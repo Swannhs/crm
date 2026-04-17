@@ -21,7 +21,15 @@ import {
   Zap,
   Package,
   Star,
-  ClipboardCheck
+  ClipboardCheck,
+  TrendingUp,
+  Share2,
+  LifeBuoy,
+  Layers,
+  Clock,
+  Sparkles,
+  Briefcase,
+  ShieldCheck
 } from "lucide-react";
 import { 
   Drawer, 
@@ -47,16 +55,24 @@ const menuItems = [
   { icon: Zap, label: "Automations", href: "/dashboard/marketing/automations" },
   { icon: Globe, label: "Site Builder", href: "/dashboard/site-builder" },
   { icon: MessageSquare, label: "Live Chat", href: "/dashboard/live-chat" },
+  { icon: Sparkles, label: "AI Assistant", href: "/dashboard/ai-assistant" },
   { icon: Users, label: "Contacts", href: "/dashboard/contacts-mfe" },
   { icon: FileText, label: "Documents", href: "/dashboard/documents" },
   { icon: ClipboardCheck, label: "Forms", href: "/dashboard/forms" },
+  { icon: TrendingUp, label: "Sales", href: "/dashboard/sales" },
+  { icon: Share2, label: "Affiliate", href: "/dashboard/affiliate" },
+  { icon: Briefcase, label: "Business Tools", href: "/dashboard/business-tools" },
+  { icon: Layers, label: "Integrations", href: "/dashboard/integrations" },
 
   { icon: CreditCard, label: "Billing", href: "/dashboard/billing" },
   { icon: ShoppingBag, label: "Commerce", href: "/dashboard/commerce" },
   { icon: Package, label: "Inventory", href: "/dashboard/commerce/inventory" },
   { icon: Star, label: "Membership", href: "/dashboard/membership" },
+  { icon: ShieldCheck, label: "Organizations", href: "/dashboard/organizations" },
   { icon: Users2, label: "Employees", href: "/dashboard/employees" },
-  { icon: Calendar, label: "Booking", href: "/dashboard/booking" },
+  { icon: Calendar, label: "Calendar", href: "/dashboard/calendar" },
+  { icon: Clock, label: "Booking", href: "/dashboard/booking" },
+  { icon: LifeBuoy, label: "Help Center", href: "/dashboard/help-center" },
 ];
 
 export function Sidebar() {
