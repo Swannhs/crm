@@ -114,6 +114,15 @@ services:
     depends_on:
       - rabbitmq
 
+  api-router-service:
+    build:
+      context: ../../services/api-router-service
+    container_name: ms-api-router-service
+    environment:
+      PORT: 7001
+    ports:
+      - "7001:7001"
+
   notification-service:
     build:
       context: ../../services/notification-service
