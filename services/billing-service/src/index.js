@@ -1,21 +1,8 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import pino from "pino";
-import pinoHttp from "pino-http";
+import { createServiceApp, publishJson } from "@mymanager/node-service-kit";
 import { randomUUID } from "node:crypto";
 import { getChannel } from "./amqp.js";
 
-const logger = pino({ level: process.env.LOG_LEVEL || "info" });
-const app = express();
-
-app.use(pinoHttp({ logger }));
-app.use(helmet());
-app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-
-app.get("/healthz", (_req, res) => res.status(200).json({ status: "ok" }));
-app.get("/readyz", (_req, res) => res.status(200).json({ status: "ok" }));
+const { app, logger } = createServiceApp({ serviceName: "billing-service", jsonLimit: "1mb" });
 
 app.post("/v1/invoices", async (req, res) => {
   const orgId = req.header("X-Org-Id") || null;
@@ -42,12 +29,7 @@ app.post("/v1/invoices", async (req, res) => {
 
   const url = process.env.RABBITMQ_URL || "amqp://localhost:5672";
   const ch = await getChannel({ url, logger });
-  ch.publish(
-    "domain-events",
-    "billing.invoice.created",
-    Buffer.from(JSON.stringify({ invoice })),
-    { contentType: "application/json" }
-  );
+  publishJson(ch, "domain-events", "billing.invoice.created", { invoice });
 
   return res.status(201).json({ data: invoice });
 });

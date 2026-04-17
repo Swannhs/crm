@@ -1,21 +1,10 @@
 import http from "node:http";
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import pino from "pino";
-import amqp from "amqplib";
 import { Server as SocketIOServer } from "socket.io";
+import { createServiceApp, connectAmqpWithRetry, ensureTopicExchange } from "@mymanager/node-service-kit";
 
-const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 const url = process.env.RABBITMQ_URL || "amqp://localhost:5672";
 
-const app = express();
-app.use(helmet());
-app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-
-app.get("/healthz", (_req, res) => res.status(200).json({ status: "ok" }));
-app.get("/readyz", (_req, res) => res.status(200).json({ status: "ok" }));
+const { app, logger } = createServiceApp({ serviceName: "realtime-service", jsonLimit: "1mb" });
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
@@ -29,12 +18,10 @@ io.on("connection", (socket) => {
 });
 
 async function startConsumer() {
-  const conn = await amqp.connect(url);
-  conn.on("error", (err) => logger.error({ err }, "amqp connection error"));
-  conn.on("close", () => logger.warn("amqp connection closed"));
+  const conn = await connectAmqpWithRetry(url, logger);
 
   const ch = await conn.createChannel();
-  await ch.assertExchange("domain-events", "topic", { durable: true });
+  await ensureTopicExchange(ch, "domain-events");
 
   const { queue } = await ch.assertQueue("realtime-service", { durable: true });
   await ch.bindQueue(queue, "domain-events", "#");
@@ -65,4 +52,3 @@ server.listen(port, "0.0.0.0", async () => {
     logger.error({ err }, "failed to start consumer");
   }
 });
-

@@ -1,29 +1,13 @@
-import amqp from "amqplib";
-import pino from "pino";
+import { connectAmqpWithRetry, ensureTopicExchange, createServiceApp } from "@mymanager/node-service-kit";
 
-const logger = pino({ level: process.env.LOG_LEVEL || "info" });
+const { logger } = createServiceApp({ serviceName: "notification-service" });
 const url = process.env.RABBITMQ_URL || "amqp://localhost:5672";
 
 async function main() {
-  // RabbitMQ may start slower than this service. Keep retrying instead of crashing the container.
-  let conn;
-  let attempt = 0;
-  while (!conn) {
-    try {
-      attempt += 1;
-      conn = await amqp.connect(url);
-    } catch (err) {
-      const delayMs = Math.min(10_000, 500 + attempt * 500);
-      logger.warn({ err, attempt, delayMs }, "amqp connect failed, retrying");
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
-  }
-
-  conn.on("error", (err) => logger.error({ err }, "amqp connection error"));
-  conn.on("close", () => logger.warn("amqp connection closed"));
+  const conn = await connectAmqpWithRetry(url, logger);
 
   const ch = await conn.createChannel();
-  await ch.assertExchange("domain-events", "topic", { durable: true });
+  await ensureTopicExchange(ch, "domain-events");
 
   const { queue } = await ch.assertQueue("notification-service", { durable: true });
   await ch.bindQueue(queue, "domain-events", "#");

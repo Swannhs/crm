@@ -1,22 +1,10 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import pino from "pino";
-import pinoHttp from "pino-http";
+import { createServiceApp } from "@mymanager/node-service-kit";
 
-const logger = pino({ level: process.env.LOG_LEVEL || "info" });
-
-const app = express();
-app.use(pinoHttp({ logger }));
-app.use(helmet());
-app.use(cors());
-
-// We keep body limits similar-ish to the monolith defaults for now.
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
-
-app.get("/healthz", (_req, res) => res.status(200).json({ status: "ok" }));
-app.get("/readyz", (_req, res) => res.status(200).json({ status: "ok" }));
+const { app, logger } = createServiceApp({
+  serviceName: "api-router-service",
+  jsonLimit: "50mb",
+  urlEncodedLimit: "50mb"
+});
 
 function identityOr401(req, res) {
   const orgId = req.header("X-Org-Id") || null;
