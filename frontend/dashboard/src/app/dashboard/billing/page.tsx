@@ -9,7 +9,29 @@ import {
   Clock,
   CheckCircle2
 } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Avatar, 
+  IconButton, 
+  Button, 
+  TextField, 
+  InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Stack
+} from "@mui/material";
+import { formatCurrency } from "@/lib/utils";
 import { billingService } from "@/services/billing.service";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -31,134 +53,166 @@ export default function BillingPage() {
   const statsData = statsResponse?.data || {};
 
   const summary = [
-    { label: "Total Invoiced", value: statsData.total_amount || 0, icon: DollarSign, color: "text-primary" },
-    { label: "Paid Invoices", value: statsData.paid_amount || 0, icon: CheckCircle2, color: "text-emerald-400" },
-    { label: "Pending Amount", value: statsData.pending_amount || 0, icon: Clock, color: "text-amber-400" },
+    { label: "Total Invoiced", value: statsData.total_amount || 0, icon: DollarSign, color: '#6366f1' },
+    { label: "Paid Invoices", value: statsData.paid_amount || 0, icon: CheckCircle2, color: '#10b981' },
+    { label: "Pending Amount", value: statsData.pending_amount || 0, icon: Clock, color: '#f59e0b' },
   ];
 
   return (
-    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold">Billing & Invoices</h2>
-          <p className="text-slate-400">Track payments, issue invoices, and manage finances.</p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl font-semibold hover:bg-white/10 transition-all">
-            <Download className="w-5 h-5" />
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -1 }}>
+            Billing & Invoices
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            Track payments, issue invoices, and manage finances.
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant="outlined" 
+            startIcon={<Download size={20} />}
+            sx={{ py: 1.5, px: 3, borderRadius: 3 }}
+          >
             Report
-          </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-primary rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-            <Plus className="w-5 h-5" />
+          </Button>
+          <Button 
+            variant="contained" 
+            startIcon={<Plus size={20} />}
+            sx={{ py: 1.5, px: 3, borderRadius: 3 }}
+          >
             Create Invoice
-          </button>
-        </div>
-      </header>
+          </Button>
+        </Stack>
+      </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <Grid container spacing={3} sx={{ mb: 6 }}>
         {summary.map((item) => (
-          <div key={item.label} className="glass-card flex items-center gap-4">
-            <div className={cn("p-3 rounded-2xl bg-white/5", item.color)}>
-              <item.icon className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm text-slate-400 font-medium">{item.label}</p>
-              <h3 className="text-xl font-bold">{formatCurrency(item.value / 100)}</h3>
-            </div>
-          </div>
+          <Grid item xs={12} md={4} key={item.label}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Avatar sx={{ bgcolor: `${item.color}15`, color: item.color, width: 48, height: 48, borderRadius: 2 }}>
+                <item.icon size={24} />
+              </Avatar>
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 800 }}>{formatCurrency(item.value / 100)}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>{item.label}</Typography>
+              </Box>
+            </Paper>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      <div className="glass-card !p-0">
-        <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
-          <div className="flex items-center gap-4">
-            <h3 className="font-bold text-lg">Invoices</h3>
-            <div className="flex bg-black/20 rounded-lg p-1">
-              {['all', 'paid', 'pending'].map((s) => (
-                <button 
-                  key={s}
-                  onClick={() => setFilter(s)}
-                  className={cn(
-                    "px-3 py-1 text-xs font-bold rounded-md transition-all capitalize",
-                    filter === s ? "bg-primary text-white" : "text-slate-400 hover:text-white"
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Filter invoices..." 
-              className="pl-10 pr-4 py-2 bg-black/20 border border-white/10 rounded-xl text-sm focus:outline-none focus:border-primary/50"
-            />
-          </div>
-        </div>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          borderRadius: 4, 
+          overflow: 'hidden', 
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper'
+        }}
+      >
+        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+          <Tabs 
+            value={filter} 
+            onChange={(_, v) => setFilter(v)}
+            sx={{ 
+                minHeight: 40,
+                '& .MuiTabs-indicator': { display: 'none' },
+                '& .MuiTab-root': { 
+                    minHeight: 32, 
+                    borderRadius: 2, 
+                    textTransform: 'capitalize',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    mx: 0.5,
+                    color: 'text.secondary',
+                    '&.Mui-selected': { bgcolor: 'primary.main', color: 'white' }
+                }
+            }}
+          >
+            <Tab label="All Invoices" value="all" />
+            <Tab label="Paid" value="paid" />
+            <Tab label="Pending" value="pending" />
+          </Tabs>
+          <TextField
+             variant="outlined"
+             placeholder="Filter..."
+             size="small"
+             sx={{ maxWidth: 200 }}
+             InputProps={{
+               startAdornment: (
+                 <InputAdornment position="start">
+                   <Search size={16} />
+                 </InputAdornment>
+               ),
+               sx: { borderRadius: 3, bgcolor: 'rgba(0,0,0,0.02)' }
+             }}
+          />
+        </Box>
 
-        <div className="overflow-x-auto">
+        <TableContainer>
           {isInvoicesLoading ? (
-            <div className="p-12 text-center text-slate-400">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              Loading invoices...
-            </div>
+            <Box sx={{ p: 10, textAlign: 'center' }}>
+              <CircularProgress size={30} sx={{ mb: 2 }} />
+              <Typography color="text.secondary">Loading invoices...</Typography>
+            </Box>
           ) : invoicesError ? (
-            <div className="p-12 text-center text-red-400 bg-red-400/5">
-              Failed to load invoices.
-            </div>
+            <Box sx={{ p: 10, textAlign: 'center', color: 'error.main' }}>
+              <Typography>Failed to fetch data from Billing service.</Typography>
+            </Box>
           ) : invoices.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 italic">
-              No invoices found.
-            </div>
+            <Box sx={{ p: 10, textAlign: 'center' }}>
+              <Typography color="text.secondary">No invoices found for this filter.</Typography>
+            </Box>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-slate-400 text-xs uppercase tracking-wider">
-                  <th className="px-6 py-4">ID</th>
-                  <th className="px-6 py-4">Amount</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
+            <Table>
+              <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Invoice ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Amount</TableCell>
+                  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Status</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {invoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors group">
-                    <td className="px-6 py-4 font-mono text-sm text-primary group-hover:underline cursor-pointer">
-                      {inv.id.substring(0, 8)}...
-                    </td>
-                    <td className="px-6 py-4 font-bold">
-                      {formatCurrency(inv.amountCents / 100)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase ring-1",
-                        inv.status === "paid" ? "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20" :
-                        inv.status === "pending" ? "bg-amber-400/10 text-amber-400 ring-amber-400/20" :
-                        "bg-slate-400/10 text-slate-400 ring-slate-400/20"
-                      )}>
-                        <div className={cn("w-1 h-1 rounded-full", 
-                          inv.status === "paid" ? "bg-emerald-400" :
-                          inv.status === "pending" ? "bg-amber-400" : "bg-slate-400"
-                        )} />
-                        {inv.status}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
-                        <ExternalLink className="w-3.5 h-3.5" />
+                  <TableRow key={inv.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'primary.main' }}>
+                        #{inv.id.substring(0, 8).toUpperCase()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        {formatCurrency(inv.amountCents / 100)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={inv.status} 
+                        size="small"
+                        sx={{ 
+                          fontWeight: 700, textTransform: 'uppercase', fontSize: 10,
+                          borderRadius: 1.5,
+                          bgcolor: inv.status === 'paid' ? 'success.light' : 'warning.light',
+                          color: inv.status === 'paid' ? 'success.dark' : 'warning.dark',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Button size="small" variant="text" startIcon={<ExternalLink size={14} />} sx={{ borderRadius: 2 }}>
                         View
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
-        </div>
-      </div>
-    </div>
+        </TableContainer>
+      </Paper>
+    </Box>
   );
 }
-

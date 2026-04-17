@@ -3,13 +3,34 @@
 import { 
   Package, 
   ShoppingCart, 
-  BarChart3, 
   Plus, 
-  ArrowUpRight,
   Monitor,
-  Smartphone,
-  Tag
+  Tag,
+  BarChart3,
+  Search,
+  MoreVertical
 } from "lucide-react";
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Avatar, 
+  IconButton, 
+  Button, 
+  TextField, 
+  InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  CircularProgress,
+  LinearProgress,
+  Stack
+} from "@mui/material";
 import { formatCurrency } from "@/lib/utils";
 import { commerceService } from "@/services/commerce.service";
 import { useQuery } from "@tanstack/react-query";
@@ -23,135 +44,179 @@ export default function CommercePage() {
   const products = productsResponse?.data || [];
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold">Commerce & Inventory</h2>
-          <p className="text-slate-400">Manage your product catalog, stock, and sales performance.</p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-primary rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-            <Plus className="w-5 h-5" />
-            Add Product
-          </button>
-        </div>
-      </header>
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -1 }}>
+            Commerce & Inventory
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            Manage your product catalog, stock, and sales performance.
+          </Typography>
+        </Box>
+        <Button 
+          variant="contained" 
+          startIcon={<Plus size={20} />}
+          sx={{ py: 1.5, px: 3, borderRadius: 3 }}
+        >
+          Add Product
+        </Button>
+      </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm font-medium mb-1">Items in Catalog</p>
-            <h3 className="text-3xl font-black">{products.length}</h3>
-            <span className="text-emerald-400 text-xs font-bold">Live from Backend</span>
-          </div>
-          <div className="p-4 rounded-2xl bg-primary/10 text-primary">
-            <Package className="w-8 h-8" />
-          </div>
-        </div>
-        <div className="glass-card flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm font-medium mb-1">Total Sales</p>
-            <h3 className="text-3xl font-black">--</h3>
-            <span className="text-slate-500 text-xs font-bold">Orders endpoint pending</span>
-          </div>
-          <div className="p-4 rounded-2xl bg-amber-400/10 text-amber-400">
-            <ShoppingCart className="w-8 h-8" />
-          </div>
-        </div>
-        <div className="glass-card flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm font-medium mb-1">Stock Status</p>
-            <h3 className="text-3xl font-black">{products.filter(p => (p.stockQuantity ?? 0) > 0).length}</h3>
-            <span className="text-primary text-xs font-bold">In Stock Items</span>
-          </div>
-          <div className="p-4 rounded-2xl bg-purple-400/10 text-purple-400">
-            <Tag className="w-8 h-8" />
-          </div>
-        </div>
-      </div>
+      <Grid container spacing={3} sx={{ mb: 6 }}>
+        <Grid item xs={12} md={4}>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>Items in Catalog</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 800 }}>{products.length}</Typography>
+              <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 700 }}>Live Storefront</Typography>
+            </Box>
+            <Avatar sx={{ bgcolor: 'rgba(99, 102, 241, 0.1)', color: 'primary.main', width: 56, height: 56, borderRadius: 2 }}>
+              <Package size={32} />
+            </Avatar>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>Total Sales</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 800 }}>--</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Next update in 2h</Typography>
+            </Box>
+            <Avatar sx={{ bgcolor: 'rgba(245, 158, 11, 0.1)', color: 'warning.main', width: 56, height: 56, borderRadius: 2 }}>
+              <ShoppingCart size={32} />
+            </Avatar>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>In Stock Items</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 800 }}>{products.filter(p => (p.stockQuantity ?? 0) > 0).length}</Typography>
+              <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>Stock Healthy</Typography>
+            </Box>
+            <Avatar sx={{ bgcolor: 'rgba(236, 72, 153, 0.1)', color: 'error.main', width: 56, height: 56, borderRadius: 2 }}>
+              <Tag size={32} />
+            </Avatar>
+          </Paper>
+        </Grid>
+      </Grid>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass-card !p-0">
-          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/5">
-            <h3 className="font-bold text-lg">Product Catalog</h3>
-          </div>
-          <div className="overflow-x-auto">
-            {isLoading ? (
-              <div className="p-12 text-center text-slate-400">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                Loading products...
-              </div>
-            ) : error ? (
-              <div className="p-12 text-center text-red-400 bg-red-400/5">
-                Failed to load product catalog.
-              </div>
-            ) : products.length === 0 ? (
-              <div className="p-12 text-center text-slate-500 italic">
-                No products found.
-              </div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left text-slate-500 text-[10px] uppercase font-black tracking-widest">
-                    <th className="px-6 py-4">Item</th>
-                    <th className="px-6 py-4 text-center">Price</th>
-                    <th className="px-6 py-4 text-center">Stock</th>
-                    <th className="px-6 py-4 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {products.map((p) => (
-                    <tr key={p.id} className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-black/20 rounded-lg flex items-center justify-center text-slate-500 group-hover:text-primary transition-colors">
-                            <Package className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-white max-w-[200px] truncate">{p.name}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm font-bold text-slate-300">
-                        {formatCurrency((p.priceCents || 0) / 100)}
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm font-mono text-slate-400">
-                        {p.stockQuantity ?? 0}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className={cn(
-                          "px-2 py-0.5 rounded-md text-[10px] font-black uppercase ring-1",
-                          p.status === 'active' ? "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20" : "bg-slate-400/10 text-slate-400 ring-slate-400/20"
-                        )}>{p.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-
-        <div className="glass-card">
-          <h3 className="text-lg font-bold mb-6">Channel Performance</h3>
-          <div className="space-y-6">
-            <div className="space-y-2 opacity-50">
-              <div className="flex justify-between text-sm">
-                <span className="flex items-center gap-2 text-slate-400"><Monitor className="w-4 h-4" /> Desktop</span>
-                <span className="font-bold">--</span>
-              </div>
-              <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-primary w-0" />
-              </div>
-            </div>
-            <p className="text-xs text-slate-500 italic mt-4 text-center">Analytics data integration pending aggregation microservice.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Grid container spacing={4}>
+        <Grid item xs={12} lg={8}>
+          <Paper elevation={0} sx={{ borderRadius: 4, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, flexGrow: 1 }}>Catalog</Typography>
+              <TextField
+                 variant="outlined"
+                 placeholder="Search products..."
+                 size="small"
+                 sx={{ maxWidth: 300 }}
+                 InputProps={{
+                   startAdornment: (
+                     <InputAdornment position="start">
+                       <Search size={16} />
+                     </InputAdornment>
+                   ),
+                   sx: { borderRadius: 3, bgcolor: 'rgba(0,0,0,0.02)' }
+                 }}
+              />
+            </Box>
+            <TableContainer>
+              {isLoading ? (
+                <Box sx={{ p: 10, textAlign: 'center' }}>
+                  <CircularProgress size={30} sx={{ mb: 2 }} />
+                  <Typography color="text.secondary">Fetching products...</Typography>
+                </Box>
+              ) : error ? (
+                <Box sx={{ p: 10, textAlign: 'center', color: 'error.main' }}>
+                  <Typography>Commerce service connection error.</Typography>
+                </Box>
+              ) : (
+                <Table>
+                  <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Product</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Price</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Stock</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {products.map((product) => (
+                      <TableRow key={product.id} hover>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: 'rgba(0,0,0,0.05)', borderRadius: 2, width: 40, height: 40 }}>
+                              <Package size={20} color="#64748b" />
+                            </Avatar>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, maxWidth: 200, truncate: true }}>
+                              {product.name}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                            {formatCurrency((product.priceCents || 0) / 100)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                            {product.stockQuantity ?? 0}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Chip 
+                            label={product.status} 
+                            size="small" 
+                            sx={{ 
+                              fontWeight: 700, fontSize: 10, borderRadius: 1.5,
+                              bgcolor: product.status === 'active' ? 'success.light' : 'action.selected',
+                              color: product.status === 'active' ? 'success.dark' : 'text.secondary'
+                            }} 
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TableContainer>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} lg={4}>
+          <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 4 }}>Sales Channels</Typography>
+            <Stack spacing={4}>
+               {[
+                 { label: 'Web Storefront', value: 75, color: '#6366f1' },
+                 { label: 'Mobile App', value: 45, color: '#ec4899' },
+                 { label: 'Point of Sale', value: 20, color: '#f59e0b' }
+               ].map((channel) => (
+                 <Box key={channel.label}>
+                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                     <Typography variant="caption" sx={{ fontWeight: 700 }}>{channel.label}</Typography>
+                     <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>{channel.value}%</Typography>
+                   </Box>
+                   <LinearProgress 
+                     variant="determinate" 
+                     value={channel.value} 
+                     sx={{ 
+                       height: 6, 
+                       borderRadius: 3, 
+                       bgcolor: 'rgba(0,0,0,0.05)',
+                       '& .MuiLinearProgress-bar': { bgcolor: channel.color, borderRadius: 3 }
+                     }} 
+                   />
+                 </Box>
+               ))}
+               <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', pt: 2, textAlign: 'center', display: 'block' }}>
+                 Aggregated sales data is updated every 12 hours.
+               </Typography>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
 }

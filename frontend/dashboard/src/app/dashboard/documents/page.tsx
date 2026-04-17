@@ -7,9 +7,32 @@ import {
   Download,
   Share2,
   Lock,
-  Search
+  Search,
+  MoreVertical,
+  CheckCircle2,
+  Clock
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Avatar, 
+  IconButton, 
+  Button, 
+  TextField, 
+  InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  CircularProgress,
+  Stack,
+  Tooltip
+} from "@mui/material";
 import { documentService } from "@/services/document.service";
 import { useQuery } from "@tanstack/react-query";
 
@@ -25,101 +48,155 @@ export default function DocumentsPage() {
   const pendingCount = documents.filter(d => d.status === 'pending').length;
 
   return (
-    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold">Document vault</h2>
-          <p className="text-slate-400">Securely store, sign, and manage organization documents.</p>
-        </div>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-primary rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-          <Upload className="w-5 h-5" />
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -1 }}>
+            Document Vault
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            Securely store, sign, and manage organization documents.
+          </Typography>
+        </Box>
+        <Button 
+          variant="contained" 
+          startIcon={<Upload size={20} />}
+          sx={{ py: 1.5, px: 3, borderRadius: 3 }}
+        >
           Upload New
-        </button>
-      </header>
+        </Button>
+      </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="glass-card text-center border-b-4 border-emerald-400">
-          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Signed</p>
-          <h3 className="text-2xl font-black">{signedCount}</h3>
-        </div>
-        <div className="glass-card text-center border-b-4 border-amber-400">
-          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Pending</p>
-          <h3 className="text-2xl font-black">{pendingCount}</h3>
-        </div>
-        <div className="glass-card text-center border-b-4 border-primary">
-          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Total Files</p>
-          <h3 className="text-2xl font-black">{documents.length}</h3>
-        </div>
-        <div className="glass-card text-center border-b-4 border-purple-400">
-          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Vault Status</p>
-          <h3 className="text-2xl font-black">Active</h3>
-        </div>
-      </div>
+      <Grid container spacing={3} sx={{ mb: 6 }}>
+        {[
+          { label: "Signed", count: signedCount, icon: CheckCircle2, color: '#10b981' },
+          { label: "Pending", count: pendingCount, icon: Clock, color: '#f59e0b' },
+          { label: "Total Files", count: documents.length, icon: FileText, color: '#6366f1' },
+          { label: "Vault Status", count: "Active", icon: Lock, color: '#ec4899' },
+        ].map((stat) => (
+          <Grid item xs={12} sm={6} md={3} key={stat.label}>
+             <Paper 
+               elevation={0} 
+               sx={{ 
+                 p: 3, 
+                 borderRadius: 4, 
+                 border: '1px solid', 
+                 borderColor: 'divider',
+                 borderBottom: `4px solid ${stat.color}`
+               }}
+             >
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase', mb: 1, display: 'block' }}>
+                  {stat.label}
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                  {stat.count}
+                </Typography>
+             </Paper>
+          </Grid>
+        ))}
+      </Grid>
 
-      <div className="glass-card !p-0 overflow-hidden">
-        <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
-          <div className="flex gap-4">
-            <button className="text-sm font-bold text-white border-b-2 border-primary pb-1">All Files</button>
-            <button className="text-sm font-semibold text-slate-500 hover:text-white transition-colors">Shared with me</button>
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input type="text" placeholder="Search files..." className="pl-10 pr-4 py-2 bg-black/40 border border-white/5 rounded-xl text-sm focus:outline-none" />
-          </div>
-        </div>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          borderRadius: 4, 
+          overflow: 'hidden', 
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper'
+        }}
+      >
+        <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+          <Stack direction="row" spacing={2}>
+            <Button size="small" variant="text" sx={{ fontWeight: 800, borderBottom: '2px solid', borderColor: 'primary.main', borderRadius: 0 }}>All Files</Button>
+            <Button size="small" variant="text" color="inherit" sx={{ fontWeight: 600, color: 'text.secondary' }}>Shared with me</Button>
+          </Stack>
+          <TextField
+             variant="outlined"
+             placeholder="Search files..."
+             size="small"
+             sx={{ maxWidth: 300 }}
+             InputProps={{
+               startAdornment: (
+                 <InputAdornment position="start">
+                   <Search size={16} />
+                 </InputAdornment>
+               ),
+               sx: { borderRadius: 3, bgcolor: 'rgba(0,0,0,0.02)' }
+             }}
+          />
+        </Box>
 
-        <div className="divide-y divide-white/5">
+        <TableContainer>
           {isLoading ? (
-            <div className="p-12 text-center text-slate-400">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              Loading vault...
-            </div>
+            <Box sx={{ p: 10, textAlign: 'center' }}>
+              <CircularProgress size={30} sx={{ mb: 2 }} />
+              <Typography color="text.secondary">Accessing vault...</Typography>
+            </Box>
           ) : error ? (
-            <div className="p-12 text-center text-red-400 bg-red-400/5">
-              Failed to load document vault.
-            </div>
+            <Box sx={{ p: 10, textAlign: 'center', color: 'error.main' }}>
+              <Typography>Failed to load secure vault data.</Typography>
+            </Box>
           ) : documents.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 italic">
-              No documents found in your vault.
-            </div>
+            <Box sx={{ p: 10, textAlign: 'center' }}>
+              <Typography color="text.secondary">Your document vault is empty.</Typography>
+            </Box>
           ) : (
-            documents.map((doc) => (
-              <div key={doc.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-all group">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-primary transition-all">
-                    <FileText className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white text-sm cursor-pointer hover:underline">{doc.name}</h4>
-                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-tighter mt-0.5">
-                      {doc.type} • {(doc.sizeBytes / 1024).toFixed(1)} KB • Uploaded {new Date(doc.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6">
-                  <span className={cn(
-                    "px-2 py-0.5 rounded text-[10px] font-black uppercase ring-1 shadow-sm capitalize",
-                    doc.status === "signed" ? "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20" :
-                    doc.status === "pending" ? "bg-amber-400/10 text-amber-400 ring-amber-400/20" :
-                    "bg-primary/10 text-primary ring-primary/20"
-                  )}>
-                    {doc.status}
-                  </span>
-
-                  <div className="flex gap-1">
-                    <button title="Preview" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Eye className="w-4 h-4" /></button>
-                    <button title="Download" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Download className="w-4 h-4" /></button>
-                    <button title="Share" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Share2 className="w-4 h-4" /></button>
-                    <button title="Security" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Lock className="w-4 h-4" /></button>
-                  </div>
-                </div>
-              </div>
-            ))
+            <Table>
+              <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>File Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Details</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map((doc) => (
+                  <TableRow key={doc.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ bgcolor: 'rgba(0,0,0,0.05)', color: 'text.secondary', borderRadius: 2 }}>
+                          <FileText size={20} />
+                        </Avatar>
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{doc.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">{(doc.sizeBytes / 1024).toFixed(1)} KB</Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={doc.status} 
+                        size="small"
+                        sx={{ 
+                          fontWeight: 700, textTransform: 'uppercase', fontSize: 10,
+                          borderRadius: 1.5,
+                          bgcolor: doc.status === 'signed' ? 'success.light' : 'warning.light',
+                          color: doc.status === 'signed' ? 'success.dark' : 'warning.dark',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                        {doc.type.toUpperCase()} • {new Date(doc.createdAt).toLocaleDateString()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        <Tooltip title="Preview"><IconButton size="small"><Eye size={18} /></IconButton></Tooltip>
+                        <Tooltip title="Download"><IconButton size="small"><Download size={18} /></IconButton></Tooltip>
+                        <Tooltip title="Share"><IconButton size="small"><Share2 size={18} /></IconButton></Tooltip>
+                        <IconButton size="small"><MoreVertical size={18} /></IconButton>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </div>
-      </div>
-    </div>
+        </TableContainer>
+      </Paper>
+    </Box>
   );
 }
-

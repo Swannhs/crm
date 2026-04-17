@@ -17,7 +17,17 @@ const nextConfig = {
         source: '/dashboard/contacts-mfe/:path*',
         destination: 'http://localhost:3001/dashboard/contacts-mfe/:path*',
       },
+      {
+        source: '/dashboard/pipelines/:path*',
+        destination: 'http://localhost:3002/dashboard/pipelines/:path*',
+      },
+      {
+        source: '/dashboard/marketing/:path*',
+        destination: 'http://localhost:3003/dashboard/marketing/:path*',
+      },
     ]
+
+
   },
 };
 

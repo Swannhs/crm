@@ -1,3 +1,5 @@
+'use client';
+
 import { 
   User, 
   Building, 
@@ -7,9 +9,30 @@ import {
   Globe,
   CreditCard,
   Mail,
-  Smartphone
+  Smartphone,
+  Trash2,
+  Save
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Avatar, 
+  IconButton, 
+  Button, 
+  TextField, 
+  InputAdornment,
+  Divider,
+  Stack,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Select
+} from "@mui/material";
 
 const settingGroups = [
   { label: "Account", icon: User, active: true },
@@ -22,87 +45,114 @@ const settingGroups = [
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-      <header>
-        <h2 className="text-3xl font-bold">Preferences</h2>
-        <p className="text-slate-400">Configure your personal profile and organization settings.</p>
-      </header>
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -1 }}>
+          Settings
+        </Typography>
+        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+          Configure your personal profile and organization preferences.
+        </Typography>
+      </Box>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        <aside className="w-full lg:w-64 space-y-1">
-          {settingGroups.map((group) => (
-            <button 
-              key={group.label}
-              className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
-                group.active ? "bg-primary text-white font-bold shadow-lg shadow-primary/10" : "text-slate-400 font-medium hover:text-white hover:bg-white/5"
-              )}
-            >
-              <group.icon className="w-5 h-5" />
-              {group.label}
-            </button>
-          ))}
-        </aside>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={3}>
+          <Paper elevation={0} sx={{ p: 1, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+            <List disablePadding>
+              {settingGroups.map((group) => (
+                <ListItem key={group.label} disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton 
+                    selected={group.active}
+                    sx={{ 
+                      borderRadius: 3, 
+                      py: 1.5,
+                      '&.Mui-selected': { bgcolor: 'primary.main', color: 'white', '& .MuiListItemIcon-root': { color: 'white' } },
+                      '&.Mui-selected:hover': { bgcolor: 'primary.dark' }
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40, color: group.active ? 'white' : 'text.secondary' }}>
+                      <group.icon size={20} />
+                    </ListItemIcon>
+                    <ListItemText primary={group.label} primaryTypographyProps={{ fontSize: 14, fontWeight: 700 }} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
+        </Grid>
 
-        <div className="flex-1 space-y-6">
-          <div className="glass-card">
-            <h3 className="text-xl font-bold mb-6">Profile Information</h3>
-            <div className="space-y-6">
-              <div className="flex items-center gap-6 pb-6 border-b border-white/5">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-2xl font-black">
+        <Grid item xs={12} md={9}>
+          <Stack spacing={4}>
+            <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 4 }}>Profile Information</Typography>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 6 }}>
+                <Avatar sx={{ width: 80, height: 80, fontSize: 24, fontWeight: 800, bgcolor: 'primary.main', borderRadius: 4 }}>
                   JS
-                </div>
-                <div>
-                  <button className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm font-bold hover:bg-white/10 transition-all mb-2 block">Change Avatar</button>
-                  <p className="text-xs text-slate-500 font-medium">JPG, GIF or PNG. Max size of 800K</p>
-                </div>
-              </div>
+                </Avatar>
+                <Box>
+                  <Button variant="outlined" size="small" sx={{ borderRadius: 2, mb: 1 }}>Change Avatar</Button>
+                  <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+                    Recommended: 800x800px, JPG or PNG.
+                  </Typography>
+                </Box>
+              </Box>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-300 ml-1">Full Name</label>
-                  <input type="text" defaultValue="John Smith" className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-white font-medium" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-300 ml-1">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input type="email" defaultValue="john@mymanager.com" className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-white font-medium" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-300 ml-1">Phone</label>
-                  <div className="relative">
-                    <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input type="text" defaultValue="+1 (555) 000-0000" className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-white font-medium" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-300 ml-1">Timezone</label>
-                  <div className="relative">
-                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <select className="w-full pl-12 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-white font-medium appearance-none">
-                      <option>(GMT-05:00) Eastern Time</option>
-                      <option>(GMT-08:00) Pacific Time</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, mb: 1, display: 'block', px: 1 }}>Full Name</Typography>
+                  <TextField fullWidth size="small" defaultValue="John Smith" variant="outlined" sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }} />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, mb: 1, display: 'block', px: 1 }}>Email Address</Typography>
+                  <TextField 
+                    fullWidth 
+                    size="small" 
+                    defaultValue="john@mymanager.com" 
+                    variant="outlined" 
+                    InputProps={{ startAdornment: <InputAdornment position="start"><Mail size={16} /></InputAdornment>, sx: { borderRadius: 3 } }} 
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, mb: 1, display: 'block', px: 1 }}>Phone Number</Typography>
+                  <TextField 
+                    fullWidth 
+                    size="small" 
+                    defaultValue="+1 (555) 000-0000" 
+                    variant="outlined" 
+                    InputProps={{ startAdornment: <InputAdornment position="start"><Smartphone size={16} /></InputAdornment>, sx: { borderRadius: 3 } }} 
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                   <Typography variant="caption" sx={{ fontWeight: 700, mb: 1, display: 'block', px: 1 }}>Timezone</Typography>
+                   <Select
+                     fullWidth
+                     size="small"
+                     defaultValue="EST"
+                     sx={{ borderRadius: 3 }}
+                   >
+                     <MenuItem value="EST">(GMT-05:00) Eastern Time</MenuItem>
+                     <MenuItem value="PST">(GMT-08:00) Pacific Time</MenuItem>
+                   </Select>
+                </Grid>
+              </Grid>
 
-              <div className="pt-4 flex justify-end gap-3">
-                <button className="px-6 py-2.5 rounded-xl font-bold text-slate-400 hover:text-white transition-all">Discard</button>
-                <button className="px-8 py-2.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">Save Changes</button>
-              </div>
-            </div>
-          </div>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 6 }}>
+                <Button sx={{ color: 'text.secondary', fontWeight: 700 }}>Discard</Button>
+                <Button variant="contained" startIcon={<Save size={18} />} sx={{ px: 4, py: 1, borderRadius: 3 }}>Save Changes</Button>
+              </Box>
+            </Paper>
 
-          <div className="glass-card border-red-500/20">
-            <h3 className="text-lg font-bold text-red-400 mb-2">Danger Zone</h3>
-            <p className="text-sm text-slate-500 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
-            <button className="px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-bold hover:bg-red-500 hover:text-white transition-all">Delete Account</button>
-          </div>
-        </div>
-      </div>
-    </div>
+            <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid', borderColor: 'error.light', bgcolor: 'rgba(239, 68, 68, 0.02)' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: 'error.main', mb: 1 }}>Danger Zone</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+                Delete your account and all associated data. This action is irreversible.
+              </Typography>
+              <Button color="error" variant="outlined" startIcon={<Trash2 size={18} />} sx={{ borderRadius: 3 }}>Delete Account</Button>
+            </Paper>
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

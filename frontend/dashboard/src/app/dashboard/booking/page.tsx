@@ -1,3 +1,5 @@
+'use client';
+
 import { 
   Plus, 
   Calendar as CalendarIcon, 
@@ -6,9 +8,25 @@ import {
   User, 
   Video,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Settings,
+  MoreVertical
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Avatar, 
+  IconButton, 
+  Button, 
+  Chip, 
+  Stack, 
+  Divider,
+  Card,
+  CardContent,
+  Tooltip
+} from "@mui/material";
 
 const appointments = [
   { time: "09:00 AM", client: "John Wick", service: "Strategic Consultation", type: "Video", duration: "60 min" },
@@ -18,100 +36,139 @@ const appointments = [
 ];
 
 export default function BookingPage() {
+  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold">Booking & Scheduling</h2>
-          <p className="text-slate-400">Coordinate appointments and manage your availability calendar.</p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl font-semibold hover:bg-white/10 transition-all">
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -1 }}>
+            Booking & Scheduling
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            Coordinate appointments and manage your availability calendar.
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant="outlined" 
+            startIcon={<Settings size={20} />}
+            sx={{ py: 1.5, px: 3, borderRadius: 3 }}
+          >
             Settings
-          </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-primary rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-            <Plus className="w-5 h-5" />
+          </Button>
+          <Button 
+            variant="contained" 
+            startIcon={<Plus size={20} />}
+            sx={{ py: 1.5, px: 3, borderRadius: 3 }}
+          >
             Book Now
-          </button>
-        </div>
-      </header>
+          </Button>
+        </Stack>
+      </Box>
 
-      <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
-        <div className="lg:col-span-5 space-y-6">
-          <div className="glass-card">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <h3 className="text-xl font-bold">Today's Schedule</h3>
-                <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">March 17, 2024</span>
-              </div>
-              <div className="flex gap-1">
-                <button className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-all"><ChevronLeft className="w-5 h-5" /></button>
-                <button className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-all"><ChevronRight className="w-5 h-5" /></button>
-              </div>
-            </div>
+      <Grid container spacing={4}>
+        <Grid item xs={12} lg={8}>
+          <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography variant="h6" sx={{ fontWeight: 800 }}>Today's Schedule</Typography>
+                <Chip label={today} size="small" sx={{ fontWeight: 700, bgcolor: 'primary.light', color: 'primary.contrastText' }} />
+              </Stack>
+              <Stack direction="row" spacing={1}>
+                <IconButton size="small"><ChevronLeft size={20} /></IconButton>
+                <IconButton size="small"><ChevronRight size={20} /></IconButton>
+              </Stack>
+            </Box>
 
-            <div className="space-y-4">
-              {appointments.map((apt) => (
-                <div key={apt.time} className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/30 transition-all group relative overflow-hidden">
-                  <div className="flex items-start justify-between relative z-10">
-                    <div className="flex gap-6">
-                      <div className="text-center min-w-[80px]">
-                        <p className="text-sm font-bold text-primary mb-1">{apt.time}</p>
-                        <p className="text-[10px] text-slate-500 uppercase font-bold">{apt.duration}</p>
-                      </div>
-                      <div className="w-[2px] bg-white/10 self-stretch" />
-                      <div>
-                        <h4 className="font-bold text-white text-lg mb-1">{apt.service}</h4>
-                        <div className="flex items-center gap-4 text-sm text-slate-400">
-                          <span className="flex items-center gap-1.5"><User className="w-4 h-4" /> {apt.client}</span>
-                          <span className="flex items-center gap-1.5">
-                            {apt.type === "Video" ? <Video className="w-4 h-4 text-primary" /> : <MapPin className="w-4 h-4 text-emerald-400" />}
-                            {apt.type}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <button className="px-4 py-2 bg-primary/10 text-primary text-xs font-bold rounded-xl hover:bg-primary hover:text-white transition-all">
-                      Confirm
-                    </button>
-                  </div>
-                  
-                  {/* Subtle progress indicator for the current time slot (example) */}
-                  {apt.time === "09:00 AM" && (
-                    <div className="absolute left-0 bottom-0 h-1 bg-primary w-full animate-pulse" />
-                  )}
-                </div>
+            <Stack spacing={2}>
+              {appointments.map((apt, index) => (
+                <Card 
+                  key={index} 
+                  elevation={0} 
+                  sx={{ 
+                    borderRadius: 3, 
+                    border: '1px solid', 
+                    borderColor: 'divider', 
+                    transition: 'all 0.2s',
+                    '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(99, 102, 241, 0.02)' }
+                  }}
+                >
+                  <CardContent sx={{ p: '24px !important' }}>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={2} sx={{ textAlign: 'center', borderRight: '1px solid', borderColor: 'divider' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>{apt.time}</Typography>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>{apt.duration}</Typography>
+                      </Grid>
+                      <Grid item xs={7} sx={{ pl: 3 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, fontSize: 16 }}>{apt.service}</Typography>
+                        <Stack direction="row" spacing={2} alignItems="center" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <User size={14} />
+                            <Typography variant="caption" sx={{ fontWeight: 600 }}>{apt.client}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            {apt.type === "Video" ? <Video size={14} color="#6366f1" /> : <MapPin size={14} color="#10b981" />}
+                            <Typography variant="caption" sx={{ fontWeight: 600 }}>{apt.type}</Typography>
+                          </Box>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={3} sx={{ textAlign: 'right' }}>
+                        <Button variant="outlined" size="small" sx={{ borderRadius: 2, fontWeight: 700 }}>Confirm</Button>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
               ))}
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Paper>
+        </Grid>
 
-        <div className="lg:col-span-2 space-y-6">
-          <div className="glass-card">
-            <h3 className="text-lg font-bold mb-6">Upcoming Slots</h3>
-            <div className="grid grid-cols-7 gap-2 mb-6 text-center text-[10px] uppercase font-bold text-slate-500">
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <div key={i}>{d}</div>)}
-            </div>
-            <div className="grid grid-cols-7 gap-2 text-center">
-              {Array.from({ length: 31 }).map((_, i) => (
-                <div key={i} className={cn(
-                  "aspect-square flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer transition-all",
-                  i + 1 === 17 ? "bg-primary text-white shadow-lg shadow-primary/20 scale-110" : "hover:bg-white/5 text-slate-400 hover:text-white"
-                )}>
-                  {i + 1}
-                </div>
-              ))}
-            </div>
-          </div>
+        <Grid item xs={12} lg={4}>
+          <Stack spacing={4}>
+            <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 3 }}>Monthly Overview</Typography>
+              <Grid container spacing={1}>
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => (
+                  <Grid item xs={1.7} key={day} sx={{ textAlign: 'center' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>{day}</Typography>
+                  </Grid>
+                ))}
+                {Array.from({ length: 31 }).map((_, i) => (
+                  <Grid item xs={1.7} key={i}>
+                    <Box 
+                      sx={{ 
+                        aspectRatio: '1/1', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: 12, 
+                        fontWeight: 700, 
+                        borderRadius: 2, 
+                        cursor: 'pointer',
+                        bgcolor: i + 1 === 17 ? 'primary.main' : 'transparent',
+                        color: i + 1 === 17 ? 'white' : 'text.primary',
+                        '&:hover': { bgcolor: i + 1 === 17 ? 'primary.dark' : 'rgba(0,0,0,0.05)' }
+                      }}
+                    >
+                      {i + 1}
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
 
-          <div className="glass-card bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
-            <h4 className="font-black text-xs uppercase tracking-widest text-primary mb-2">Pro Tip</h4>
-            <p className="text-xs text-slate-300 leading-relaxed font-medium">
-              You have 3 video consultations remaining this week. Sync your Google Calendar to avoid overbooking.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'primary.light', bgcolor: 'rgba(99, 102, 241, 0.05)' }}>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', textTransform: 'uppercase', mb: 1, display: 'block' }}>
+                Availability Note
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
+                You have 3 video consultations remaining this week. Sync your Google Calendar to avoid overbooking.
+              </Typography>
+            </Paper>
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

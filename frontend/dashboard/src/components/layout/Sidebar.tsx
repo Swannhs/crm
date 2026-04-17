@@ -12,7 +12,16 @@ import {
   Calendar, 
   Settings,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  LayoutGrid as Grid,
+  Megaphone,
+  Folder,
+  Globe,
+  MessageSquare,
+  Zap,
+  Package,
+  Star,
+  ClipboardCheck
 } from "lucide-react";
 import { 
   Drawer, 
@@ -32,11 +41,20 @@ const drawerWidth = 280;
 
 const menuItems = [
   { icon: Home, label: "Overview", href: "/dashboard" },
+  { icon: Grid, label: "Pipelines", href: "/dashboard/pipelines" },
+  { icon: Folder, label: "Projects", href: "/dashboard/projects" },
+  { icon: Megaphone, label: "Marketing", href: "/dashboard/marketing" },
+  { icon: Zap, label: "Automations", href: "/dashboard/marketing/automations" },
+  { icon: Globe, label: "Site Builder", href: "/dashboard/site-builder" },
+  { icon: MessageSquare, label: "Live Chat", href: "/dashboard/live-chat" },
   { icon: Users, label: "Contacts", href: "/dashboard/contacts-mfe" },
   { icon: FileText, label: "Documents", href: "/dashboard/documents" },
+  { icon: ClipboardCheck, label: "Forms", href: "/dashboard/forms" },
 
   { icon: CreditCard, label: "Billing", href: "/dashboard/billing" },
   { icon: ShoppingBag, label: "Commerce", href: "/dashboard/commerce" },
+  { icon: Package, label: "Inventory", href: "/dashboard/commerce/inventory" },
+  { icon: Star, label: "Membership", href: "/dashboard/membership" },
   { icon: Users2, label: "Employees", href: "/dashboard/employees" },
   { icon: Calendar, label: "Booking", href: "/dashboard/booking" },
 ];
@@ -164,4 +182,3 @@ export function Sidebar() {
     </Drawer>
   );
 }
-

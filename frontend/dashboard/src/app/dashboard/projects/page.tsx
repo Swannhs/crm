@@ -1,106 +1,178 @@
+'use client';
+
 import { 
-  BarChart3, 
+  Plus, 
+  MoreVertical, 
+  Folder, 
   CheckCircle2, 
   Clock, 
-  Plus, 
-  Users, 
-  MoreHorizontal,
-  GripVertical,
-  Flag
+  Users,
+  Search,
+  LayoutGrid,
+  List as ListIcon,
+  Calendar,
+  AlertCircle
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Avatar, 
+  IconButton, 
+  Button, 
+  TextField, 
+  InputAdornment,
+  Stack,
+  Chip,
+  LinearProgress,
+  AvatarGroup,
+  Card,
+  CardContent,
+  Tooltip
+} from "@mui/material";
 
-const columns = [
-  { id: 'todo', label: 'To Do', color: 'bg-slate-500' },
-  { id: 'in-progress', label: 'In Progress', color: 'bg-primary' },
-  { id: 'review', label: 'Review', color: 'bg-amber-400' },
-  { id: 'done', label: 'Completed', color: 'bg-emerald-400' },
-];
-
-const tasks = [
-  { id: '1', title: 'Migrate API Gateway', status: 'in-progress', priority: 'high', team: 3 },
-  { id: '2', title: 'Implement Auth Service', status: 'done', priority: 'medium', team: 2 },
-  { id: '3', title: 'Draft Community Schema', status: 'todo', priority: 'low', team: 1 },
-  { id: '4', title: 'Refactor Frontend Layout', status: 'review', priority: 'high', team: 4 },
+const projects = [
+  { 
+    id: 1, 
+    name: "Q2 Marketing Campaign", 
+    status: "In Progress", 
+    progress: 65, 
+    tasks: 12, 
+    completed: 8, 
+    team: ["AD", "JS", "MK"],
+    category: "Marketing",
+    priority: "High"
+  },
+  { 
+    id: 2, 
+    name: "Client Dashboard Redesign", 
+    status: "Completed", 
+    progress: 100, 
+    tasks: 45, 
+    completed: 45, 
+    team: ["JS", "AD"],
+    category: "Product",
+    priority: "Medium"
+  },
+  { 
+    id: 3, 
+    name: "New API Integration", 
+    status: "Pending", 
+    progress: 15, 
+    tasks: 8, 
+    completed: 1, 
+    team: ["MK", "JS"],
+    category: "Development",
+    priority: "Low"
+  },
 ];
 
 export default function ProjectsPage() {
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold">Project Workspace</h2>
-          <p className="text-slate-400">Manage your workflows, team tasks, and sprint progress.</p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl font-semibold hover:bg-white/10 transition-all">
-            <BarChart3 className="w-5 h-5" />
-            Analytics
-          </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-primary rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-            <Plus className="w-5 h-5" />
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -1 }}>
+            Project Manager
+          </Typography>
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            Plan, execute, and track collaborative team projects.
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" startIcon={<Folder size={20} />} sx={{ borderRadius: 3 }}>
+            Archive
+          </Button>
+          <Button variant="contained" startIcon={<Plus size={20} />} sx={{ borderRadius: 3 }}>
             New Project
-          </button>
-        </div>
-      </header>
+          </Button>
+        </Stack>
+      </Box>
 
-      <div className="flex gap-6 overflow-x-auto pb-6 -mx-2 px-2 scrollbar-hide">
-        {columns.map((column) => (
-          <div key={column.id} className="min-w-[320px] flex-1 flex flex-col gap-4">
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-2">
-                <div className={cn("w-2 h-2 rounded-full", column.color)} />
-                <h3 className="font-bold text-sm text-white uppercase tracking-widest">{column.label}</h3>
-                <span className="text-[10px] font-black bg-white/5 px-2 py-0.5 rounded text-slate-500">
-                  {tasks.filter(t => t.status === column.id).length}
-                </span>
-              </div>
-              <button className="p-1 hover:bg-white/5 rounded transition-all"><Plus className="w-4 h-4 text-slate-500" /></button>
-            </div>
-
-            <div className="flex-1 space-y-4">
-              {tasks.filter(t => t.status === column.id).map((task) => (
-                <div key={task.id} className="glass-card !p-5 group cursor-grab active:cursor-grabbing hover:border-primary/40 transition-all">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className={cn(
-                      "text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-sm ring-1",
-                      task.priority === 'high' ? "bg-red-400/10 text-red-400 ring-red-400/20" :
-                      task.priority === 'medium' ? "bg-amber-400/10 text-amber-400 ring-amber-400/20" :
-                      "bg-slate-400/10 text-slate-400 ring-slate-400/20"
-                    )}>
-                      {task.priority} Priority
-                    </span>
-                    <button className="text-slate-600 hover:text-white transition-all opacity-0 group-hover:opacity-100"><MoreHorizontal className="w-4 h-4" /></button>
-                  </div>
-                  
-                  <h4 className="font-bold text-white mb-4 group-hover:text-primary transition-colors">{task.title}</h4>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex -space-x-2">
-                      {[...Array(task.team)].map((_, i) => (
-                        <div key={i} className="w-7 h-7 rounded-full bg-white/10 border-2 border-[#12141c] flex items-center justify-center text-[10px] font-bold">
-                          {String.fromCharCode(65 + i)}
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="flex items-center gap-3 text-slate-500">
-                      <div className="flex items-center gap-1 text-[10px] font-bold">
-                        <Flag className="w-3 h-3" />
-                        Today
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              <button className="w-full py-3 border-2 border-dashed border-white/5 rounded-2xl text-slate-600 font-bold text-sm hover:border-white/10 hover:text-slate-400 transition-all">
-                + Add Task
-              </button>
-            </div>
-          </div>
+      <Grid container spacing={3} sx={{ mb: 6 }}>
+        {[
+          { label: "Active Projects", value: "8", icon: LayoutGrid, color: '#6366f1' },
+          { label: "Tasks Completed", value: "142", icon: CheckCircle2, color: '#10b981' },
+          { label: "Pending Review", value: "3", icon: AlertCircle, color: '#f59e0b' },
+          { label: "Hours Tracked", value: "480h", icon: Clock, color: '#ec4899' },
+        ].map((stat) => (
+          <Grid item xs={12} sm={6} md={3} key={stat.label}>
+             <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: `${stat.color}15`, color: stat.color, borderRadius: 2 }}>
+                    <stat.icon size={20} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase' }}>
+                      {stat.label}
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                </Box>
+             </Paper>
+          </Grid>
         ))}
-      </div>
-    </div>
+      </Grid>
+
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+         <Stack direction="row" spacing={1}>
+            <Button size="small" variant="text" sx={{ fontWeight: 800, borderBottom: '2px solid', borderColor: 'primary.main', borderRadius: 0 }}>Active</Button>
+            <Button size="small" variant="text" color="inherit" sx={{ fontWeight: 600, color: 'text.secondary' }}>Completed</Button>
+            <Button size="small" variant="text" color="inherit" sx={{ fontWeight: 600, color: 'text.secondary' }}>All</Button>
+         </Stack>
+         <TextField
+            placeholder="Search projects..."
+            size="small"
+            sx={{ width: 300 }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><Search size={16} /></InputAdornment>, sx: { borderRadius: 3, bgcolor: 'background.paper' } }}
+         />
+      </Box>
+
+      <Grid container spacing={4}>
+        {projects.map((project) => (
+          <Grid item xs={12} md={6} lg={4} key={project.id}>
+            <Card elevation={0} sx={{ borderRadius: 4, border: '1px solid', borderColor: 'divider', transition: 'all 0.2s', '&:hover': { borderColor: 'primary.main', transform: 'translateY(-4px)' } }}>
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                   <Chip 
+                     label={project.category} 
+                     size="small" 
+                     sx={{ fontWeight: 800, fontSize: 10, borderRadius: 1.5, bgcolor: 'rgba(99, 102, 241, 0.05)', color: 'primary.main' }} 
+                   />
+                   <IconButton size="small"><MoreVertical size={18} /></IconButton>
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>{project.name}</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
+                  Objective: Deliver high-quality {project.category.toLowerCase()} assets by end of quarter.
+                </Typography>
+
+                <Box sx={{ mb: 3 }}>
+                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>Progress</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 800 }}>{project.progress}%</Typography>
+                   </Box>
+                   <LinearProgress variant="determinate" value={project.progress} sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(0,0,0,0.05)', '& .MuiLinearProgress-bar': { bgcolor: project.progress === 100 ? 'success.main' : 'primary.main', borderRadius: 3 } }} />
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 28, height: 28, fontSize: 10, fontWeight: 700 } }}>
+                      {project.team.map((initials) => (
+                        <Avatar key={initials} sx={{ bgcolor: 'secondary.main' }}>{initials}</Avatar>
+                      ))}
+                   </AvatarGroup>
+                   <Stack direction="row" spacing={1} alignItems="center" color="text.secondary">
+                      <CheckCircle2 size={14} />
+                      <Typography variant="caption" sx={{ fontWeight: 800 }}>{project.completed}/{project.tasks}</Typography>
+                   </Stack>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 }
