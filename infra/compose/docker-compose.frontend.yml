@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  dashboard-shell:
+    build:
+      context: ../../frontend/dashboard
+    container_name: ms-frontend-dashboard
+    environment:
+      - NODE_ENV=production
+      - CONTACTS_MFE_URL=http://localhost:3001
+      - PIPELINES_MFE_URL=http://localhost:3002
+      - MARKETING_MFE_URL=http://localhost:3003
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  contacts-mfe:
+    build:
+      context: ../../frontend/contacts
+    container_name: ms-frontend-contacts
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+
+  pipelines-mfe:
+    build:
+      context: ../../frontend/pipelines
+    container_name: ms-frontend-pipelines
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3002:3000"
+    restart: unless-stopped
+
+  marketing-mfe:
+    build:
+      context: ../../frontend/marketing
+    container_name: ms-frontend-marketing
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3003:3000"
+    restart: unless-stopped
+
+networks:
+  default:
+    name: mfe-network
