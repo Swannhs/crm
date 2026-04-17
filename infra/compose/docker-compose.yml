@@ -80,7 +80,10 @@ services:
 
   organization-service:
     build:
-      context: ../../services/organization-service
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/organization-service
     container_name: ms-organization-service
     environment:
       PORT: 7010
@@ -92,7 +95,10 @@ services:
 
   billing-service:
     build:
-      context: ../../services/billing-service
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/billing-service
     container_name: ms-billing-service
     environment:
       PORT: 7020
@@ -104,7 +110,10 @@ services:
 
   booking-service:
     build:
-      context: ../../services/booking-service
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/booking-service
     container_name: ms-booking-service
     environment:
       PORT: 7040
@@ -116,7 +125,10 @@ services:
 
   api-router-service:
     build:
-      context: ../../services/api-router-service
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/api-router-service
     container_name: ms-api-router-service
     environment:
       PORT: 7001
@@ -125,7 +137,10 @@ services:
 
   notification-service:
     build:
-      context: ../../services/notification-service
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/notification-service
     container_name: ms-notification-service
     restart: unless-stopped
     environment:
@@ -135,7 +150,10 @@ services:
 
   realtime-service:
     build:
-      context: ../../services/realtime-service
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/realtime-service
     container_name: ms-realtime-service
     environment:
       PORT: 7030

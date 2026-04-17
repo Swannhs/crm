@@ -1,0 +1,14 @@
+{
+  "name": "@mymanager/microservices",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "common/*",
+    "services/*"
+  ],
+  "scripts": {
+    "compose:up": "docker compose -f infra/compose/docker-compose.yml up -d --build",
+    "compose:down": "docker compose -f infra/compose/docker-compose.yml down -v"
+  }
+}
+
