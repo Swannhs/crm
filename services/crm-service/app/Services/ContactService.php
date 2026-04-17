@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ImportContactsJob;
 use App\Models\Contact;
 use App\Models\OutboxEvent;
 use Illuminate\Support\Facades\DB;
@@ -9,6 +10,14 @@ use Illuminate\Support\Str;
 
 class ContactService
 {
+    /**
+     * Dispatches a bulk import job.
+     */
+    public function import(string $orgId, string $userId, array $contactsData): void
+    {
+        ImportContactsJob::dispatch($orgId, $userId, $contactsData);
+    }
+
     /**
      * Merges one or more duplicate contacts into a primary contact.
      *

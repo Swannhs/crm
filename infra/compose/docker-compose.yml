@@ -45,6 +45,30 @@ services:
     ports:
       - "6379:6379"
 
+  community-db:
+    image: postgres:17-alpine
+    container_name: ms-community-db
+    environment:
+      POSTGRES_DB: community
+      POSTGRES_USER: community
+      POSTGRES_PASSWORD: community
+    ports:
+      - "5437:5432"
+    volumes:
+      - community_db_data:/var/lib/postgresql/data
+
+  commerce-db:
+    image: postgres:17-alpine
+    container_name: ms-commerce-db
+    environment:
+      POSTGRES_DB: commerce
+      POSTGRES_USER: commerce
+      POSTGRES_PASSWORD: commerce
+    ports:
+      - "5438:5432"
+    volumes:
+      - commerce_db_data:/var/lib/postgresql/data
+
   crm-db:
     image: postgres:17-alpine
     container_name: ms-crm-db
@@ -80,6 +104,18 @@ services:
       - "5436:5432"
     volumes:
       - billing_db_data:/var/lib/postgresql/data
+
+  booking-db:
+    image: postgres:17-alpine
+    container_name: ms-booking-db
+    environment:
+      POSTGRES_DB: booking
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+    ports:
+      - "5439:5432"
+    volumes:
+      - booking_db_data:/var/lib/postgresql/data
 
   crm-service:
     build:
@@ -146,10 +182,12 @@ services:
     environment:
       PORT: 7040
       RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://booking:booking@booking-db:5432/booking
     ports:
       - "7040:7040"
     depends_on:
       - rabbitmq
+      - booking-db
 
   api-router-service:
     build:
@@ -261,3 +299,6 @@ volumes:
   crm_db_data:
   organization_db_data:
   billing_db_data:
+  booking_db_data:
+  community_db_data:
+  commerce_db_data:

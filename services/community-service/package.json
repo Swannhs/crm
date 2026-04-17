@@ -9,7 +9,11 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "@mymanager/node-service-kit": "0.1.0"
+    "@mymanager/node-service-kit": "0.1.0",
+    "@prisma/client": "^6.3.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.3.0"
   }
 }
 

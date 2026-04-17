@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Post {
+  id           String    @id @default(uuid()) @db.Uuid
+  orgId        String    @map("org_id") @db.Uuid
+  userId       String    @map("user_id")
+  contactId    String?   @map("contact_id") @db.Uuid
+  groupId      String?   @map("group_id") @db.Uuid
+  
+  text         String?   @db.Text
+  postColor    String?   @map("post_color")
+  attachments  Json      @default("[]")
+  
+  likesCount   Int       @default(0) @map("likes_count")
+  isDeleted    Boolean   @default(false) @map("is_deleted")
+  
+  metadata     Json      @default("{}")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  comments     Comment[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id           String    @id @default(uuid()) @db.Uuid
+  postId       String    @map("post_id") @db.Uuid
+  post         Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  orgId        String    @map("org_id") @db.Uuid
+  userId       String    @map("user_id")
+  contactId    String?   @map("contact_id") @db.Uuid
+  
+  text         String    @db.Text
+  isDeleted    Boolean   @default(false) @map("is_deleted")
+  
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([postId])
+  @@map("comments")
+}

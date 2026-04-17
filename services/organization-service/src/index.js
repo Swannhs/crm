@@ -23,7 +23,10 @@ app.get("/v1/organizations", async (req, res) => {
   }
 
   try {
-    const org = await db("organizations").where({ id: orgId }).first();
+    const org = await db.organization.findUnique({
+      where: { id: orgId }
+    });
+    
     if (!org) {
       return res.status(404).json({ message: "Organization not found" });
     }
@@ -42,11 +45,11 @@ app.put("/v1/organizations", async (req, res) => {
   if (!name) return res.status(400).json({ message: "Name is required" });
 
   try {
-    await db("organizations")
-      .where({ id: orgId })
-      .update({ name, updated_at: db.fn.now() });
+    const updated = await db.organization.update({
+      where: { id: orgId },
+      data: { name }
+    });
 
-    const updated = await db("organizations").where({ id: orgId }).first();
     res.json({ data: updated });
   } catch (err) {
     logger.error({ err }, "Failed to update organization");
@@ -63,7 +66,10 @@ app.get("/v1/locations", async (req, res) => {
   if (!orgId) return res.status(401).json({ message: "Missing X-Org-Id" });
 
   try {
-    const locations = await db("locations").where({ organization_id: orgId }).orderBy("name");
+    const locations = await db.location.findMany({
+      where: { organizationId: orgId },
+      orderBy: { name: 'asc' }
+    });
     res.json({ data: locations });
   } catch (err) {
     logger.error({ err }, "Failed to fetch locations");
@@ -79,20 +85,19 @@ app.post("/v1/locations", async (req, res) => {
   if (!name) return res.status(400).json({ message: "Name is required" });
 
   try {
-    const [location] = await db("locations").insert({
-      id: crypto.randomUUID(),
-      organization_id: orgId,
-      name,
-      email,
-      phone,
-      street,
-      city,
-      state,
-      zip_code: zip_code,
-      country,
-      created_at: db.fn.now(),
-      updated_at: db.fn.now()
-    }).returning("*");
+    const location = await db.location.create({
+      data: {
+        organizationId: orgId,
+        name,
+        email,
+        phone,
+        street,
+        city,
+        state,
+        zipCode: zip_code,
+        country
+      }
+    });
 
     res.status(201).json({ data: location });
   } catch (err) {

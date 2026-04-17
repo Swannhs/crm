@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Product {
+  id           String      @id @default(uuid()) @db.Uuid
+  orgId        String      @map("org_id") @db.Uuid
+  name         String
+  description  String?     @db.Text
+  priceCents   Int         @map("price_cents")
+  currency     String      @default("USD")
+  status       String      @default("draft")
+  photos       Json        @default("[]")
+  metadata     Json        @default("{}")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  orderItems   OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id                String      @id @default(uuid()) @db.Uuid
+  orgId             String      @map("org_id") @db.Uuid
+  contactId         String?     @map("contact_id") @db.Uuid
+  userId            String?     @map("user_id")
+  totalAmountCents  Int         @map("total_amount_cents")
+  status            String      @default("pending")
+  paymentStatus     String      @default("unpaid") @map("payment_status")
+  shippingAddress   Json?       @map("shipping_address")
+  metadata          Json        @default("{}")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  items             OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  orderId        String   @map("order_id") @db.Uuid
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String   @map("product_id") @db.Uuid
+  product        Product  @relation(fields: [productId], references: [id])
+  productName    String   @map("product_name")
+  quantity       Int
+  unitPriceCents Int      @map("unit_price_cents")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@map("order_items")
+}

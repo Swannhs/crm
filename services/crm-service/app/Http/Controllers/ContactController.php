@@ -191,6 +191,85 @@ class ContactController extends Controller
         return response()->json(['data' => $primary]);
     }
 
+    public function import(Request $request): JsonResponse
+    {
+        $orgId = (string) $request->attributes->get('org_id');
+        $userId = (string) $request->attributes->get('user_id');
+
+        $validated = $request->validate([
+            'contacts' => ['required', 'array', 'min:1', 'max:5000'],
+            'contacts.*.name' => ['required', 'string', 'max:200'],
+            'contacts.*.email' => ['nullable', 'string', 'max:255'],
+            'contacts.*.phone' => ['nullable', 'string', 'max:40'],
+        ]);
+
+        $this->contactService->import(
+            $orgId,
+            $userId,
+            $validated['contacts']
+        );
+
+        return response()->json([
+            'message' => 'Bulk import started successfully.',
+            'count' => count($validated['contacts'])
+        ], 202);
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        $orgId = (string) $request->attributes->get('org_id');
+
+        $q = $request->string('q')->toString();
+        if (strlen($q) < 2) {
+            return response()->json(['data' => []]);
+        }
+
+        $limit = min((int) $request->query('limit', 20), 100);
+        $term = '%' . strtolower($q) . '%';
+
+        $contacts = Contact::query()
+            ->where('org_id', $orgId)
+            ->where(function ($sub) use ($term): void {
+                $sub->whereRaw('LOWER(name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(phone) LIKE ?', [$term]);
+            })
+            ->limit($limit)
+            ->get(['id', 'name', 'first_name', 'last_name', 'email', 'phone', 'status']);
+
+        return response()->json(['data' => $contacts]);
+    }
+
+    public function statistics(Request $request): JsonResponse
+    {
+        $orgId = (string) $request->attributes->get('org_id');
+
+        $total = Contact::query()->where('org_id', $orgId)->count();
+        $active = Contact::query()->where('org_id', $orgId)->where('status', 'active')->count();
+        $inactive = Contact::query()->where('org_id', $orgId)->where('status', 'inactive')->count();
+
+        $byType = Contact::query()
+            ->where('org_id', $orgId)
+            ->selectRaw('type, COUNT(*) as count')
+            ->groupBy('type')
+            ->get();
+
+        $newThisMonth = Contact::query()
+            ->where('org_id', $orgId)
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->count();
+
+        return response()->json([
+            'data' => [
+                'total' => $total,
+                'active' => $active,
+                'inactive' => $inactive,
+                'new_this_month' => $newThisMonth,
+                'by_type' => $byType,
+            ]
+        ]);
+    }
+
     private function assertOrgScope(Request $request, Contact $contact): void
     {
         $orgId = (string) $request->attributes->get('org_id');

@@ -1,52 +1,74 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
-import { randomUUID } from "node:crypto";
+import {
+  getBookingTypes,
+  getBookingTypesCount,
+  getBookingTypeByLink,
+  getBookingTypeById,
+  createBookingType,
+  updateBookingType,
+  deleteBookingType,
+  getMultipleBookings,
+  createBookingGroup,
+  editBookingGroup,
+  getBookingGroups,
+  getBookingGroupById
+} from "./bookingType.controller.js";
+import {
+  createAppointmentFromBooking,
+  getAppointments,
+  createAppointment,
+  createBulkAppointment,
+  updateAppointment,
+  getAppointmentsTotals,
+  getInvitedUserList,
+  getAppointmentById,
+  removeAppointment,
+  getAppointmentsForGroupBooking,
+  insertBulkAppointmentFromGroup,
+  deleteAllAppointmentSeries,
+  createBulkAppointmentsFromMembership,
+  createMultiServiceAppointments
+} from "./appointment.controller.js";
 
-const { app, logger } = createServiceApp({ serviceName: "booking-service", jsonLimit: "2mb" });
+const { app, logger } = createServiceApp({ serviceName: "booking-service", jsonLimit: "10mb" });
 
-// This service starts as an API-compatible shell for monolith booking routes:
-// monolith: /api/booking/booking-types...
-// gateway will map that -> these /v1 endpoints.
-const bookingTypes = [
-  {
-    id: randomUUID(),
-    link: "demo",
-    title: "Demo Booking Type",
-    duration_minutes: 60
-  }
-];
+// Booking Type endpoints (12 routes)
+app.get("/v1/booking-types", getBookingTypes);
+app.get("/v1/booking-types-count", getBookingTypesCount);
+app.get("/v1/booking-types/:link", getBookingTypeByLink);
+app.get("/v1/booking-types-id/:id", getBookingTypeById);
+app.post("/v1/booking-types", createBookingType);
+app.put("/v1/booking-types/:id", updateBookingType);
+app.delete("/v1/booking-types/:id", deleteBookingType);
+app.get("/v1/booking-types-multi", getMultipleBookings);
 
-app.get("/v1/booking-types", (req, res) => {
-  // Monolith requires auth; we enforce identity headers at the gateway layer.
-  const orgId = req.header("X-Org-Id") || null;
-  if (!orgId) return res.status(401).json({ message: "Missing identity context headers." });
-  res.json({ data: bookingTypes });
+// Booking Group endpoints
+app.post("/v1/booking-group", createBookingGroup);
+app.put("/v1/booking-group/:id", editBookingGroup);
+app.get("/v1/booking-group", getBookingGroups);
+app.get("/v1/booking-group/:id", getBookingGroupById);
+
+// Appointment endpoints (14 routes)
+app.post("/v1/appointments", createAppointmentFromBooking);
+app.post("/v1/appointments/user", createAppointment);
+app.post("/v1/appointments/bulk", createBulkAppointment);
+app.post("/v1/appointments/bulk-membership", createBulkAppointmentsFromMembership);
+app.post("/v1/appointments/insert-bulk-group", insertBulkAppointmentFromGroup);
+app.post("/v1/appointments/multi-service", createMultiServiceAppointments);
+app.put("/v1/appointments/:id", updateAppointment);
+app.put("/v1/appointments/delete-all/:seriesId", deleteAllAppointmentSeries);
+app.get("/v1/appointments/group-appointments", getAppointmentsForGroupBooking);
+app.get("/v1/appointments", getAppointments);
+app.get("/v1/appointments/stats", getAppointmentsTotals);
+app.get("/v1/appointments/invitedList", getInvitedUserList);
+app.get("/v1/appointments/by-id/:id", getAppointmentById);
+app.delete("/v1/appointments/:id", removeAppointment);
+
+const PORT = process.env.PORT || 7040;
+app.listen(PORT, "0.0.0.0", () => {
+  logger.info({ port: PORT }, "booking-service listening");
 });
 
-app.get("/v1/booking-types-count", (req, res) => {
-  const orgId = req.header("X-Org-Id") || null;
-  if (!orgId) return res.status(401).json({ message: "Missing identity context headers." });
-  res.json({ data: { total: bookingTypes.length } });
-});
-
-app.get("/v1/booking-types/:link", (req, res) => {
-  const found = bookingTypes.find((b) => b.link === req.params.link);
-  if (!found) return res.status(404).json({ message: "Not found" });
-  res.json({ data: found });
-});
-
-app.get("/v1/booking-types-id/:id", (req, res) => {
-  const found = bookingTypes.find((b) => b.id === req.params.id);
-  if (!found) return res.status(404).json({ message: "Not found" });
-  res.json({ data: found });
-});
-
-app.post("/v1/booking-types", (req, res) => {
-  const orgId = req.header("X-Org-Id") || null;
-  const userId = req.header("X-User-Id") || null;
-  if (!orgId || !userId) return res.status(401).json({ message: "Missing identity context headers." });
-
-  const title = String(req.body?.title || "").trim();
-  if (!title) return res.status(422).json({ message: "title is required" });
 
   const created = {
     id: randomUUID(),
