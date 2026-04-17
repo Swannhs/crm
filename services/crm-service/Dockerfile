@@ -1,0 +1,24 @@
+FROM composer:2 AS vendor
+
+WORKDIR /app
+COPY . .
+RUN composer install --prefer-dist --no-interaction
+
+FROM php:8.4-cli
+
+WORKDIR /app
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends libpq-dev unzip git \
+  && rm -rf /var/lib/apt/lists/* \
+  && docker-php-ext-install pdo_pgsql
+
+COPY --from=vendor /app/vendor /app/vendor
+COPY . .
+
+EXPOSE 8010
+
+RUN chmod +x /app/docker/entrypoint.sh
+
+ENV PORT=8010
+CMD ["/app/docker/entrypoint.sh"]
