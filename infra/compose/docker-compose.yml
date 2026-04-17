@@ -57,6 +57,30 @@ services:
     volumes:
       - crm_db_data:/var/lib/postgresql/data
 
+  organization-db:
+    image: postgres:17-alpine
+    container_name: ms-organization-db
+    environment:
+      POSTGRES_DB: organization
+      POSTGRES_USER: organization
+      POSTGRES_PASSWORD: organization
+    ports:
+      - "5435:5432"
+    volumes:
+      - organization_db_data:/var/lib/postgresql/data
+
+  billing-db:
+    image: postgres:17-alpine
+    container_name: ms-billing-db
+    environment:
+      POSTGRES_DB: billing
+      POSTGRES_USER: billing
+      POSTGRES_PASSWORD: billing
+    ports:
+      - "5436:5432"
+    volumes:
+      - billing_db_data:/var/lib/postgresql/data
+
   crm-service:
     build:
       context: ../../services/crm-service
@@ -88,10 +112,12 @@ services:
     environment:
       PORT: 7010
       RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://organization:organization@organization-db:5432/organization
     ports:
       - "7010:7010"
     depends_on:
       - rabbitmq
+      - organization-db
 
   billing-service:
     build:
@@ -103,10 +129,12 @@ services:
     environment:
       PORT: 7020
       RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://billing:billing@billing-db:5432/billing
     ports:
       - "7020:7020"
     depends_on:
       - rabbitmq
+      - billing-db
 
   booking-service:
     build:
@@ -134,6 +162,54 @@ services:
       PORT: 7001
     ports:
       - "7001:7001"
+
+  community-service:
+    build:
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/community-service
+    container_name: ms-community-service
+    environment:
+      PORT: 7050
+    ports:
+      - "7050:7050"
+
+  commerce-service:
+    build:
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/commerce-service
+    container_name: ms-commerce-service
+    environment:
+      PORT: 7060
+    ports:
+      - "7060:7060"
+
+  documents-service:
+    build:
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/documents-service
+    container_name: ms-documents-service
+    environment:
+      PORT: 7070
+    ports:
+      - "7070:7070"
+
+  payments-service:
+    build:
+      context: ../..
+      dockerfile: docker/node-service.Dockerfile
+      args:
+        SERVICE_PATH: services/payments-service
+    container_name: ms-payments-service
+    environment:
+      PORT: 7080
+    ports:
+      - "7080:7080"
 
   notification-service:
     build:
@@ -183,3 +259,5 @@ services:
 volumes:
   keycloak_db_data:
   crm_db_data:
+  organization_db_data:
+  billing_db_data:

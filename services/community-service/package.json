@@ -1,5 +1,5 @@
 {
-  "name": "@mymanager/organization-service",
+  "name": "@mymanager/community-service",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,8 +9,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "@mymanager/node-service-kit": "0.1.0",
-    "knex": "^3.1.0",
-    "pg": "^8.13.1"
+    "@mymanager/node-service-kit": "0.1.0"
   }
 }
+

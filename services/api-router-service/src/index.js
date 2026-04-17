@@ -95,6 +95,67 @@ async function handleApiCompat(req, res) {
   // Route modules we’ve already started migrating.
   // Everything else returns 501 (so clients see “not implemented” rather than 404).
   try {
+    // Modules that are owned by other domain services but still in "stub" mode.
+    // We forward them 1:1 so those services can implement endpoints incrementally.
+    const domainRoutes = {
+      // community domain
+      "community": "http://community-service:7050",
+      "community-group": "http://community-service:7050",
+      "community-members": "http://community-service:7050",
+      "community-post": "http://community-service:7050",
+      "community-livechat": "http://community-service:7050",
+      "community-group-livechat": "http://community-service:7050",
+      "community-follow": "http://community-service:7050",
+      "community-booking": "http://community-service:7050",
+      "community-profile": "http://community-service:7050",
+      "community-settings": "http://community-service:7050",
+      "community-events": "http://community-service:7050",
+      "community-badges": "http://community-service:7050",
+      "community-activity": "http://community-service:7050",
+      "community-points": "http://community-service:7050",
+
+      // commerce domain
+      "shopv2": "http://commerce-service:7060",
+      "cart": "http://commerce-service:7060",
+      "checkout-page": "http://commerce-service:7060",
+      "product": "http://commerce-service:7060",
+      "product-category": "http://commerce-service:7060",
+      "category": "http://commerce-service:7060",
+      "coupon": "http://commerce-service:7060",
+      "hardware": "http://commerce-service:7060",
+      "hardware-quote": "http://commerce-service:7060",
+      "modifier-type": "http://commerce-service:7060",
+      "modifier-files": "http://commerce-service:7060",
+      "label": "http://commerce-service:7060",
+      "cash-drawer": "http://commerce-service:7060",
+
+      // documents domain
+      "document": "http://documents-service:7070",
+      "document-recipient": "http://documents-service:7070",
+      "document-signature": "http://documents-service:7070",
+      "document-custome-fields": "http://documents-service:7070",
+      "file-manager": "http://documents-service:7070",
+      "file-manager-activity": "http://documents-service:7070",
+      "upload": "http://documents-service:7070",
+      "local-storage": "http://documents-service:7070",
+
+      // payments domain
+      "payment": "http://payments-service:7080",
+      "payment-cards": "http://payments-service:7080",
+      "payment-fluidpay": "http://payments-service:7080",
+      "payment-paypal": "http://payments-service:7080",
+      "payment-valor": "http://payments-service:7080",
+      "payment-method-tag": "http://payments-service:7080",
+      "fullstack-payment": "http://payments-service:7080",
+      "qr-pay-page": "http://payments-service:7080",
+      "processing-fee-settings": "http://payments-service:7080"
+    };
+
+    if (domainRoutes[module]) {
+      const path = `/api/${module}${rest}`;
+      return proxyTo(req, res, { baseUrl: domainRoutes[module], targetPath: path });
+    }
+
     if (module === "contact") {
       // Minimal compatibility mapping for the endpoints we already support.
       if (req.method === "GET" && rest === "/get") {
