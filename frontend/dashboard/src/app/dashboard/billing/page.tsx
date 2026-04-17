@@ -1,30 +1,41 @@
+'use client';
+
 import { 
   Download, 
   ExternalLink, 
-  FileCheck, 
   Plus, 
   Search,
-  Calendar,
   DollarSign,
   Clock,
   CheckCircle2
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
-
-const mockInvoices = [
-  { id: "1", number: "INV-2024-001", client: "Acme Corp", amount: 450000, status: "Paid", date: "Mar 12, 2024" },
-  { id: "2", number: "INV-2024-002", client: "Global Tech", amount: 120000, status: "Sent", date: "Mar 15, 2024" },
-  { id: "3", number: "INV-2024-003", client: "Stark Ind", amount: 890000, status: "Overdue", date: "Mar 01, 2024" },
-  { id: "4", number: "INV-2024-004", client: "Wayne Ent", amount: 230000, status: "Draft", date: "Mar 16, 2024" },
-];
-
-const summary = [
-  { label: "Total Invoiced", value: 1690000, icon: DollarSign, color: "text-primary" },
-  { label: "Paid Invoices", value: 450000, icon: CheckCircle2, color: "text-emerald-400" },
-  { label: "Pending Amount", value: 350000, icon: Clock, color: "text-amber-400" },
-];
+import { billingService } from "@/services/billing.service";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function BillingPage() {
+  const [filter, setFilter] = useState('all');
+  
+  const { data: invoicesResponse, isLoading: isInvoicesLoading, error: invoicesError } = useQuery({
+    queryKey: ['invoices', filter],
+    queryFn: () => billingService.getInvoices({ status: filter === 'all' ? undefined : filter }),
+  });
+
+  const { data: statsResponse } = useQuery({
+    queryKey: ['invoice-stats'],
+    queryFn: () => billingService.getStats(),
+  });
+
+  const invoices = invoicesResponse?.data || [];
+  const statsData = statsResponse?.data || {};
+
+  const summary = [
+    { label: "Total Invoiced", value: statsData.total_amount || 0, icon: DollarSign, color: "text-primary" },
+    { label: "Paid Invoices", value: statsData.paid_amount || 0, icon: CheckCircle2, color: "text-emerald-400" },
+    { label: "Pending Amount", value: statsData.pending_amount || 0, icon: Clock, color: "text-amber-400" },
+  ];
+
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
       <header className="flex justify-between items-end">
@@ -52,7 +63,7 @@ export default function BillingPage() {
             </div>
             <div>
               <p className="text-sm text-slate-400 font-medium">{item.label}</p>
-              <h3 className="text-xl font-bold">{formatCurrency(item.value)}</h3>
+              <h3 className="text-xl font-bold">{formatCurrency(item.value / 100)}</h3>
             </div>
           </div>
         ))}
@@ -63,9 +74,18 @@ export default function BillingPage() {
           <div className="flex items-center gap-4">
             <h3 className="font-bold text-lg">Invoices</h3>
             <div className="flex bg-black/20 rounded-lg p-1">
-              <button className="px-3 py-1 text-xs font-bold rounded-md bg-primary text-white">All</button>
-              <button className="px-3 py-1 text-xs font-medium text-slate-400 hover:text-white transition-colors">Paid</button>
-              <button className="px-3 py-1 text-xs font-medium text-slate-400 hover:text-white transition-colors">Pending</button>
+              {['all', 'paid', 'pending'].map((s) => (
+                <button 
+                  key={s}
+                  onClick={() => setFilter(s)}
+                  className={cn(
+                    "px-3 py-1 text-xs font-bold rounded-md transition-all capitalize",
+                    filter === s ? "bg-primary text-white" : "text-slate-400 hover:text-white"
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
             </div>
           </div>
           <div className="relative">
@@ -79,60 +99,66 @@ export default function BillingPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-slate-400 text-xs uppercase tracking-wider">
-                <th className="px-6 py-4">Invoice #</th>
-                <th className="px-6 py-4">Client</th>
-                <th className="px-6 py-4">Amount</th>
-                <th className="px-6 py-4">Due Date</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {mockInvoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors group">
-                  <td className="px-6 py-4 font-mono text-sm text-primary group-hover:underline cursor-pointer">
-                    {inv.number}
-                  </td>
-                  <td className="px-6 py-4 font-medium text-white">
-                    {inv.client}
-                  </td>
-                  <td className="px-6 py-4 font-bold">
-                    {formatCurrency(inv.amount)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-400">
-                    {inv.date}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase ring-1",
-                      inv.status === "Paid" ? "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20" :
-                      inv.status === "Overdue" ? "bg-rose-400/10 text-rose-400 ring-rose-400/20" :
-                      inv.status === "Sent" ? "bg-primary/10 text-primary ring-primary/20" :
-                      "bg-slate-400/10 text-slate-400 ring-slate-400/20"
-                    )}>
-                      <div className={cn("w-1 h-1 rounded-full", 
-                        inv.status === "Paid" ? "bg-emerald-400" :
-                        inv.status === "Overdue" ? "bg-rose-400" : 
-                        inv.status === "Sent" ? "bg-primary" : "bg-slate-400"
-                      )} />
-                      {inv.status}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      View
-                    </button>
-                  </td>
+          {isInvoicesLoading ? (
+            <div className="p-12 text-center text-slate-400">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              Loading invoices...
+            </div>
+          ) : invoicesError ? (
+            <div className="p-12 text-center text-red-400 bg-red-400/5">
+              Failed to load invoices.
+            </div>
+          ) : invoices.length === 0 ? (
+            <div className="p-12 text-center text-slate-500 italic">
+              No invoices found.
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-slate-400 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Amount</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {invoices.map((inv) => (
+                  <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-6 py-4 font-mono text-sm text-primary group-hover:underline cursor-pointer">
+                      {inv.id.substring(0, 8)}...
+                    </td>
+                    <td className="px-6 py-4 font-bold">
+                      {formatCurrency(inv.amountCents / 100)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase ring-1",
+                        inv.status === "paid" ? "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20" :
+                        inv.status === "pending" ? "bg-amber-400/10 text-amber-400 ring-amber-400/20" :
+                        "bg-slate-400/10 text-slate-400 ring-slate-400/20"
+                      )}>
+                        <div className={cn("w-1 h-1 rounded-full", 
+                          inv.status === "paid" ? "bg-emerald-400" :
+                          inv.status === "pending" ? "bg-amber-400" : "bg-slate-400"
+                        )} />
+                        {inv.status}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
   );
 }
+

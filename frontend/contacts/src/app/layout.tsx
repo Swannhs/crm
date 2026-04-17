@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "@/styles/globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
-
 import { Providers } from "@/components/providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MyManager Dashboard",
-  description: "Modern minimalist dashboard for MyManager",
+  title: "CRM | MyManager",
+  description: "Contact management microfrontend",
 };
 
 export default function RootLayout({
@@ -23,7 +21,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex">
             <Sidebar />
-            <main className="flex-1 ml-64 p-8 min-h-screen">
+            <main className="flex-1 ml-[280px] p-8 min-h-screen bg-[#f8fafc]">
               <div className="max-w-7xl mx-auto">
                 {children}
               </div>
@@ -34,4 +32,3 @@ export default function RootLayout({
     </html>
   );
 }
-

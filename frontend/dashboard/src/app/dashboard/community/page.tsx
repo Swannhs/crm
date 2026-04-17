@@ -1,3 +1,5 @@
+'use client';
+
 import { 
   MessageSquare, 
   Heart, 
@@ -7,39 +9,22 @@ import {
   MoreHorizontal,
   Bookmark,
   TrendingUp,
-  Award
+  Award,
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
-const posts = [
-  {
-    id: "1",
-    title: "Scaling Microservices with KrakenD Gateway",
-    author: "Jane Doe",
-    role: "Architect",
-    category: "Architecture",
-    likes: 124,
-    comments: 18,
-    date: "2 hours ago",
-    excerpt: "Learn how we reduced latency by 40% using declarative routing and custom middleware in our API gateway layer...",
-    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=60"
-  },
-  {
-    id: "2",
-    title: "The Future of MyManager Dashboard Design",
-    author: "Alex Rivera",
-    role: "Lead Designer",
-    category: "Design",
-    likes: 89,
-    comments: 42,
-    date: "5 hours ago",
-    excerpt: "Glassmorphism, micro-interactions, and the philosophy behind our new minimalist aesthetics for 2024...",
-    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=60"
-  }
-];
+import { communityService } from "@/services/community.service";
+import { useQuery } from "@tanstack/react-query";
 
 export default function CommunityPage() {
+  const { data: postsResponse, isLoading, error } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () => communityService.getPosts(),
+  });
+
+  const posts = postsResponse?.data || [];
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <header className="flex justify-between items-end">
@@ -95,54 +80,61 @@ export default function CommunityPage() {
           </div>
 
           <div className="space-y-6">
-            {posts.map((post) => (
-              <div key={post.id} className="glass-card !p-0 overflow-hidden group hover:border-primary/30 transition-all duration-500">
-                <div className="aspect-[21/9] w-full relative overflow-hidden">
-                  <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                  <div className="absolute bottom-4 left-6">
-                    <span className="px-3 py-1 bg-primary text-[10px] font-black uppercase rounded-md shadow-lg">{post.category}</span>
-                  </div>
-                </div>
-
-                <div className="p-8 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-purple-600 border-2 border-white/10 flex items-center justify-center text-sm font-bold shadow-lg">
-                        {post.author[0]}
-                      </div>
-                      <div>
-                        <h4 className="text-white font-bold text-sm">{post.author}</h4>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase">{post.role} • {post.date}</p>
-                      </div>
-                    </div>
-                    <button className="text-slate-500 hover:text-white transition-all"><MoreHorizontal className="w-6 h-6" /></button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Link href={`/dashboard/community/${post.id}`} className="text-2xl font-black text-white hover:text-primary transition-colors leading-tight block">
-                      {post.title}
-                    </Link>
-                    <p className="text-slate-400 text-sm leading-relaxed">{post.excerpt}</p>
-                  </div>
-
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                      <button className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-all text-xs font-bold uppercase tracking-wider">
-                        <Heart className="w-4 h-4" /> {post.likes}
-                      </button>
-                      <button className="flex items-center gap-2 text-slate-400 hover:text-primary transition-all text-xs font-bold uppercase tracking-wider">
-                        <MessageSquare className="w-4 h-4" /> {post.comments}
-                      </button>
-                    </div>
-                    <div className="flex gap-4">
-                      <button className="text-slate-500 hover:text-white transition-all"><Share2 className="w-5 h-5" /></button>
-                      <button className="text-slate-500 hover:text-white transition-all"><Bookmark className="w-5 h-5" /></button>
-                    </div>
-                  </div>
-                </div>
+            {isLoading ? (
+              <div className="p-12 text-center text-slate-400">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                Streaming community insights...
               </div>
-            ))}
+            ) : error ? (
+              <div className="p-12 text-center text-red-400 bg-red-400/5">
+                Failed to load the community feed.
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="p-12 text-center text-slate-500 italic">
+                No conversations yet. Be the first to start one!
+              </div>
+            ) : (
+              posts.map((post) => (
+                <div key={post.id} className="glass-card !p-0 overflow-hidden group hover:border-primary/30 transition-all duration-500">
+                  <div className="p-8 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-purple-600 border-2 border-white/10 flex items-center justify-center text-sm font-bold shadow-lg">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-white font-bold text-sm">Member {post.authorId.substring(0, 4)}</h4>
+                          <p className="text-[10px] text-slate-500 font-bold uppercase">{post.category} • {new Date(post.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <button className="text-slate-500 hover:text-white transition-all"><MoreHorizontal className="w-6 h-6" /></button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Link href={`/dashboard/community/${post.id}`} className="text-2xl font-black text-white hover:text-primary transition-colors leading-tight block">
+                        {post.title}
+                      </Link>
+                      <p className="text-slate-400 text-sm leading-relaxed line-clamp-3">{post.content}</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <button className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-all text-xs font-bold uppercase tracking-wider">
+                          <Heart className="w-4 h-4" /> 0
+                        </button>
+                        <button className="flex items-center gap-2 text-slate-400 hover:text-primary transition-all text-xs font-bold uppercase tracking-wider">
+                          <MessageSquare className="w-4 h-4" /> 0
+                        </button>
+                      </div>
+                      <div className="flex gap-4">
+                        <button className="text-slate-500 hover:text-white transition-all"><Share2 className="w-5 h-5" /></button>
+                        <button className="text-slate-500 hover:text-white transition-all"><Bookmark className="w-5 h-5" /></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -155,31 +147,20 @@ export default function CommunityPage() {
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Monthly Reach</span>
-                <span className="text-sm font-black text-white">+24k</span>
+                <span className="text-xs text-slate-400 font-medium">Platform Growth</span>
+                <span className="text-sm font-black text-white">Live</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Contributor Score</span>
-                <span className="text-sm font-black text-emerald-400">Elite</span>
+                <span className="text-xs text-slate-400 font-medium">Active Discussions</span>
+                <span className="text-sm font-black text-emerald-400">{posts.length}</span>
               </div>
             </div>
           </div>
 
           <div className="glass-card">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Top Contributors</h3>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Organization Contributors</h3>
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-xs">U{i}</div>
-                    <div className="absolute -top-1 -right-1"><Award className="w-3 h-3 text-amber-400" /></div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-bold text-white">User {i}</p>
-                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-tighter">1.2k Contribution Pts</p>
-                  </div>
-                </div>
-              ))}
+              <p className="text-xs text-slate-500 italic">Contributing to your org's collective intelligence.</p>
             </div>
           </div>
         </div>
@@ -187,3 +168,4 @@ export default function CommunityPage() {
     </div>
   );
 }
+

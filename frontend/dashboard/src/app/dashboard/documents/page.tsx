@@ -1,8 +1,8 @@
+'use client';
+
 import { 
   FileText, 
   Upload, 
-  Clock, 
-  CheckCircle2, 
   Eye, 
   Download,
   Share2,
@@ -10,15 +10,20 @@ import {
   Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const documents = [
-  { id: "1", name: "Employment_Contract_Q2.pdf", status: "Signed", type: "Contract", size: "1.2 MB", date: "2 days ago" },
-  { id: "2", name: "Commercial_Lease_V1.docx", status: "Pending", type: "Legal", size: "840 KB", date: "5 hours ago" },
-  { id: "3", name: "Software_SLA_MyManager.pdf", status: "Review", type: "SLA", size: "2.4 MB", date: "Mar 10, 2024" },
-  { id: "4", name: "Investor_Pitch_v2.pptx", status: "Signed", type: "Pitch", size: "12.2 MB", date: "Mar 01, 2024" },
-];
+import { documentService } from "@/services/document.service";
+import { useQuery } from "@tanstack/react-query";
 
 export default function DocumentsPage() {
+  const { data: docsResponse, isLoading, error } = useQuery({
+    queryKey: ['documents'],
+    queryFn: () => documentService.getDocuments(),
+  });
+
+  const documents = docsResponse?.data || [];
+
+  const signedCount = documents.filter(d => d.status === 'signed').length;
+  const pendingCount = documents.filter(d => d.status === 'pending').length;
+
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
       <header className="flex justify-between items-end">
@@ -35,18 +40,18 @@ export default function DocumentsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="glass-card text-center border-b-4 border-emerald-400">
           <p className="text-slate-400 text-xs font-bold uppercase mb-2">Signed</p>
-          <h3 className="text-2xl font-black">124</h3>
+          <h3 className="text-2xl font-black">{signedCount}</h3>
         </div>
         <div className="glass-card text-center border-b-4 border-amber-400">
           <p className="text-slate-400 text-xs font-bold uppercase mb-2">Pending</p>
-          <h3 className="text-2xl font-black">12</h3>
+          <h3 className="text-2xl font-black">{pendingCount}</h3>
         </div>
         <div className="glass-card text-center border-b-4 border-primary">
-          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Total Storage</p>
-          <h3 className="text-2xl font-black">4.2 GB</h3>
+          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Total Files</p>
+          <h3 className="text-2xl font-black">{documents.length}</h3>
         </div>
         <div className="glass-card text-center border-b-4 border-purple-400">
-          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Safe Vault</p>
+          <p className="text-slate-400 text-xs font-bold uppercase mb-2">Vault Status</p>
           <h3 className="text-2xl font-black">Active</h3>
         </div>
       </div>
@@ -56,7 +61,6 @@ export default function DocumentsPage() {
           <div className="flex gap-4">
             <button className="text-sm font-bold text-white border-b-2 border-primary pb-1">All Files</button>
             <button className="text-sm font-semibold text-slate-500 hover:text-white transition-colors">Shared with me</button>
-            <button className="text-sm font-semibold text-slate-500 hover:text-white transition-colors">Templates</button>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -65,41 +69,57 @@ export default function DocumentsPage() {
         </div>
 
         <div className="divide-y divide-white/5">
-          {documents.map((doc) => (
-            <div key={doc.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-all group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-primary transition-all">
-                  <FileText className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-white text-sm cursor-pointer hover:underline">{doc.name}</h4>
-                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-tighter mt-0.5">
-                    {doc.type} • {doc.size} • Uploaded {doc.date}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6">
-                <span className={cn(
-                  "px-2 py-0.5 rounded text-[10px] font-black uppercase ring-1 shadow-sm",
-                  doc.status === "Signed" ? "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20" :
-                  doc.status === "Pending" ? "bg-amber-400/10 text-amber-400 ring-amber-400/20" :
-                  "bg-primary/10 text-primary ring-primary/20"
-                )}>
-                  {doc.status}
-                </span>
-
-                <div className="flex gap-1">
-                  <button title="Preview" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Eye className="w-4 h-4" /></button>
-                  <button title="Download" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Download className="w-4 h-4" /></button>
-                  <button title="Share" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Share2 className="w-4 h-4" /></button>
-                  <button title="Security" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Lock className="w-4 h-4" /></button>
-                </div>
-              </div>
+          {isLoading ? (
+            <div className="p-12 text-center text-slate-400">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              Loading vault...
             </div>
-          ))}
+          ) : error ? (
+            <div className="p-12 text-center text-red-400 bg-red-400/5">
+              Failed to load document vault.
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="p-12 text-center text-slate-500 italic">
+              No documents found in your vault.
+            </div>
+          ) : (
+            documents.map((doc) => (
+              <div key={doc.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-all group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-primary transition-all">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white text-sm cursor-pointer hover:underline">{doc.name}</h4>
+                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-tighter mt-0.5">
+                      {doc.type} • {(doc.sizeBytes / 1024).toFixed(1)} KB • Uploaded {new Date(doc.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <span className={cn(
+                    "px-2 py-0.5 rounded text-[10px] font-black uppercase ring-1 shadow-sm capitalize",
+                    doc.status === "signed" ? "bg-emerald-400/10 text-emerald-400 ring-emerald-400/20" :
+                    doc.status === "pending" ? "bg-amber-400/10 text-amber-400 ring-amber-400/20" :
+                    "bg-primary/10 text-primary ring-primary/20"
+                  )}>
+                    {doc.status}
+                  </span>
+
+                  <div className="flex gap-1">
+                    <button title="Preview" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Eye className="w-4 h-4" /></button>
+                    <button title="Download" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Download className="w-4 h-4" /></button>
+                    <button title="Share" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Share2 className="w-4 h-4" /></button>
+                    <button title="Security" className="p-2 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all"><Lock className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
   );
 }
+

@@ -2,27 +2,31 @@ import api from '../lib/api';
 
 export interface Invoice {
   id: string;
-  invoiceNumber: string;
-  contactName: string;
-  amountCents: bigint;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-  dueDate: string;
+  orgId: string;
+  contactId?: string;
+  amountCents: number;
+  paidAmountCents: number;
+  status: 'pending' | 'partial' | 'paid' | 'cancelled';
   createdAt: string;
+  dueDate?: string;
 }
 
 export const billingService = {
   getInvoices: async (params?: { status?: string, page?: number, limit?: number }) => {
-    const response = await api.get<{ data: Invoice[], total: number }>(`/v1/invoices`, { params });
+    const response = await api.get<{ data: Invoice[] }>(`/api/invoice`, { params });
     return response.data;
   },
   
   getInvoice: async (id: string) => {
-    const response = await api.get<{ data: Invoice }>(`/v1/invoices/${id}`);
+    const response = await api.get<{ data: Invoice }>(`/api/invoice/${id}`);
     return response.data;
   },
   
   getStats: async () => {
-    const response = await api.get<{ data: any }>(`/v1/invoices/stats`);
+    // Note: True stats endpoint might be missing, using a placeholder or combined metric if needed.
+    // For now, mapping to existing KrakenD stat endpoints if found.
+    const response = await api.get<{ data: any }>(`/api/invoice/statistics/income`);
     return response.data;
   }
 };
+

@@ -1,78 +1,148 @@
+'use client';
+
 import { 
   Users, 
   TrendingUp, 
   DollarSign, 
   ArrowUpRight,
   ArrowDownRight,
-  Activity
+  Activity,
+  Package,
+  Calendar
 } from "lucide-react";
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Paper, 
+  Avatar, 
+  IconButton, 
+  Stack, 
+  Divider,
+  Card,
+  CardContent
+} from "@mui/material";
 import { formatCurrency } from "@/lib/utils";
-
-const stats = [
-  { label: "Total Revenue", value: 1245000, change: "+12.5%", trending: "up", icon: DollarSign },
-  { label: "Active Contacts", value: 2420, change: "+3.2%", trending: "up", icon: Users },
-  { label: "New Orders", value: 48, change: "-2.4%", trending: "down", icon: TrendingUp },
-  { label: "Team Velocity", value: "92%", change: "+5.1%", trending: "up", icon: Activity },
-];
+import { useQuery } from "@tanstack/react-query";
+import { contactService } from "@/services/contact.service";
+import { billingService } from "@/services/billing.service";
+import { employeeService } from "@/services/employee.service";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function DashboardPage() {
+  const { user } = useAuthStore();
+
+  const { data: billingStats } = useQuery({
+    queryKey: ['billing-stats'],
+    queryFn: () => billingService.getStats(),
+  });
+
+  const { data: contactsResponse } = useQuery({
+    queryKey: ['contacts-count'],
+    queryFn: () => contactService.getContacts(),
+  });
+
+  const { data: employeesResponse } = useQuery({
+    queryKey: ['employees-count'],
+    queryFn: () => employeeService.getEmployees(),
+  });
+
+  const revenue = (billingStats?.data?.total_amount || 0) / 100;
+  const contactsCount = contactsResponse?.data?.length || 0;
+  const employeesCount = employeesResponse?.data?.length || 0;
+
+  const stats = [
+    { label: "Total Revenue", value: formatCurrency(revenue), change: "+12.5%", trending: "up", icon: DollarSign, color: '#6366f1' },
+    { label: "Active Contacts", value: contactsCount, change: "+3.2%", trending: "up", icon: Users, color: '#ec4899' },
+    { label: "Team Members", value: employeesCount, change: "Live", trending: "up", icon: Activity, color: '#10b981' },
+    { label: "Bookings", value: "24", change: "New", trending: "up", icon: Calendar, color: '#f59e0b' },
+  ];
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header>
-        <h2 className="text-3xl font-bold">Good morning, Admin</h2>
-        <p className="text-slate-400">Here's what's happening with your business today.</p>
-      </header>
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ mb: 6 }}>
+        <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: -1 }}>
+          Good morning, {user?.name || 'Admin'}
+        </Typography>
+        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+          Here's what's happening with your business today.
+        </Typography>
+      </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Grid container spacing={3} sx={{ mb: 6 }}>
         {stats.map((stat) => (
-          <div key={stat.label} className="glass-card group relative overflow-hidden">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                <stat.icon className="w-6 h-6" />
-              </div>
-              <div className={cn(
-                "flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-full",
-                stat.trending === "up" ? "text-emerald-400 bg-emerald-400/10" : "text-rose-400 bg-rose-400/10"
-              )}>
-                {stat.trending === "up" ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                {stat.change}
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-400 text-sm font-medium mb-1">{stat.label}</p>
-              <h3 className="text-2xl font-bold">
-                {typeof stat.value === "number" ? formatCurrency(stat.value) : stat.value}
-              </h3>
-            </div>
-            
-            {/* Subtle background glow on hover */}
-            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-500" />
-          </div>
+          <Grid item xs={12} sm={6} md={3} key={stat.label}>
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: 3, 
+                borderRadius: 4, 
+                border: '1px solid', 
+                borderColor: 'divider',
+                position: 'relative',
+                overflow: 'hidden',
+                '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(99, 102, 241, 0.02)' }
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Avatar sx={{ bgcolor: `${stat.color}15`, color: stat.color, borderRadius: 2 }}>
+                  <stat.icon size={24} />
+                </Avatar>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  px: 1, 
+                  py: 0.5, 
+                  borderRadius: 2, 
+                  bgcolor: stat.trending === 'up' ? 'success.light' : 'error.light',
+                  color: stat.trending === 'up' ? 'success.dark' : 'error.dark',
+                }}>
+                  {stat.trending === "up" ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                  <Typography variant="caption" sx={{ fontWeight: 700, ml: 0.5 }}>{stat.change}</Typography>
+                </Box>
+              </Box>
+              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{stat.label}</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 800 }}>{stat.value}</Typography>
+            </Paper>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass-card h-[400px] flex items-center justify-center border-dashed">
-          <p className="text-slate-500 font-medium">Revenue Analytics Chart Space</p>
-        </div>
-        <div className="glass-card h-[400px]">
-          <h3 className="text-lg font-semibold mb-6">Recent Activity</h3>
-          <div className="space-y-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex gap-4 items-start border-l-2 border-primary/20 pl-4 py-1">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-white">New appointment booked</p>
-                  <p className="text-xs text-slate-400">by John Doe • 2 minutes ago</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+      <Grid container spacing={4}>
+        <Grid item xs={12} lg={8}>
+          <Paper elevation={0} sx={{ p: 4, borderRadius: 5, border: '1px solid', borderColor: 'divider', height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper' }}>
+             <Stack spacing={2} alignItems="center" sx={{ opacity: 0.5 }}>
+                <TrendingUp size={48} color="#cbd5e1" />
+                <Typography variant="h6" color="text.secondary">Revenue Analytics Chart</Typography>
+                <Typography variant="caption" sx={{ maxWidth: 200, textAlign: 'center' }}>Dynamic chart integration pending data aggregation microservice.</Typography>
+             </Stack>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} lg={4}>
+          <Paper elevation={0} sx={{ p: 4, borderRadius: 5, border: '1px solid', borderColor: 'divider', height: 400, bgcolor: 'background.paper' }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 4 }}>Recent Activity</Typography>
+            <Stack spacing={3}>
+              {[1, 2, 3].map((i) => (
+                <Box key={i} sx={{ display: 'flex', gap: 2 }}>
+                  <Avatar sx={{ width: 40, height: 40, bgcolor: 'primary.light', borderRadius: 2 }}>
+                    <Activity size={20} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>New Contact Added</Typography>
+                    <Typography variant="caption" color="text.secondary">Jane Cooper joined your CRM • 2m ago</Typography>
+                  </Box>
+                </Box>
+              ))}
+              <Divider sx={{ my: 1 }} />
+              <Button variant="text" size="small" endIcon={<ArrowUpRight size={16} />} sx={{ alignSelf: 'flex-start' }}>
+                View all activity
+              </Button>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
-}
+
