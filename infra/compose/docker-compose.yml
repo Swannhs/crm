@@ -1,0 +1,145 @@
+services:
+  keycloak-db:
+    image: postgres:17-alpine
+    container_name: ms-keycloak-db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    ports:
+      - "5433:5432"
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.1
+    container_name: ms-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../auth/keycloak/realm:/opt/keycloak/data/import:ro
+    depends_on:
+      - keycloak-db
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: ms-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:7-alpine
+    container_name: ms-redis
+    ports:
+      - "6379:6379"
+
+  crm-db:
+    image: postgres:17-alpine
+    container_name: ms-crm-db
+    environment:
+      POSTGRES_DB: crm
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: crm
+    ports:
+      - "5434:5432"
+    volumes:
+      - crm_db_data:/var/lib/postgresql/data
+
+  crm-service:
+    build:
+      context: ../../services/crm-service
+    container_name: ms-crm-service
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: base64:zQ2EhlbMUt1iZc8g1/Rr4qOfjROp+oJjwt6vszci3gM=
+      APP_URL: http://localhost:8010
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: pgsql
+      DB_HOST: crm-db
+      DB_PORT: 5432
+      DB_DATABASE: crm
+      DB_USERNAME: crm
+      DB_PASSWORD: crm
+    ports:
+      - "8010:8010"
+    depends_on:
+      - crm-db
+
+  organization-service:
+    build:
+      context: ../../services/organization-service
+    container_name: ms-organization-service
+    environment:
+      PORT: 7010
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    ports:
+      - "7010:7010"
+    depends_on:
+      - rabbitmq
+
+  billing-service:
+    build:
+      context: ../../services/billing-service
+    container_name: ms-billing-service
+    environment:
+      PORT: 7020
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    ports:
+      - "7020:7020"
+    depends_on:
+      - rabbitmq
+
+  notification-service:
+    build:
+      context: ../../services/notification-service
+    container_name: ms-notification-service
+    restart: unless-stopped
+    environment:
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      - rabbitmq
+
+  realtime-service:
+    build:
+      context: ../../services/realtime-service
+    container_name: ms-realtime-service
+    environment:
+      PORT: 7030
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "7030:7030"
+    depends_on:
+      - rabbitmq
+      - redis
+
+  krakend:
+    image: krakend:2.13.4
+    container_name: ms-krakend
+    command: ["run", "-c", "/etc/krakend/krakend.json"]
+    ports:
+      - "8081:8081"
+    volumes:
+      - ../../gateway/krakend/krakend.json:/etc/krakend/krakend.json:ro
+    depends_on:
+      - keycloak
+      - organization-service
+      - crm-service
+      - billing-service
+
+volumes:
+  keycloak_db_data:
+  crm_db_data:
