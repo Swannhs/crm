@@ -117,6 +117,42 @@ services:
     volumes:
       - booking_db_data:/var/lib/postgresql/data
 
+  documents-db:
+    image: postgres:17-alpine
+    container_name: ms-documents-db
+    environment:
+      POSTGRES_DB: documents
+      POSTGRES_USER: documents
+      POSTGRES_PASSWORD: documents
+    ports:
+      - "5440:5432"
+    volumes:
+      - documents_db_data:/var/lib/postgresql/data
+
+  payments-db:
+    image: postgres:17-alpine
+    container_name: ms-payments-db
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: payments
+      POSTGRES_PASSWORD: payments
+    ports:
+      - "5441:5432"
+    volumes:
+      - payments_db_data:/var/lib/postgresql/data
+
+  notification-db:
+    image: postgres:17-alpine
+    container_name: ms-notification-db
+    environment:
+      POSTGRES_DB: notification
+      POSTGRES_USER: notification
+      POSTGRES_PASSWORD: notification
+    ports:
+      - "5442:5432"
+    volumes:
+      - notification_db_data:/var/lib/postgresql/data
+
   crm-service:
     build:
       context: ../../services/crm-service
@@ -210,8 +246,13 @@ services:
     container_name: ms-community-service
     environment:
       PORT: 7050
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://community:community@community-db:5432/community
     ports:
       - "7050:7050"
+    depends_on:
+      - rabbitmq
+      - community-db
 
   commerce-service:
     build:
@@ -222,8 +263,13 @@ services:
     container_name: ms-commerce-service
     environment:
       PORT: 7060
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://commerce:commerce@commerce-db:5432/commerce
     ports:
       - "7060:7060"
+    depends_on:
+      - rabbitmq
+      - commerce-db
 
   documents-service:
     build:
@@ -234,8 +280,13 @@ services:
     container_name: ms-documents-service
     environment:
       PORT: 7070
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://documents:documents@documents-db:5432/documents
     ports:
       - "7070:7070"
+    depends_on:
+      - rabbitmq
+      - documents-db
 
   payments-service:
     build:
@@ -246,8 +297,13 @@ services:
     container_name: ms-payments-service
     environment:
       PORT: 7080
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://payments:payments@payments-db:5432/payments
     ports:
       - "7080:7080"
+    depends_on:
+      - rabbitmq
+      - payments-db
 
   notification-service:
     build:
@@ -258,9 +314,14 @@ services:
     container_name: ms-notification-service
     restart: unless-stopped
     environment:
+      PORT: 7050
       RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://notification:notification@notification-db:5432/notification
+    ports:
+      - "7055:7050"
     depends_on:
       - rabbitmq
+      - notification-db
 
   realtime-service:
     build:
@@ -302,3 +363,6 @@ volumes:
   booking_db_data:
   community_db_data:
   commerce_db_data:
+  documents_db_data:
+  payments_db_data:
+  notification_db_data:

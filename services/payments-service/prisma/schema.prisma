@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Invoice {
+  id                 String    @id @default(uuid()) @db.Uuid
+  org_id             String    @db.Uuid
+  created_by_user_id String    @db.VarChar(80)
+  contact_id         String?   @db.Uuid
+  invoice_number     String?
+  title              String?
+
+  status             String    @default("draft")  // draft | sent | paid | overdue | cancelled
+  amount_cents       BigInt    @default(0)
+  tax_cents          BigInt    @default(0)
+  discount_cents     BigInt    @default(0)
+  total_cents        BigInt    @default(0)
+  paid_cents         BigInt    @default(0)
+
+  currency           String    @default("USD")
+  due_date           DateTime?
+  paid_at            DateTime?
+  sent_at            DateTime?
+  is_delete          Boolean   @default(false)
+
+  line_items         Json      @default("[]")
+  metadata           Json      @default("{}")
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  payments           Payment[]
+  activities         InvoiceActivity[]
+
+  @@index([org_id])
+  @@index([contact_id])
+  @@index([status])
+  @@map("invoices")
+}
+
+model Payment {
+  id                 String    @id @default(uuid()) @db.Uuid
+  invoice_id         String    @db.Uuid
+  invoice            Invoice   @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  org_id             String    @db.Uuid
+  created_by_user_id String    @db.VarChar(80)
+
+  amount_cents       BigInt
+  method             String    // cash | card | ach | check | stripe | other
+  status             String    @default("completed")  // pending | completed | refunded | failed
+  reference          String?
+  processor          String?   // stripe | valor | fluidpay | manual
+  processor_id       String?
+
+  refunded_cents     BigInt    @default(0)
+  notes              String?
+  metadata           Json      @default("{}")
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  @@index([invoice_id])
+  @@index([org_id])
+  @@map("payments")
+}
+
+model InvoiceActivity {
+  id                 String    @id @default(uuid()) @db.Uuid
+  invoice_id         String    @db.Uuid
+  invoice            Invoice   @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  org_id             String    @db.Uuid
+  user_id            String?   @db.VarChar(80)
+  action             String
+  note               String?
+  metadata           Json      @default("{}")
+  created_at         DateTime  @default(now())
+
+  @@index([invoice_id])
+  @@map("invoice_activities")
+}
+
+model Deposit {
+  id                 String    @id @default(uuid()) @db.Uuid
+  org_id             String    @db.Uuid
+  created_by_user_id String    @db.VarChar(80)
+  contact_id         String?   @db.Uuid
+  amount_cents       BigInt
+  currency           String    @default("USD")
+  status             String    @default("pending")
+  description        String?
+  payment_method     String?
+  processor_id       String?
+  is_deleted         Boolean   @default(false)
+  metadata           Json      @default("{}")
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  @@index([org_id])
+  @@map("deposits")
+}

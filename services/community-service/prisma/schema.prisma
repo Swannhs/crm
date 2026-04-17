@@ -46,3 +46,66 @@ model Comment {
   @@index([postId])
   @@map("comments")
 }
+
+model Group {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  createdBy   String    @map("created_by")
+  name        String
+  description String?   @db.Text
+  coverImage  String?   @map("cover_image")
+  privacy     String    @default("public") // public | private
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  members     GroupMember[]
+
+  @@index([orgId])
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String    @id @default(uuid()) @db.Uuid
+  groupId   String    @map("group_id") @db.Uuid
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String    @map("user_id")
+  role      String    @default("member") // admin | moderator | member
+  joinedAt  DateTime  @default(now()) @map("joined_at")
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@map("group_members")
+}
+
+model Badge {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  name        String
+  description String?
+  icon        String?
+  points      Int       @default(0)
+  isPublic    Boolean   @default(true) @map("is_public")
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  awardedTo   UserBadge[]
+
+  @@index([orgId])
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String    @id @default(uuid()) @db.Uuid
+  badgeId   String    @map("badge_id") @db.Uuid
+  badge     Badge     @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  orgId     String    @map("org_id") @db.Uuid
+  userId    String    @map("user_id")
+  awardedBy String    @map("awarded_by")
+  awardedAt DateTime  @default(now()) @map("awarded_at")
+
+  @@index([orgId, userId])
+  @@map("user_badges")
+}
+
