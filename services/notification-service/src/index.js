@@ -247,8 +247,10 @@ app.post("/v1/sms", requireIdentityContext, async (req, res) => {
 
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "notification-service" }));
 
-const PORT = process.env.PORT || 7050;
-app.listen(PORT, () => logger.info(`notification-service HTTP listening on port ${PORT}`));
+const port = Number(process.env.PORT || 8000);
+app.listen(port, "0.0.0.0", () => {
+    logger.info({ port }, "notification-service listening");
+});
 
 // ─── AMQP Consumer ───────────────────────────────────────────────────────────
 

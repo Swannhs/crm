@@ -231,6 +231,6 @@ app.get("/v1/documents/certificate/:recipientId", requireIdentityContext, async 
   }
 });
 
-const port = Number(process.env.PORT || 7070);
+const port = Number(process.env.PORT || 7080);
 app.listen(port, "0.0.0.0", () => logger.info({ port }, "documents-service listening"));
 

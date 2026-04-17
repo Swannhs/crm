@@ -99,56 +99,41 @@ async function handleApiCompat(req, res) {
     // We forward them 1:1 so those services can implement endpoints incrementally.
     const domainRoutes = {
       // community domain
-      "community": "http://community-service:7050",
-      "community-group": "http://community-service:7050",
-      "community-members": "http://community-service:7050",
-      "community-post": "http://community-service:7050",
-      "community-livechat": "http://community-service:7050",
-      "community-group-livechat": "http://community-service:7050",
-      "community-follow": "http://community-service:7050",
-      "community-booking": "http://community-service:7050",
-      "community-profile": "http://community-service:7050",
-      "community-settings": "http://community-service:7050",
-      "community-events": "http://community-service:7050",
-      "community-badges": "http://community-service:7050",
-      "community-activity": "http://community-service:7050",
-      "community-points": "http://community-service:7050",
+      "community": "http://community-service:7030",
+      "community-group": "http://community-service:7030",
+      "community-members": "http://community-service:7030",
+      "community-post": "http://community-service:7030",
+      "community-profile": "http://community-service:7030",
+      "community-settings": "http://community-service:7030",
+      "community-events": "http://community-service:7030",
+      "community-badges": "http://community-service:7030",
+      "community-activity": "http://community-service:7030",
+      "community-points": "http://community-service:7030",
 
       // commerce domain
       "shopv2": "http://commerce-service:7060",
       "cart": "http://commerce-service:7060",
-      "checkout-page": "http://commerce-service:7060",
       "product": "http://commerce-service:7060",
       "product-category": "http://commerce-service:7060",
       "category": "http://commerce-service:7060",
       "coupon": "http://commerce-service:7060",
-      "hardware": "http://commerce-service:7060",
-      "hardware-quote": "http://commerce-service:7060",
-      "modifier-type": "http://commerce-service:7060",
-      "modifier-files": "http://commerce-service:7060",
-      "label": "http://commerce-service:7060",
-      "cash-drawer": "http://commerce-service:7060",
 
       // documents domain
-      "document": "http://documents-service:7070",
-      "document-recipient": "http://documents-service:7070",
-      "document-signature": "http://documents-service:7070",
-      "document-custome-fields": "http://documents-service:7070",
-      "file-manager": "http://documents-service:7070",
-      "file-manager-activity": "http://documents-service:7070",
-      "upload": "http://documents-service:7070",
-      "local-storage": "http://documents-service:7070",
+      "document": "http://documents-service:7080",
+      "document-recipient": "http://documents-service:7080",
+      "document-signature": "http://documents-service:7080",
+      "upload": "http://documents-service:7080",
 
       // payments domain
-      "payment": "http://payments-service:7080",
-      "payment-cards": "http://payments-service:7080",
-      "payment-fluidpay": "http://payments-service:7080",
-      "payment-paypal": "http://payments-service:7080",
-      "payment-valor": "http://payments-service:7080",
-      "payment-method-tag": "http://payments-service:7080",
-      "fullstack-payment": "http://payments-service:7080",
-      "qr-pay-page": "http://payments-service:7080",
-      "processing-fee-settings": "http://payments-service:7080"
+      "payment": "http://payments-service:7090",
+      "payment-cards": "http://payments-service:7090",
+      "deposit": "http://payments-service:7090",
+
+      // employees domain
+      "employee": "http://employees-service:7070",
+      "employee-schedule": "http://employees-service:7070",
+      "employee-timeoff-request": "http://employees-service:7070",
+      "employee-attendance": "http://employees-service:7070"
     };
 
     if (domainRoutes[module]) {
@@ -202,7 +187,10 @@ async function handleApiCompat(req, res) {
       return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: booking-types + count (scaffold)" });
     }
 
-    return notImplemented(res, { module, method: req.method, path: rest, hint: "Not migrated yet. Track in migration/TRACKER.md" });
+    // Fallback: Proxy anything else to the legacy monolith
+    const path = `/api/${module}${rest}`;
+    logger.info({ module, path }, "Proxying unmigrated route to legacy monolith");
+    return proxyTo(req, res, { baseUrl: "http://monolith:5000", targetPath: path });
   } catch (err) {
     logger.error({ err, module, rest }, "api-router-service failed");
     res.status(502).json({ message: "Upstream error", module, path: rest });

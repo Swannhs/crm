@@ -153,6 +153,42 @@ services:
     volumes:
       - notification_db_data:/var/lib/postgresql/data
 
+  employees-db:
+    image: postgres:17-alpine
+    container_name: ms-employees-db
+    environment:
+      POSTGRES_DB: employees
+      POSTGRES_USER: employees
+      POSTGRES_PASSWORD: employees
+    ports:
+      - "5443:5432"
+    volumes:
+      - employees_db_data:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:6.0
+    container_name: ms-monolith-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  monolith:
+    image: node:16-alpine
+    container_name: ms-monolith
+    working_dir: /app
+    volumes:
+      - ../../../server:/app
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://mongo:27017/mymanager
+      APPNAME: api
+    command: sh -c "yarn install && node index.js"
+    depends_on:
+      - mongo
+    ports:
+      - "5000:5000"
+
   crm-service:
     build:
       context: ../../services/crm-service
@@ -175,170 +211,187 @@ services:
       - crm-db
 
   organization-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/organization-service
+    image: node:24-alpine
     container_name: ms-organization-service
+    working_dir: /repo/services/organization-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7010
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://organization:organization@organization-db:5432/organization
-    ports:
-      - "7010:7010"
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
     depends_on:
       - rabbitmq
       - organization-db
+    ports:
+      - "7010:7010"
 
   billing-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/billing-service
+    image: node:24-alpine
     container_name: ms-billing-service
+    working_dir: /repo/services/billing-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7020
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://billing:billing@billing-db:5432/billing
-    ports:
-      - "7020:7020"
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
     depends_on:
       - rabbitmq
       - billing-db
+    ports:
+      - "7020:7020"
 
   booking-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/booking-service
+    image: node:24-alpine
     container_name: ms-booking-service
+    working_dir: /repo/services/booking-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7040
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://booking:booking@booking-db:5432/booking
-    ports:
-      - "7040:7040"
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
     depends_on:
       - rabbitmq
       - booking-db
+    ports:
+      - "7040:7040"
 
   api-router-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/api-router-service
+    image: node:24-alpine
     container_name: ms-api-router-service
+    working_dir: /repo/services/api-router-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7001
+    command: sh -c "npm install --no-audit && node src/index.js"
     ports:
       - "7001:7001"
 
   community-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/community-service
+    image: node:24-alpine
     container_name: ms-community-service
+    working_dir: /repo/services/community-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7050
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://community:community@community-db:5432/community
-    ports:
-      - "7050:7050"
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
     depends_on:
       - rabbitmq
       - community-db
+    ports:
+      - "7050:7050"
 
   commerce-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/commerce-service
+    image: node:24-alpine
     container_name: ms-commerce-service
+    working_dir: /repo/services/commerce-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7060
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://commerce:commerce@commerce-db:5432/commerce
-    ports:
-      - "7060:7060"
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
     depends_on:
       - rabbitmq
       - commerce-db
+    ports:
+      - "7060:7060"
 
   documents-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/documents-service
+    image: node:24-alpine
     container_name: ms-documents-service
-    environment:
-      PORT: 7070
-      RABBITMQ_URL: amqp://rabbitmq:5672
-      DB_URL: postgres://documents:documents@documents-db:5432/documents
-    ports:
-      - "7070:7070"
-    depends_on:
-      - rabbitmq
-      - documents-db
-
-  payments-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/payments-service
-    container_name: ms-payments-service
+    working_dir: /repo/services/documents-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7080
       RABBITMQ_URL: amqp://rabbitmq:5672
-      DB_URL: postgres://payments:payments@payments-db:5432/payments
+      DB_URL: postgres://documents:documents@documents-db:5432/documents
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    depends_on:
+      - rabbitmq
+      - documents-db
     ports:
       - "7080:7080"
+
+  payments-service:
+    image: node:24-alpine
+    container_name: ms-payments-service
+    working_dir: /repo/services/payments-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 7090
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://payments:payments@payments-db:5432/payments
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
     depends_on:
       - rabbitmq
       - payments-db
+    ports:
+      - "7090:7090"
 
   notification-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/notification-service
+    image: node:24-alpine
     container_name: ms-notification-service
     restart: unless-stopped
+    working_dir: /repo/services/notification-service
+    volumes:
+      - ../../:/repo
     environment:
-      PORT: 7050
+      PORT: 8000
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://notification:notification@notification-db:5432/notification
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
     ports:
-      - "7055:7050"
+      - "8000:8000"
     depends_on:
       - rabbitmq
       - notification-db
 
+  employees-service:
+    image: node:24-alpine
+    container_name: ms-employees-service
+    working_dir: /repo/services/employees-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 7070
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://employees:employees@employees-db:5432/employees
+    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    depends_on:
+      - rabbitmq
+      - employees-db
+    ports:
+      - "7070:7070"
+
   realtime-service:
-    build:
-      context: ../..
-      dockerfile: docker/node-service.Dockerfile
-      args:
-        SERVICE_PATH: services/realtime-service
+    image: node:24-alpine
     container_name: ms-realtime-service
+    working_dir: /repo/services/realtime-service
+    volumes:
+      - ../../:/repo
     environment:
       PORT: 7030
       RABBITMQ_URL: amqp://rabbitmq:5672
       REDIS_URL: redis://redis:6379
-    ports:
-      - "7030:7030"
+    command: sh -c "npm install --no-audit && node src/index.js"
     depends_on:
       - rabbitmq
       - redis
+    ports:
+      - "7030:7030"
 
   krakend:
     image: krakend:2.13.4
@@ -363,6 +416,8 @@ volumes:
   booking_db_data:
   community_db_data:
   commerce_db_data:
+  employees_db_data:
   documents_db_data:
   payments_db_data:
   notification_db_data:
+  mongo_data:

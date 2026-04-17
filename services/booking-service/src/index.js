@@ -64,23 +64,6 @@ app.get("/v1/appointments/invitedList", getInvitedUserList);
 app.get("/v1/appointments/by-id/:id", getAppointmentById);
 app.delete("/v1/appointments/:id", removeAppointment);
 
-const PORT = process.env.PORT || 7040;
-app.listen(PORT, "0.0.0.0", () => {
-  logger.info({ port: PORT }, "booking-service listening");
-});
-
-
-  const created = {
-    id: randomUUID(),
-    link: String(req.body?.link || randomUUID()).slice(0, 40),
-    title,
-    duration_minutes: Number(req.body?.duration_minutes ?? 60)
-  };
-
-  bookingTypes.unshift(created);
-  res.status(201).json({ data: created });
-});
-
 const port = Number(process.env.PORT || 7040);
 app.listen(port, "0.0.0.0", () => {
   logger.info({ port }, "booking-service listening");

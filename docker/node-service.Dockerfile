@@ -9,7 +9,7 @@ COPY package.json package-lock.json ./
 COPY common/node-service-kit ./common/node-service-kit
 COPY ${SERVICE_PATH}/package.json ./${SERVICE_PATH}/package.json
 
-RUN npm ci -w ${SERVICE_PATH} --omit=dev
+RUN npm install -w ${SERVICE_PATH} --omit=dev
 
 COPY ${SERVICE_PATH} ./${SERVICE_PATH}
 

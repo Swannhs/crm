@@ -4732,6 +4732,174 @@
           }
         }
       ]
+    },
+    {
+      "endpoint": "/api/employees",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/employees" }]
+    },
+    {
+      "endpoint": "/api/employees",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/employees" }]
+    },
+    {
+      "endpoint": "/api/employees/metrics",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/employees/metrics" }]
+    },
+    {
+      "endpoint": "/api/documents",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents" }]
+    },
+    {
+      "endpoint": "/api/payments",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://payments-service:7090"], "url_pattern": "/v1/payments" }]
+    },
+    {
+      "endpoint": "/api/notification",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/notifications" }]
+    },
+    {
+      "endpoint": "/api/shop/products",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://commerce-service:7060"], "url_pattern": "/v1/products" }]
+    },
+    {
+      "endpoint": "/api/community/posts",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://community-service:7030"], "url_pattern": "/v1/posts" }]
+    },
+    {
+      "endpoint": "/api/documents/share/{hash_code}",
+      "method": "GET",
+      "input_headers": ["Authorization"],
+      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents/email-link?token={hash_code}" }]
+    },
+    {
+      "endpoint": "/api/documents/otp/send",
+      "method": "POST",
+      "input_headers": ["Content-Type"],
+      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents/email-link/send-otp" }]
+    },
+    {
+      "endpoint": "/api/documents/otp/verify",
+      "method": "POST",
+      "input_headers": ["Content-Type"],
+      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents/email-link/verify-otp" }]
+    },
+    {
+      "endpoint": "/api/notification/settings",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/notifications/settings" }]
+    },
+    {
+      "endpoint": "/api/notification/read",
+      "method": "POST",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/notifications/read" }]
     }
   ]
 }

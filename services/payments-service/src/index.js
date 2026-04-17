@@ -280,14 +280,7 @@ app.delete("/v1/deposits/:id", requireIdentityContext, async (req, res) => {
   res.json({ message: "Deleted" });
 });
 
-// ─── Health ───────────────────────────────────────────────────────────────────
-app.get("/health", (_req, res) => res.json({ status: "ok", service: "payments-service" }));
-
-const PORT = process.env.PORT || 7080;
-app.listen(PORT, () => logger.info(`payments-service listening on port ${PORT}`));
-}
-
-const port = Number(process.env.PORT || 7080);
+const port = Number(process.env.PORT || 7090);
 app.listen(port, "0.0.0.0", () => {
   logger.info({ port }, "payments-service listening");
 });
