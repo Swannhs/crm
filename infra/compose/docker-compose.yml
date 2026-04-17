@@ -102,6 +102,18 @@ services:
     depends_on:
       - rabbitmq
 
+  booking-service:
+    build:
+      context: ../../services/booking-service
+    container_name: ms-booking-service
+    environment:
+      PORT: 7040
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    ports:
+      - "7040:7040"
+    depends_on:
+      - rabbitmq
+
   notification-service:
     build:
       context: ../../services/notification-service
@@ -139,6 +151,7 @@ services:
       - organization-service
       - crm-service
       - billing-service
+      - booking-service
 
 volumes:
   keycloak_db_data:
