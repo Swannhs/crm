@@ -38,7 +38,8 @@ app.post("/v1/payments",
   billingController.recordPayment
 );
 
-// --- Server ---
+// --- Health ---
+app.get("/health", (_req, res) => res.json({ status: "ok", service: "billing-service (TS)" }));
 
 const port = Number(process.env.PORT || 7020);
 app.listen(port, "0.0.0.0", () => {

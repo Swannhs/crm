@@ -165,6 +165,42 @@ services:
     volumes:
       - employees_db_data:/var/lib/postgresql/data
 
+  marketing-db:
+    image: postgres:17-alpine
+    container_name: ms-marketing-db
+    environment:
+      POSTGRES_DB: marketing
+      POSTGRES_USER: marketing
+      POSTGRES_PASSWORD: marketing
+    ports:
+      - "5444:5432"
+    volumes:
+      - marketing_db_data:/var/lib/postgresql/data
+
+  projects-db:
+    image: postgres:17-alpine
+    container_name: ms-projects-db
+    environment:
+      POSTGRES_DB: projects
+      POSTGRES_USER: projects
+      POSTGRES_PASSWORD: projects
+    ports:
+      - "5445:5432"
+    volumes:
+      - projects_db_data:/var/lib/postgresql/data
+
+  calendar-db:
+    image: postgres:17-alpine
+    container_name: ms-calendar-db
+    environment:
+      POSTGRES_DB: calendar
+      POSTGRES_USER: calendar
+      POSTGRES_PASSWORD: calendar
+    ports:
+      - "5446:5432"
+    volumes:
+      - calendar_db_data:/var/lib/postgresql/data
+
   mongo:
     image: mongo:6.0
     container_name: ms-monolith-db
@@ -220,7 +256,7 @@ services:
       PORT: 7010
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://organization:organization@organization-db:5432/organization
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - organization-db
@@ -237,7 +273,7 @@ services:
       PORT: 7020
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://billing:billing@billing-db:5432/billing
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - billing-db
@@ -254,7 +290,7 @@ services:
       PORT: 7040
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://booking:booking@booking-db:5432/booking
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - booking-db
@@ -269,7 +305,7 @@ services:
       - ../../:/repo
     environment:
       PORT: 7001
-    command: sh -c "npm install --no-audit && node src/index.js"
+    command: npx --no-install tsx watch src/index.ts
     ports:
       - "7001:7001"
 
@@ -283,7 +319,7 @@ services:
       PORT: 7050
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://community:community@community-db:5432/community
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - community-db
@@ -300,7 +336,7 @@ services:
       PORT: 7060
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://commerce:commerce@commerce-db:5432/commerce
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - commerce-db
@@ -317,7 +353,7 @@ services:
       PORT: 7080
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://documents:documents@documents-db:5432/documents
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - documents-db
@@ -334,7 +370,7 @@ services:
       PORT: 7090
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://payments:payments@payments-db:5432/payments
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - payments-db
@@ -352,7 +388,7 @@ services:
       PORT: 8000
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://notification:notification@notification-db:5432/notification
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     ports:
       - "8000:8000"
     depends_on:
@@ -369,7 +405,7 @@ services:
       PORT: 7070
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://employees:employees@employees-db:5432/employees
-    command: sh -c "npm install --no-audit && npx prisma generate && node src/index.js"
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - employees-db
@@ -386,12 +422,63 @@ services:
       PORT: 7030
       RABBITMQ_URL: amqp://rabbitmq:5672
       REDIS_URL: redis://redis:6379
-    command: sh -c "npm install --no-audit && node src/index.js"
+    command: npx --no-install tsx watch src/index.ts
     depends_on:
       - rabbitmq
       - redis
     ports:
       - "7030:7030"
+
+  marketing-service:
+    image: node:24-alpine
+    container_name: ms-marketing-service
+    working_dir: /repo/services/marketing-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 8030
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://marketing:marketing@marketing-db:5432/marketing
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - marketing-db
+    ports:
+      - "8030:8030"
+
+  projects-service:
+    image: node:24-alpine
+    container_name: ms-projects-service
+    working_dir: /repo/services/projects-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 8040
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://projects:projects@projects-db:5432/projects
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - projects-db
+    ports:
+      - "8040:8040"
+
+  calendar-service:
+    image: node:24-alpine
+    container_name: ms-calendar-service
+    working_dir: /repo/services/calendar-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 8050
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://calendar:calendar@calendar-db:5432/calendar
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - calendar-db
+    ports:
+      - "8050:8050"
 
   krakend:
     image: krakend:2.13.4
@@ -408,6 +495,22 @@ services:
       - billing-service
       - booking-service
 
+  frontend:
+    image: node:24-alpine
+    container_name: ms-frontend
+    working_dir: /repo/frontend/micro-app
+    volumes:
+      - ../../:/repo
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8081/api
+      - PORT=3034
+      - WATCHPACK_POLLING=true
+    command: npx --no-install next dev -p 3034
+    ports:
+      - "3034:3034"
+    depends_on:
+      - krakend
+
 volumes:
   keycloak_db_data:
   crm_db_data:
@@ -417,7 +520,10 @@ volumes:
   community_db_data:
   commerce_db_data:
   employees_db_data:
+  marketing_db_data:
+  projects_db_data:
   documents_db_data:
   payments_db_data:
   notification_db_data:
+  calendar_db_data:
   mongo_data:

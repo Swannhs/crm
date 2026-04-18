@@ -4851,329 +4851,2486 @@
     {
       "endpoint": "/api/employees",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/employees" }]
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/employees"
+        }
+      ]
     },
     {
       "endpoint": "/api/employees",
       "method": "POST",
-      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/employees" }]
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/employees"
+        }
+      ]
     },
     {
       "endpoint": "/api/employees/metrics",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/employees/metrics" }]
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/employees/metrics"
+        }
+      ]
     },
     {
       "endpoint": "/api/documents",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents" }]
+      "backend": [
+        {
+          "host": [
+            "http://documents-service:7080"
+          ],
+          "url_pattern": "/v1/documents"
+        }
+      ]
     },
     {
       "endpoint": "/api/payments",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://payments-service:7090"], "url_pattern": "/v1/payments" }]
+      "backend": [
+        {
+          "host": [
+            "http://payments-service:7090"
+          ],
+          "url_pattern": "/v1/payments"
+        }
+      ]
     },
     {
       "endpoint": "/api/notification",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/notifications" }]
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications"
+        }
+      ]
     },
     {
       "endpoint": "/api/shop/products",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://commerce-service:7060"], "url_pattern": "/v1/products" }]
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/products"
+        }
+      ]
     },
     {
       "endpoint": "/api/community/posts",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://community-service:7030"], "url_pattern": "/v1/posts" }]
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7030"
+          ],
+          "url_pattern": "/v1/posts"
+        }
+      ]
     },
     {
       "endpoint": "/api/documents/share/{hash_code}",
       "method": "GET",
-      "input_headers": ["Authorization"],
-      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents/email-link?token={hash_code}" }]
+      "input_headers": [
+        "Authorization"
+      ],
+      "backend": [
+        {
+          "host": [
+            "http://documents-service:7080"
+          ],
+          "url_pattern": "/v1/documents/email-link?token={hash_code}"
+        }
+      ]
     },
     {
       "endpoint": "/api/documents/otp/send",
       "method": "POST",
-      "input_headers": ["Content-Type"],
-      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents/email-link/send-otp" }]
+      "input_headers": [
+        "Content-Type"
+      ],
+      "backend": [
+        {
+          "host": [
+            "http://documents-service:7080"
+          ],
+          "url_pattern": "/v1/documents/email-link/send-otp"
+        }
+      ]
     },
     {
       "endpoint": "/api/documents/otp/verify",
       "method": "POST",
-      "input_headers": ["Content-Type"],
-      "backend": [{ "host": ["http://documents-service:7080"], "url_pattern": "/v1/documents/email-link/verify-otp" }]
+      "input_headers": [
+        "Content-Type"
+      ],
+      "backend": [
+        {
+          "host": [
+            "http://documents-service:7080"
+          ],
+          "url_pattern": "/v1/documents/email-link/verify-otp"
+        }
+      ]
     },
     {
       "endpoint": "/api/notification/settings",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/notifications/settings" }]
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications/settings"
+        }
+      ]
     },
     {
       "endpoint": "/api/notification/read",
       "method": "POST",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id",
+        "Content-Type"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-          "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/notifications/read" }]
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications/read"
+        }
+      ]
     },
     {
       "endpoint": "/api/employees/schedules",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/schedules" }]
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/schedules"
+        }
+      ]
     },
     {
       "endpoint": "/api/employees/schedules",
       "method": "POST",
-      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/schedules" }]
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/schedules"
+        }
+      ]
     },
     {
       "endpoint": "/api/community/posts",
       "method": "POST",
-      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://community-service:7030"], "url_pattern": "/v1/posts" }]
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7030"
+          ],
+          "url_pattern": "/v1/posts"
+        }
+      ]
     },
     {
       "endpoint": "/api/community/posts/{id}",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://community-service:7030"], "url_pattern": "/v1/posts/{id}" }]
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7030"
+          ],
+          "url_pattern": "/v1/posts/{id}"
+        }
+      ]
     },
     {
       "endpoint": "/api/marketing/campaigns",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/email-campaigns" }]
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/email-campaigns"
+        }
+      ]
     },
     {
       "endpoint": "/api/marketing/emails",
       "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
       "extra_config": {
         "auth/validator": {
           "alg": "RS256",
           "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
           "disable_jwk_security": true,
           "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
         }
       },
-      "backend": [{ "host": ["http://notification-service:8000"], "url_pattern": "/v1/email-messages" }]
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/email-messages"
+        }
+      ]
     },
-
-    // ── CRM API-prefixed routes (for front-end Axios base /api) ───────────────
-    { "endpoint": "/api/crm/v1/contacts", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://crm-service:8010"], "url_pattern": "/api/v1/contacts" }] },
-    { "endpoint": "/api/crm/v1/contacts", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://crm-service:8010"], "url_pattern": "/api/v1/contacts" }] },
-    { "endpoint": "/api/crm/v1/contacts/{contact}", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://crm-service:8010"], "url_pattern": "/api/v1/contacts/{contact}" }] },
-    { "endpoint": "/api/crm/v1/contacts/{contact}", "method": "PATCH", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://crm-service:8010"], "url_pattern": "/api/v1/contacts/{contact}" }] },
-
-    // ── Employees extended ────────────────────────────────────────────────────
-    { "endpoint": "/api/employees/shifts", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/shifts" }] },
-    { "endpoint": "/api/employees/shifts", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/shifts" }] },
-    { "endpoint": "/api/employees/shifts/{id}", "method": "PUT", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/shifts/{id}" }] },
-    { "endpoint": "/api/employees/salary", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/salary" }] },
-    { "endpoint": "/api/employees/salary", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/salary" }] },
-    { "endpoint": "/api/employees/attendance", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/attendance" }] },
-    { "endpoint": "/api/employees/attendance/check-in", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/attendance/check-in" }] },
-    { "endpoint": "/api/employees/attendance/check-out", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/attendance/check-out" }] },
-    { "endpoint": "/api/employees/budgets", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/budgets" }] },
-    { "endpoint": "/api/employees/budgets", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/budgets" }] },
-    { "endpoint": "/api/employees/categories", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/categories" }] },
-    { "endpoint": "/api/employees/categories", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/categories" }] },
-    { "endpoint": "/api/employees/activity-log", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/activity-log" }] },
-    { "endpoint": "/api/employees/payroll", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/payroll" }] },
-    { "endpoint": "/api/employees/payroll", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/payroll" }] },
-    { "endpoint": "/api/employees/payroll/history", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://employees-service:7070"], "url_pattern": "/v1/payroll/history" }] },
-
-    // ── Community extended ────────────────────────────────────────────────────
-    { "endpoint": "/api/community/follows/following", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/follows/following" }] },
-    { "endpoint": "/api/community/follows/followers", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/follows/followers" }] },
-    { "endpoint": "/api/community/follows", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/follows" }] },
-    { "endpoint": "/api/community/activity", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/activity" }] },
-    { "endpoint": "/api/community/points", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/points" }] },
-    { "endpoint": "/api/community/points", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/points" }] },
-    { "endpoint": "/api/community/settings", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/settings" }] },
-    { "endpoint": "/api/community/settings", "method": "PUT", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/settings" }] },
-    { "endpoint": "/api/community/events", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/events" }] },
-    { "endpoint": "/api/community/events", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/events" }] },
-    { "endpoint": "/api/community/members", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/members" }] },
-    { "endpoint": "/api/community/members/invite", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://community-service:7050"], "url_pattern": "/v1/members/invite" }] },
-
-    // ── Marketing service ─────────────────────────────────────────────────────
-    { "endpoint": "/api/marketing/v1/campaigns", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/campaigns" }] },
-    { "endpoint": "/api/marketing/v1/campaigns", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/campaigns" }] },
-    { "endpoint": "/api/marketing/v1/campaigns/{id}", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/campaigns/{id}" }] },
-    { "endpoint": "/api/marketing/v1/campaigns/{id}", "method": "PUT", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/campaigns/{id}" }] },
-    { "endpoint": "/api/marketing/v1/campaigns/{id}/send", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/campaigns/{id}/send" }] },
-    { "endpoint": "/api/marketing/v1/automations", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/automations" }] },
-    { "endpoint": "/api/marketing/v1/automations", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/automations" }] },
-    { "endpoint": "/api/marketing/v1/subscribers", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/subscribers" }] },
-    { "endpoint": "/api/marketing/v1/subscribers", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/subscribers" }] },
-    { "endpoint": "/api/marketing/v1/optin-forms", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/optin-forms" }] },
-    { "endpoint": "/api/marketing/v1/optin-forms", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://marketing-service:8030"], "url_pattern": "/v1/optin-forms" }] },
-
-    // ── Projects service ──────────────────────────────────────────────────────
-    { "endpoint": "/api/projects/v1/projects", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://projects-service:8040"], "url_pattern": "/v1/projects" }] },
-    { "endpoint": "/api/projects/v1/projects", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://projects-service:8040"], "url_pattern": "/v1/projects" }] },
-    { "endpoint": "/api/projects/v1/projects/{id}", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://projects-service:8040"], "url_pattern": "/v1/projects/{id}" }] },
-    { "endpoint": "/api/projects/v1/projects/{id}/boards", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://projects-service:8040"], "url_pattern": "/v1/projects/{id}/boards" }] },
-    { "endpoint": "/api/projects/v1/boards/{id}", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://projects-service:8040"], "url_pattern": "/v1/boards/{id}" }] },
-    { "endpoint": "/api/projects/v1/tasks", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://projects-service:8040"], "url_pattern": "/v1/tasks" }] },
-    { "endpoint": "/api/projects/v1/tasks", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://projects-service:8040"], "url_pattern": "/v1/tasks" }] },
-
-    // ── Calendar service ──────────────────────────────────────────────────────
-    { "endpoint": "/api/calendar/v1/events", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://calendar-service:8050"], "url_pattern": "/v1/events" }] },
-    { "endpoint": "/api/calendar/v1/events", "method": "POST", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://calendar-service:8050"], "url_pattern": "/v1/events" }] },
-    { "endpoint": "/api/calendar/v1/events/{id}", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://calendar-service:8050"], "url_pattern": "/v1/events/{id}" }] },
-    { "endpoint": "/api/calendar/v1/calendars", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://calendar-service:8050"], "url_pattern": "/v1/calendars" }] },
-    { "endpoint": "/api/calendar/v1/event-categories", "method": "GET", "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"], "extra_config": { "auth/validator": { "alg": "RS256", "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs", "disable_jwk_security": true, "cache": true, "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]] } }, "backend": [{ "host": ["http://calendar-service:8050"], "url_pattern": "/v1/event-categories" }] }
+    {
+      "endpoint": "/api/crm/v1/contacts/{contact}",
+      "method": "PATCH",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://crm-service:8010"
+          ],
+          "url_pattern": "/api/v1/contacts/{contact}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/shifts",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/shifts"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/shifts",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/shifts"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/shifts/{id}",
+      "method": "PUT",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/shifts/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/salary",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/salary"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/salary",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/salary"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/attendance",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/attendance"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/attendance/check-in",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/attendance/check-in"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/attendance/check-out",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/attendance/check-out"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/budgets",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/budgets"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/budgets",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/budgets"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/categories",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/categories"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/categories",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/categories"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/activity-log",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/activity-log"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/payroll",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/payroll"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/payroll",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/payroll"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/employees/payroll/history",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://employees-service:7070"
+          ],
+          "url_pattern": "/v1/payroll/history"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/follows/following",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/follows/following"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/follows/followers",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/follows/followers"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/follows",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/follows"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/activity",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/activity"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/points",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/points"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/points",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/points"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/settings",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/settings"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/settings",
+      "method": "PUT",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/settings"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/events",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/events"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/events",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/events"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/members",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/members"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/community/members/invite",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://community-service:7050"
+          ],
+          "url_pattern": "/v1/members/invite"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/campaigns",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/campaigns"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/campaigns",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/campaigns"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/campaigns/{id}",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/campaigns/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/campaigns/{id}",
+      "method": "PUT",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/campaigns/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/campaigns/{id}/send",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/campaigns/{id}/send"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/automations",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/automations"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/automations",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/automations"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/subscribers",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/subscribers"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/subscribers",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/subscribers"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/optin-forms",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/optin-forms"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/v1/optin-forms",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/v1/optin-forms"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/v1/projects",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/v1/projects"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/v1/projects",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/v1/projects"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/v1/projects/{id}",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/v1/projects/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/v1/projects/{id}/boards",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/v1/projects/{id}/boards"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/v1/boards/{id}",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/v1/boards/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/v1/tasks",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/v1/tasks"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/v1/tasks",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/v1/tasks"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/calendar/v1/events",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://calendar-service:8050"
+          ],
+          "url_pattern": "/v1/events"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/calendar/v1/events",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://calendar-service:8050"
+          ],
+          "url_pattern": "/v1/events"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/calendar/v1/events/{id}",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://calendar-service:8050"
+          ],
+          "url_pattern": "/v1/events/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/calendar/v1/calendars",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://calendar-service:8050"
+          ],
+          "url_pattern": "/v1/calendars"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/calendar/v1/event-categories",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://calendar-service:8050"
+          ],
+          "url_pattern": "/v1/event-categories"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/marketing/health",
+      "backend": [
+        {
+          "host": [
+            "http://marketing-service:8030"
+          ],
+          "url_pattern": "/health"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/projects/health",
+      "backend": [
+        {
+          "host": [
+            "http://projects-service:8040"
+          ],
+          "url_pattern": "/health"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/calendar/health",
+      "backend": [
+        {
+          "host": [
+            "http://calendar-service:8050"
+          ],
+          "url_pattern": "/health"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/billing/health",
+      "backend": [
+        {
+          "host": [
+            "http://billing-service:7020"
+          ],
+          "url_pattern": "/health"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/organization/health",
+      "backend": [
+        {
+          "host": [
+            "http://organization-service:7010"
+          ],
+          "url_pattern": "/healthz"
+        }
+      ]
+    }
   ]
 }
-
-
