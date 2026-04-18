@@ -11,7 +11,8 @@ import {
   Smile,
   Circle,
   Clock,
-  ChevronDown
+  ChevronDown,
+  Phone
 } from "lucide-react";
 import { 
   Box, 
@@ -94,7 +95,7 @@ export default function LiveChatPage() {
                          <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{chat.name}</Typography>
                          <Typography variant="caption" color="text.secondary">{chat.time}</Typography>
                       </Box>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 180, truncate: true }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                          {chat.lastMsg}
                       </Typography>
                    </Box>

@@ -164,7 +164,7 @@ export default function EmployeesPage() {
                         </Avatar>
                         <Box>
                           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                            {employee.firstName} {employee.lastName}
+                            {employee.firstName || ''} {employee.lastName || ''}
                           </Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <Mail size={12} /> {employee.email}

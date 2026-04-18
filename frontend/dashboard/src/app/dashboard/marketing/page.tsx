@@ -9,7 +9,7 @@ import {
   Globe,
   ArrowUpRight,
   Eye,
-  CursorClick
+  MousePointer2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +40,7 @@ export default function MarketingPage() {
           <h3 className="text-2xl font-black">1.4M</h3>
         </div>
         <div className="glass-card flex flex-col items-center text-center p-6 border-b-2 border-emerald-400">
-          <CursorClick className="w-6 h-6 text-emerald-400 mb-3" />
+          <MousePointer2 className="w-6 h-6 text-emerald-400 mb-3" />
           <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Avg. Click Rate</p>
           <h3 className="text-2xl font-black">8.4%</h3>
         </div>

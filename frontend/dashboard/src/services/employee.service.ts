@@ -5,6 +5,10 @@ export interface Employee {
   orgId: string;
   userId?: string;
   contactId?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  avatar?: string;
   jobTitle?: string;
   department?: string;
   status: 'active' | 'inactive';
@@ -37,4 +41,3 @@ export const employeeService = {
     return response.data;
   }
 };
-

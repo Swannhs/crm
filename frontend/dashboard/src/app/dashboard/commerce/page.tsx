@@ -150,7 +150,7 @@ export default function CommercePage() {
                             <Avatar sx={{ bgcolor: 'rgba(0,0,0,0.05)', borderRadius: 2, width: 40, height: 40 }}>
                               <Package size={20} color="#64748b" />
                             </Avatar>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, maxWidth: 200, truncate: true }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {product.name}
                             </Typography>
                           </Box>

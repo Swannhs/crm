@@ -38,7 +38,7 @@ import {
   CardActions
 } from "@mui/material";
 import Link from "next/link";
-import { communityService } from "@/services/community.service";
+import { communityService, Post } from "@/services/community.service";
 import { useQuery } from "@tanstack/react-query";
 
 export default function CommunityPage() {
@@ -48,6 +48,23 @@ export default function CommunityPage() {
   });
 
   const posts = postsResponse?.data || [];
+
+  const getAuthorName = (post: Post) => {
+    if (post.user && post.user[0]) {
+      const name = `${post.user[0].firstName || ''} ${post.user[0].lastName || ''}`.trim();
+      return name || `Member ${post.userId?.substring(0, 4) || 'Unknown'}`;
+    }
+    if (post.contact && post.contact[0]) {
+      return post.contact[0].fullName || `Member ${post.userId?.substring(0, 4) || 'Unknown'}`;
+    }
+    return `Member ${post.userId?.substring(0, 4) || 'Unknown'}`;
+  };
+
+  const getAuthorAvatar = (post: Post) => {
+    if (post.user && post.user[0]?.avatar) return post.user[0].avatar;
+    if (post.contact && post.contact[0]?.photo) return post.contact[0].photo;
+    return undefined;
+  };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -145,15 +162,18 @@ export default function CommunityPage() {
                   <CardContent sx={{ p: 4 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: 'rgba(99, 102, 241, 0.1)', color: 'primary.main', fontWeight: 800, fontSize: 14 }}>
-                          {post.authorId.substring(0, 1).toUpperCase()}
+                        <Avatar 
+                          src={getAuthorAvatar(post)}
+                          sx={{ bgcolor: 'rgba(99, 102, 241, 0.1)', color: 'primary.main', fontWeight: 800, fontSize: 14 }}
+                        >
+                          {getAuthorName(post).substring(0, 1).toUpperCase()}
                         </Avatar>
                         <Box>
                           <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                            {post.authorName || `Member ${post.authorId.substring(0, 4)}`}
+                            {getAuthorName(post)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 700, fontSize: 10 }}>
-                            {post.category} • {new Date(post.createdAt).toLocaleDateString()}
+                            General • {new Date(post.createdAt).toLocaleDateString()}
                           </Typography>
                         </Box>
                       </Box>
@@ -166,20 +186,26 @@ export default function CommunityPage() {
                       variant="h5" 
                       sx={{ fontWeight: 800, mb: 1, display: 'block', color: 'text.primary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
                     >
-                      {post.title}
+                      {post.text.substring(0, 100)}{post.text.length > 100 ? '...' : ''}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineClamp: 3, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {post.content}
+                      {post.text}
                     </Typography>
                   </CardContent>
                   <Divider sx={{ opacity: 0.5 }} />
                   <CardActions sx={{ px: 3, py: 1.5, justifyContent: 'space-between' }}>
                     <Stack direction="row" spacing={3}>
                       <IconButton size="small" sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}>
-                        <Heart size={18} />
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <Heart size={18} />
+                          <Typography variant="caption" sx={{ fontWeight: 800 }}>{post.totalLikes || post.likesCount || 0}</Typography>
+                        </Stack>
                       </IconButton>
                       <IconButton size="small" sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}>
-                        <MessageSquare size={18} />
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <MessageSquare size={18} />
+                          <Typography variant="caption" sx={{ fontWeight: 800 }}>{post.commentsCount || 0}</Typography>
+                        </Stack>
                       </IconButton>
                     </Stack>
                     <Stack direction="row" spacing={1}>

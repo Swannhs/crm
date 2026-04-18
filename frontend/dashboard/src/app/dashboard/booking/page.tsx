@@ -130,12 +130,12 @@ export default function BookingPage() {
               <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 3 }}>Monthly Overview</Typography>
               <Grid container spacing={1}>
                 {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => (
-                  <Grid item xs={1.7} key={day} sx={{ textAlign: 'center' }}>
+                  <Grid xs={1.7} key={day} sx={{ textAlign: 'center' }}>
                     <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>{day}</Typography>
                   </Grid>
                 ))}
                 {Array.from({ length: 31 }).map((_, i) => (
-                  <Grid item xs={1.7} key={i}>
+                  <Grid xs={1.7} key={i}>
                     <Box 
                       sx={{ 
                         aspectRatio: '1/1', 

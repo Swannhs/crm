@@ -10,7 +10,18 @@ export interface Post {
   postColor?: string;
   attachments: string[];
   likesCount: number;
+  totalLikes?: number;
+  commentsCount?: number;
   createdAt: string;
+  user?: Array<{
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+  }>;
+  contact?: Array<{
+    fullName?: string;
+    photo?: string;
+  }>;
 }
 
 export interface Comment {
@@ -31,8 +42,6 @@ export const communityService = {
   },
   
   getPostDetails: async (id: string) => {
-    // Note: Backend might return comments separately. 
-    // If not, we'll fetch them in parallel if needed.
     const response = await api.get<{ data: Post }>(`/api/community/posts/${id}`);
     return response.data;
   },
@@ -42,4 +51,3 @@ export const communityService = {
     return response.data;
   }
 };
-

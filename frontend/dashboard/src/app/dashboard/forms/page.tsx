@@ -137,7 +137,7 @@ export default function FormsPage() {
                       sx={{ 
                         fontWeight: 800, fontSize: 10, borderRadius: 1.5,
                         bgcolor: form.status === 'Active' ? 'success.light' : form.status === 'Draft' ? 'action.selected' : 'warning.light',
-                        color: form.status === 'Active' ? 'success.dark' : 'text.secondary' : 'warning.dark'
+                        color: form.status === 'Active' ? 'success.dark' : form.status === 'Draft' ? 'text.secondary' : 'warning.dark'
                       }} 
                     />
                   </TableCell>

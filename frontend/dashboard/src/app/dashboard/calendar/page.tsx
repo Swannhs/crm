@@ -26,6 +26,8 @@ import {
   Button, 
   Stack, 
   Chip,
+  TextField,
+  InputAdornment,
   Divider,
   List as MuiList,
   ListItem,
@@ -76,9 +78,9 @@ export default function CalendarPage() {
                   </Stack>
                </Box>
                <Grid container spacing={1}>
-                  {days.map(d => <Grid item xs={1.7} key={d} sx={{ textAlign: 'center' }}><Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>{d[0]}</Typography></Grid>)}
+                  {days.map(d => <Grid xs={1.7} key={d} sx={{ textAlign: 'center' }}><Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>{d[0]}</Typography></Grid>)}
                   {dates.slice(0, 31).map((d, i) => (
-                    <Grid item xs={1.7} key={i} sx={{ textAlign: 'center' }}>
+                    <Grid xs={1.7} key={i} sx={{ textAlign: 'center' }}>
                        <Box sx={{ 
                          p: 0.5, 
                          borderRadius: 2, 
@@ -135,12 +137,12 @@ export default function CalendarPage() {
                
                <Grid container sx={{ flexGrow: 1 }}>
                   {days.map(d => (
-                    <Grid item xs={1.71} key={d} sx={{ p: 1.5, textAlign: 'center', borderBottom: '1px solid', borderColor: 'divider' }}>
+                    <Grid xs={1.71} key={d} sx={{ p: 1.5, textAlign: 'center', borderBottom: '1px solid', borderColor: 'divider' }}>
                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>{d}</Typography>
                     </Grid>
                   ))}
                   {dates.map((d, i) => (
-                    <Grid item xs={1.71} key={i} sx={{ 
+                    <Grid xs={1.71} key={i} sx={{ 
                       height: '20%', 
                       p: 1, 
                       borderRight: (i + 1) % 7 === 0 ? 'none' : '1px solid', 
@@ -149,13 +151,13 @@ export default function CalendarPage() {
                       bgcolor: d.active ? 'transparent' : 'rgba(0,0,0,0.01)',
                     }}>
                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="caption" sx={{ fontWeight: d.day === 12 ? 800 : 600, color: d.active ? 'text.primary' : 'text.disabled', bgcolor: d.day === 12 ? 'primary.main' : 'transparent', color: d.day === 12 ? 'white' : 'inherit', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+                          <Typography variant="caption" sx={{ fontWeight: d.day === 12 ? 800 : 600, color: d.day === 12 ? 'white' : (d.active ? 'text.primary' : 'text.disabled'), bgcolor: d.day === 12 ? 'primary.main' : 'transparent', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
                             {d.day > 0 ? d.day : 31 + d.day}
                           </Typography>
                        </Box>
                        {d.event && (
                          <Box sx={{ p: 0.5, mb: 0.5, borderRadius: 1, bgcolor: 'rgba(99, 102, 241, 0.1)', border: '1px solid', borderColor: 'primary.light', cursor: 'pointer' }}>
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: 'primary.main', display: 'block', truncate: true }}>10a Project Launch...</Typography>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: 'primary.main', display: 'block' }} noWrap>10a Project Launch...</Typography>
                          </Box>
                        )}
                     </Grid>

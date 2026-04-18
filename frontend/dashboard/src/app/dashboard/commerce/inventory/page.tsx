@@ -17,7 +17,7 @@ import {
 import { 
   Box, 
   Typography, 
-  Grid, 
+  Grid as MuiGrid, 
   Paper, 
   Avatar, 
   IconButton, 
@@ -60,14 +60,14 @@ export default function InventoryPage() {
         </Stack>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      <MuiGrid container spacing={3} sx={{ mb: 6 }}>
         {[
           { label: "Total SKUs", value: "1,240", icon: Package, color: '#6366f1' },
           { label: "Low Stock Items", value: "14", icon: AlertTriangle, color: '#f59e0b' },
           { label: "Out of Stock", value: "8", icon: BoxIcon, color: '#ef4444' },
           { label: "Inventory Value", value: "$124,500", icon: BarChart2, color: '#10b981' },
         ].map((stat) => (
-          <Grid item xs={12} sm={6} md={3} key={stat.label}>
+          <MuiGrid item xs={12} sm={6} md={3} key={stat.label}>
              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase' }}>{stat.label}</Typography>
@@ -78,9 +78,9 @@ export default function InventoryPage() {
                    <Typography variant="caption" sx={{ color: 'warning.main', fontWeight: 700 }}>Action Required</Typography>
                 )}
              </Paper>
-          </Grid>
+          </MuiGrid>
         ))}
-      </Grid>
+      </MuiGrid>
 
       <Paper elevation={0} sx={{ borderRadius: 4, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
         <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

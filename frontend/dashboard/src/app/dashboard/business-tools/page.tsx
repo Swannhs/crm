@@ -10,7 +10,6 @@ import {
   Smartphone, 
   ExternalLink,
   ChevronRight,
-  Tool,
   Download,
   Copy,
   Layout,

@@ -17,7 +17,7 @@ import {
 import { 
   Box, 
   Typography, 
-  Grid, 
+  Grid as MuiGrid, 
   Paper, 
   Avatar, 
   IconButton, 
@@ -78,14 +78,14 @@ export default function SiteBuilderPage() {
         </Button>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      <MuiGrid container spacing={3} sx={{ mb: 6 }}>
         {[
           { label: "Total Sites", value: "4", icon: Globe, color: '#6366f1' },
           { label: "Active Pages", value: "28", icon: Layers, color: '#10b981' },
           { label: "Unique Visitors", value: "4.8k", icon: Monitor, color: '#f59e0b' },
           { label: "Domain Link", value: "Custom", icon: Rocket, color: '#ec4899' },
         ].map((stat) => (
-          <Grid item xs={12} sm={6} md={3} key={stat.label}>
+          <MuiGrid item xs={12} sm={6} md={3} key={stat.label}>
              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, textTransform: 'uppercase' }}>
@@ -97,9 +97,9 @@ export default function SiteBuilderPage() {
                   {stat.value}
                 </Typography>
              </Paper>
-          </Grid>
+          </MuiGrid>
         ))}
-      </Grid>
+      </MuiGrid>
 
       <Box sx={{ p: 3, mb: 4, bgcolor: 'rgba(99, 102, 241, 0.05)', borderRadius: 4, border: '1px dashed', borderColor: 'primary.light', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Stack direction="row" spacing={3} alignItems="center">
@@ -114,9 +114,9 @@ export default function SiteBuilderPage() {
 
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>My Sites</Typography>
 
-      <Grid container spacing={4}>
+      <MuiGrid container spacing={4}>
         {sites.map((site) => (
-          <Grid item xs={12} md={6} key={site.id}>
+          <MuiGrid item xs={12} md={6} key={site.id}>
             <Card elevation={0} sx={{ borderRadius: 4, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
               <CardMedia
                 component="img"
@@ -165,10 +165,10 @@ export default function SiteBuilderPage() {
                  <IconButton size="small"><Settings size={18} /></IconButton>
               </CardActions>
             </Card>
-          </Grid>
+          </MuiGrid>
         ))}
         
-        <Grid item xs={12} md={6}>
+        <MuiGrid item xs={12} md={6}>
            <Paper 
              elevation={0} 
              sx={{ 
@@ -192,8 +192,8 @@ export default function SiteBuilderPage() {
               <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>Create New Site</Typography>
               <Typography variant="caption" color="text.secondary">Start from a template or a blank canvas</Typography>
            </Paper>
-        </Grid>
-      </Grid>
+        </MuiGrid>
+      </MuiGrid>
     </Box>
   );
 }

@@ -1,3 +1,5 @@
+'use client';
+
 import { 
   Plus, 
   MousePointer2, 
@@ -12,11 +14,23 @@ import {
   Zap,
   Mail,
   Smartphone,
-  ChevronRight
+  ChevronRight,
+  LucideIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const componentLibrary = [
+interface LibraryItem {
+  icon: LucideIcon;
+  label: string;
+  color?: string;
+}
+
+interface ComponentGroup {
+  group: string;
+  items: LibraryItem[];
+}
+
+const componentLibrary: ComponentGroup[] = [
   { group: 'Form Elements', items: [
     { icon: Type, label: 'Text Input' },
     { icon: ToggleLeft, label: 'Checkbox' },

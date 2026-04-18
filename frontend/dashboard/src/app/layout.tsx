@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
-
 import { Providers } from "@/components/providers";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "MyManager Dashboard",
@@ -19,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className="antialiased font-sans bg-slate-50 text-slate-900">
         <Providers>
           <div className="flex">
             <Sidebar />
@@ -34,4 +30,3 @@ export default function RootLayout({
     </html>
   );
 }
-
