@@ -4,7 +4,7 @@ import packageJson from '../package.json';
 
 // ----------------------------------------------------------------------
 
-type AuthMethod = 'jwt' | 'amplify' | 'firebase' | 'supabase' | 'auth0';
+type AuthMethod = 'jwt' | 'amplify' | 'firebase' | 'supabase' | 'auth0' | 'keycloak';
 
 type AppConfig = {
   site: {
@@ -46,6 +46,11 @@ type AppConfig = {
     url: string;
     key: string;
   };
+  keycloak: {
+    url: string;
+    realm: string;
+    clientId: string;
+  };
 };
 
 export const CONFIG: AppConfig = {
@@ -59,12 +64,17 @@ export const CONFIG: AppConfig = {
   isStaticExport: JSON.parse(`${process.env.BUILD_STATIC_EXPORT}`),
   /**
    * Auth
-   * @method jwt | amplify | firebase | supabase | auth0
+   * @method jwt | amplify | firebase | supabase | auth0 | keycloak
    */
   auth: {
-    method: 'jwt',
+    method: 'keycloak',
     skip: false,
     redirectPath: paths.dashboard.root,
+  },
+  keycloak: {
+    url: process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? 'http://localhost:8080',
+    realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? 'mymanager',
+    clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? 'mymanager-web',
   },
   /**
    * Mapbox

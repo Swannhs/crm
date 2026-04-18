@@ -16,8 +16,6 @@ return new class extends Migration
             $table->string('color', 10)->nullable();
             $table->jsonb('metadata')->default('{}');
             $table->timestamps();
-
-            $table->index(['org_id']);
         });
     }
 
