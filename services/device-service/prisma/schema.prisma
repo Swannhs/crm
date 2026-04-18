@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Device {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  name            String
+  type            String?
+  status          String?
+  locationId      String?  @db.Uuid
+  metadata        Json?
+  lastSeen        DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model HardwareProduct {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  description     String?
+  sku             String   @unique
+  price           Decimal  @db.Decimal(10, 2)
+  categoryId      String?  @db.Uuid
+  brand           String?
+  imageUrl        String?
+  specifications  Json?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+model HardwareBundle {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  description     String?
+  sku             String   @unique
+  price           Decimal  @db.Decimal(10, 2)
+  productIds      String[] @db.Uuid
+  imageUrl        String?
+  discount        Decimal? @db.Decimal(5, 2)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model HardwareCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  parentId    String?  @db.Uuid
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([parentId])
+}
+
+model SunmiConfig {
+  id          String   @id @default(uuid()) @db.Uuid
+  organizationId String? @db.Uuid
+  apiUrl      String?
+  apiKey      String?
+  appId       String?
+  deviceSn    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([organizationId])
+}
+
+model UnifiConnection {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @db.Uuid
+  locationId      String?  @db.Uuid
+  name            String
+  host            String
+  port            Int      @default(443)
+  apiKey          String?
+  sslVerify       Boolean  @default(true)
+  isConnected     Boolean  @default(false)
+  lastSync        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([locationId])
+}
+
+model DeviceAssignment {
+  id              String   @id @default(uuid()) @db.Uuid
+  deviceId        String   @db.Uuid
+  organizationId  String   @db.Uuid
+  locationId      String?  @db.Uuid
+  assignedAt      DateTime @default(now())
+  assignedBy      String?  @db.Uuid
+  createdAt       DateTime @default(now())
+
+  @@index([deviceId])
+  @@index([organizationId])
+}

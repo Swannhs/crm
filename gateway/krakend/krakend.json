@@ -8134,6 +8134,372 @@
     {
       "endpoint": "/api/automation/health",
       "backend": [{"host": ["http://automation-service:7110"], "url_pattern": "/health"}]
+    },
+    {
+      "endpoint": "/api/devices",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/devices"}]
+    },
+    {
+      "endpoint": "/api/devices",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/devices"}]
+    },
+    {
+      "endpoint": "/api/devices/{id}",
+      "method": "PUT",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/devices/{id}"}]
+    },
+    {
+      "endpoint": "/api/devices/{id}",
+      "method": "DELETE",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/devices/{id}"}]
+    },
+    {
+      "endpoint": "/api/devices/auth",
+      "method": "POST",
+      "input_headers": ["Content-Type"],
+      "extra_config": {},
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/devices/auth"}]
+    },
+    {
+      "endpoint": "/api/hardware/products",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/hardware/products"}]
+    },
+    {
+      "endpoint": "/api/hardware/products",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/hardware/products"}]
+    },
+    {
+      "endpoint": "/api/hardware/products/{id}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/hardware/products/{id}"}]
+    },
+    {
+      "endpoint": "/api/hardware/bundles",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/hardware/bundles"}]
+    },
+    {
+      "endpoint": "/api/hardware/categories",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/hardware/categories"}]
+    },
+    {
+      "endpoint": "/api/hardware/recommendation",
+      "method": "GET",
+      "extra_config": {},
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/hardware/recommendation"}]
+    },
+    {
+      "endpoint": "/api/sunmi/config",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/sunmi/config"}]
+    },
+    {
+      "endpoint": "/api/sunmi/config",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/sunmi/config"}]
+    },
+    {
+      "endpoint": "/api/unifi/connection",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/unifi/connection"}]
+    },
+    {
+      "endpoint": "/api/unifi/connections",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/unifi/connections"}]
+    },
+    {
+      "endpoint": "/api/unifi/cameras",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/v1/unifi/cameras"}]
+    },
+    {
+      "endpoint": "/api/device/health",
+      "backend": [{"host": ["http://device-service:7120"], "url_pattern": "/health"}]
+    },
+    {
+      "endpoint": "/api/file-manager/get-files",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/file-manager/get-files"}]
+    },
+    {
+      "endpoint": "/api/file-manager/new-folder",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/file-manager/new-folder"}]
+    },
+    {
+      "endpoint": "/api/file-manager/fileupload",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/file-manager/fileupload"}]
+    },
+    {
+      "endpoint": "/api/file-manager/search-file",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/file-manager/search-file"}]
+    },
+    {
+      "endpoint": "/api/file-manager/get-folder-item/{folderId}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/file-manager/get-folder-item/{folderId}"}]
+    },
+    {
+      "endpoint": "/api/file-manager/file/{id}",
+      "method": "DELETE",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/file-manager/file/{id}"}]
+    },
+    {
+      "endpoint": "/api/file-manager/file/rename/{id}",
+      "method": "PUT",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/file-manager/file/rename/{id}"}]
+    },
+    {
+      "endpoint": "/api/image-library",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/image-library"}]
+    },
+    {
+      "endpoint": "/api/image-library",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/v1/image-library"}]
+    },
+    {
+      "endpoint": "/api/file/health",
+      "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/health"}]
     }
   ]
 }

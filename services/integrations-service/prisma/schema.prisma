@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model IntegrationConnection {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  provider        String
+  accessToken     String?
+  refreshToken    String?
+  expiresAt       DateTime?
+  tokenType       String?
+  scope           String?
+  accountId       String?
+  accountName     String?
+  isActive        Boolean  @default(true)
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, provider])
+  @@index([organizationId])
+  @@index([provider])
+}
+
+model GoogleIntegration {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  accessToken     String?
+  refreshToken    String?
+  expiresAt       DateTime?
+  isConnected     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model ZoomIntegration {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  accountId       String?
+  accessToken     String?
+  refreshToken    String?
+  expiresAt       DateTime?
+  webhookSecret   String?
+  isConnected     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model ZoomMeeting {
+  id              String   @id @default(uuid()) @db.Uuid
+  zoomId          String   @unique
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  topic           String
+  startTime       DateTime
+  duration        Int?
+  joinUrl         String?
+  password        String?
+  status          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model ShopifyStore {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  shopDomain      String   @unique
+  accessToken     String?
+  scope           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model UberEatsConfig {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  storeId         String?
+  accessToken     String?
+  refreshToken    String?
+  isActive        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model EasyPostConfig {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  apiKey          String?
+  isActive        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model IntegrationActivity {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  provider        String
+  action          String
+  status          String   @default("success")
+  details         Json?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([provider])
+  @@index([organizationId])
+}

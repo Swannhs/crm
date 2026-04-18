@@ -538,6 +538,64 @@ services:
     ports:
       - "7110:7110"
 
+  device-db:
+    image: postgres:17-alpine
+    container_name: ms-device-db
+    environment:
+      POSTGRES_DB: device
+      POSTGRES_USER: device
+      POSTGRES_PASSWORD: device
+    ports:
+      - "5449:5432"
+    volumes:
+      - device_db_data:/var/lib/postgresql/data
+
+  device-service:
+    image: node:24-alpine
+    container_name: ms-device-service
+    working_dir: /repo/services/device-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 7120
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://device:device@device-db:5432/device
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - device-db
+    ports:
+      - "7120:7120"
+
+  file-db:
+    image: postgres:17-alpine
+    container_name: ms-file-db
+    environment:
+      POSTGRES_DB: file
+      POSTGRES_USER: file
+      POSTGRES_PASSWORD: file
+    ports:
+      - "5450:5432"
+    volumes:
+      - file_db_data:/var/lib/postgresql/data
+
+  file-service:
+    image: node:24-alpine
+    container_name: ms-file-service
+    working_dir: /repo/services/file-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 7130
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://file:file@file-db:5432/file
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - file-db
+    ports:
+      - "7130:7130"
+
   krakend:
     image: krakend:2.13.4
     container_name: ms-krakend
@@ -554,6 +612,8 @@ services:
       - booking-service
       - pos-service
       - automation-service
+      - device-service
+      - file-service
 
   frontend:
     image: node:24-alpine
@@ -588,4 +648,6 @@ volumes:
   calendar_db_data:
   pos_db_data:
   automation_db_data:
+  device_db_data:
+  file_db_data:
   mongo_data:

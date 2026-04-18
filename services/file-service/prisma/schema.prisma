@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model FileManager {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  parentId        String?  @db.Uuid
+  name            String
+  type            String   @default("folder")
+  mimeType        String?
+  size            Int?
+  path            String?
+  url             String?
+  thumbnail       String?
+  isStarred       Boolean  @default(false)
+  isShared        Boolean  @default(false)
+  sharedWith      String[] @db.Uuid
+  isDeleted       Boolean  @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([parentId])
+}
+
+model FileManagerActivity {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId  String?  @db.Uuid
+  fileId          String?  @db.Uuid
+  action          String
+  details         Json?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([fileId])
+  @@index([organizationId])
+}
+
+model ImageLibrary {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId  String?  @db.Uuid
+  name            String
+  url             String
+  thumbnail       String?
+  width           Int?
+  height          Int?
+  mimeType        String?
+  size            Int?
+  category        String?
+  tags            String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model FileUploadProgress {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  fileName    String
+  totalSize   Int
+  uploadedSize Int    @default(0)
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
