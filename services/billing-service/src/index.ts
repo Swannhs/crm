@@ -14,18 +14,28 @@ const billingController = new BillingController();
 // Invoices
 app.get("/v1/invoices", 
   identityMiddleware, 
-  (req, res) => billingController.listInvoices(req as any, res)
+  billingController.listInvoices
+);
+
+app.get("/v1/invoices/:id", 
+  identityMiddleware,
+  billingController.getInvoice
 );
 
 app.post("/v1/invoices", 
   identityMiddleware, 
-  (req, res) => billingController.createInvoice(req as any, res)
+  billingController.createInvoice
 );
 
 // Payments
+app.get("/v1/payments",
+  identityMiddleware,
+  billingController.listPayments
+);
+
 app.post("/v1/payments", 
   identityMiddleware, 
-  (req, res) => billingController.recordPayment(req as any, res)
+  billingController.recordPayment
 );
 
 // --- Server ---

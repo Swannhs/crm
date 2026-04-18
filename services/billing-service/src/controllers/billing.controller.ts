@@ -1,40 +1,71 @@
 import { Response } from 'express';
 import { BillingService } from '../services/billing.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
+import { AppError } from '../errors.js';
 
 export class BillingController {
-  private billingService = new BillingService();
+  constructor(private readonly billingService = new BillingService()) {}
 
-  async listInvoices(req: AuthenticatedRequest, res: Response) {
-    try {
-      const { orgId } = req.identity;
-      const invoices = await this.billingService.getInvoices(orgId);
-      return res.json({ data: invoices });
-    } catch (err: any) {
-      return res.status(500).json({ message: err.message });
+  private handleError(res: Response, error: unknown) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({
+        message: error.message,
+        code: error.code,
+        ...(error.details ? { details: error.details } : {}),
+      });
     }
+
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return res.status(500).json({ message, code: 'INTERNAL_SERVER_ERROR' });
   }
 
-  async createInvoice(req: AuthenticatedRequest, res: Response) {
+  listInvoices = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { orgId } = req.identity;
+      const result = await this.billingService.getInvoices(orgId, req.query);
+      return res.json(result);
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  };
+
+  getInvoice = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { orgId } = req.identity;
+      const invoice = await this.billingService.getInvoiceById(orgId, req.params.id);
+      return res.json({ data: invoice });
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  };
+
+  createInvoice = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { orgId, userId } = req.identity;
       const invoice = await this.billingService.createInvoice(orgId, userId, req.body);
       return res.status(201).json({ data: invoice });
-    } catch (err: any) {
-      return res.status(422).json({ message: err.message });
+    } catch (error) {
+      return this.handleError(res, error);
     }
-  }
+  };
 
-  async recordPayment(req: AuthenticatedRequest, res: Response) {
+  listPayments = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { orgId } = req.identity;
+      const payments = await this.billingService.getPayments(orgId, req.query);
+      return res.json(payments);
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  };
+
+  recordPayment = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { orgId, userId } = req.identity;
-      const payment = await this.billingService.recordPayment(orgId, userId, req.body);
+      const payment = await this.billingService.recordPayment(orgId, userId, req.body, req.log as never);
       return res.status(201).json({ data: payment });
-    } catch (err: any) {
-      if (err.message === 'Invoice not found') {
-        return res.status(404).json({ message: err.message });
-      }
-      return res.status(500).json({ message: err.message });
+    } catch (error) {
+      return this.handleError(res, error);
     }
-  }
+  };
 }
