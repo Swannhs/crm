@@ -509,6 +509,35 @@ services:
     ports:
       - "7100:7100"
 
+  automation-db:
+    image: postgres:17-alpine
+    container_name: ms-automation-db
+    environment:
+      POSTGRES_DB: automation
+      POSTGRES_USER: automation
+      POSTGRES_PASSWORD: automation
+    ports:
+      - "5448:5432"
+    volumes:
+      - automation_db_data:/var/lib/postgresql/data
+
+  automation-service:
+    image: node:24-alpine
+    container_name: ms-automation-service
+    working_dir: /repo/services/automation-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 7110
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://automation:automation@automation-db:5432/automation
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - automation-db
+    ports:
+      - "7110:7110"
+
   krakend:
     image: krakend:2.13.4
     container_name: ms-krakend
@@ -524,6 +553,7 @@ services:
       - billing-service
       - booking-service
       - pos-service
+      - automation-service
 
   frontend:
     image: node:24-alpine
@@ -557,4 +587,5 @@ volumes:
   notification_db_data:
   calendar_db_data:
   pos_db_data:
+  automation_db_data:
   mongo_data:
