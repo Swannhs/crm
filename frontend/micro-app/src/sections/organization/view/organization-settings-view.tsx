@@ -1,0 +1,104 @@
+'use client';
+
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+
+import { organizationService } from 'src/services/organization-service';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { Iconify } from 'src/components/iconify';
+
+// ----------------------------------------------------------------------
+
+export function OrganizationSettingsView() {
+  const [currentTab, setCurrentTab] = useState('general');
+
+  const { data: organization, isLoading } = useQuery({
+    queryKey: ['org-details'],
+    queryFn: () => organizationService.getOrganizationDetails(),
+  });
+
+  if (isLoading) {
+    return (
+      <Box sx={{ p: 5, textAlign: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <DashboardContent maxWidth="xl">
+      <Typography variant="h4" sx={{ mb: 5 }}>Organization Settings</Typography>
+
+      <Tabs
+        value={currentTab}
+        onChange={(e, val) => setCurrentTab(val)}
+        sx={{ mb: 5 }}
+      >
+        <Tab icon={<Iconify icon="ic:round-business" />} label="General" value="general" />
+        <Tab icon={<Iconify icon="ic:round-color-lens" />} label="Branding" value="branding" />
+        <Tab icon={<Iconify icon="ic:round-people" />} label="Roles & Permissions" value="roles" />
+      </Tabs>
+
+      {currentTab === 'general' && (
+        <Grid container spacing={3}>
+           <Grid item xs={12} md={4}>
+              <Typography variant="h6" sx={{ mb: 1 }}>General Information</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Basic details about your organization.
+              </Typography>
+           </Grid>
+           <Grid item xs={12} md={8}>
+              <Card sx={{ p: 3 }}>
+                 <Stack spacing={3}>
+                    <TextField fullWidth label="Organization Name" defaultValue={organization?.name || 'MyManager Org'} />
+                    <TextField fullWidth label="Email Address" defaultValue={organization?.email || 'admin@mymanager.com'} />
+                    <TextField fullWidth multiline rows={3} label="Address" />
+                 </Stack>
+                 <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button variant="contained">Save Changes</Button>
+                 </Box>
+              </Card>
+           </Grid>
+        </Grid>
+      )}
+
+      {currentTab === 'branding' && (
+         <Grid container spacing={3}>
+            <Grid item xs={12} md={4}>
+               <Typography variant="h6" sx={{ mb: 1 }}>Branding</Typography>
+               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                 Customize the look and feel of your portal.
+               </Typography>
+            </Grid>
+            <Grid item xs={12} md={8}>
+               <Card sx={{ p: 3 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 2 }}>Main Logo</Typography>
+                  <Box sx={{ width: 100, height: 100, border: '1px dashed #ccc', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+                     <Iconify icon="ic:round-add-photo-alternate" width={32} />
+                  </Box>
+                  <Divider sx={{ mb: 3 }} />
+                  <Typography variant="subtitle2" sx={{ mb: 2 }}>Primary Color</Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                     {['#00A76F', '#3366FF', '#FFAB00', '#FF5630'].map(color => (
+                        <Box key={color} sx={{ width: 32, height: 32, bgcolor: color, borderRadius: '50%', cursor: 'pointer', border: color === '#00A76F' ? '2px solid #000' : 'none' }} />
+                     ))}
+                  </Box>
+               </Card>
+            </Grid>
+         </Grid>
+      )}
+    </DashboardContent>
+  );
+}

@@ -86,7 +86,7 @@ model Appointment {
   location           String?
   geo_location       Json?     @default("{}")
   
-  start_datetime     DateTime  @index
+  start_datetime     DateTime
   end_datetime       DateTime
   duration_minutes   Int       @default(30)
   
@@ -100,7 +100,7 @@ model Appointment {
   is_recurring       Boolean   @default(false)
   
   metadata           Json      @default("{}")
-  created_at         DateTime  @default(now()) @index
+  created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
   
   @@index([org_id])

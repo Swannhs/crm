@@ -25,6 +25,8 @@ import { _workspaces } from '../config-nav-workspace';
 import { LayoutSection } from '../core/layout-section';
 import { navData as dashboardNavData } from '../config-nav-dashboard';
 
+import { AIChatBox } from 'src/components/ai-chat/ai-chat-box';
+
 // ----------------------------------------------------------------------
 
 interface DashboardLayoutProps {
@@ -197,6 +199,7 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
         }}
       >
         <Main isNavHorizontal={isNavHorizontal}>{children}</Main>
+        <AIChatBox />
       </LayoutSection>
     </>
   );
