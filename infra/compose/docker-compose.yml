@@ -480,6 +480,35 @@ services:
     ports:
       - "8050:8050"
 
+  pos-db:
+    image: postgres:17-alpine
+    container_name: ms-pos-db
+    environment:
+      POSTGRES_DB: pos
+      POSTGRES_USER: pos
+      POSTGRES_PASSWORD: pos
+    ports:
+      - "5447:5432"
+    volumes:
+      - pos_db_data:/var/lib/postgresql/data
+
+  pos-service:
+    image: node:24-alpine
+    container_name: ms-pos-service
+    working_dir: /repo/services/pos-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 7100
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://pos:pos@pos-db:5432/pos
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - pos-db
+    ports:
+      - "7100:7100"
+
   krakend:
     image: krakend:2.13.4
     container_name: ms-krakend
@@ -494,6 +523,7 @@ services:
       - crm-service
       - billing-service
       - booking-service
+      - pos-service
 
   frontend:
     image: node:24-alpine
@@ -526,4 +556,5 @@ volumes:
   payments_db_data:
   notification_db_data:
   calendar_db_data:
+  pos_db_data:
   mongo_data:
