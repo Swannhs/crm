@@ -8500,6 +8500,272 @@
     {
       "endpoint": "/api/file/health",
       "backend": [{"host": ["http://file-service:7130"], "url_pattern": "/health"}]
+    },
+    {
+      "endpoint": "/api/integrations/connect",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/connect"}]
+    },
+    {
+      "endpoint": "/api/integrations",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations"}]
+    },
+    {
+      "endpoint": "/api/integrations/google",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/google/connect"}]
+    },
+    {
+      "endpoint": "/api/integrations/zoom",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/zoom/connect"}]
+    },
+    {
+      "endpoint": "/api/integrations/zoom/meetings",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/zoom/meetings"}]
+    },
+    {
+      "endpoint": "/api/integrations/zoom/create-meeting",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/zoom/create-meeting"}]
+    },
+    {
+      "endpoint": "/api/integrations/facebook",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/facebook/connect"}]
+    },
+    {
+      "endpoint": "/api/integrations/shopify/connect",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/shopify/connect"}]
+    },
+    {
+      "endpoint": "/api/integrations/shopify/stores",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/shopify/stores"}]
+    },
+    {
+      "endpoint": "/api/integrations/easypost/shipment",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/integrations/easypost/shipment"}]
+    },
+    {
+      "endpoint": "/api/integrations/health",
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/health"}]
+    },
+    {
+      "endpoint": "/api/livechat/channels/{adminId}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/channels"}]
+    },
+    {
+      "endpoint": "/api/livechat/channel/{channelId}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/channel/{channelId}"}]
+    },
+    {
+      "endpoint": "/api/livechat/chathistory/{channelId}",
+      "method": "GET",
+      "extra_config": {},
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/chathistory/{channelId}"}]
+    },
+    {
+      "endpoint": "/api/livechat/newmessage",
+      "method": "POST",
+      "extra_config": {},
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/newmessage"}]
+    },
+    {
+      "endpoint": "/api/livechat/chats-and-contacts",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/chats-and-contacts"}]
+    },
+    {
+      "endpoint": "/api/livechat/widget-setting",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/widget-setting"}]
+    },
+    {
+      "endpoint": "/api/livechat/widget-setting",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/widget-setting"}]
+    },
+    {
+      "endpoint": "/api/livechat/widget-setting/pub",
+      "method": "GET",
+      "extra_config": {},
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/widget-setting/pub"}]
+    },
+    {
+      "endpoint": "/api/livechat/statistics",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/statistics"}]
+    },
+    {
+      "endpoint": "/api/realtime/health",
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/health"}]
     }
   ]
 }

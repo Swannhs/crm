@@ -422,12 +422,26 @@ services:
       PORT: 7030
       RABBITMQ_URL: amqp://rabbitmq:5672
       REDIS_URL: redis://redis:6379
-    command: npx --no-install tsx watch src/index.ts
+      DB_URL: postgres://realtime:realtime@realtime-db:5432/realtime
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - redis
+      - realtime-db
     ports:
       - "7030:7030"
+
+  realtime-db:
+    image: postgres:17-alpine
+    container_name: ms-realtime-db
+    environment:
+      POSTGRES_DB: realtime
+      POSTGRES_USER: realtime
+      POSTGRES_PASSWORD: realtime
+    ports:
+      - "5452:5432"
+    volumes:
+      - realtime_db_data:/var/lib/postgresql/data
 
   marketing-service:
     image: node:24-alpine
@@ -596,6 +610,35 @@ services:
     ports:
       - "7130:7130"
 
+  integrations-db:
+    image: postgres:17-alpine
+    container_name: ms-integrations-db
+    environment:
+      POSTGRES_DB: integrations
+      POSTGRES_USER: integrations
+      POSTGRES_PASSWORD: integrations
+    ports:
+      - "5451:5432"
+    volumes:
+      - integrations_db_data:/var/lib/postgresql/data
+
+  integrations-service:
+    image: node:24-alpine
+    container_name: ms-integrations-service
+    working_dir: /repo/services/integrations-service
+    volumes:
+      - ../../:/repo
+    environment:
+      PORT: 7140
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      DB_URL: postgres://integrations:integrations@integrations-db:5432/integrations
+    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    depends_on:
+      - rabbitmq
+      - integrations-db
+    ports:
+      - "7140:7140"
+
   krakend:
     image: krakend:2.13.4
     container_name: ms-krakend
@@ -614,6 +657,8 @@ services:
       - automation-service
       - device-service
       - file-service
+      - integrations-service
+      - realtime-service
 
   frontend:
     image: node:24-alpine
@@ -650,4 +695,6 @@ volumes:
   automation_db_data:
   device_db_data:
   file_db_data:
+  integrations_db_data:
+  realtime_db_data:
   mongo_data:

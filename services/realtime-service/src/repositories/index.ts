@@ -1,0 +1,165 @@
+import { db } from '../db.js';
+import type { LiveChatChannelInput, LiveChatMessageInput, LiveChatContactInput, LiveChatWidgetSettingInput, SocketConnectionInput, ChatStatisticsInput } from '../types/index.js';
+
+export class LiveChatChannelRepository {
+  async create(data: LiveChatChannelInput) {
+    return db.liveChatChannel.create({ data });
+  }
+
+  async findById(id: string) {
+    return db.liveChatChannel.findUnique({ where: { id } });
+  }
+
+  async findByAdminId(adminId: string) {
+    return db.liveChatChannel.findMany({
+      where: { adminId, isActive: true },
+      orderBy: { updatedAt: 'desc' }
+    });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.liveChatChannel.findMany({
+      where: { organizationId, isActive: true },
+      orderBy: { updatedAt: 'desc' }
+    });
+  }
+
+  async findByContactId(contactId: string) {
+    return db.liveChatChannel.findMany({
+      where: { contactId, isActive: true },
+      orderBy: { updatedAt: 'desc' }
+    });
+  }
+
+  async update(id: string, data: Partial<LiveChatChannelInput>) {
+    return db.liveChatChannel.update({ where: { id }, data });
+  }
+
+  async delete(id: string) {
+    return db.liveChatChannel.update({ where: { id }, data: { isActive: false } });
+  }
+
+  async updateLastMessage(id: string) {
+    return db.liveChatChannel.update({
+      where: { id },
+      data: { lastMessageAt: new Date() }
+    });
+  }
+}
+
+export class LiveChatMessageRepository {
+  async create(data: LiveChatMessageInput) {
+    return db.liveChatMessage.create({ data });
+  }
+
+  async findByChannelId(channelId: string, limit = 50) {
+    return db.liveChatMessage.findMany({
+      where: { channelId },
+      orderBy: { createdAt: 'desc' },
+      take: limit
+    });
+  }
+
+  async markAsRead(channelId: string, senderId: string) {
+    return db.liveChatMessage.updateMany({
+      where: { channelId, senderId: { not: senderId } },
+      data: { isRead: true }
+    });
+  }
+
+  async getUnreadCount(channelId: string, excludeSenderId: string) {
+    return db.liveChatMessage.count({
+      where: { channelId, isRead: false, senderId: { not: excludeSenderId } }
+    });
+  }
+}
+
+export class LiveChatContactRepository {
+  async create(data: LiveChatContactInput) {
+    return db.liveChatContact.create({ data });
+  }
+
+  async findById(id: string) {
+    return db.liveChatContact.findUnique({ where: { id } });
+  }
+
+  async findByUserId(userId: string) {
+    return db.liveChatContact.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async update(id: string, data: Partial<LiveChatContactInput>) {
+    return db.liveChatContact.update({ where: { id }, data });
+  }
+}
+
+export class LiveChatWidgetSettingRepository {
+  async upsert(userId: string, organizationId: string | undefined, data: LiveChatWidgetSettingInput) {
+    const existing = await db.liveChatWidgetSetting.findFirst({ where: { userId } });
+    if (existing) {
+      return db.liveChatWidgetSetting.update({ where: { id: existing.id }, data });
+    }
+    return db.liveChatWidgetSetting.create({ data: { ...data, userId, organizationId } });
+  }
+
+  async findByUserId(userId: string) {
+    return db.liveChatWidgetSetting.findFirst({ where: { userId } });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.liveChatWidgetSetting.findFirst({ where: { organizationId } });
+  }
+}
+
+export class LiveChatStatisticsRepository {
+  async create(data: ChatStatisticsInput) {
+    return db.liveChatStatistics.create({ data });
+  }
+
+  async findByOrganizationId(organizationId: string, startDate?: Date, endDate?: Date) {
+    return db.liveChatStatistics.findMany({
+      where: {
+        organizationId,
+        ...(startDate && endDate ? { date: { gte: startDate, lte: endDate } } : {})
+      },
+      orderBy: { date: 'desc' }
+    });
+  }
+
+  async updateDaily(organizationId: string, date: Date, data: Partial<ChatStatisticsInput>) {
+    const existing = await db.liveChatStatistics.findFirst({
+      where: { organizationId, date }
+    });
+    if (existing) {
+      return db.liveChatStatistics.update({ where: { id: existing.id }, data });
+    }
+    return this.create({ ...data, organizationId, date });
+  }
+}
+
+export class SocketConnectionRepository {
+  async create(data: SocketConnectionInput) {
+    return db.socketConnection.create({ data });
+  }
+
+  async findBySocketId(socketId: string) {
+    return db.socketConnection.findUnique({ where: { socketId } });
+  }
+
+  async findByUserId(userId: string) {
+    return db.socketConnection.findMany({ where: { userId } });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.socketConnection.findMany({ where: { organizationId, disconnectedAt: null } });
+  }
+
+  async disconnect(socketId: string) {
+    return db.socketConnection.update({
+      where: { socketId },
+      data: { disconnectedAt: new Date() }
+    });
+  }
+}
