@@ -96,3 +96,128 @@ model WorkedEmployee {
 
   @@map("worked_employees")
 }
+
+model Shift {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  employeeId  String?  @map("employee_id") @db.Uuid
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
+  position    String?
+  shiftName   String?  @map("shift_name")
+  color       String?
+  notes       String?  @db.Text
+  isDraft     Boolean  @default(false) @map("is_draft")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("shifts")
+}
+
+model Salary {
+  id            String   @id @default(uuid()) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  employeeId    String   @map("employee_id") @db.Uuid
+  amount        Float    // hourly rate or monthly amount
+  type          String   @default("hourly") // hourly | monthly | annual
+  effectiveDate DateTime @default(now()) @map("effective_date")
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId, employeeId])
+  @@map("salaries")
+}
+
+model Attendance {
+  id         String    @id @default(uuid()) @db.Uuid
+  orgId      String    @map("org_id") @db.Uuid
+  employeeId String    @map("employee_id") @db.Uuid
+  date       DateTime  @default(now())
+  checkIn    DateTime? @map("check_in")
+  checkOut   DateTime? @map("check_out")
+  status     String    @default("present") // present | absent | late | half-day
+  notes      String?   @db.Text
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@index([orgId, employeeId])
+  @@map("attendance")
+}
+
+model Budget {
+  id            String   @id @default(uuid()) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  period        String   // e.g. "2025-01", "2025-Q1"
+  budgetedCents Int      @default(0) @map("budgeted_cents")
+  actualCents   Int      @default(0) @map("actual_cents")
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("budgets")
+}
+
+model EmployeeCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  name        String
+  description String?  @db.Text
+  color       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("employee_categories")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  employeeId  String?  @map("employee_id") @db.Uuid
+  userId      String?  @map("user_id")
+  action      String
+  description String?  @db.Text
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([orgId, employeeId])
+  @@map("activity_logs")
+}
+
+model Payroll {
+  id               String   @id @default(uuid()) @db.Uuid
+  orgId            String   @map("org_id") @db.Uuid
+  createdBy        String   @map("created_by")
+  periodStart      DateTime @map("period_start")
+  periodEnd        DateTime @map("period_end")
+  totalAmountCents Int      @default(0) @map("total_amount_cents")
+  status           String   @default("draft") // draft | processing | completed | cancelled
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  history          PayrollHistory[]
+
+  @@index([orgId])
+  @@map("payrolls")
+}
+
+model PayrollHistory {
+  id               String   @id @default(uuid()) @db.Uuid
+  orgId            String   @map("org_id") @db.Uuid
+  payrollId        String?  @map("payroll_id") @db.Uuid
+  payroll          Payroll? @relation(fields: [payrollId], references: [id])
+  employeeId       String   @map("employee_id") @db.Uuid
+  grossCents       Int      @default(0) @map("gross_cents")
+  netCents         Int      @default(0) @map("net_cents")
+  deductionsCents  Int      @default(0) @map("deductions_cents")
+  paidAt           DateTime @default(now()) @map("paid_at")
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([orgId, employeeId])
+  @@map("payroll_history")
+}

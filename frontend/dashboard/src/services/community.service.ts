@@ -35,19 +35,19 @@ export interface Comment {
 
 export const communityService = {
   getPosts: async (query?: string) => {
-    const response = await api.get<{ data: Post[] }>(`/api/community/posts`, {
+    const response = await api.get<{ data: Post[] }>(`/community/posts`, {
       params: { q: query }
     });
     return response.data;
   },
   
   getPostDetails: async (id: string) => {
-    const response = await api.get<{ data: Post }>(`/api/community/posts/${id}`);
+    const response = await api.get<{ data: Post }>(`/community/posts/${id}`);
     return response.data;
   },
   
   createPost: async (data: Partial<Post>) => {
-    const response = await api.post<{ data: Post }>(`/api/community/posts`, data);
+    const response = await api.post<{ data: Post }>(`/community/posts`, data);
     return response.data;
   }
 };

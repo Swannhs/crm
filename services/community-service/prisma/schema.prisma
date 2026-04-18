@@ -109,3 +109,105 @@ model UserBadge {
   @@map("user_badges")
 }
 
+model Follow {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([orgId, followerId, followingId], name: "orgId_followerId_followingId")
+  @@index([orgId, followerId])
+  @@map("follows")
+}
+
+model CommunityActivity {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  userId      String   @map("user_id")
+  action      String
+  entityType  String?  @map("entity_type")
+  entityId    String?  @map("entity_id")
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([orgId, userId])
+  @@map("community_activities")
+}
+
+model PointRecord {
+  id        String   @id @default(uuid()) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  userId    String   @map("user_id")
+  points    Int
+  reason    String?  @db.Text
+  awardedBy String?  @map("awarded_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([orgId, userId])
+  @@map("point_records")
+}
+
+model CommunitySettings {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @unique @map("org_id") @db.Uuid
+  name        String?
+  description String?  @db.Text
+  coverImage  String?  @map("cover_image")
+  features    Json     @default("{}")
+  theme       Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("community_settings")
+}
+
+model CommunityProfile {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  userId      String   @map("user_id")
+  displayName String?  @map("display_name")
+  bio         String?  @db.Text
+  avatar      String?
+  links       Json     @default("[]")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([orgId, userId], name: "orgId_userId")
+  @@map("community_profiles")
+}
+
+model CommunityEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  createdBy   String    @map("created_by")
+  title       String
+  description String?   @db.Text
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  location    String?
+  coverImage  String?   @map("cover_image")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("community_events")
+}
+
+model CommunityMember {
+  id         String    @id @default(uuid()) @db.Uuid
+  orgId      String    @map("org_id") @db.Uuid
+  email      String?
+  contactId  String?   @map("contact_id") @db.Uuid
+  userId     String?   @map("user_id")
+  invitedBy  String?   @map("invited_by")
+  role       String    @default("member")
+  status     String    @default("invited") // invited | active | rejected | removed
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("community_members")
+}
+

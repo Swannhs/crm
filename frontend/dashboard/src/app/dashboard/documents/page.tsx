@@ -161,7 +161,7 @@ export default function DocumentsPage() {
                         </Avatar>
                         <Box>
                           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{doc.name}</Typography>
-                          <Typography variant="caption" color="text.secondary">{(doc.sizeBytes / 1024).toFixed(1)} KB</Typography>
+                          <Typography variant="caption" color="text.secondary">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : 'Unknown'}</Typography>
                         </Box>
                       </Box>
                     </TableCell>
@@ -179,7 +179,7 @@ export default function DocumentsPage() {
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                        {doc.type.toUpperCase()} • {new Date(doc.createdAt).toLocaleDateString()}
+                        {doc.type.toUpperCase()} • {new Date(doc.created_at).toLocaleDateString()}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">

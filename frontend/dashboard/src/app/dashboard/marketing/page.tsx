@@ -1,6 +1,5 @@
 import { 
   Megaphone, 
-  BarChart3, 
   Target, 
   TrendingUp, 
   Plus, 
@@ -11,15 +10,23 @@ import {
   Eye,
   MousePointer2
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const campaigns = [
-  { name: "Spring Clearance 2024", type: "Email", status: "Sent", reach: "12,400", conv: "4.2%" },
-  { name: "Product Launch SMS", type: "SMS", status: "Scheduled", reach: "5,800", conv: "-" },
-  { name: "Global Rebranding", type: "Social", status: "Draft", reach: "0", conv: "-" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { marketingService } from "@/services/marketing.service";
 
 export default function MarketingPage() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['marketing-campaigns'],
+    queryFn: () => marketingService.getCampaigns(),
+  });
+
+  const campaigns = (data?.data || []).map((campaign) => ({
+    name: campaign.name,
+    type: campaign.type.toUpperCase(),
+    status: campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1),
+    reach: campaign.sentAt ? 'Sent' : 'Pending',
+    conv: campaign.subject || '-',
+  }));
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       <header className="flex justify-between items-end">
@@ -65,11 +72,17 @@ export default function MarketingPage() {
             <button className="text-xs font-bold text-slate-500 hover:text-white transition-all uppercase tracking-widest">View Archives</button>
           </div>
           <div className="divide-y divide-white/5">
-            {campaigns.map((c) => (
+            {isLoading ? (
+              <div className="p-6 text-sm text-slate-400">Loading campaigns...</div>
+            ) : error ? (
+              <div className="p-6 text-sm text-red-400">Failed to load campaigns.</div>
+            ) : campaigns.length === 0 ? (
+              <div className="p-6 text-sm text-slate-400">No campaigns found.</div>
+            ) : campaigns.map((c) => (
               <div key={c.name} className="flex items-center justify-between p-6 hover:bg-white/[0.02] transition-colors group">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-primary transition-all">
-                    {c.type === 'Email' ? <Mail className="w-6 h-6" /> : c.type === 'SMS' ? <Smartphone className="w-6 h-6" /> : <Globe className="w-6 h-6" />}
+                    {c.type === 'EMAIL' ? <Mail className="w-6 h-6" /> : c.type === 'SMS' ? <Smartphone className="w-6 h-6" /> : <Globe className="w-6 h-6" />}
                   </div>
                   <div>
                     <h4 className="font-bold text-white text-sm">{c.name}</h4>
@@ -86,7 +99,7 @@ export default function MarketingPage() {
                     <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Conv.</p>
                     <p className="text-sm font-black text-emerald-400">{c.conv}</p>
                   </div>
-                  <button className="p-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100">
+                  <button title="Open campaign" className="p-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100">
                     <ArrowUpRight className="w-4 h-4" />
                   </button>
                 </div>

@@ -26,17 +26,11 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { contactService } from "@/services/contact.service";
-import { billingService } from "@/services/billing.service";
 import { employeeService } from "@/services/employee.service";
 import { useAuthStore } from "@/stores/auth.store";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-
-  const { data: billingStats } = useQuery({
-    queryKey: ['billing-stats'],
-    queryFn: () => billingService.getStats(),
-  });
 
   const { data: contactsResponse } = useQuery({
     queryKey: ['contacts-count'],
@@ -48,7 +42,7 @@ export default function DashboardPage() {
     queryFn: () => employeeService.getEmployees(),
   });
 
-  const revenue = (billingStats?.data?.total_amount || 0) / 100;
+  const revenue = 0; // placeholder until analytics service is available
   const contactsCount = contactsResponse?.data?.length || 0;
   const employeesCount = employeesResponse?.data?.length || 0;
 

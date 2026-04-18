@@ -4,9 +4,10 @@ export interface Document {
   id: string;
   name: string;
   type: string;
-  sizeBytes: number;
+  file_size?: number;
   status: 'draft' | 'pending' | 'signed' | 'review';
-  createdAt: string;
+  created_at: string;
+  cloud_url?: string;
 }
 
 export const documentService = {

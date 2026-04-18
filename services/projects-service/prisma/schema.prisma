@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Project {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  createdBy   String   @map("created_by")
+  name        String
+  description String?  @db.Text
+  status      String   @default("active") // active | archived | completed
+  color       String?
+  isDeleted   Boolean  @default(false) @map("is_deleted")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  boards      Board[]
+
+  @@index([orgId])
+  @@map("projects")
+}
+
+model Board {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  projectId   String?  @map("project_id") @db.Uuid
+  project     Project? @relation(fields: [projectId], references: [id])
+  createdBy   String   @map("created_by")
+  name        String
+  description String?  @db.Text
+  background  String?
+  status      String   @default("open") // open | closed | archived
+  isDeleted   Boolean  @default(false) @map("is_deleted")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  columns     Column[]
+
+  @@index([orgId])
+  @@map("boards")
+}
+
+model Column {
+  id        String   @id @default(uuid()) @db.Uuid
+  boardId   String   @map("board_id") @db.Uuid
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  orgId     String   @map("org_id") @db.Uuid
+  name      String
+  position  Int      @default(0)
+  color     String?
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cards     Card[]
+
+  @@index([boardId])
+  @@map("columns")
+}
+
+model Card {
+  id          String    @id @default(uuid()) @db.Uuid
+  columnId    String    @map("column_id") @db.Uuid
+  column      Column    @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  boardId     String    @map("board_id") @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  createdBy   String    @map("created_by")
+  title       String
+  description String?   @db.Text
+  position    Int       @default(0)
+  dueDate     DateTime? @map("due_date")
+  priority    String?   // low | medium | high | urgent
+  assignees   Json      @default("[]")
+  labels      Json      @default("[]")
+  attachments Json      @default("[]")
+  isArchived  Boolean   @default(false) @map("is_archived")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  comments    CardComment[]
+
+  @@index([columnId])
+  @@index([boardId])
+  @@map("cards")
+}
+
+model CardComment {
+  id        String   @id @default(uuid()) @db.Uuid
+  cardId    String   @map("card_id") @db.Uuid
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  orgId     String   @map("org_id") @db.Uuid
+  userId    String   @map("user_id")
+  text      String   @db.Text
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([cardId])
+  @@map("card_comments")
+}
+
+model Label {
+  id        String   @id @default(uuid()) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  name      String
+  color     String   @default("#6366f1")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([orgId])
+  @@map("labels")
+}
+
+model Task {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  createdBy   String    @map("created_by")
+  categoryId  String?   @map("category_id") @db.Uuid
+  title       String
+  description String?   @db.Text
+  status      String    @default("todo") // todo | in_progress | done | cancelled
+  priority    String?   // low | medium | high
+  dueDate     DateTime? @map("due_date")
+  assignees   Json      @default("[]")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("tasks")
+}
+
+model TaskCategory {
+  id        String   @id @default(uuid()) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  name      String
+  color     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([orgId])
+  @@map("task_categories")
+}
+
+model ProjectTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  createdBy   String   @map("created_by")
+  name        String
+  description String?  @db.Text
+  structure   Json     @default("{}") // columns, default cards, etc.
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([orgId])
+  @@map("project_templates")
+}

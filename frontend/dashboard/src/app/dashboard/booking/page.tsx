@@ -27,16 +27,28 @@ import {
   CardContent,
   Tooltip
 } from "@mui/material";
-
-const appointments = [
-  { time: "09:00 AM", client: "John Wick", service: "Strategic Consultation", type: "Video", duration: "60 min" },
-  { time: "11:30 AM", client: "Selina Kyle", service: "Security Audit", type: "On-site", duration: "90 min" },
-  { time: "02:00 PM", client: "Bruce Wayne", service: "Investment Review", type: "Video", duration: "45 min" },
-  { time: "04:30 PM", client: "Clark Kent", service: "Press Interview", type: "In-person", duration: "30 min" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { bookingService } from "@/services/booking.service";
 
 export default function BookingPage() {
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['appointments'],
+    queryFn: () => bookingService.getAppointments(),
+  });
+  const appointments = (data?.data || []).map((appointment) => {
+    const start = new Date(appointment.startTime);
+    const end = new Date(appointment.endTime);
+    const durationMinutes = Math.max(0, Math.round((end.getTime() - start.getTime()) / 60000));
+    return {
+      id: appointment.id,
+      time: start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      client: appointment.contactId || appointment.employeeId || 'Unknown',
+      service: appointment.title || 'Booked Appointment',
+      type: appointment.status === 'confirmed' ? 'Confirmed' : appointment.status,
+      duration: `${durationMinutes} min`,
+    };
+  });
 
   return (
     <Box sx={{ p: 4 }}>
@@ -82,9 +94,16 @@ export default function BookingPage() {
             </Box>
 
             <Stack spacing={2}>
+              {isLoading ? (
+                <Typography color="text.secondary">Loading appointments...</Typography>
+              ) : error ? (
+                <Typography color="error.main">Failed to load appointments.</Typography>
+              ) : appointments.length === 0 ? (
+                <Typography color="text.secondary">No appointments scheduled.</Typography>
+              ) : (
               {appointments.map((apt, index) => (
                 <Card 
-                  key={index} 
+                  key={apt.id || index} 
                   elevation={0} 
                   sx={{ 
                     borderRadius: 3, 
@@ -120,6 +139,7 @@ export default function BookingPage() {
                   </CardContent>
                 </Card>
               ))}
+              )}
             </Stack>
           </Paper>
         </Grid>

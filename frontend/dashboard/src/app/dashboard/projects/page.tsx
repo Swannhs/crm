@@ -31,44 +31,27 @@ import {
   CardContent,
   Tooltip
 } from "@mui/material";
-
-const projects = [
-  { 
-    id: 1, 
-    name: "Q2 Marketing Campaign", 
-    status: "In Progress", 
-    progress: 65, 
-    tasks: 12, 
-    completed: 8, 
-    team: ["AD", "JS", "MK"],
-    category: "Marketing",
-    priority: "High"
-  },
-  { 
-    id: 2, 
-    name: "Client Dashboard Redesign", 
-    status: "Completed", 
-    progress: 100, 
-    tasks: 45, 
-    completed: 45, 
-    team: ["JS", "AD"],
-    category: "Product",
-    priority: "Medium"
-  },
-  { 
-    id: 3, 
-    name: "New API Integration", 
-    status: "Pending", 
-    progress: 15, 
-    tasks: 8, 
-    completed: 1, 
-    team: ["MK", "JS"],
-    category: "Development",
-    priority: "Low"
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { projectsService } from "@/services/projects.service";
 
 export default function ProjectsPage() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => projectsService.getProjects(),
+  });
+
+  const projects = (data?.data || []).map((project) => ({
+    id: project.id,
+    name: project.name,
+    status: project.status === 'completed' ? 'Completed' : project.status === 'archived' ? 'Archived' : 'Active',
+    progress: project.status === 'completed' ? 100 : project.status === 'archived' ? 0 : 50,
+    tasks: 0,
+    completed: project.status === 'completed' ? 0 : 0,
+    team: [],
+    category: 'Project',
+    priority: 'Medium',
+  }));
+
   return (
     <Box sx={{ p: 4 }}>
       <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -132,7 +115,19 @@ export default function ProjectsPage() {
       </Box>
 
       <Grid container spacing={4}>
-        {projects.map((project) => (
+        {isLoading ? (
+          <Grid item xs={12}>
+            <Typography color="text.secondary">Loading projects...</Typography>
+          </Grid>
+        ) : error ? (
+          <Grid item xs={12}>
+            <Typography color="error.main">Failed to load projects.</Typography>
+          </Grid>
+        ) : projects.length === 0 ? (
+          <Grid item xs={12}>
+            <Typography color="text.secondary">No projects found.</Typography>
+          </Grid>
+        ) : projects.map((project) => (
           <Grid item xs={12} md={6} lg={4} key={project.id}>
             <Card elevation={0} sx={{ borderRadius: 4, border: '1px solid', borderColor: 'divider', transition: 'all 0.2s', '&:hover': { borderColor: 'primary.main', transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ p: 3 }}>
@@ -159,9 +154,9 @@ export default function ProjectsPage() {
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                    <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 28, height: 28, fontSize: 10, fontWeight: 700 } }}>
-                      {project.team.map((initials) => (
-                        <Avatar key={initials} sx={{ bgcolor: 'secondary.main' }}>{initials}</Avatar>
-                      ))}
+                     {(project.team.length ? project.team : ['PR']).map((initials) => (
+                      <Avatar key={initials} sx={{ bgcolor: 'secondary.main' }}>{initials}</Avatar>
+                     ))}
                    </AvatarGroup>
                    <Stack direction="row" spacing={1} alignItems="center" color="text.secondary">
                       <CheckCircle2 size={14} />

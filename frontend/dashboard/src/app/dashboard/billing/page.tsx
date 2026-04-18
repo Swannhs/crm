@@ -44,18 +44,16 @@ export default function BillingPage() {
     queryFn: () => billingService.getInvoices({ status: filter === 'all' ? undefined : filter }),
   });
 
-  const { data: statsResponse } = useQuery({
-    queryKey: ['invoice-stats'],
-    queryFn: () => billingService.getStats(),
-  });
-
   const invoices = invoicesResponse?.data || [];
-  const statsData = statsResponse?.data || {};
+
+  const totalCents   = invoices.reduce((s, i) => s + i.amountCents, 0);
+  const paidCents    = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amountCents, 0);
+  const pendingCents = totalCents - paidCents;
 
   const summary = [
-    { label: "Total Invoiced", value: statsData.total_amount || 0, icon: DollarSign, color: '#6366f1' },
-    { label: "Paid Invoices", value: statsData.paid_amount || 0, icon: CheckCircle2, color: '#10b981' },
-    { label: "Pending Amount", value: statsData.pending_amount || 0, icon: Clock, color: '#f59e0b' },
+    { label: "Total Invoiced", value: totalCents, icon: DollarSign, color: '#6366f1' },
+    { label: "Paid Invoices", value: paidCents, icon: CheckCircle2, color: '#10b981' },
+    { label: "Pending Amount", value: pendingCents, icon: Clock, color: '#f59e0b' },
   ];
 
   return (
@@ -132,9 +130,12 @@ export default function BillingPage() {
                 }
             }}
           >
-            <Tab label="All Invoices" value="all" />
+            <Tab label="All" value="all" />
+            <Tab label="Draft" value="draft" />
+            <Tab label="Sent" value="sent" />
             <Tab label="Paid" value="paid" />
-            <Tab label="Pending" value="pending" />
+            <Tab label="Overdue" value="overdue" />
+            <Tab label="Cancelled" value="cancelled" />
           </Tabs>
           <TextField
              variant="outlined"

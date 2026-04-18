@@ -25,19 +25,19 @@ export interface Schedule {
 
 export const employeeService = {
   getEmployees: async () => {
-    const response = await api.get<{ data: Employee[] }>(`/api/employees`);
+    const response = await api.get<{ data: Employee[] }>(`/employees`);
     return response.data;
   },
   
   getSchedules: async (start?: string, end?: string) => {
-    const response = await api.get<{ data: Schedule[] }>(`/api/employees/schedules`, {
+    const response = await api.get<{ data: Schedule[] }>(`/employees/schedules`, {
       params: { start, end }
     });
     return response.data;
   },
   
   createSchedule: async (data: Partial<Schedule>) => {
-    const response = await api.post<{ data: Schedule }>(`/api/employees/schedules`, data);
+    const response = await api.post<{ data: Schedule }>(`/employees/schedules`, data);
     return response.data;
   }
 };
