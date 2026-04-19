@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Campaign {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  createdBy   String    @map("created_by")
+  name        String
+  type        String    @default("email") // email | sms | push
+  status      String    @default("draft") // draft | scheduled | sent | cancelled
+  subject     String?
+  body        String?   @db.Text
+  scheduledAt DateTime? @map("scheduled_at")
+  sentAt      DateTime? @map("sent_at")
+  metadata    Json      @default("{}")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  emails EmailMessage[]
+
+  @@index([orgId])
+  @@map("campaigns")
+}
+
+model EmailMessage {
+  id         String    @id @default(uuid()) @db.Uuid
+  orgId      String    @map("org_id") @db.Uuid
+  campaignId String?   @map("campaign_id") @db.Uuid
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+  toEmail    String    @map("to_email")
+  subject    String
+  body       String    @db.Text
+  status     String    @default("pending") // pending | sent | failed | opened
+  sentAt     DateTime? @map("sent_at")
+  openedAt   DateTime? @map("opened_at")
+  metadata   Json      @default("{}")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([orgId])
+  @@map("email_messages")
+}
+
+model Subscriber {
+  id        String   @id @default(uuid()) @db.Uuid
+  orgId     String   @map("org_id") @db.Uuid
+  email     String
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  phone     String?
+  source    String?
+  status    String   @default("active") // active | unsubscribed | bounced
+  tags      Json     @default("[]")
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([orgId, email])
+  @@index([orgId])
+  @@map("subscribers")
+}
+
+model Automation {
+  id         String   @id @default(uuid()) @db.Uuid
+  orgId      String   @map("org_id") @db.Uuid
+  createdBy  String   @map("created_by")
+  name       String
+  trigger    String // contact_created | tag_added | form_submitted | manual
+  conditions Json     @default("[]")
+  actions    Json     @default("[]")
+  status     String   @default("inactive") // active | inactive
+  runCount   Int      @default(0) @map("run_count")
+  isDeleted  Boolean  @default(false) @map("is_deleted")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("automations")
+}
+
+model OptinForm {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String   @map("org_id") @db.Uuid
+  createdBy   String   @map("created_by")
+  name        String
+  slug        String   @unique
+  fields      Json     @default("[]")
+  settings    Json     @default("{}")
+  isPublished Boolean  @default(false) @map("is_published")
+  isDeleted   Boolean  @default(false) @map("is_deleted")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("optin_forms")
+}

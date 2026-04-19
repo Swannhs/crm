@@ -60,7 +60,7 @@ export function ProjectListView() {
     queryFn: () => projectService.getProjects(),
   });
 
-  const projects = projectsData || [];
+  const projects = Array.isArray(projectsData) ? projectsData : [];
 
   const methods = useForm({
     resolver: zodResolver(NewProjectSchema),
@@ -140,17 +140,17 @@ export function ProjectListView() {
                 ) : (
                   <>
                     {projects.map((row: any) => (
-                      <TableRow key={row._id} hover>
+                      <TableRow key={row.id || row._id} hover>
                         <TableCell>
                           <Typography
                             variant="subtitle2"
                             sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                           >
-                            {row.title}
+                            {row.name || row.title || 'Untitled project'}
                           </Typography>
                         </TableCell>
                         <TableCell>{row.description || 'No description'}</TableCell>
-                        <TableCell>{new Date(row.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                         <TableCell>{row.status || 'Active'}</TableCell>
                         <TableCell align="right">
                           <IconButton>

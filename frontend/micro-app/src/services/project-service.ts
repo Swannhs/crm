@@ -4,12 +4,12 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export async function getProjects() {
   const response = await axiosInstance.get('/api/projects/v1/projects');
-  return response.data;
+  return response.data?.data ?? response.data ?? [];
 }
 
 export async function getProject(id: string) {
   const response = await axiosInstance.get(`/api/projects/v1/projects/${id}`);
-  return response.data;
+  return response.data?.data ?? response.data;
 }
 
 export async function createProject(data: any) {
@@ -30,12 +30,12 @@ export async function deleteProject(id: string) {
 // Kanban / Boards
 export async function getProjectBoards(projectId: string) {
   const response = await axiosInstance.get(`/api/projects/v1/projects/${projectId}/boards`);
-  return response.data;
+  return response.data?.data ?? response.data ?? [];
 }
 
 export async function getTasks() {
   const response = await axiosInstance.get('/api/projects/v1/tasks');
-  return response.data;
+  return response.data?.data ?? response.data ?? [];
 }
 
 export async function createTask(data: any) {
@@ -51,7 +51,7 @@ export async function createBoard(projectId: string, data: any) {
 // Columns
 export async function getColumns(boardId: string) {
   const response = await axiosInstance.get(`/api/projects/v1/boards/${boardId}/columns`);
-  return response.data;
+  return response.data?.data ?? response.data ?? [];
 }
 
 export async function createColumn(boardId: string, data: any) {
@@ -62,7 +62,7 @@ export async function createColumn(boardId: string, data: any) {
 // Cards / Tasks
 export async function getCards(boardId: string) {
   const response = await axiosInstance.get(`/api/projects/v1/boards/${boardId}/cards`);
-  return response.data;
+  return response.data?.data ?? response.data ?? [];
 }
 
 export async function createCard(boardId: string, data: any) {

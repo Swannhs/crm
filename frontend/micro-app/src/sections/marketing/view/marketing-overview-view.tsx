@@ -44,7 +44,7 @@ export function MarketingOverviewView() {
           <AnalyticsWidgetSummary
             title="Total Campaigns"
             total={campaigns?.length || 0}
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.png" />}
+            icon="solar:mailbox-bold"
           />
         </Grid>
 
@@ -53,7 +53,7 @@ export function MarketingOverviewView() {
             title="Opt-in Forms"
             total={forms?.length || 0}
             color="info"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.png" />}
+            icon="solar:document-add-bold"
           />
         </Grid>
 
@@ -62,7 +62,7 @@ export function MarketingOverviewView() {
             title="Active Subscribers"
             total={1240}
             color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.png" />}
+            icon="solar:users-group-rounded-bold"
           />
         </Grid>
 
@@ -71,7 +71,7 @@ export function MarketingOverviewView() {
             title="Sent Emails"
             total={42500}
             color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.png" />}
+            icon="solar:letter-bold"
           />
         </Grid>
 
@@ -80,8 +80,8 @@ export function MarketingOverviewView() {
               <Typography variant="h6">Recent Campaigns</Typography>
               <Box sx={{ mt: 3 }}>
                 {campaigns?.map((c: any) => (
-                   <Box key={c._id} sx={{ mb: 2, p: 2, borderBottom: '1px solid #f0f0f0' }}>
-                      <Typography variant="subtitle2">{c.title}</Typography>
+                   <Box key={c.id || c._id} sx={{ mb: 2, p: 2, borderBottom: '1px solid #f0f0f0' }}>
+                      <Typography variant="subtitle2">{c.name || c.title || 'Untitled campaign'}</Typography>
                       <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         {c.type} • Status: {c.status}
                       </Typography>
