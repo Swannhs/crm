@@ -16,7 +16,9 @@
     "re:start": "yarn rm:all && yarn install && yarn dev",
     "re:build": "yarn rm:all && yarn install && yarn build",
     "re:build-npm": "npm run rm:all && npm install && npm run build",
-    "start:out": "npx serve@latest out -p 3034"
+    "start:out": "npx serve@latest out -p 3034",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -67,6 +69,7 @@
     "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^8.58.2",
     "@typescript-eslint/parser": "^8.58.2",
+    "cypress": "^15.14.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^9.1.0",

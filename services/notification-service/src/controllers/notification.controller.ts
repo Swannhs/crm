@@ -1,5 +1,11 @@
 import { Response } from 'express';
-import { NotificationService, NotificationSettingService, EmailMessageService, SmsService } from '../services/notification.service.js';
+import {
+  NotificationService,
+  NotificationSettingService,
+  EmailMessageService,
+  SmsService,
+  ContactPhoneVerificationService,
+} from '../services/notification.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
 export class NotificationController {
@@ -29,18 +35,42 @@ export class NotificationController {
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
 
+  async archive(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { orgId, userId } = req.identity;
+      await this.svc.archive(orgId, userId, req.body.ids);
+      return res.json({ message: 'Archived notifications' });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async unarchive(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { orgId, userId } = req.identity;
+      await this.svc.unarchive(orgId, userId, req.body.ids);
+      return res.json({ message: 'Unarchived notifications' });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
   async markSeen(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.markAsSeen(req.params.notificationId, req.params.userId);
+      await this.svc.markAsSeen(String(req.params.notificationId), String(req.params.userId));
       return res.json({ message: 'Marked as seen' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
 
   async unseenCount(req: AuthenticatedRequest, res: Response) {
     try {
-      const count = await this.svc.getUnseenCount(req.identity.orgId, req.params.groupId, req.params.userId);
+      const count = await this.svc.getUnseenCount(
+        req.identity.orgId,
+        String(req.params.groupId),
+        String(req.params.userId)
+      );
       return res.json({ data: { count } });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async handleDomainEvent(routingKey: string, payload: any) {
+    return this.svc.createFromDomainEvent(routingKey, payload);
   }
 }
 
@@ -89,7 +119,7 @@ export class EmailMessageController {
 
   async markSent(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.markAsSent(req.params.id, req.identity.orgId);
+      await this.svc.markAsSent(String(req.params.id), req.identity.orgId);
       return res.json({ message: 'Marked as sent' });
     } catch (err: any) {
       if (err.message === 'Not found') return res.status(404).json({ message: err.message });
@@ -115,5 +145,28 @@ export class SmsController {
       const msg = await this.svc.sendSms(orgId, userId, req.body.to, req.body.body);
       return res.status(201).json({ data: msg });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+}
+
+export class ContactPhoneVerificationController {
+  private svc = new ContactPhoneVerificationService();
+
+  async generate(req: any, res: Response) {
+    try {
+      if (!req.body.phoneNumber) {
+        return res.status(400).json({ message: "phoneNumber is required" });
+      }
+      const verification = await this.svc.generate(req.body);
+      return res.status(201).json({
+        data: {
+          id: verification.id,
+          phoneNumber: verification.phoneNumber,
+          verificationCode: verification.verificationCode,
+          expiresAt: verification.expiresAt,
+        },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
   }
 }

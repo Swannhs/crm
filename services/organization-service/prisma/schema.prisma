@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  output   = "../generated-local/prisma"
 }
 
 datasource db {
@@ -47,4 +47,17 @@ model Location {
 
   @@index([organizationId])
   @@map("locations")
+}
+
+model OnboardingStatus {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.VarChar(80)
+  tourStepId    String   @map("tour_step_id")
+  tourCompleted Boolean  @default(false) @map("tour_completed")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, tourStepId])
+  @@index([userId])
+  @@map("onboarding_statuses")
 }

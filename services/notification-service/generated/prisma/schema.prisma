@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -9,20 +10,22 @@ datasource db {
 }
 
 model Notification {
-  id         String    @id @default(uuid()) @db.Uuid
-  org_id     String    @db.Uuid
-  user_id    String    @db.VarChar(80)
-  type       String // email | sms | push | call | system
-  category   String? // appointment | message | payment | marketing | community
-  title      String?
-  body       String?
-  is_seen    Boolean   @default(false)
-  is_read    Boolean   @default(false)
-  seen_at    DateTime?
-  ref_id     String? // external reference (e.g. message id)
-  ref_type   String? // type of reference
-  metadata   Json      @default("{}")
-  created_at DateTime  @default(now())
+  id          String    @id @default(uuid()) @db.Uuid
+  org_id      String    @db.Uuid
+  user_id     String    @db.VarChar(80)
+  type        String // email | sms | push | call | system
+  category    String? // appointment | message | payment | marketing | community
+  title       String?
+  body        String?
+  is_seen     Boolean   @default(false)
+  is_read     Boolean   @default(false)
+  is_archived Boolean   @default(false)
+  seen_at     DateTime?
+  archived_at DateTime?
+  ref_id      String? // external reference (e.g. message id)
+  ref_type    String? // type of reference
+  metadata    Json      @default("{}")
+  created_at  DateTime  @default(now())
 
   @@index([org_id])
   @@index([user_id])
@@ -110,4 +113,22 @@ model NotificationSetting {
   updated_at    DateTime @updatedAt
 
   @@map("notification_settings")
+}
+
+model ContactPhoneVerification {
+  id               String    @id @default(uuid()) @db.Uuid
+  orgId            String?   @map("org_id") @db.Uuid
+  userRef          String?   @map("user_ref")
+  phoneNumber      String    @map("phone_number")
+  verificationCode String    @map("verification_code")
+  source           String?
+  status           String    @default("generated")
+  expiresAt        DateTime  @map("expires_at")
+  verifiedAt       DateTime? @map("verified_at")
+  metadata         Json      @default("{}")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@index([phoneNumber])
+  @@map("contact_phone_verifications")
 }

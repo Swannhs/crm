@@ -17,8 +17,20 @@ export async function likePost(id: string) {
   return response.data;
 }
 
+export async function getGroups() {
+  const response = await axiosInstance.get('/api/community/groups');
+  return response.data?.data ?? response.data ?? [];
+}
+
+export async function getGroup(id: string) {
+  const response = await axiosInstance.get(`/api/community/groups/${id}`);
+  return response.data?.data ?? response.data;
+}
+
 export const communityService = {
   getPosts,
   createPost,
   likePost,
+  getGroups,
+  getGroup,
 };

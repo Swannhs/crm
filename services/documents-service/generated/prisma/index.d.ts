@@ -28,6 +28,11 @@ export type DocumentRecipient = $Result.DefaultSelection<Prisma.$DocumentRecipie
  * 
  */
 export type DocumentActivity = $Result.DefaultSelection<Prisma.$DocumentActivityPayload>
+/**
+ * Model ContactWaiver
+ * 
+ */
+export type ContactWaiver = $Result.DefaultSelection<Prisma.$ContactWaiverPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -176,6 +181,16 @@ export class PrismaClient<
     * ```
     */
   get documentActivity(): Prisma.DocumentActivityDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.contactWaiver`: Exposes CRUD operations for the **ContactWaiver** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ContactWaivers
+    * const contactWaivers = await prisma.contactWaiver.findMany()
+    * ```
+    */
+  get contactWaiver(): Prisma.ContactWaiverDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -619,7 +634,8 @@ export namespace Prisma {
   export const ModelName: {
     Document: 'Document',
     DocumentRecipient: 'DocumentRecipient',
-    DocumentActivity: 'DocumentActivity'
+    DocumentActivity: 'DocumentActivity',
+    ContactWaiver: 'ContactWaiver'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -638,7 +654,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "document" | "documentRecipient" | "documentActivity"
+      modelProps: "document" | "documentRecipient" | "documentActivity" | "contactWaiver"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -864,6 +880,80 @@ export namespace Prisma {
           }
         }
       }
+      ContactWaiver: {
+        payload: Prisma.$ContactWaiverPayload<ExtArgs>
+        fields: Prisma.ContactWaiverFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ContactWaiverFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ContactWaiverFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>
+          }
+          findFirst: {
+            args: Prisma.ContactWaiverFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ContactWaiverFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>
+          }
+          findMany: {
+            args: Prisma.ContactWaiverFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>[]
+          }
+          create: {
+            args: Prisma.ContactWaiverCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>
+          }
+          createMany: {
+            args: Prisma.ContactWaiverCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ContactWaiverCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>[]
+          }
+          delete: {
+            args: Prisma.ContactWaiverDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>
+          }
+          update: {
+            args: Prisma.ContactWaiverUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>
+          }
+          deleteMany: {
+            args: Prisma.ContactWaiverDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ContactWaiverUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ContactWaiverUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>[]
+          }
+          upsert: {
+            args: Prisma.ContactWaiverUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactWaiverPayload>
+          }
+          aggregate: {
+            args: Prisma.ContactWaiverAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateContactWaiver>
+          }
+          groupBy: {
+            args: Prisma.ContactWaiverGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ContactWaiverGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ContactWaiverCountArgs<ExtArgs>
+            result: $Utils.Optional<ContactWaiverCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -963,6 +1053,7 @@ export namespace Prisma {
     document?: DocumentOmit
     documentRecipient?: DocumentRecipientOmit
     documentActivity?: DocumentActivityOmit
+    contactWaiver?: ContactWaiverOmit
   }
 
   /* Types for Logging */
@@ -4633,6 +4724,1185 @@ export namespace Prisma {
 
 
   /**
+   * Model ContactWaiver
+   */
+
+  export type AggregateContactWaiver = {
+    _count: ContactWaiverCountAggregateOutputType | null
+    _min: ContactWaiverMinAggregateOutputType | null
+    _max: ContactWaiverMaxAggregateOutputType | null
+  }
+
+  export type ContactWaiverMinAggregateOutputType = {
+    id: string | null
+    orgId: string | null
+    createdByUserId: string | null
+    contactId: string | null
+    name: string | null
+    title: string | null
+    content: string | null
+    status: string | null
+    signatureType: string | null
+    templateLogo: string | null
+    signerName: string | null
+    signedAt: Date | null
+    isDeleted: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ContactWaiverMaxAggregateOutputType = {
+    id: string | null
+    orgId: string | null
+    createdByUserId: string | null
+    contactId: string | null
+    name: string | null
+    title: string | null
+    content: string | null
+    status: string | null
+    signatureType: string | null
+    templateLogo: string | null
+    signerName: string | null
+    signedAt: Date | null
+    isDeleted: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ContactWaiverCountAggregateOutputType = {
+    id: number
+    orgId: number
+    createdByUserId: number
+    contactId: number
+    name: number
+    title: number
+    content: number
+    status: number
+    signatureType: number
+    templateLogo: number
+    signerName: number
+    signedAt: number
+    isDeleted: number
+    waiver: number
+    questions: number
+    members: number
+    guardian: number
+    orgBranding: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ContactWaiverMinAggregateInputType = {
+    id?: true
+    orgId?: true
+    createdByUserId?: true
+    contactId?: true
+    name?: true
+    title?: true
+    content?: true
+    status?: true
+    signatureType?: true
+    templateLogo?: true
+    signerName?: true
+    signedAt?: true
+    isDeleted?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ContactWaiverMaxAggregateInputType = {
+    id?: true
+    orgId?: true
+    createdByUserId?: true
+    contactId?: true
+    name?: true
+    title?: true
+    content?: true
+    status?: true
+    signatureType?: true
+    templateLogo?: true
+    signerName?: true
+    signedAt?: true
+    isDeleted?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ContactWaiverCountAggregateInputType = {
+    id?: true
+    orgId?: true
+    createdByUserId?: true
+    contactId?: true
+    name?: true
+    title?: true
+    content?: true
+    status?: true
+    signatureType?: true
+    templateLogo?: true
+    signerName?: true
+    signedAt?: true
+    isDeleted?: true
+    waiver?: true
+    questions?: true
+    members?: true
+    guardian?: true
+    orgBranding?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ContactWaiverAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ContactWaiver to aggregate.
+     */
+    where?: ContactWaiverWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactWaivers to fetch.
+     */
+    orderBy?: ContactWaiverOrderByWithRelationInput | ContactWaiverOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ContactWaiverWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactWaivers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactWaivers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ContactWaivers
+    **/
+    _count?: true | ContactWaiverCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ContactWaiverMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ContactWaiverMaxAggregateInputType
+  }
+
+  export type GetContactWaiverAggregateType<T extends ContactWaiverAggregateArgs> = {
+        [P in keyof T & keyof AggregateContactWaiver]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateContactWaiver[P]>
+      : GetScalarType<T[P], AggregateContactWaiver[P]>
+  }
+
+
+
+
+  export type ContactWaiverGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ContactWaiverWhereInput
+    orderBy?: ContactWaiverOrderByWithAggregationInput | ContactWaiverOrderByWithAggregationInput[]
+    by: ContactWaiverScalarFieldEnum[] | ContactWaiverScalarFieldEnum
+    having?: ContactWaiverScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ContactWaiverCountAggregateInputType | true
+    _min?: ContactWaiverMinAggregateInputType
+    _max?: ContactWaiverMaxAggregateInputType
+  }
+
+  export type ContactWaiverGroupByOutputType = {
+    id: string
+    orgId: string | null
+    createdByUserId: string | null
+    contactId: string | null
+    name: string
+    title: string | null
+    content: string
+    status: string
+    signatureType: string | null
+    templateLogo: string | null
+    signerName: string | null
+    signedAt: Date | null
+    isDeleted: boolean
+    waiver: JsonValue
+    questions: JsonValue
+    members: JsonValue
+    guardian: JsonValue
+    orgBranding: JsonValue
+    metadata: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: ContactWaiverCountAggregateOutputType | null
+    _min: ContactWaiverMinAggregateOutputType | null
+    _max: ContactWaiverMaxAggregateOutputType | null
+  }
+
+  type GetContactWaiverGroupByPayload<T extends ContactWaiverGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ContactWaiverGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ContactWaiverGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ContactWaiverGroupByOutputType[P]>
+            : GetScalarType<T[P], ContactWaiverGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ContactWaiverSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    createdByUserId?: boolean
+    contactId?: boolean
+    name?: boolean
+    title?: boolean
+    content?: boolean
+    status?: boolean
+    signatureType?: boolean
+    templateLogo?: boolean
+    signerName?: boolean
+    signedAt?: boolean
+    isDeleted?: boolean
+    waiver?: boolean
+    questions?: boolean
+    members?: boolean
+    guardian?: boolean
+    orgBranding?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["contactWaiver"]>
+
+  export type ContactWaiverSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    createdByUserId?: boolean
+    contactId?: boolean
+    name?: boolean
+    title?: boolean
+    content?: boolean
+    status?: boolean
+    signatureType?: boolean
+    templateLogo?: boolean
+    signerName?: boolean
+    signedAt?: boolean
+    isDeleted?: boolean
+    waiver?: boolean
+    questions?: boolean
+    members?: boolean
+    guardian?: boolean
+    orgBranding?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["contactWaiver"]>
+
+  export type ContactWaiverSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    createdByUserId?: boolean
+    contactId?: boolean
+    name?: boolean
+    title?: boolean
+    content?: boolean
+    status?: boolean
+    signatureType?: boolean
+    templateLogo?: boolean
+    signerName?: boolean
+    signedAt?: boolean
+    isDeleted?: boolean
+    waiver?: boolean
+    questions?: boolean
+    members?: boolean
+    guardian?: boolean
+    orgBranding?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["contactWaiver"]>
+
+  export type ContactWaiverSelectScalar = {
+    id?: boolean
+    orgId?: boolean
+    createdByUserId?: boolean
+    contactId?: boolean
+    name?: boolean
+    title?: boolean
+    content?: boolean
+    status?: boolean
+    signatureType?: boolean
+    templateLogo?: boolean
+    signerName?: boolean
+    signedAt?: boolean
+    isDeleted?: boolean
+    waiver?: boolean
+    questions?: boolean
+    members?: boolean
+    guardian?: boolean
+    orgBranding?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ContactWaiverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "createdByUserId" | "contactId" | "name" | "title" | "content" | "status" | "signatureType" | "templateLogo" | "signerName" | "signedAt" | "isDeleted" | "waiver" | "questions" | "members" | "guardian" | "orgBranding" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["contactWaiver"]>
+
+  export type $ContactWaiverPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ContactWaiver"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      orgId: string | null
+      createdByUserId: string | null
+      contactId: string | null
+      name: string
+      title: string | null
+      content: string
+      status: string
+      signatureType: string | null
+      templateLogo: string | null
+      signerName: string | null
+      signedAt: Date | null
+      isDeleted: boolean
+      waiver: Prisma.JsonValue
+      questions: Prisma.JsonValue
+      members: Prisma.JsonValue
+      guardian: Prisma.JsonValue
+      orgBranding: Prisma.JsonValue
+      metadata: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["contactWaiver"]>
+    composites: {}
+  }
+
+  type ContactWaiverGetPayload<S extends boolean | null | undefined | ContactWaiverDefaultArgs> = $Result.GetResult<Prisma.$ContactWaiverPayload, S>
+
+  type ContactWaiverCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ContactWaiverFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ContactWaiverCountAggregateInputType | true
+    }
+
+  export interface ContactWaiverDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ContactWaiver'], meta: { name: 'ContactWaiver' } }
+    /**
+     * Find zero or one ContactWaiver that matches the filter.
+     * @param {ContactWaiverFindUniqueArgs} args - Arguments to find a ContactWaiver
+     * @example
+     * // Get one ContactWaiver
+     * const contactWaiver = await prisma.contactWaiver.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ContactWaiverFindUniqueArgs>(args: SelectSubset<T, ContactWaiverFindUniqueArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ContactWaiver that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ContactWaiverFindUniqueOrThrowArgs} args - Arguments to find a ContactWaiver
+     * @example
+     * // Get one ContactWaiver
+     * const contactWaiver = await prisma.contactWaiver.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ContactWaiverFindUniqueOrThrowArgs>(args: SelectSubset<T, ContactWaiverFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ContactWaiver that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactWaiverFindFirstArgs} args - Arguments to find a ContactWaiver
+     * @example
+     * // Get one ContactWaiver
+     * const contactWaiver = await prisma.contactWaiver.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ContactWaiverFindFirstArgs>(args?: SelectSubset<T, ContactWaiverFindFirstArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ContactWaiver that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactWaiverFindFirstOrThrowArgs} args - Arguments to find a ContactWaiver
+     * @example
+     * // Get one ContactWaiver
+     * const contactWaiver = await prisma.contactWaiver.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ContactWaiverFindFirstOrThrowArgs>(args?: SelectSubset<T, ContactWaiverFindFirstOrThrowArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ContactWaivers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactWaiverFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ContactWaivers
+     * const contactWaivers = await prisma.contactWaiver.findMany()
+     * 
+     * // Get first 10 ContactWaivers
+     * const contactWaivers = await prisma.contactWaiver.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const contactWaiverWithIdOnly = await prisma.contactWaiver.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ContactWaiverFindManyArgs>(args?: SelectSubset<T, ContactWaiverFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ContactWaiver.
+     * @param {ContactWaiverCreateArgs} args - Arguments to create a ContactWaiver.
+     * @example
+     * // Create one ContactWaiver
+     * const ContactWaiver = await prisma.contactWaiver.create({
+     *   data: {
+     *     // ... data to create a ContactWaiver
+     *   }
+     * })
+     * 
+     */
+    create<T extends ContactWaiverCreateArgs>(args: SelectSubset<T, ContactWaiverCreateArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ContactWaivers.
+     * @param {ContactWaiverCreateManyArgs} args - Arguments to create many ContactWaivers.
+     * @example
+     * // Create many ContactWaivers
+     * const contactWaiver = await prisma.contactWaiver.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ContactWaiverCreateManyArgs>(args?: SelectSubset<T, ContactWaiverCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ContactWaivers and returns the data saved in the database.
+     * @param {ContactWaiverCreateManyAndReturnArgs} args - Arguments to create many ContactWaivers.
+     * @example
+     * // Create many ContactWaivers
+     * const contactWaiver = await prisma.contactWaiver.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ContactWaivers and only return the `id`
+     * const contactWaiverWithIdOnly = await prisma.contactWaiver.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ContactWaiverCreateManyAndReturnArgs>(args?: SelectSubset<T, ContactWaiverCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ContactWaiver.
+     * @param {ContactWaiverDeleteArgs} args - Arguments to delete one ContactWaiver.
+     * @example
+     * // Delete one ContactWaiver
+     * const ContactWaiver = await prisma.contactWaiver.delete({
+     *   where: {
+     *     // ... filter to delete one ContactWaiver
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ContactWaiverDeleteArgs>(args: SelectSubset<T, ContactWaiverDeleteArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ContactWaiver.
+     * @param {ContactWaiverUpdateArgs} args - Arguments to update one ContactWaiver.
+     * @example
+     * // Update one ContactWaiver
+     * const contactWaiver = await prisma.contactWaiver.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ContactWaiverUpdateArgs>(args: SelectSubset<T, ContactWaiverUpdateArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ContactWaivers.
+     * @param {ContactWaiverDeleteManyArgs} args - Arguments to filter ContactWaivers to delete.
+     * @example
+     * // Delete a few ContactWaivers
+     * const { count } = await prisma.contactWaiver.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ContactWaiverDeleteManyArgs>(args?: SelectSubset<T, ContactWaiverDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ContactWaivers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactWaiverUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ContactWaivers
+     * const contactWaiver = await prisma.contactWaiver.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ContactWaiverUpdateManyArgs>(args: SelectSubset<T, ContactWaiverUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ContactWaivers and returns the data updated in the database.
+     * @param {ContactWaiverUpdateManyAndReturnArgs} args - Arguments to update many ContactWaivers.
+     * @example
+     * // Update many ContactWaivers
+     * const contactWaiver = await prisma.contactWaiver.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ContactWaivers and only return the `id`
+     * const contactWaiverWithIdOnly = await prisma.contactWaiver.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ContactWaiverUpdateManyAndReturnArgs>(args: SelectSubset<T, ContactWaiverUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ContactWaiver.
+     * @param {ContactWaiverUpsertArgs} args - Arguments to update or create a ContactWaiver.
+     * @example
+     * // Update or create a ContactWaiver
+     * const contactWaiver = await prisma.contactWaiver.upsert({
+     *   create: {
+     *     // ... data to create a ContactWaiver
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ContactWaiver we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ContactWaiverUpsertArgs>(args: SelectSubset<T, ContactWaiverUpsertArgs<ExtArgs>>): Prisma__ContactWaiverClient<$Result.GetResult<Prisma.$ContactWaiverPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ContactWaivers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactWaiverCountArgs} args - Arguments to filter ContactWaivers to count.
+     * @example
+     * // Count the number of ContactWaivers
+     * const count = await prisma.contactWaiver.count({
+     *   where: {
+     *     // ... the filter for the ContactWaivers we want to count
+     *   }
+     * })
+    **/
+    count<T extends ContactWaiverCountArgs>(
+      args?: Subset<T, ContactWaiverCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ContactWaiverCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ContactWaiver.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactWaiverAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ContactWaiverAggregateArgs>(args: Subset<T, ContactWaiverAggregateArgs>): Prisma.PrismaPromise<GetContactWaiverAggregateType<T>>
+
+    /**
+     * Group by ContactWaiver.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactWaiverGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ContactWaiverGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ContactWaiverGroupByArgs['orderBy'] }
+        : { orderBy?: ContactWaiverGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ContactWaiverGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetContactWaiverGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ContactWaiver model
+   */
+  readonly fields: ContactWaiverFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ContactWaiver.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ContactWaiverClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ContactWaiver model
+   */
+  interface ContactWaiverFieldRefs {
+    readonly id: FieldRef<"ContactWaiver", 'String'>
+    readonly orgId: FieldRef<"ContactWaiver", 'String'>
+    readonly createdByUserId: FieldRef<"ContactWaiver", 'String'>
+    readonly contactId: FieldRef<"ContactWaiver", 'String'>
+    readonly name: FieldRef<"ContactWaiver", 'String'>
+    readonly title: FieldRef<"ContactWaiver", 'String'>
+    readonly content: FieldRef<"ContactWaiver", 'String'>
+    readonly status: FieldRef<"ContactWaiver", 'String'>
+    readonly signatureType: FieldRef<"ContactWaiver", 'String'>
+    readonly templateLogo: FieldRef<"ContactWaiver", 'String'>
+    readonly signerName: FieldRef<"ContactWaiver", 'String'>
+    readonly signedAt: FieldRef<"ContactWaiver", 'DateTime'>
+    readonly isDeleted: FieldRef<"ContactWaiver", 'Boolean'>
+    readonly waiver: FieldRef<"ContactWaiver", 'Json'>
+    readonly questions: FieldRef<"ContactWaiver", 'Json'>
+    readonly members: FieldRef<"ContactWaiver", 'Json'>
+    readonly guardian: FieldRef<"ContactWaiver", 'Json'>
+    readonly orgBranding: FieldRef<"ContactWaiver", 'Json'>
+    readonly metadata: FieldRef<"ContactWaiver", 'Json'>
+    readonly createdAt: FieldRef<"ContactWaiver", 'DateTime'>
+    readonly updatedAt: FieldRef<"ContactWaiver", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ContactWaiver findUnique
+   */
+  export type ContactWaiverFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactWaiver to fetch.
+     */
+    where: ContactWaiverWhereUniqueInput
+  }
+
+  /**
+   * ContactWaiver findUniqueOrThrow
+   */
+  export type ContactWaiverFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactWaiver to fetch.
+     */
+    where: ContactWaiverWhereUniqueInput
+  }
+
+  /**
+   * ContactWaiver findFirst
+   */
+  export type ContactWaiverFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactWaiver to fetch.
+     */
+    where?: ContactWaiverWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactWaivers to fetch.
+     */
+    orderBy?: ContactWaiverOrderByWithRelationInput | ContactWaiverOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ContactWaivers.
+     */
+    cursor?: ContactWaiverWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactWaivers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactWaivers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ContactWaivers.
+     */
+    distinct?: ContactWaiverScalarFieldEnum | ContactWaiverScalarFieldEnum[]
+  }
+
+  /**
+   * ContactWaiver findFirstOrThrow
+   */
+  export type ContactWaiverFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactWaiver to fetch.
+     */
+    where?: ContactWaiverWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactWaivers to fetch.
+     */
+    orderBy?: ContactWaiverOrderByWithRelationInput | ContactWaiverOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ContactWaivers.
+     */
+    cursor?: ContactWaiverWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactWaivers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactWaivers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ContactWaivers.
+     */
+    distinct?: ContactWaiverScalarFieldEnum | ContactWaiverScalarFieldEnum[]
+  }
+
+  /**
+   * ContactWaiver findMany
+   */
+  export type ContactWaiverFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactWaivers to fetch.
+     */
+    where?: ContactWaiverWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactWaivers to fetch.
+     */
+    orderBy?: ContactWaiverOrderByWithRelationInput | ContactWaiverOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ContactWaivers.
+     */
+    cursor?: ContactWaiverWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactWaivers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactWaivers.
+     */
+    skip?: number
+    distinct?: ContactWaiverScalarFieldEnum | ContactWaiverScalarFieldEnum[]
+  }
+
+  /**
+   * ContactWaiver create
+   */
+  export type ContactWaiverCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ContactWaiver.
+     */
+    data: XOR<ContactWaiverCreateInput, ContactWaiverUncheckedCreateInput>
+  }
+
+  /**
+   * ContactWaiver createMany
+   */
+  export type ContactWaiverCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ContactWaivers.
+     */
+    data: ContactWaiverCreateManyInput | ContactWaiverCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ContactWaiver createManyAndReturn
+   */
+  export type ContactWaiverCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * The data used to create many ContactWaivers.
+     */
+    data: ContactWaiverCreateManyInput | ContactWaiverCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ContactWaiver update
+   */
+  export type ContactWaiverUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ContactWaiver.
+     */
+    data: XOR<ContactWaiverUpdateInput, ContactWaiverUncheckedUpdateInput>
+    /**
+     * Choose, which ContactWaiver to update.
+     */
+    where: ContactWaiverWhereUniqueInput
+  }
+
+  /**
+   * ContactWaiver updateMany
+   */
+  export type ContactWaiverUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ContactWaivers.
+     */
+    data: XOR<ContactWaiverUpdateManyMutationInput, ContactWaiverUncheckedUpdateManyInput>
+    /**
+     * Filter which ContactWaivers to update
+     */
+    where?: ContactWaiverWhereInput
+    /**
+     * Limit how many ContactWaivers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ContactWaiver updateManyAndReturn
+   */
+  export type ContactWaiverUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * The data used to update ContactWaivers.
+     */
+    data: XOR<ContactWaiverUpdateManyMutationInput, ContactWaiverUncheckedUpdateManyInput>
+    /**
+     * Filter which ContactWaivers to update
+     */
+    where?: ContactWaiverWhereInput
+    /**
+     * Limit how many ContactWaivers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ContactWaiver upsert
+   */
+  export type ContactWaiverUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ContactWaiver to update in case it exists.
+     */
+    where: ContactWaiverWhereUniqueInput
+    /**
+     * In case the ContactWaiver found by the `where` argument doesn't exist, create a new ContactWaiver with this data.
+     */
+    create: XOR<ContactWaiverCreateInput, ContactWaiverUncheckedCreateInput>
+    /**
+     * In case the ContactWaiver was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ContactWaiverUpdateInput, ContactWaiverUncheckedUpdateInput>
+  }
+
+  /**
+   * ContactWaiver delete
+   */
+  export type ContactWaiverDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+    /**
+     * Filter which ContactWaiver to delete.
+     */
+    where: ContactWaiverWhereUniqueInput
+  }
+
+  /**
+   * ContactWaiver deleteMany
+   */
+  export type ContactWaiverDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ContactWaivers to delete
+     */
+    where?: ContactWaiverWhereInput
+    /**
+     * Limit how many ContactWaivers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ContactWaiver without action
+   */
+  export type ContactWaiverDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactWaiver
+     */
+    select?: ContactWaiverSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactWaiver
+     */
+    omit?: ContactWaiverOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -4697,6 +5967,33 @@ export namespace Prisma {
   };
 
   export type DocumentActivityScalarFieldEnum = (typeof DocumentActivityScalarFieldEnum)[keyof typeof DocumentActivityScalarFieldEnum]
+
+
+  export const ContactWaiverScalarFieldEnum: {
+    id: 'id',
+    orgId: 'orgId',
+    createdByUserId: 'createdByUserId',
+    contactId: 'contactId',
+    name: 'name',
+    title: 'title',
+    content: 'content',
+    status: 'status',
+    signatureType: 'signatureType',
+    templateLogo: 'templateLogo',
+    signerName: 'signerName',
+    signedAt: 'signedAt',
+    isDeleted: 'isDeleted',
+    waiver: 'waiver',
+    questions: 'questions',
+    members: 'members',
+    guardian: 'guardian',
+    orgBranding: 'orgBranding',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ContactWaiverScalarFieldEnum = (typeof ContactWaiverScalarFieldEnum)[keyof typeof ContactWaiverScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -5084,6 +6381,138 @@ export namespace Prisma {
     created_at?: DateTimeWithAggregatesFilter<"DocumentActivity"> | Date | string
   }
 
+  export type ContactWaiverWhereInput = {
+    AND?: ContactWaiverWhereInput | ContactWaiverWhereInput[]
+    OR?: ContactWaiverWhereInput[]
+    NOT?: ContactWaiverWhereInput | ContactWaiverWhereInput[]
+    id?: UuidFilter<"ContactWaiver"> | string
+    orgId?: UuidNullableFilter<"ContactWaiver"> | string | null
+    createdByUserId?: StringNullableFilter<"ContactWaiver"> | string | null
+    contactId?: UuidNullableFilter<"ContactWaiver"> | string | null
+    name?: StringFilter<"ContactWaiver"> | string
+    title?: StringNullableFilter<"ContactWaiver"> | string | null
+    content?: StringFilter<"ContactWaiver"> | string
+    status?: StringFilter<"ContactWaiver"> | string
+    signatureType?: StringNullableFilter<"ContactWaiver"> | string | null
+    templateLogo?: StringNullableFilter<"ContactWaiver"> | string | null
+    signerName?: StringNullableFilter<"ContactWaiver"> | string | null
+    signedAt?: DateTimeNullableFilter<"ContactWaiver"> | Date | string | null
+    isDeleted?: BoolFilter<"ContactWaiver"> | boolean
+    waiver?: JsonFilter<"ContactWaiver">
+    questions?: JsonFilter<"ContactWaiver">
+    members?: JsonFilter<"ContactWaiver">
+    guardian?: JsonFilter<"ContactWaiver">
+    orgBranding?: JsonFilter<"ContactWaiver">
+    metadata?: JsonFilter<"ContactWaiver">
+    createdAt?: DateTimeFilter<"ContactWaiver"> | Date | string
+    updatedAt?: DateTimeFilter<"ContactWaiver"> | Date | string
+  }
+
+  export type ContactWaiverOrderByWithRelationInput = {
+    id?: SortOrder
+    orgId?: SortOrderInput | SortOrder
+    createdByUserId?: SortOrderInput | SortOrder
+    contactId?: SortOrderInput | SortOrder
+    name?: SortOrder
+    title?: SortOrderInput | SortOrder
+    content?: SortOrder
+    status?: SortOrder
+    signatureType?: SortOrderInput | SortOrder
+    templateLogo?: SortOrderInput | SortOrder
+    signerName?: SortOrderInput | SortOrder
+    signedAt?: SortOrderInput | SortOrder
+    isDeleted?: SortOrder
+    waiver?: SortOrder
+    questions?: SortOrder
+    members?: SortOrder
+    guardian?: SortOrder
+    orgBranding?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ContactWaiverWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ContactWaiverWhereInput | ContactWaiverWhereInput[]
+    OR?: ContactWaiverWhereInput[]
+    NOT?: ContactWaiverWhereInput | ContactWaiverWhereInput[]
+    orgId?: UuidNullableFilter<"ContactWaiver"> | string | null
+    createdByUserId?: StringNullableFilter<"ContactWaiver"> | string | null
+    contactId?: UuidNullableFilter<"ContactWaiver"> | string | null
+    name?: StringFilter<"ContactWaiver"> | string
+    title?: StringNullableFilter<"ContactWaiver"> | string | null
+    content?: StringFilter<"ContactWaiver"> | string
+    status?: StringFilter<"ContactWaiver"> | string
+    signatureType?: StringNullableFilter<"ContactWaiver"> | string | null
+    templateLogo?: StringNullableFilter<"ContactWaiver"> | string | null
+    signerName?: StringNullableFilter<"ContactWaiver"> | string | null
+    signedAt?: DateTimeNullableFilter<"ContactWaiver"> | Date | string | null
+    isDeleted?: BoolFilter<"ContactWaiver"> | boolean
+    waiver?: JsonFilter<"ContactWaiver">
+    questions?: JsonFilter<"ContactWaiver">
+    members?: JsonFilter<"ContactWaiver">
+    guardian?: JsonFilter<"ContactWaiver">
+    orgBranding?: JsonFilter<"ContactWaiver">
+    metadata?: JsonFilter<"ContactWaiver">
+    createdAt?: DateTimeFilter<"ContactWaiver"> | Date | string
+    updatedAt?: DateTimeFilter<"ContactWaiver"> | Date | string
+  }, "id">
+
+  export type ContactWaiverOrderByWithAggregationInput = {
+    id?: SortOrder
+    orgId?: SortOrderInput | SortOrder
+    createdByUserId?: SortOrderInput | SortOrder
+    contactId?: SortOrderInput | SortOrder
+    name?: SortOrder
+    title?: SortOrderInput | SortOrder
+    content?: SortOrder
+    status?: SortOrder
+    signatureType?: SortOrderInput | SortOrder
+    templateLogo?: SortOrderInput | SortOrder
+    signerName?: SortOrderInput | SortOrder
+    signedAt?: SortOrderInput | SortOrder
+    isDeleted?: SortOrder
+    waiver?: SortOrder
+    questions?: SortOrder
+    members?: SortOrder
+    guardian?: SortOrder
+    orgBranding?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ContactWaiverCountOrderByAggregateInput
+    _max?: ContactWaiverMaxOrderByAggregateInput
+    _min?: ContactWaiverMinOrderByAggregateInput
+  }
+
+  export type ContactWaiverScalarWhereWithAggregatesInput = {
+    AND?: ContactWaiverScalarWhereWithAggregatesInput | ContactWaiverScalarWhereWithAggregatesInput[]
+    OR?: ContactWaiverScalarWhereWithAggregatesInput[]
+    NOT?: ContactWaiverScalarWhereWithAggregatesInput | ContactWaiverScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ContactWaiver"> | string
+    orgId?: UuidNullableWithAggregatesFilter<"ContactWaiver"> | string | null
+    createdByUserId?: StringNullableWithAggregatesFilter<"ContactWaiver"> | string | null
+    contactId?: UuidNullableWithAggregatesFilter<"ContactWaiver"> | string | null
+    name?: StringWithAggregatesFilter<"ContactWaiver"> | string
+    title?: StringNullableWithAggregatesFilter<"ContactWaiver"> | string | null
+    content?: StringWithAggregatesFilter<"ContactWaiver"> | string
+    status?: StringWithAggregatesFilter<"ContactWaiver"> | string
+    signatureType?: StringNullableWithAggregatesFilter<"ContactWaiver"> | string | null
+    templateLogo?: StringNullableWithAggregatesFilter<"ContactWaiver"> | string | null
+    signerName?: StringNullableWithAggregatesFilter<"ContactWaiver"> | string | null
+    signedAt?: DateTimeNullableWithAggregatesFilter<"ContactWaiver"> | Date | string | null
+    isDeleted?: BoolWithAggregatesFilter<"ContactWaiver"> | boolean
+    waiver?: JsonWithAggregatesFilter<"ContactWaiver">
+    questions?: JsonWithAggregatesFilter<"ContactWaiver">
+    members?: JsonWithAggregatesFilter<"ContactWaiver">
+    guardian?: JsonWithAggregatesFilter<"ContactWaiver">
+    orgBranding?: JsonWithAggregatesFilter<"ContactWaiver">
+    metadata?: JsonWithAggregatesFilter<"ContactWaiver">
+    createdAt?: DateTimeWithAggregatesFilter<"ContactWaiver"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ContactWaiver"> | Date | string
+  }
+
   export type DocumentCreateInput = {
     id?: string
     org_id: string
@@ -5399,6 +6828,174 @@ export namespace Prisma {
     user_agent?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: JsonNullValueInput | InputJsonValue
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ContactWaiverCreateInput = {
+    id?: string
+    orgId?: string | null
+    createdByUserId?: string | null
+    contactId?: string | null
+    name: string
+    title?: string | null
+    content: string
+    status?: string
+    signatureType?: string | null
+    templateLogo?: string | null
+    signerName?: string | null
+    signedAt?: Date | string | null
+    isDeleted?: boolean
+    waiver?: JsonNullValueInput | InputJsonValue
+    questions?: JsonNullValueInput | InputJsonValue
+    members?: JsonNullValueInput | InputJsonValue
+    guardian?: JsonNullValueInput | InputJsonValue
+    orgBranding?: JsonNullValueInput | InputJsonValue
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ContactWaiverUncheckedCreateInput = {
+    id?: string
+    orgId?: string | null
+    createdByUserId?: string | null
+    contactId?: string | null
+    name: string
+    title?: string | null
+    content: string
+    status?: string
+    signatureType?: string | null
+    templateLogo?: string | null
+    signerName?: string | null
+    signedAt?: Date | string | null
+    isDeleted?: boolean
+    waiver?: JsonNullValueInput | InputJsonValue
+    questions?: JsonNullValueInput | InputJsonValue
+    members?: JsonNullValueInput | InputJsonValue
+    guardian?: JsonNullValueInput | InputJsonValue
+    orgBranding?: JsonNullValueInput | InputJsonValue
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ContactWaiverUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    signatureType?: NullableStringFieldUpdateOperationsInput | string | null
+    templateLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    signerName?: NullableStringFieldUpdateOperationsInput | string | null
+    signedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    waiver?: JsonNullValueInput | InputJsonValue
+    questions?: JsonNullValueInput | InputJsonValue
+    members?: JsonNullValueInput | InputJsonValue
+    guardian?: JsonNullValueInput | InputJsonValue
+    orgBranding?: JsonNullValueInput | InputJsonValue
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ContactWaiverUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    signatureType?: NullableStringFieldUpdateOperationsInput | string | null
+    templateLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    signerName?: NullableStringFieldUpdateOperationsInput | string | null
+    signedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    waiver?: JsonNullValueInput | InputJsonValue
+    questions?: JsonNullValueInput | InputJsonValue
+    members?: JsonNullValueInput | InputJsonValue
+    guardian?: JsonNullValueInput | InputJsonValue
+    orgBranding?: JsonNullValueInput | InputJsonValue
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ContactWaiverCreateManyInput = {
+    id?: string
+    orgId?: string | null
+    createdByUserId?: string | null
+    contactId?: string | null
+    name: string
+    title?: string | null
+    content: string
+    status?: string
+    signatureType?: string | null
+    templateLogo?: string | null
+    signerName?: string | null
+    signedAt?: Date | string | null
+    isDeleted?: boolean
+    waiver?: JsonNullValueInput | InputJsonValue
+    questions?: JsonNullValueInput | InputJsonValue
+    members?: JsonNullValueInput | InputJsonValue
+    guardian?: JsonNullValueInput | InputJsonValue
+    orgBranding?: JsonNullValueInput | InputJsonValue
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ContactWaiverUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    signatureType?: NullableStringFieldUpdateOperationsInput | string | null
+    templateLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    signerName?: NullableStringFieldUpdateOperationsInput | string | null
+    signedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    waiver?: JsonNullValueInput | InputJsonValue
+    questions?: JsonNullValueInput | InputJsonValue
+    members?: JsonNullValueInput | InputJsonValue
+    guardian?: JsonNullValueInput | InputJsonValue
+    orgBranding?: JsonNullValueInput | InputJsonValue
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ContactWaiverUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    title?: NullableStringFieldUpdateOperationsInput | string | null
+    content?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    signatureType?: NullableStringFieldUpdateOperationsInput | string | null
+    templateLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    signerName?: NullableStringFieldUpdateOperationsInput | string | null
+    signedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    waiver?: JsonNullValueInput | InputJsonValue
+    questions?: JsonNullValueInput | InputJsonValue
+    members?: JsonNullValueInput | InputJsonValue
+    guardian?: JsonNullValueInput | InputJsonValue
+    orgBranding?: JsonNullValueInput | InputJsonValue
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UuidFilter<$PrismaModel = never> = {
@@ -5792,6 +7389,66 @@ export namespace Prisma {
     ip_address?: SortOrder
     user_agent?: SortOrder
     created_at?: SortOrder
+  }
+
+  export type ContactWaiverCountOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdByUserId?: SortOrder
+    contactId?: SortOrder
+    name?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    status?: SortOrder
+    signatureType?: SortOrder
+    templateLogo?: SortOrder
+    signerName?: SortOrder
+    signedAt?: SortOrder
+    isDeleted?: SortOrder
+    waiver?: SortOrder
+    questions?: SortOrder
+    members?: SortOrder
+    guardian?: SortOrder
+    orgBranding?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ContactWaiverMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdByUserId?: SortOrder
+    contactId?: SortOrder
+    name?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    status?: SortOrder
+    signatureType?: SortOrder
+    templateLogo?: SortOrder
+    signerName?: SortOrder
+    signedAt?: SortOrder
+    isDeleted?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ContactWaiverMinOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdByUserId?: SortOrder
+    contactId?: SortOrder
+    name?: SortOrder
+    title?: SortOrder
+    content?: SortOrder
+    status?: SortOrder
+    signatureType?: SortOrder
+    templateLogo?: SortOrder
+    signerName?: SortOrder
+    signedAt?: SortOrder
+    isDeleted?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type DocumentRecipientCreateNestedManyWithoutDocumentInput = {

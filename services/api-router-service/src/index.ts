@@ -117,7 +117,7 @@ async function handleApiCompat(req: Request, res: Response) {
       if (req.method === "GET" && (rest === "" || rest === "/")) return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices" });
       if (req.method === "POST" && (rest === "" || rest === "/")) return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices" });
       if (req.method === "GET" && (rest === "/stats" || rest === "/statistics/income")) {
-        return proxyTo(req, res, { baseUrl: "http://payments-service:7090", targetPath: "/v1/invoices/stats" });
+        return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices/stats" });
       }
       return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: GET /, POST /" });
     }

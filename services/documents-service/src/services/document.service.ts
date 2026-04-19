@@ -1,4 +1,4 @@
-import { DocumentRepository } from '../repositories/document.repository.js';
+import { DocumentRepository, ContactWaiverRepository } from '../repositories/document.repository.js';
 import { randomUUID } from "node:crypto";
 
 export class DocumentService {
@@ -34,5 +34,88 @@ export class DocumentService {
 
   async getStatusCounts(orgId: string) {
     return this.docRepo.groupByStatus(orgId);
+  }
+}
+
+export class ContactWaiverService {
+  private waiverRepo = new ContactWaiverRepository();
+
+  async getPublicWaiver(id: string) {
+    const waiver = await this.waiverRepo.findPublicById(id);
+    if (!waiver) throw new Error("Not found");
+    return waiver;
+  }
+
+  async signPublicWaiver(id: string, data: any, signingInfo: any) {
+    const waiver = await this.waiverRepo.findPublicById(id);
+    if (!waiver) throw new Error("Not found");
+
+    const currentWaivers = Array.isArray(waiver.waiver) ? [...(waiver.waiver as any[])] : [];
+    const currentQuestions = Array.isArray(waiver.questions) ? [...(waiver.questions as any[])] : [];
+    const members = Array.isArray(waiver.members) ? [...(waiver.members as any[])] : [];
+    const guardian = waiver.guardian && typeof waiver.guardian === "object" ? { ...(waiver.guardian as any) } : {};
+
+    if (Array.isArray(data.waiverChecks)) {
+      for (let i = 0; i < currentWaivers.length; i += 1) {
+        const existing = currentWaivers[i];
+        currentWaivers[i] = {
+          ...(typeof existing === "object" ? existing : { waiver: String(existing) }),
+          checked: Boolean(data.waiverChecks[i]),
+        };
+      }
+    }
+
+    if (Array.isArray(data.questionAnswers)) {
+      for (let i = 0; i < currentQuestions.length; i += 1) {
+        const existing = currentQuestions[i];
+        currentQuestions[i] = {
+          ...(typeof existing === "object" ? existing : { question: `Question ${i + 1}` }),
+          answer: data.questionAnswers[i] ?? "",
+        };
+      }
+    }
+
+    const signaturePayload = {
+      signature: data.signature || null,
+      signerName: data.signerName || waiver.signerName || null,
+      signedAt: new Date().toISOString(),
+      ...signingInfo,
+    };
+
+    if (data.isGuardian) {
+      Object.assign(guardian, signaturePayload, { status: "signed" });
+    } else if (data.memberId) {
+      const memberIndex = members.findIndex(
+        (member: any) => member?.id === data.memberId || member?._id === data.memberId || member?.contactId === data.memberId
+      );
+      if (memberIndex >= 0) {
+        members[memberIndex] = { ...members[memberIndex], ...signaturePayload, status: "signed" };
+      }
+    }
+
+    const memberStatuses = members.filter(Boolean).map((member: any) => member?.status);
+    const guardianSigned = guardian?.status === "signed";
+    const completedCount = memberStatuses.filter((status: string) => status === "signed").length + (guardianSigned ? 1 : 0);
+    const totalCount = members.filter(Boolean).length + (guardian?.fullName ? 1 : 0);
+    const status = totalCount === 0 || completedCount >= totalCount
+      ? "completed"
+      : completedCount > 0
+        ? "partially_signed"
+        : "pending";
+
+    return this.waiverRepo.update(id, {
+      signerName: data.signerName || waiver.signerName || null,
+      signedAt: new Date(),
+      status,
+      waiver: currentWaivers,
+      questions: currentQuestions,
+      members,
+      guardian,
+      metadata: {
+        ...(waiver.metadata as Record<string, unknown> || {}),
+        lastSignature: data.signature || null,
+        signingInfo,
+      },
+    });
   }
 }

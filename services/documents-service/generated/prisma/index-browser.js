@@ -165,6 +165,30 @@ exports.Prisma.DocumentActivityScalarFieldEnum = {
   created_at: 'created_at'
 };
 
+exports.Prisma.ContactWaiverScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  createdByUserId: 'createdByUserId',
+  contactId: 'contactId',
+  name: 'name',
+  title: 'title',
+  content: 'content',
+  status: 'status',
+  signatureType: 'signatureType',
+  templateLogo: 'templateLogo',
+  signerName: 'signerName',
+  signedAt: 'signedAt',
+  isDeleted: 'isDeleted',
+  waiver: 'waiver',
+  questions: 'questions',
+  members: 'members',
+  guardian: 'guardian',
+  orgBranding: 'orgBranding',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -194,7 +218,8 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   Document: 'Document',
   DocumentRecipient: 'DocumentRecipient',
-  DocumentActivity: 'DocumentActivity'
+  DocumentActivity: 'DocumentActivity',
+  ContactWaiver: 'ContactWaiver'
 };
 
 /**

@@ -27,6 +27,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 import { projectService } from 'src/services/project-service';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -52,7 +54,7 @@ export const NewProjectSchema = zod.object({
 
 export function ProjectListView() {
   const [search, setSearch] = useState('');
-  
+  const router = useRouter();
   const quickEdit = useBoolean();
 
   const { data: projectsData, isLoading, refetch } = useQuery({
@@ -144,6 +146,7 @@ export function ProjectListView() {
                         <TableCell>
                           <Typography
                             variant="subtitle2"
+                            onClick={() => router.push(paths.dashboard.project(row.id || row._id))}
                             sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                           >
                             {row.name || row.title || 'Untitled project'}
@@ -153,7 +156,7 @@ export function ProjectListView() {
                         <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
                         <TableCell>{row.status || 'Active'}</TableCell>
                         <TableCell align="right">
-                          <IconButton>
+                          <IconButton onClick={() => router.push(paths.dashboard.project(row.id || row._id))}>
                             <Iconify icon="eva:arrow-ios-forward-fill" />
                           </IconButton>
                         </TableCell>

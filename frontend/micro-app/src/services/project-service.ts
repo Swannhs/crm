@@ -65,6 +65,11 @@ export async function getCards(boardId: string) {
   return response.data?.data ?? response.data ?? [];
 }
 
+export async function getBoard(boardId: string) {
+  const response = await axiosInstance.get(`/api/projects/v1/boards/${boardId}`);
+  return response.data?.data ?? response.data;
+}
+
 export async function createCard(boardId: string, data: any) {
   const response = await axiosInstance.post(`/api/projects/v1/boards/${boardId}/cards`, data);
   return response.data;
@@ -81,5 +86,6 @@ export const projectService = {
   getColumns,
   createColumn,
   getCards,
+  getBoard,
   createCard,
 };

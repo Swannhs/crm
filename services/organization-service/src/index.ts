@@ -1,5 +1,5 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
-import { OrganizationController, LocationController } from "./controllers/organization.controller.js";
+import { OrganizationController, LocationController, OnboardingController } from "./controllers/organization.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ serviceName: "organization-service", jsonLimit: "1mb" });
@@ -8,6 +8,7 @@ const cast = (req: any) => req as any;
 
 const orgCtrl = new OrganizationController();
 const locationCtrl = new LocationController();
+const onboardingCtrl = new OnboardingController();
 
 // --- Organizations ---
 app.get("/v1/organizations", auth, (req, res) => orgCtrl.get(cast(req), res));
@@ -16,6 +17,10 @@ app.put("/v1/organizations", auth, (req, res) => orgCtrl.update(cast(req), res))
 // --- Locations ---
 app.get("/v1/locations", auth, (req, res) => locationCtrl.list(cast(req), res));
 app.post("/v1/locations", auth, (req, res) => locationCtrl.create(cast(req), res));
+
+// --- Onboarding ---
+app.get("/v1/onboarding/status", auth, (req, res) => onboardingCtrl.list(cast(req), res));
+app.post("/v1/onboarding/status", auth, (req, res) => onboardingCtrl.create(cast(req), res));
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "organization-service (TS)" }));

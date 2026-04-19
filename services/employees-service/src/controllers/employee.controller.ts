@@ -16,6 +16,14 @@ export class EmployeeController {
     try { return res.status(201).json({ data: await this.svc.createEmployee(req.identity.orgId, req.body) }); }
     catch (e: any) { return res.status(500).json({ message: e.message }); }
   }
+  async getContactsWithCategoriesAndShifts(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getEmployeesWithScheduleSummary(req.identity.orgId, req.query);
+      return res.json({ success: true, data });
+    } catch (e: any) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  }
 }
 
 export class ShiftController {

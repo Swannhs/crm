@@ -27,6 +27,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useBoolean } from 'src/hooks/use-boolean';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { contactService } from 'src/services/contact-service';
@@ -55,7 +57,7 @@ export const NewContactSchema = zod.object({
 
 export function ContactListView() {
   const [search, setSearch] = useState('');
-  
+  const router = useRouter();
   const quickEdit = useBoolean();
 
   const { data: contactsData, isLoading, refetch } = useQuery({

@@ -16,8 +16,20 @@ export async function getRoles() {
   return [];
 }
 
+export async function getLocations() {
+  const response = await axiosInstance.get('/org/v1/locations');
+  return response.data?.data ?? response.data ?? [];
+}
+
+export async function createLocation(data: any) {
+  const response = await axiosInstance.post('/org/v1/locations', data);
+  return response.data?.data ?? response.data;
+}
+
 export const organizationService = {
   getOrganizationDetails,
   updateOrganization,
   getRoles,
+  getLocations,
+  createLocation,
 };

@@ -12,13 +12,31 @@ export async function getAppointments() {
   return Array.isArray(response.data?.data) ? response.data.data : [];
 }
 
+export async function getBookingTypeByLink(link: string) {
+  const response = await axiosInstance.get(`/api/booking/booking-types/${link}`);
+  return response.data?.data ?? response.data;
+}
+
 export async function createBookingType(data: any) {
   const response = await axiosInstance.post('/api/booking/booking-types', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function createAppointment(data: any) {
+  const response = await axiosInstance.post('/api/booking/appointments/user', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function cancelAppointment(id: string) {
+  const response = await axiosInstance.delete(`/api/booking/appointments/${id}`);
   return response.data?.data ?? response.data;
 }
 
 export const bookingService = {
   getBookingTypes,
   getAppointments,
+  getBookingTypeByLink,
   createBookingType,
+  createAppointment,
+  cancelAppointment,
 };

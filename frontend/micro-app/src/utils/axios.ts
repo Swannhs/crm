@@ -49,7 +49,15 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong!')
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('accessToken');
+        window.dispatchEvent(new CustomEvent('auth-unauthorized'));
+      }
+    }
+    return Promise.reject((error.response && error.response.data) || 'Something went wrong!');
+  }
 );
 
 export default axiosInstance;

@@ -1,5 +1,11 @@
 import { createServiceApp, connectAmqpWithRetry, ensureTopicExchange } from "@mymanager/node-service-kit";
-import { NotificationController, NotificationSettingController, EmailMessageController, SmsController } from "./controllers/notification.controller.js";
+import {
+  NotificationController,
+  NotificationSettingController,
+  EmailMessageController,
+  SmsController,
+  ContactPhoneVerificationController,
+} from "./controllers/notification.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ serviceName: "notification-service" });
@@ -10,6 +16,7 @@ const notifCtrl = new NotificationController();
 const settingsCtrl = new NotificationSettingController();
 const emailCtrl = new EmailMessageController();
 const smsCtrl = new SmsController();
+const contactPhoneVerificationCtrl = new ContactPhoneVerificationController();
 
 // --- Notifications ---
 app.get("/v1/notifications", auth, (req, res) => notifCtrl.list(cast(req), res));
@@ -17,6 +24,8 @@ app.get("/v1/notifications/total", auth, (req, res) => notifCtrl.totals(cast(req
 app.get("/v1/notifications/unseen-count/:groupId/:userId", auth, (req, res) => notifCtrl.unseenCount(cast(req), res));
 app.post("/v1/notifications/mark-seen/:notificationId/:userId", auth, (req, res) => notifCtrl.markSeen(cast(req), res));
 app.post("/v1/notifications/read", auth, (req, res) => notifCtrl.markRead(cast(req), res));
+app.post("/v1/notifications/archive", auth, (req, res) => notifCtrl.archive(cast(req), res));
+app.post("/v1/notifications/unarchive", auth, (req, res) => notifCtrl.unarchive(cast(req), res));
 
 // --- Notification Settings ---
 app.get("/v1/notifications/settings", auth, (req, res) => settingsCtrl.get(cast(req), res));
@@ -31,6 +40,11 @@ app.put("/v1/email-messages/:id/sent", auth, (req, res) => emailCtrl.markSent(ca
 // --- SMS ---
 app.get("/v1/sms", auth, (req, res) => smsCtrl.list(cast(req), res));
 app.post("/v1/sms", auth, (req, res) => smsCtrl.send(cast(req), res));
+
+// --- Public contact phone verification ---
+app.post("/v1/contact-phone-verifications/generate", (req, res) =>
+  contactPhoneVerificationCtrl.generate(cast(req), res)
+);
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "notification-service (TS)" }));
@@ -51,7 +65,8 @@ async function startAmqp() {
   await ch.consume(queue, async (msg: any) => {
     if (!msg) return;
     try {
-      JSON.parse(msg.content.toString("utf8"));
+      const payload = JSON.parse(msg.content.toString("utf8"));
+      await notifCtrl.handleDomainEvent(msg.fields.routingKey, payload);
       logger.info({ routingKey: msg.fields.routingKey }, "domain event received");
     } catch (err) {
       logger.error({ err, routingKey: msg.fields.routingKey }, "Failed to process domain event");

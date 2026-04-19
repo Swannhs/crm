@@ -36,6 +36,30 @@ export class BillingService {
     return { data, total, page, limit };
   }
 
+  async getInvoiceStats(orgId: string) {
+    const { aggregate, grouped } = await this.invoiceRepo.summarize(orgId);
+
+    const invoiceCount = Number(aggregate._count._all || 0);
+    const totalRevenue = Number(aggregate._sum.amountCents || 0) / 100;
+    const paid = Number(aggregate._sum.paidAmountCents || 0) / 100;
+    const outstanding = Math.max(totalRevenue - paid, 0);
+
+    return {
+      data: {
+        invoiceCount,
+        totalRevenue,
+        paid,
+        outstanding,
+        byStatus: grouped.map((entry) => ({
+          status: entry.status,
+          count: Number(entry._count._all || 0),
+          total: Number(entry._sum.amountCents || 0) / 100,
+          paid: Number(entry._sum.paidAmountCents || 0) / 100,
+        })),
+      },
+    };
+  }
+
   async getInvoiceById(orgId: string, invoiceId: string) {
     const invoice = await this.invoiceRepo.findUnique(invoiceId, orgId);
     if (!invoice) {
@@ -118,6 +142,7 @@ export class BillingService {
           paymentId: payment.id,
           invoiceId,
           orgId,
+          userId,
           amountCents: amount,
         });
       } catch (err) {

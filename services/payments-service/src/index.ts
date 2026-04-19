@@ -1,11 +1,18 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
-import { InvoiceController, DepositController } from "./controllers/payment.controller.js";
+import {
+  InvoiceController,
+  DepositController,
+  CheckoutPageController,
+  QrPayPageController,
+} from "./controllers/payment.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ serviceName: "payments-service", jsonLimit: "10mb" });
 
 const invoiceController = new InvoiceController();
 const depositController = new DepositController();
+const checkoutPageController = new CheckoutPageController();
+const qrPayPageController = new QrPayPageController();
 const auth = identityMiddleware;
 const cast = (req: any) => req as any;
 
@@ -18,6 +25,11 @@ app.post("/v1/invoices/:id/payments", auth, (req, res) => invoiceController.addP
 // --- Deposits ---
 app.get("/v1/deposits", auth, (req, res) => depositController.list(cast(req), res));
 app.post("/v1/deposits", auth, (req, res) => depositController.create(cast(req), res));
+
+// --- Public checkout / QR pay ---
+app.get("/v1/checkout-pages/public/:slug", (req, res) => checkoutPageController.getPublic(cast(req), res));
+app.get("/v1/qr-pay-pages/public/:slug", (req, res) => qrPayPageController.getPublic(cast(req), res));
+app.post("/v1/qr-pay-pages/public/:slug/track", (req, res) => qrPayPageController.trackPublic(cast(req), res));
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "payments-service (TS)" }));

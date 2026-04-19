@@ -8,6 +8,13 @@ export class EmployeeRepository {
     return db.employee.findUnique({ where: { id, orgId }, include: { availabilities: true, timeOffRequests: true, schedules: true } });
   }
   async create(data: any) { return db.employee.create({ data }); }
+
+  async findManyForSchedule(orgId: string) {
+    return db.employee.findMany({
+      where: { orgId },
+      orderBy: { createdAt: "asc" }
+    });
+  }
 }
 
 export class ShiftRepository {
@@ -15,6 +22,15 @@ export class ShiftRepository {
   async create(data: any) { return db.shift.create({ data }); }
   async update(id: string, orgId: string, data: any) { return db.shift.updateMany({ where: { id, orgId }, data }); }
   async delete(id: string, orgId: string) { return db.shift.deleteMany({ where: { id, orgId } }); }
+  async findManyForEmployees(orgId: string, employeeIds: string[], startTime?: Date, endTime?: Date) {
+    const where: any = { orgId, employeeId: { in: employeeIds } };
+    if (startTime || endTime) {
+      where.startTime = {};
+      if (startTime) where.startTime.gte = startTime;
+      if (endTime) where.startTime.lte = endTime;
+    }
+    return db.shift.findMany({ where, orderBy: { startTime: "asc" } });
+  }
 }
 
 export class AttendanceRepository {

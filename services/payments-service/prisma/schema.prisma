@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -101,4 +100,79 @@ model Deposit {
 
   @@index([org_id])
   @@map("deposits")
+}
+
+model CheckoutPage {
+  id              String              @id @default(uuid()) @db.Uuid
+  orgId           String?             @map("org_id") @db.Uuid
+  createdByUserId String?             @map("created_by_user_id") @db.VarChar(80)
+  slug            String              @unique
+  title           String
+  description     String?
+  status          String              @default("published")
+  currency        String              @default("USD")
+  themeColor      String?             @map("theme_color")
+  heroImage       String?             @map("hero_image")
+  products        Json                @default("[]")
+  metadata        Json                @default("{}")
+  isArchived      Boolean             @default(false) @map("is_archived")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  events          CheckoutPageEvent[]
+
+  @@index([slug])
+  @@index([orgId])
+  @@map("checkout_pages")
+}
+
+model CheckoutPageEvent {
+  id             String       @id @default(uuid()) @db.Uuid
+  checkoutPageId String       @map("checkout_page_id") @db.Uuid
+  checkoutPage   CheckoutPage @relation(fields: [checkoutPageId], references: [id], onDelete: Cascade)
+  eventType      String       @map("event_type")
+  customerEmail  String?      @map("customer_email")
+  customerPhone  String?      @map("customer_phone")
+  amountCents    BigInt?      @map("amount_cents")
+  payload        Json         @default("{}")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@index([checkoutPageId])
+  @@map("checkout_page_events")
+}
+
+model QrPayPage {
+  id                 String             @id @default(uuid()) @db.Uuid
+  orgId              String?            @map("org_id") @db.Uuid
+  createdByUserId    String?            @map("created_by_user_id") @db.VarChar(80)
+  slug               String             @unique
+  title              String
+  description        String?
+  status             String             @default("published")
+  currency           String             @default("USD")
+  themeColor         String?            @map("theme_color")
+  defaultAmountCents BigInt?            @map("default_amount_cents")
+  metadata           Json               @default("{}")
+  isArchived         Boolean            @default(false) @map("is_archived")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  transactions       QrPayTransaction[]
+
+  @@index([slug])
+  @@index([orgId])
+  @@map("qr_pay_pages")
+}
+
+model QrPayTransaction {
+  id            String    @id @default(uuid()) @db.Uuid
+  qrPayPageId   String    @map("qr_pay_page_id") @db.Uuid
+  qrPayPage     QrPayPage @relation(fields: [qrPayPageId], references: [id], onDelete: Cascade)
+  amountCents   BigInt?   @map("amount_cents")
+  customerEmail String?   @map("customer_email")
+  customerPhone String?   @map("customer_phone")
+  status        String    @default("tracked")
+  metadata      Json      @default("{}")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@index([qrPayPageId])
+  @@map("qr_pay_transactions")
 }

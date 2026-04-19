@@ -43,10 +43,15 @@ export type DeviceToken = $Result.DefaultSelection<Prisma.$DeviceTokenPayload>
  * 
  */
 export type NotificationSetting = $Result.DefaultSelection<Prisma.$NotificationSettingPayload>
+/**
+ * Model ContactPhoneVerification
+ * 
+ */
+export type ContactPhoneVerification = $Result.DefaultSelection<Prisma.$ContactPhoneVerificationPayload>
 
 /**
  * ##  Prisma Client ʲˢ
- * 
+ *
  * Type-safe database client for TypeScript & Node.js
  * @example
  * ```
@@ -55,19 +60,19 @@ export type NotificationSetting = $Result.DefaultSelection<Prisma.$NotificationS
  * const notifications = await prisma.notification.findMany()
  * ```
  *
- * 
+ *
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
 
     /**
    * ##  Prisma Client ʲˢ
-   * 
+   *
    * Type-safe database client for TypeScript & Node.js
    * @example
    * ```
@@ -76,12 +81,12 @@ export class PrismaClient<
    * const notifications = await prisma.notification.findMany()
    * ```
    *
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
    */
 
   constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
-  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): void;
+  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
 
   /**
    * Connect with the database
@@ -93,20 +98,13 @@ export class PrismaClient<
    */
   $disconnect(): $Utils.JsPromise<void>;
 
-  /**
-   * Add a middleware
-   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
-   * @see https://pris.ly/d/extensions
-   */
-  $use(cb: Prisma.Middleware): void
-
 /**
    * Executes a prepared raw query and returns the number of affected rows.
    * @example
    * ```
    * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -118,7 +116,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -129,7 +127,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -141,7 +139,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -165,7 +163,9 @@ export class PrismaClient<
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
 
-  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb, ExtArgs>
+  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
+    extArgs: ExtArgs
+  }>>
 
       /**
    * `prisma.notification`: Exposes CRUD operations for the **Notification** model.
@@ -175,7 +175,7 @@ export class PrismaClient<
     * const notifications = await prisma.notification.findMany()
     * ```
     */
-  get notification(): Prisma.NotificationDelegate<ExtArgs>;
+  get notification(): Prisma.NotificationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.emailMessage`: Exposes CRUD operations for the **EmailMessage** model.
@@ -185,7 +185,7 @@ export class PrismaClient<
     * const emailMessages = await prisma.emailMessage.findMany()
     * ```
     */
-  get emailMessage(): Prisma.EmailMessageDelegate<ExtArgs>;
+  get emailMessage(): Prisma.EmailMessageDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.emailCampaign`: Exposes CRUD operations for the **EmailCampaign** model.
@@ -195,7 +195,7 @@ export class PrismaClient<
     * const emailCampaigns = await prisma.emailCampaign.findMany()
     * ```
     */
-  get emailCampaign(): Prisma.EmailCampaignDelegate<ExtArgs>;
+  get emailCampaign(): Prisma.EmailCampaignDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.smsMessage`: Exposes CRUD operations for the **SmsMessage** model.
@@ -205,7 +205,7 @@ export class PrismaClient<
     * const smsMessages = await prisma.smsMessage.findMany()
     * ```
     */
-  get smsMessage(): Prisma.SmsMessageDelegate<ExtArgs>;
+  get smsMessage(): Prisma.SmsMessageDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.deviceToken`: Exposes CRUD operations for the **DeviceToken** model.
@@ -215,7 +215,7 @@ export class PrismaClient<
     * const deviceTokens = await prisma.deviceToken.findMany()
     * ```
     */
-  get deviceToken(): Prisma.DeviceTokenDelegate<ExtArgs>;
+  get deviceToken(): Prisma.DeviceTokenDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.notificationSetting`: Exposes CRUD operations for the **NotificationSetting** model.
@@ -225,7 +225,17 @@ export class PrismaClient<
     * const notificationSettings = await prisma.notificationSetting.findMany()
     * ```
     */
-  get notificationSetting(): Prisma.NotificationSettingDelegate<ExtArgs>;
+  get notificationSetting(): Prisma.NotificationSettingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.contactPhoneVerification`: Exposes CRUD operations for the **ContactPhoneVerification** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ContactPhoneVerifications
+    * const contactPhoneVerifications = await prisma.contactPhoneVerification.findMany()
+    * ```
+    */
+  get contactPhoneVerification(): Prisma.ContactPhoneVerificationDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -246,7 +256,6 @@ export namespace Prisma {
   export import PrismaClientRustPanicError = runtime.PrismaClientRustPanicError
   export import PrismaClientInitializationError = runtime.PrismaClientInitializationError
   export import PrismaClientValidationError = runtime.PrismaClientValidationError
-  export import NotFoundError = runtime.NotFoundError
 
   /**
    * Re-export of sql-template-tag
@@ -267,7 +276,7 @@ export namespace Prisma {
   export type DecimalJsLike = runtime.DecimalJsLike
 
   /**
-   * Metrics 
+   * Metrics
    */
   export type Metrics = runtime.Metrics
   export type Metric<T> = runtime.Metric<T>
@@ -285,20 +294,21 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 5.22.0
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Prisma Client JS version: 6.19.3
+   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
     client: string
   }
 
-  export const prismaVersion: PrismaVersion 
+  export const prismaVersion: PrismaVersion
 
   /**
    * Utility Types
    */
 
 
+  export import Bytes = runtime.Bytes
   export import JsonObject = runtime.JsonObject
   export import JsonArray = runtime.JsonArray
   export import JsonValue = runtime.JsonValue
@@ -308,15 +318,15 @@ export namespace Prisma {
 
   /**
    * Types of the values used to represent different kinds of `null` values when working with JSON fields.
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   namespace NullTypes {
     /**
     * Type of `Prisma.DbNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class DbNull {
@@ -326,9 +336,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.JsonNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class JsonNull {
@@ -338,9 +348,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.AnyNull`.
-    * 
+    *
     * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
-    * 
+    *
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class AnyNull {
@@ -351,21 +361,21 @@ export namespace Prisma {
 
   /**
    * Helper for filtering JSON entries that have `null` on the database (empty on the db)
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const DbNull: NullTypes.DbNull
 
   /**
    * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const JsonNull: NullTypes.JsonNull
 
   /**
    * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
-   * 
+   *
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const AnyNull: NullTypes.AnyNull
@@ -553,7 +563,7 @@ export namespace Prisma {
   type AtLeast<O extends object, K extends string> = NoExpand<
     O extends unknown
     ? | (K extends keyof O ? { [P in K]: O[P] } & O : O)
-      | {[P in keyof O as P extends K ? K : never]-?: O[P]} & O
+      | {[P in keyof O as P extends K ? P : never]-?: O[P]} & O
     : never>;
 
   type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
@@ -672,7 +682,8 @@ export namespace Prisma {
     EmailCampaign: 'EmailCampaign',
     SmsMessage: 'SmsMessage',
     DeviceToken: 'DeviceToken',
-    NotificationSetting: 'NotificationSetting'
+    NotificationSetting: 'NotificationSetting',
+    ContactPhoneVerification: 'ContactPhoneVerification'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -682,13 +693,16 @@ export namespace Prisma {
     db?: Datasource
   }
 
-  interface TypeMapCb extends $Utils.Fn<{extArgs: $Extensions.InternalArgs, clientOptions: PrismaClientOptions }, $Utils.Record<string, any>> {
-    returns: Prisma.TypeMap<this['params']['extArgs'], this['params']['clientOptions']>
+  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
+    returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
   }
 
-  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
+  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+    globalOmitOptions: {
+      omit: GlobalOmitOptions
+    }
     meta: {
-      modelProps: "notification" | "emailMessage" | "emailCampaign" | "smsMessage" | "deviceToken" | "notificationSetting"
+      modelProps: "notification" | "emailMessage" | "emailCampaign" | "smsMessage" | "deviceToken" | "notificationSetting" | "contactPhoneVerification"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -743,6 +757,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.NotificationUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NotificationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationPayload>[]
           }
           upsert: {
             args: Prisma.NotificationUpsertArgs<ExtArgs>
@@ -814,6 +832,10 @@ export namespace Prisma {
             args: Prisma.EmailMessageUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.EmailMessageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailMessagePayload>[]
+          }
           upsert: {
             args: Prisma.EmailMessageUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$EmailMessagePayload>
@@ -883,6 +905,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.EmailCampaignUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EmailCampaignUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailCampaignPayload>[]
           }
           upsert: {
             args: Prisma.EmailCampaignUpsertArgs<ExtArgs>
@@ -954,6 +980,10 @@ export namespace Prisma {
             args: Prisma.SmsMessageUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.SmsMessageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SmsMessagePayload>[]
+          }
           upsert: {
             args: Prisma.SmsMessageUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$SmsMessagePayload>
@@ -1023,6 +1053,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.DeviceTokenUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DeviceTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>[]
           }
           upsert: {
             args: Prisma.DeviceTokenUpsertArgs<ExtArgs>
@@ -1094,6 +1128,10 @@ export namespace Prisma {
             args: Prisma.NotificationSettingUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.NotificationSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationSettingPayload>[]
+          }
           upsert: {
             args: Prisma.NotificationSettingUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$NotificationSettingPayload>
@@ -1109,6 +1147,80 @@ export namespace Prisma {
           count: {
             args: Prisma.NotificationSettingCountArgs<ExtArgs>
             result: $Utils.Optional<NotificationSettingCountAggregateOutputType> | number
+          }
+        }
+      }
+      ContactPhoneVerification: {
+        payload: Prisma.$ContactPhoneVerificationPayload<ExtArgs>
+        fields: Prisma.ContactPhoneVerificationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ContactPhoneVerificationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ContactPhoneVerificationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>
+          }
+          findFirst: {
+            args: Prisma.ContactPhoneVerificationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ContactPhoneVerificationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>
+          }
+          findMany: {
+            args: Prisma.ContactPhoneVerificationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>[]
+          }
+          create: {
+            args: Prisma.ContactPhoneVerificationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>
+          }
+          createMany: {
+            args: Prisma.ContactPhoneVerificationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ContactPhoneVerificationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>[]
+          }
+          delete: {
+            args: Prisma.ContactPhoneVerificationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>
+          }
+          update: {
+            args: Prisma.ContactPhoneVerificationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>
+          }
+          deleteMany: {
+            args: Prisma.ContactPhoneVerificationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ContactPhoneVerificationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ContactPhoneVerificationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>[]
+          }
+          upsert: {
+            args: Prisma.ContactPhoneVerificationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ContactPhoneVerificationPayload>
+          }
+          aggregate: {
+            args: Prisma.ContactPhoneVerificationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateContactPhoneVerification>
+          }
+          groupBy: {
+            args: Prisma.ContactPhoneVerificationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ContactPhoneVerificationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ContactPhoneVerificationCountArgs<ExtArgs>
+            result: $Utils.Optional<ContactPhoneVerificationCountAggregateOutputType> | number
           }
         }
       }
@@ -1155,16 +1267,24 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Defaults to stdout
+     * // Shorthand for `emit: 'stdout'`
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events
+     * // Emit as events only
      * log: [
-     *   { emit: 'stdout', level: 'query' },
-     *   { emit: 'stdout', level: 'info' },
-     *   { emit: 'stdout', level: 'warn' }
-     *   { emit: 'stdout', level: 'error' }
+     *   { emit: 'event', level: 'query' },
+     *   { emit: 'event', level: 'info' },
+     *   { emit: 'event', level: 'warn' }
+     *   { emit: 'event', level: 'error' }
      * ]
+     * 
+     * / Emit as events and log to stdout
+     * og: [
+     *  { emit: 'stdout', level: 'query' },
+     *  { emit: 'stdout', level: 'info' },
+     *  { emit: 'stdout', level: 'warn' }
+     *  { emit: 'stdout', level: 'error' }
+     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -1179,8 +1299,35 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
+    /**
+     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     */
+    adapter?: runtime.SqlDriverAdapterFactory | null
+    /**
+     * Global configuration for omitting model fields by default.
+     * 
+     * @example
+     * ```
+     * const prisma = new PrismaClient({
+     *   omit: {
+     *     user: {
+     *       password: true
+     *     }
+     *   }
+     * })
+     * ```
+     */
+    omit?: Prisma.GlobalOmitConfig
   }
-
+  export type GlobalOmitConfig = {
+    notification?: NotificationOmit
+    emailMessage?: EmailMessageOmit
+    emailCampaign?: EmailCampaignOmit
+    smsMessage?: SmsMessageOmit
+    deviceToken?: DeviceTokenOmit
+    notificationSetting?: NotificationSettingOmit
+    contactPhoneVerification?: ContactPhoneVerificationOmit
+  }
 
   /* Types for Logging */
   export type LogLevel = 'info' | 'query' | 'warn' | 'error'
@@ -1189,10 +1336,15 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
-    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
-    : never
+  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
+
+  export type GetLogType<T> = CheckIsLogLevel<
+    T extends LogDefinition ? T['level'] : T
+  >;
+
+  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
+    ? GetLogType<T[number]>
+    : never;
 
   export type QueryEvent = {
     timestamp: Date
@@ -1221,6 +1373,7 @@ export namespace Prisma {
     | 'createManyAndReturn'
     | 'update'
     | 'updateMany'
+    | 'updateManyAndReturn'
     | 'upsert'
     | 'delete'
     | 'deleteMany'
@@ -1231,25 +1384,6 @@ export namespace Prisma {
     | 'runCommandRaw'
     | 'findRaw'
     | 'groupBy'
-
-  /**
-   * These options are being passed into the middleware as "params"
-   */
-  export type MiddlewareParams = {
-    model?: ModelName
-    action: PrismaAction
-    args: any
-    dataPath: string[]
-    runInTransaction: boolean
-  }
-
-  /**
-   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
-   */
-  export type Middleware<T = any> = (
-    params: MiddlewareParams,
-    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
-  ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
@@ -1293,7 +1427,9 @@ export namespace Prisma {
     body: string | null
     is_seen: boolean | null
     is_read: boolean | null
+    is_archived: boolean | null
     seen_at: Date | null
+    archived_at: Date | null
     ref_id: string | null
     ref_type: string | null
     created_at: Date | null
@@ -1309,7 +1445,9 @@ export namespace Prisma {
     body: string | null
     is_seen: boolean | null
     is_read: boolean | null
+    is_archived: boolean | null
     seen_at: Date | null
+    archived_at: Date | null
     ref_id: string | null
     ref_type: string | null
     created_at: Date | null
@@ -1325,7 +1463,9 @@ export namespace Prisma {
     body: number
     is_seen: number
     is_read: number
+    is_archived: number
     seen_at: number
+    archived_at: number
     ref_id: number
     ref_type: number
     metadata: number
@@ -1344,7 +1484,9 @@ export namespace Prisma {
     body?: true
     is_seen?: true
     is_read?: true
+    is_archived?: true
     seen_at?: true
+    archived_at?: true
     ref_id?: true
     ref_type?: true
     created_at?: true
@@ -1360,7 +1502,9 @@ export namespace Prisma {
     body?: true
     is_seen?: true
     is_read?: true
+    is_archived?: true
     seen_at?: true
+    archived_at?: true
     ref_id?: true
     ref_type?: true
     created_at?: true
@@ -1376,7 +1520,9 @@ export namespace Prisma {
     body?: true
     is_seen?: true
     is_read?: true
+    is_archived?: true
     seen_at?: true
+    archived_at?: true
     ref_id?: true
     ref_type?: true
     metadata?: true
@@ -1466,7 +1612,9 @@ export namespace Prisma {
     body: string | null
     is_seen: boolean
     is_read: boolean
+    is_archived: boolean
     seen_at: Date | null
+    archived_at: Date | null
     ref_id: string | null
     ref_type: string | null
     metadata: JsonValue
@@ -1500,7 +1648,9 @@ export namespace Prisma {
     body?: boolean
     is_seen?: boolean
     is_read?: boolean
+    is_archived?: boolean
     seen_at?: boolean
+    archived_at?: boolean
     ref_id?: boolean
     ref_type?: boolean
     metadata?: boolean
@@ -1517,7 +1667,28 @@ export namespace Prisma {
     body?: boolean
     is_seen?: boolean
     is_read?: boolean
+    is_archived?: boolean
     seen_at?: boolean
+    archived_at?: boolean
+    ref_id?: boolean
+    ref_type?: boolean
+    metadata?: boolean
+    created_at?: boolean
+  }, ExtArgs["result"]["notification"]>
+
+  export type NotificationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    org_id?: boolean
+    user_id?: boolean
+    type?: boolean
+    category?: boolean
+    title?: boolean
+    body?: boolean
+    is_seen?: boolean
+    is_read?: boolean
+    is_archived?: boolean
+    seen_at?: boolean
+    archived_at?: boolean
     ref_id?: boolean
     ref_type?: boolean
     metadata?: boolean
@@ -1534,13 +1705,16 @@ export namespace Prisma {
     body?: boolean
     is_seen?: boolean
     is_read?: boolean
+    is_archived?: boolean
     seen_at?: boolean
+    archived_at?: boolean
     ref_id?: boolean
     ref_type?: boolean
     metadata?: boolean
     created_at?: boolean
   }
 
+  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "org_id" | "user_id" | "type" | "category" | "title" | "body" | "is_seen" | "is_read" | "is_archived" | "seen_at" | "archived_at" | "ref_id" | "ref_type" | "metadata" | "created_at", ExtArgs["result"]["notification"]>
 
   export type $NotificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Notification"
@@ -1555,7 +1729,9 @@ export namespace Prisma {
       body: string | null
       is_seen: boolean
       is_read: boolean
+      is_archived: boolean
       seen_at: Date | null
+      archived_at: Date | null
       ref_id: string | null
       ref_type: string | null
       metadata: Prisma.JsonValue
@@ -1566,12 +1742,12 @@ export namespace Prisma {
 
   type NotificationGetPayload<S extends boolean | null | undefined | NotificationDefaultArgs> = $Result.GetResult<Prisma.$NotificationPayload, S>
 
-  type NotificationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<NotificationFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type NotificationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NotificationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: NotificationCountAggregateInputType | true
     }
 
-  export interface NotificationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface NotificationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Notification'], meta: { name: 'Notification' } }
     /**
      * Find zero or one Notification that matches the filter.
@@ -1584,10 +1760,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends NotificationFindUniqueArgs>(args: SelectSubset<T, NotificationFindUniqueArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends NotificationFindUniqueArgs>(args: SelectSubset<T, NotificationFindUniqueArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one Notification that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one Notification that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {NotificationFindUniqueOrThrowArgs} args - Arguments to find a Notification
      * @example
@@ -1598,7 +1774,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends NotificationFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends NotificationFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Notification that matches the filter.
@@ -1613,7 +1789,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends NotificationFindFirstArgs>(args?: SelectSubset<T, NotificationFindFirstArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends NotificationFindFirstArgs>(args?: SelectSubset<T, NotificationFindFirstArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Notification that matches the filter or
@@ -1629,7 +1805,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends NotificationFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends NotificationFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Notifications that matches the filter.
@@ -1647,7 +1823,7 @@ export namespace Prisma {
      * const notificationWithIdOnly = await prisma.notification.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends NotificationFindManyArgs>(args?: SelectSubset<T, NotificationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends NotificationFindManyArgs>(args?: SelectSubset<T, NotificationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Notification.
@@ -1661,7 +1837,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends NotificationCreateArgs>(args: SelectSubset<T, NotificationCreateArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends NotificationCreateArgs>(args: SelectSubset<T, NotificationCreateArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Notifications.
@@ -1689,7 +1865,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Notifications and only return the `id`
-     * const notificationWithIdOnly = await prisma.notification.createManyAndReturn({ 
+     * const notificationWithIdOnly = await prisma.notification.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -1699,7 +1875,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends NotificationCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends NotificationCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Notification.
@@ -1713,7 +1889,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends NotificationDeleteArgs>(args: SelectSubset<T, NotificationDeleteArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends NotificationDeleteArgs>(args: SelectSubset<T, NotificationDeleteArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Notification.
@@ -1730,7 +1906,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends NotificationUpdateArgs>(args: SelectSubset<T, NotificationUpdateArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends NotificationUpdateArgs>(args: SelectSubset<T, NotificationUpdateArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Notifications.
@@ -1766,6 +1942,36 @@ export namespace Prisma {
     updateMany<T extends NotificationUpdateManyArgs>(args: SelectSubset<T, NotificationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more Notifications and returns the data updated in the database.
+     * @param {NotificationUpdateManyAndReturnArgs} args - Arguments to update many Notifications.
+     * @example
+     * // Update many Notifications
+     * const notification = await prisma.notification.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Notifications and only return the `id`
+     * const notificationWithIdOnly = await prisma.notification.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NotificationUpdateManyAndReturnArgs>(args: SelectSubset<T, NotificationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one Notification.
      * @param {NotificationUpsertArgs} args - Arguments to update or create a Notification.
      * @example
@@ -1782,7 +1988,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends NotificationUpsertArgs>(args: SelectSubset<T, NotificationUpsertArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends NotificationUpsertArgs>(args: SelectSubset<T, NotificationUpsertArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -1922,7 +2128,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__NotificationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__NotificationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1951,7 +2157,7 @@ export namespace Prisma {
 
   /**
    * Fields of the Notification model
-   */ 
+   */
   interface NotificationFieldRefs {
     readonly id: FieldRef<"Notification", 'String'>
     readonly org_id: FieldRef<"Notification", 'String'>
@@ -1962,7 +2168,9 @@ export namespace Prisma {
     readonly body: FieldRef<"Notification", 'String'>
     readonly is_seen: FieldRef<"Notification", 'Boolean'>
     readonly is_read: FieldRef<"Notification", 'Boolean'>
+    readonly is_archived: FieldRef<"Notification", 'Boolean'>
     readonly seen_at: FieldRef<"Notification", 'DateTime'>
+    readonly archived_at: FieldRef<"Notification", 'DateTime'>
     readonly ref_id: FieldRef<"Notification", 'String'>
     readonly ref_type: FieldRef<"Notification", 'String'>
     readonly metadata: FieldRef<"Notification", 'Json'>
@@ -1980,6 +2188,10 @@ export namespace Prisma {
      */
     select?: NotificationSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
      * Filter, which Notification to fetch.
      */
     where: NotificationWhereUniqueInput
@@ -1994,6 +2206,10 @@ export namespace Prisma {
      */
     select?: NotificationSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
      * Filter, which Notification to fetch.
      */
     where: NotificationWhereUniqueInput
@@ -2007,6 +2223,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Notification
      */
     select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
     /**
      * Filter, which Notification to fetch.
      */
@@ -2052,6 +2272,10 @@ export namespace Prisma {
      */
     select?: NotificationSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
      * Filter, which Notification to fetch.
      */
     where?: NotificationWhereInput
@@ -2096,6 +2320,10 @@ export namespace Prisma {
      */
     select?: NotificationSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
      * Filter, which Notifications to fetch.
      */
     where?: NotificationWhereInput
@@ -2135,6 +2363,10 @@ export namespace Prisma {
      */
     select?: NotificationSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
      * The data needed to create a Notification.
      */
     data: XOR<NotificationCreateInput, NotificationUncheckedCreateInput>
@@ -2160,6 +2392,10 @@ export namespace Prisma {
      */
     select?: NotificationSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
      * The data used to create many Notifications.
      */
     data: NotificationCreateManyInput | NotificationCreateManyInput[]
@@ -2174,6 +2410,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Notification
      */
     select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
     /**
      * The data needed to update a Notification.
      */
@@ -2196,6 +2436,36 @@ export namespace Prisma {
      * Filter which Notifications to update
      */
     where?: NotificationWhereInput
+    /**
+     * Limit how many Notifications to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Notification updateManyAndReturn
+   */
+  export type NotificationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * The data used to update Notifications.
+     */
+    data: XOR<NotificationUpdateManyMutationInput, NotificationUncheckedUpdateManyInput>
+    /**
+     * Filter which Notifications to update
+     */
+    where?: NotificationWhereInput
+    /**
+     * Limit how many Notifications to update.
+     */
+    limit?: number
   }
 
   /**
@@ -2206,6 +2476,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Notification
      */
     select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
     /**
      * The filter to search for the Notification to update in case it exists.
      */
@@ -2229,6 +2503,10 @@ export namespace Prisma {
      */
     select?: NotificationSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
      * Filter which Notification to delete.
      */
     where: NotificationWhereUniqueInput
@@ -2242,6 +2520,10 @@ export namespace Prisma {
      * Filter which Notifications to delete
      */
     where?: NotificationWhereInput
+    /**
+     * Limit how many Notifications to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -2252,6 +2534,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the Notification
      */
     select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
   }
 
 
@@ -2512,6 +2798,25 @@ export namespace Prisma {
     updated_at?: boolean
   }, ExtArgs["result"]["emailMessage"]>
 
+  export type EmailMessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    org_id?: boolean
+    created_by?: boolean
+    subject?: boolean
+    body?: boolean
+    to?: boolean
+    cc?: boolean
+    bcc?: boolean
+    from_email?: boolean
+    from_name?: boolean
+    is_sent?: boolean
+    sent_at?: boolean
+    is_deleted?: boolean
+    metadata?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["emailMessage"]>
+
   export type EmailMessageSelectScalar = {
     id?: boolean
     org_id?: boolean
@@ -2531,6 +2836,7 @@ export namespace Prisma {
     updated_at?: boolean
   }
 
+  export type EmailMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "org_id" | "created_by" | "subject" | "body" | "to" | "cc" | "bcc" | "from_email" | "from_name" | "is_sent" | "sent_at" | "is_deleted" | "metadata" | "created_at" | "updated_at", ExtArgs["result"]["emailMessage"]>
 
   export type $EmailMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "EmailMessage"
@@ -2558,12 +2864,12 @@ export namespace Prisma {
 
   type EmailMessageGetPayload<S extends boolean | null | undefined | EmailMessageDefaultArgs> = $Result.GetResult<Prisma.$EmailMessagePayload, S>
 
-  type EmailMessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<EmailMessageFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type EmailMessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EmailMessageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: EmailMessageCountAggregateInputType | true
     }
 
-  export interface EmailMessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface EmailMessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EmailMessage'], meta: { name: 'EmailMessage' } }
     /**
      * Find zero or one EmailMessage that matches the filter.
@@ -2576,10 +2882,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends EmailMessageFindUniqueArgs>(args: SelectSubset<T, EmailMessageFindUniqueArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends EmailMessageFindUniqueArgs>(args: SelectSubset<T, EmailMessageFindUniqueArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one EmailMessage that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one EmailMessage that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {EmailMessageFindUniqueOrThrowArgs} args - Arguments to find a EmailMessage
      * @example
@@ -2590,7 +2896,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends EmailMessageFindUniqueOrThrowArgs>(args: SelectSubset<T, EmailMessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends EmailMessageFindUniqueOrThrowArgs>(args: SelectSubset<T, EmailMessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first EmailMessage that matches the filter.
@@ -2605,7 +2911,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends EmailMessageFindFirstArgs>(args?: SelectSubset<T, EmailMessageFindFirstArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends EmailMessageFindFirstArgs>(args?: SelectSubset<T, EmailMessageFindFirstArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first EmailMessage that matches the filter or
@@ -2621,7 +2927,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends EmailMessageFindFirstOrThrowArgs>(args?: SelectSubset<T, EmailMessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends EmailMessageFindFirstOrThrowArgs>(args?: SelectSubset<T, EmailMessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more EmailMessages that matches the filter.
@@ -2639,7 +2945,7 @@ export namespace Prisma {
      * const emailMessageWithIdOnly = await prisma.emailMessage.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends EmailMessageFindManyArgs>(args?: SelectSubset<T, EmailMessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findMany">>
+    findMany<T extends EmailMessageFindManyArgs>(args?: SelectSubset<T, EmailMessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a EmailMessage.
@@ -2653,7 +2959,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends EmailMessageCreateArgs>(args: SelectSubset<T, EmailMessageCreateArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends EmailMessageCreateArgs>(args: SelectSubset<T, EmailMessageCreateArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many EmailMessages.
@@ -2681,7 +2987,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many EmailMessages and only return the `id`
-     * const emailMessageWithIdOnly = await prisma.emailMessage.createManyAndReturn({ 
+     * const emailMessageWithIdOnly = await prisma.emailMessage.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -2691,7 +2997,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends EmailMessageCreateManyAndReturnArgs>(args?: SelectSubset<T, EmailMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends EmailMessageCreateManyAndReturnArgs>(args?: SelectSubset<T, EmailMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a EmailMessage.
@@ -2705,7 +3011,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends EmailMessageDeleteArgs>(args: SelectSubset<T, EmailMessageDeleteArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends EmailMessageDeleteArgs>(args: SelectSubset<T, EmailMessageDeleteArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one EmailMessage.
@@ -2722,7 +3028,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends EmailMessageUpdateArgs>(args: SelectSubset<T, EmailMessageUpdateArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends EmailMessageUpdateArgs>(args: SelectSubset<T, EmailMessageUpdateArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more EmailMessages.
@@ -2758,6 +3064,36 @@ export namespace Prisma {
     updateMany<T extends EmailMessageUpdateManyArgs>(args: SelectSubset<T, EmailMessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more EmailMessages and returns the data updated in the database.
+     * @param {EmailMessageUpdateManyAndReturnArgs} args - Arguments to update many EmailMessages.
+     * @example
+     * // Update many EmailMessages
+     * const emailMessage = await prisma.emailMessage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EmailMessages and only return the `id`
+     * const emailMessageWithIdOnly = await prisma.emailMessage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EmailMessageUpdateManyAndReturnArgs>(args: SelectSubset<T, EmailMessageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one EmailMessage.
      * @param {EmailMessageUpsertArgs} args - Arguments to update or create a EmailMessage.
      * @example
@@ -2774,7 +3110,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends EmailMessageUpsertArgs>(args: SelectSubset<T, EmailMessageUpsertArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends EmailMessageUpsertArgs>(args: SelectSubset<T, EmailMessageUpsertArgs<ExtArgs>>): Prisma__EmailMessageClient<$Result.GetResult<Prisma.$EmailMessagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -2914,7 +3250,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__EmailMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__EmailMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2943,7 +3279,7 @@ export namespace Prisma {
 
   /**
    * Fields of the EmailMessage model
-   */ 
+   */
   interface EmailMessageFieldRefs {
     readonly id: FieldRef<"EmailMessage", 'String'>
     readonly org_id: FieldRef<"EmailMessage", 'String'>
@@ -2974,6 +3310,10 @@ export namespace Prisma {
      */
     select?: EmailMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
      * Filter, which EmailMessage to fetch.
      */
     where: EmailMessageWhereUniqueInput
@@ -2988,6 +3328,10 @@ export namespace Prisma {
      */
     select?: EmailMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
      * Filter, which EmailMessage to fetch.
      */
     where: EmailMessageWhereUniqueInput
@@ -3001,6 +3345,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailMessage
      */
     select?: EmailMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
     /**
      * Filter, which EmailMessage to fetch.
      */
@@ -3046,6 +3394,10 @@ export namespace Prisma {
      */
     select?: EmailMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
      * Filter, which EmailMessage to fetch.
      */
     where?: EmailMessageWhereInput
@@ -3090,6 +3442,10 @@ export namespace Prisma {
      */
     select?: EmailMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
      * Filter, which EmailMessages to fetch.
      */
     where?: EmailMessageWhereInput
@@ -3129,6 +3485,10 @@ export namespace Prisma {
      */
     select?: EmailMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
      * The data needed to create a EmailMessage.
      */
     data: XOR<EmailMessageCreateInput, EmailMessageUncheckedCreateInput>
@@ -3154,6 +3514,10 @@ export namespace Prisma {
      */
     select?: EmailMessageSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
      * The data used to create many EmailMessages.
      */
     data: EmailMessageCreateManyInput | EmailMessageCreateManyInput[]
@@ -3168,6 +3532,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailMessage
      */
     select?: EmailMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
     /**
      * The data needed to update a EmailMessage.
      */
@@ -3190,6 +3558,36 @@ export namespace Prisma {
      * Filter which EmailMessages to update
      */
     where?: EmailMessageWhereInput
+    /**
+     * Limit how many EmailMessages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailMessage updateManyAndReturn
+   */
+  export type EmailMessageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailMessage
+     */
+    select?: EmailMessageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
+     * The data used to update EmailMessages.
+     */
+    data: XOR<EmailMessageUpdateManyMutationInput, EmailMessageUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailMessages to update
+     */
+    where?: EmailMessageWhereInput
+    /**
+     * Limit how many EmailMessages to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3200,6 +3598,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailMessage
      */
     select?: EmailMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
     /**
      * The filter to search for the EmailMessage to update in case it exists.
      */
@@ -3223,6 +3625,10 @@ export namespace Prisma {
      */
     select?: EmailMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
+    /**
      * Filter which EmailMessage to delete.
      */
     where: EmailMessageWhereUniqueInput
@@ -3236,6 +3642,10 @@ export namespace Prisma {
      * Filter which EmailMessages to delete
      */
     where?: EmailMessageWhereInput
+    /**
+     * Limit how many EmailMessages to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -3246,6 +3656,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailMessage
      */
     select?: EmailMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailMessage
+     */
+    omit?: EmailMessageOmit<ExtArgs> | null
   }
 
 
@@ -3500,6 +3914,23 @@ export namespace Prisma {
     updated_at?: boolean
   }, ExtArgs["result"]["emailCampaign"]>
 
+  export type EmailCampaignSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    org_id?: boolean
+    created_by?: boolean
+    series_id?: boolean
+    name?: boolean
+    subject?: boolean
+    body?: boolean
+    status?: boolean
+    scheduled_at?: boolean
+    sent_at?: boolean
+    is_deleted?: boolean
+    metadata?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["emailCampaign"]>
+
   export type EmailCampaignSelectScalar = {
     id?: boolean
     org_id?: boolean
@@ -3517,6 +3948,7 @@ export namespace Prisma {
     updated_at?: boolean
   }
 
+  export type EmailCampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "org_id" | "created_by" | "series_id" | "name" | "subject" | "body" | "status" | "scheduled_at" | "sent_at" | "is_deleted" | "metadata" | "created_at" | "updated_at", ExtArgs["result"]["emailCampaign"]>
 
   export type $EmailCampaignPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "EmailCampaign"
@@ -3542,12 +3974,12 @@ export namespace Prisma {
 
   type EmailCampaignGetPayload<S extends boolean | null | undefined | EmailCampaignDefaultArgs> = $Result.GetResult<Prisma.$EmailCampaignPayload, S>
 
-  type EmailCampaignCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<EmailCampaignFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type EmailCampaignCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EmailCampaignFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: EmailCampaignCountAggregateInputType | true
     }
 
-  export interface EmailCampaignDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface EmailCampaignDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EmailCampaign'], meta: { name: 'EmailCampaign' } }
     /**
      * Find zero or one EmailCampaign that matches the filter.
@@ -3560,10 +3992,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends EmailCampaignFindUniqueArgs>(args: SelectSubset<T, EmailCampaignFindUniqueArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends EmailCampaignFindUniqueArgs>(args: SelectSubset<T, EmailCampaignFindUniqueArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one EmailCampaign that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one EmailCampaign that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {EmailCampaignFindUniqueOrThrowArgs} args - Arguments to find a EmailCampaign
      * @example
@@ -3574,7 +4006,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends EmailCampaignFindUniqueOrThrowArgs>(args: SelectSubset<T, EmailCampaignFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends EmailCampaignFindUniqueOrThrowArgs>(args: SelectSubset<T, EmailCampaignFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first EmailCampaign that matches the filter.
@@ -3589,7 +4021,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends EmailCampaignFindFirstArgs>(args?: SelectSubset<T, EmailCampaignFindFirstArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends EmailCampaignFindFirstArgs>(args?: SelectSubset<T, EmailCampaignFindFirstArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first EmailCampaign that matches the filter or
@@ -3605,7 +4037,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends EmailCampaignFindFirstOrThrowArgs>(args?: SelectSubset<T, EmailCampaignFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends EmailCampaignFindFirstOrThrowArgs>(args?: SelectSubset<T, EmailCampaignFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more EmailCampaigns that matches the filter.
@@ -3623,7 +4055,7 @@ export namespace Prisma {
      * const emailCampaignWithIdOnly = await prisma.emailCampaign.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends EmailCampaignFindManyArgs>(args?: SelectSubset<T, EmailCampaignFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends EmailCampaignFindManyArgs>(args?: SelectSubset<T, EmailCampaignFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a EmailCampaign.
@@ -3637,7 +4069,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends EmailCampaignCreateArgs>(args: SelectSubset<T, EmailCampaignCreateArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends EmailCampaignCreateArgs>(args: SelectSubset<T, EmailCampaignCreateArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many EmailCampaigns.
@@ -3665,7 +4097,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many EmailCampaigns and only return the `id`
-     * const emailCampaignWithIdOnly = await prisma.emailCampaign.createManyAndReturn({ 
+     * const emailCampaignWithIdOnly = await prisma.emailCampaign.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -3675,7 +4107,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends EmailCampaignCreateManyAndReturnArgs>(args?: SelectSubset<T, EmailCampaignCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends EmailCampaignCreateManyAndReturnArgs>(args?: SelectSubset<T, EmailCampaignCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a EmailCampaign.
@@ -3689,7 +4121,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends EmailCampaignDeleteArgs>(args: SelectSubset<T, EmailCampaignDeleteArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends EmailCampaignDeleteArgs>(args: SelectSubset<T, EmailCampaignDeleteArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one EmailCampaign.
@@ -3706,7 +4138,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends EmailCampaignUpdateArgs>(args: SelectSubset<T, EmailCampaignUpdateArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends EmailCampaignUpdateArgs>(args: SelectSubset<T, EmailCampaignUpdateArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more EmailCampaigns.
@@ -3742,6 +4174,36 @@ export namespace Prisma {
     updateMany<T extends EmailCampaignUpdateManyArgs>(args: SelectSubset<T, EmailCampaignUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more EmailCampaigns and returns the data updated in the database.
+     * @param {EmailCampaignUpdateManyAndReturnArgs} args - Arguments to update many EmailCampaigns.
+     * @example
+     * // Update many EmailCampaigns
+     * const emailCampaign = await prisma.emailCampaign.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EmailCampaigns and only return the `id`
+     * const emailCampaignWithIdOnly = await prisma.emailCampaign.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EmailCampaignUpdateManyAndReturnArgs>(args: SelectSubset<T, EmailCampaignUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one EmailCampaign.
      * @param {EmailCampaignUpsertArgs} args - Arguments to update or create a EmailCampaign.
      * @example
@@ -3758,7 +4220,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends EmailCampaignUpsertArgs>(args: SelectSubset<T, EmailCampaignUpsertArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends EmailCampaignUpsertArgs>(args: SelectSubset<T, EmailCampaignUpsertArgs<ExtArgs>>): Prisma__EmailCampaignClient<$Result.GetResult<Prisma.$EmailCampaignPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -3898,7 +4360,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__EmailCampaignClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__EmailCampaignClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3927,7 +4389,7 @@ export namespace Prisma {
 
   /**
    * Fields of the EmailCampaign model
-   */ 
+   */
   interface EmailCampaignFieldRefs {
     readonly id: FieldRef<"EmailCampaign", 'String'>
     readonly org_id: FieldRef<"EmailCampaign", 'String'>
@@ -3956,6 +4418,10 @@ export namespace Prisma {
      */
     select?: EmailCampaignSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
      * Filter, which EmailCampaign to fetch.
      */
     where: EmailCampaignWhereUniqueInput
@@ -3970,6 +4436,10 @@ export namespace Prisma {
      */
     select?: EmailCampaignSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
      * Filter, which EmailCampaign to fetch.
      */
     where: EmailCampaignWhereUniqueInput
@@ -3983,6 +4453,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailCampaign
      */
     select?: EmailCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
     /**
      * Filter, which EmailCampaign to fetch.
      */
@@ -4028,6 +4502,10 @@ export namespace Prisma {
      */
     select?: EmailCampaignSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
      * Filter, which EmailCampaign to fetch.
      */
     where?: EmailCampaignWhereInput
@@ -4072,6 +4550,10 @@ export namespace Prisma {
      */
     select?: EmailCampaignSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
      * Filter, which EmailCampaigns to fetch.
      */
     where?: EmailCampaignWhereInput
@@ -4111,6 +4593,10 @@ export namespace Prisma {
      */
     select?: EmailCampaignSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
      * The data needed to create a EmailCampaign.
      */
     data: XOR<EmailCampaignCreateInput, EmailCampaignUncheckedCreateInput>
@@ -4136,6 +4622,10 @@ export namespace Prisma {
      */
     select?: EmailCampaignSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
      * The data used to create many EmailCampaigns.
      */
     data: EmailCampaignCreateManyInput | EmailCampaignCreateManyInput[]
@@ -4150,6 +4640,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailCampaign
      */
     select?: EmailCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
     /**
      * The data needed to update a EmailCampaign.
      */
@@ -4172,6 +4666,36 @@ export namespace Prisma {
      * Filter which EmailCampaigns to update
      */
     where?: EmailCampaignWhereInput
+    /**
+     * Limit how many EmailCampaigns to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailCampaign updateManyAndReturn
+   */
+  export type EmailCampaignUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailCampaign
+     */
+    select?: EmailCampaignSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
+     * The data used to update EmailCampaigns.
+     */
+    data: XOR<EmailCampaignUpdateManyMutationInput, EmailCampaignUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailCampaigns to update
+     */
+    where?: EmailCampaignWhereInput
+    /**
+     * Limit how many EmailCampaigns to update.
+     */
+    limit?: number
   }
 
   /**
@@ -4182,6 +4706,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailCampaign
      */
     select?: EmailCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
     /**
      * The filter to search for the EmailCampaign to update in case it exists.
      */
@@ -4205,6 +4733,10 @@ export namespace Prisma {
      */
     select?: EmailCampaignSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
+    /**
      * Filter which EmailCampaign to delete.
      */
     where: EmailCampaignWhereUniqueInput
@@ -4218,6 +4750,10 @@ export namespace Prisma {
      * Filter which EmailCampaigns to delete
      */
     where?: EmailCampaignWhereInput
+    /**
+     * Limit how many EmailCampaigns to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -4228,6 +4764,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the EmailCampaign
      */
     select?: EmailCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailCampaign
+     */
+    omit?: EmailCampaignOmit<ExtArgs> | null
   }
 
 
@@ -4455,6 +4995,20 @@ export namespace Prisma {
     updated_at?: boolean
   }, ExtArgs["result"]["smsMessage"]>
 
+  export type SmsMessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    org_id?: boolean
+    created_by?: boolean
+    to?: boolean
+    body?: boolean
+    status?: boolean
+    twilio_sid?: boolean
+    is_deleted?: boolean
+    metadata?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["smsMessage"]>
+
   export type SmsMessageSelectScalar = {
     id?: boolean
     org_id?: boolean
@@ -4469,6 +5023,7 @@ export namespace Prisma {
     updated_at?: boolean
   }
 
+  export type SmsMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "org_id" | "created_by" | "to" | "body" | "status" | "twilio_sid" | "is_deleted" | "metadata" | "created_at" | "updated_at", ExtArgs["result"]["smsMessage"]>
 
   export type $SmsMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "SmsMessage"
@@ -4491,12 +5046,12 @@ export namespace Prisma {
 
   type SmsMessageGetPayload<S extends boolean | null | undefined | SmsMessageDefaultArgs> = $Result.GetResult<Prisma.$SmsMessagePayload, S>
 
-  type SmsMessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<SmsMessageFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type SmsMessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SmsMessageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: SmsMessageCountAggregateInputType | true
     }
 
-  export interface SmsMessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface SmsMessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SmsMessage'], meta: { name: 'SmsMessage' } }
     /**
      * Find zero or one SmsMessage that matches the filter.
@@ -4509,10 +5064,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends SmsMessageFindUniqueArgs>(args: SelectSubset<T, SmsMessageFindUniqueArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends SmsMessageFindUniqueArgs>(args: SelectSubset<T, SmsMessageFindUniqueArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one SmsMessage that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one SmsMessage that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {SmsMessageFindUniqueOrThrowArgs} args - Arguments to find a SmsMessage
      * @example
@@ -4523,7 +5078,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends SmsMessageFindUniqueOrThrowArgs>(args: SelectSubset<T, SmsMessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends SmsMessageFindUniqueOrThrowArgs>(args: SelectSubset<T, SmsMessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first SmsMessage that matches the filter.
@@ -4538,7 +5093,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends SmsMessageFindFirstArgs>(args?: SelectSubset<T, SmsMessageFindFirstArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends SmsMessageFindFirstArgs>(args?: SelectSubset<T, SmsMessageFindFirstArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first SmsMessage that matches the filter or
@@ -4554,7 +5109,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends SmsMessageFindFirstOrThrowArgs>(args?: SelectSubset<T, SmsMessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends SmsMessageFindFirstOrThrowArgs>(args?: SelectSubset<T, SmsMessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more SmsMessages that matches the filter.
@@ -4572,7 +5127,7 @@ export namespace Prisma {
      * const smsMessageWithIdOnly = await prisma.smsMessage.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends SmsMessageFindManyArgs>(args?: SelectSubset<T, SmsMessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findMany">>
+    findMany<T extends SmsMessageFindManyArgs>(args?: SelectSubset<T, SmsMessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a SmsMessage.
@@ -4586,7 +5141,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends SmsMessageCreateArgs>(args: SelectSubset<T, SmsMessageCreateArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends SmsMessageCreateArgs>(args: SelectSubset<T, SmsMessageCreateArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many SmsMessages.
@@ -4614,7 +5169,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many SmsMessages and only return the `id`
-     * const smsMessageWithIdOnly = await prisma.smsMessage.createManyAndReturn({ 
+     * const smsMessageWithIdOnly = await prisma.smsMessage.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -4624,7 +5179,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends SmsMessageCreateManyAndReturnArgs>(args?: SelectSubset<T, SmsMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends SmsMessageCreateManyAndReturnArgs>(args?: SelectSubset<T, SmsMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a SmsMessage.
@@ -4638,7 +5193,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends SmsMessageDeleteArgs>(args: SelectSubset<T, SmsMessageDeleteArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends SmsMessageDeleteArgs>(args: SelectSubset<T, SmsMessageDeleteArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one SmsMessage.
@@ -4655,7 +5210,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends SmsMessageUpdateArgs>(args: SelectSubset<T, SmsMessageUpdateArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends SmsMessageUpdateArgs>(args: SelectSubset<T, SmsMessageUpdateArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more SmsMessages.
@@ -4691,6 +5246,36 @@ export namespace Prisma {
     updateMany<T extends SmsMessageUpdateManyArgs>(args: SelectSubset<T, SmsMessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more SmsMessages and returns the data updated in the database.
+     * @param {SmsMessageUpdateManyAndReturnArgs} args - Arguments to update many SmsMessages.
+     * @example
+     * // Update many SmsMessages
+     * const smsMessage = await prisma.smsMessage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SmsMessages and only return the `id`
+     * const smsMessageWithIdOnly = await prisma.smsMessage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SmsMessageUpdateManyAndReturnArgs>(args: SelectSubset<T, SmsMessageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one SmsMessage.
      * @param {SmsMessageUpsertArgs} args - Arguments to update or create a SmsMessage.
      * @example
@@ -4707,7 +5292,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends SmsMessageUpsertArgs>(args: SelectSubset<T, SmsMessageUpsertArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends SmsMessageUpsertArgs>(args: SelectSubset<T, SmsMessageUpsertArgs<ExtArgs>>): Prisma__SmsMessageClient<$Result.GetResult<Prisma.$SmsMessagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -4847,7 +5432,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__SmsMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__SmsMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4876,7 +5461,7 @@ export namespace Prisma {
 
   /**
    * Fields of the SmsMessage model
-   */ 
+   */
   interface SmsMessageFieldRefs {
     readonly id: FieldRef<"SmsMessage", 'String'>
     readonly org_id: FieldRef<"SmsMessage", 'String'>
@@ -4902,6 +5487,10 @@ export namespace Prisma {
      */
     select?: SmsMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
      * Filter, which SmsMessage to fetch.
      */
     where: SmsMessageWhereUniqueInput
@@ -4916,6 +5505,10 @@ export namespace Prisma {
      */
     select?: SmsMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
      * Filter, which SmsMessage to fetch.
      */
     where: SmsMessageWhereUniqueInput
@@ -4929,6 +5522,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the SmsMessage
      */
     select?: SmsMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
     /**
      * Filter, which SmsMessage to fetch.
      */
@@ -4974,6 +5571,10 @@ export namespace Prisma {
      */
     select?: SmsMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
      * Filter, which SmsMessage to fetch.
      */
     where?: SmsMessageWhereInput
@@ -5018,6 +5619,10 @@ export namespace Prisma {
      */
     select?: SmsMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
      * Filter, which SmsMessages to fetch.
      */
     where?: SmsMessageWhereInput
@@ -5057,6 +5662,10 @@ export namespace Prisma {
      */
     select?: SmsMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
      * The data needed to create a SmsMessage.
      */
     data: XOR<SmsMessageCreateInput, SmsMessageUncheckedCreateInput>
@@ -5082,6 +5691,10 @@ export namespace Prisma {
      */
     select?: SmsMessageSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
      * The data used to create many SmsMessages.
      */
     data: SmsMessageCreateManyInput | SmsMessageCreateManyInput[]
@@ -5096,6 +5709,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the SmsMessage
      */
     select?: SmsMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
     /**
      * The data needed to update a SmsMessage.
      */
@@ -5118,6 +5735,36 @@ export namespace Prisma {
      * Filter which SmsMessages to update
      */
     where?: SmsMessageWhereInput
+    /**
+     * Limit how many SmsMessages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SmsMessage updateManyAndReturn
+   */
+  export type SmsMessageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SmsMessage
+     */
+    select?: SmsMessageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
+     * The data used to update SmsMessages.
+     */
+    data: XOR<SmsMessageUpdateManyMutationInput, SmsMessageUncheckedUpdateManyInput>
+    /**
+     * Filter which SmsMessages to update
+     */
+    where?: SmsMessageWhereInput
+    /**
+     * Limit how many SmsMessages to update.
+     */
+    limit?: number
   }
 
   /**
@@ -5128,6 +5775,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the SmsMessage
      */
     select?: SmsMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
     /**
      * The filter to search for the SmsMessage to update in case it exists.
      */
@@ -5151,6 +5802,10 @@ export namespace Prisma {
      */
     select?: SmsMessageSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
+    /**
      * Filter which SmsMessage to delete.
      */
     where: SmsMessageWhereUniqueInput
@@ -5164,6 +5819,10 @@ export namespace Prisma {
      * Filter which SmsMessages to delete
      */
     where?: SmsMessageWhereInput
+    /**
+     * Limit how many SmsMessages to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5174,6 +5833,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the SmsMessage
      */
     select?: SmsMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SmsMessage
+     */
+    omit?: SmsMessageOmit<ExtArgs> | null
   }
 
 
@@ -5360,6 +6023,15 @@ export namespace Prisma {
     created_at?: boolean
   }, ExtArgs["result"]["deviceToken"]>
 
+  export type DeviceTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    org_id?: boolean
+    type?: boolean
+    token?: boolean
+    created_at?: boolean
+  }, ExtArgs["result"]["deviceToken"]>
+
   export type DeviceTokenSelectScalar = {
     id?: boolean
     user_id?: boolean
@@ -5369,6 +6041,7 @@ export namespace Prisma {
     created_at?: boolean
   }
 
+  export type DeviceTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "org_id" | "type" | "token" | "created_at", ExtArgs["result"]["deviceToken"]>
 
   export type $DeviceTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "DeviceToken"
@@ -5386,12 +6059,12 @@ export namespace Prisma {
 
   type DeviceTokenGetPayload<S extends boolean | null | undefined | DeviceTokenDefaultArgs> = $Result.GetResult<Prisma.$DeviceTokenPayload, S>
 
-  type DeviceTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<DeviceTokenFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type DeviceTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DeviceTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: DeviceTokenCountAggregateInputType | true
     }
 
-  export interface DeviceTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface DeviceTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DeviceToken'], meta: { name: 'DeviceToken' } }
     /**
      * Find zero or one DeviceToken that matches the filter.
@@ -5404,10 +6077,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends DeviceTokenFindUniqueArgs>(args: SelectSubset<T, DeviceTokenFindUniqueArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends DeviceTokenFindUniqueArgs>(args: SelectSubset<T, DeviceTokenFindUniqueArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one DeviceToken that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one DeviceToken that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {DeviceTokenFindUniqueOrThrowArgs} args - Arguments to find a DeviceToken
      * @example
@@ -5418,7 +6091,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends DeviceTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, DeviceTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends DeviceTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, DeviceTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first DeviceToken that matches the filter.
@@ -5433,7 +6106,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends DeviceTokenFindFirstArgs>(args?: SelectSubset<T, DeviceTokenFindFirstArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends DeviceTokenFindFirstArgs>(args?: SelectSubset<T, DeviceTokenFindFirstArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first DeviceToken that matches the filter or
@@ -5449,7 +6122,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends DeviceTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, DeviceTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends DeviceTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, DeviceTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more DeviceTokens that matches the filter.
@@ -5467,7 +6140,7 @@ export namespace Prisma {
      * const deviceTokenWithIdOnly = await prisma.deviceToken.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends DeviceTokenFindManyArgs>(args?: SelectSubset<T, DeviceTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends DeviceTokenFindManyArgs>(args?: SelectSubset<T, DeviceTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a DeviceToken.
@@ -5481,7 +6154,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends DeviceTokenCreateArgs>(args: SelectSubset<T, DeviceTokenCreateArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends DeviceTokenCreateArgs>(args: SelectSubset<T, DeviceTokenCreateArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many DeviceTokens.
@@ -5509,7 +6182,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many DeviceTokens and only return the `id`
-     * const deviceTokenWithIdOnly = await prisma.deviceToken.createManyAndReturn({ 
+     * const deviceTokenWithIdOnly = await prisma.deviceToken.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -5519,7 +6192,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends DeviceTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, DeviceTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends DeviceTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, DeviceTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a DeviceToken.
@@ -5533,7 +6206,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends DeviceTokenDeleteArgs>(args: SelectSubset<T, DeviceTokenDeleteArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends DeviceTokenDeleteArgs>(args: SelectSubset<T, DeviceTokenDeleteArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one DeviceToken.
@@ -5550,7 +6223,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends DeviceTokenUpdateArgs>(args: SelectSubset<T, DeviceTokenUpdateArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends DeviceTokenUpdateArgs>(args: SelectSubset<T, DeviceTokenUpdateArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more DeviceTokens.
@@ -5586,6 +6259,36 @@ export namespace Prisma {
     updateMany<T extends DeviceTokenUpdateManyArgs>(args: SelectSubset<T, DeviceTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more DeviceTokens and returns the data updated in the database.
+     * @param {DeviceTokenUpdateManyAndReturnArgs} args - Arguments to update many DeviceTokens.
+     * @example
+     * // Update many DeviceTokens
+     * const deviceToken = await prisma.deviceToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DeviceTokens and only return the `id`
+     * const deviceTokenWithIdOnly = await prisma.deviceToken.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DeviceTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, DeviceTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one DeviceToken.
      * @param {DeviceTokenUpsertArgs} args - Arguments to update or create a DeviceToken.
      * @example
@@ -5602,7 +6305,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends DeviceTokenUpsertArgs>(args: SelectSubset<T, DeviceTokenUpsertArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends DeviceTokenUpsertArgs>(args: SelectSubset<T, DeviceTokenUpsertArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -5742,7 +6445,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__DeviceTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__DeviceTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -5771,7 +6474,7 @@ export namespace Prisma {
 
   /**
    * Fields of the DeviceToken model
-   */ 
+   */
   interface DeviceTokenFieldRefs {
     readonly id: FieldRef<"DeviceToken", 'String'>
     readonly user_id: FieldRef<"DeviceToken", 'String'>
@@ -5792,6 +6495,10 @@ export namespace Prisma {
      */
     select?: DeviceTokenSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
      * Filter, which DeviceToken to fetch.
      */
     where: DeviceTokenWhereUniqueInput
@@ -5806,6 +6513,10 @@ export namespace Prisma {
      */
     select?: DeviceTokenSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
      * Filter, which DeviceToken to fetch.
      */
     where: DeviceTokenWhereUniqueInput
@@ -5819,6 +6530,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the DeviceToken
      */
     select?: DeviceTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
     /**
      * Filter, which DeviceToken to fetch.
      */
@@ -5864,6 +6579,10 @@ export namespace Prisma {
      */
     select?: DeviceTokenSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
      * Filter, which DeviceToken to fetch.
      */
     where?: DeviceTokenWhereInput
@@ -5908,6 +6627,10 @@ export namespace Prisma {
      */
     select?: DeviceTokenSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
      * Filter, which DeviceTokens to fetch.
      */
     where?: DeviceTokenWhereInput
@@ -5947,6 +6670,10 @@ export namespace Prisma {
      */
     select?: DeviceTokenSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
      * The data needed to create a DeviceToken.
      */
     data: XOR<DeviceTokenCreateInput, DeviceTokenUncheckedCreateInput>
@@ -5972,6 +6699,10 @@ export namespace Prisma {
      */
     select?: DeviceTokenSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
      * The data used to create many DeviceTokens.
      */
     data: DeviceTokenCreateManyInput | DeviceTokenCreateManyInput[]
@@ -5986,6 +6717,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the DeviceToken
      */
     select?: DeviceTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
     /**
      * The data needed to update a DeviceToken.
      */
@@ -6008,6 +6743,36 @@ export namespace Prisma {
      * Filter which DeviceTokens to update
      */
     where?: DeviceTokenWhereInput
+    /**
+     * Limit how many DeviceTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DeviceToken updateManyAndReturn
+   */
+  export type DeviceTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeviceToken
+     */
+    select?: DeviceTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update DeviceTokens.
+     */
+    data: XOR<DeviceTokenUpdateManyMutationInput, DeviceTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which DeviceTokens to update
+     */
+    where?: DeviceTokenWhereInput
+    /**
+     * Limit how many DeviceTokens to update.
+     */
+    limit?: number
   }
 
   /**
@@ -6018,6 +6783,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the DeviceToken
      */
     select?: DeviceTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
     /**
      * The filter to search for the DeviceToken to update in case it exists.
      */
@@ -6041,6 +6810,10 @@ export namespace Prisma {
      */
     select?: DeviceTokenSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
+    /**
      * Filter which DeviceToken to delete.
      */
     where: DeviceTokenWhereUniqueInput
@@ -6054,6 +6827,10 @@ export namespace Prisma {
      * Filter which DeviceTokens to delete
      */
     where?: DeviceTokenWhereInput
+    /**
+     * Limit how many DeviceTokens to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -6064,6 +6841,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the DeviceToken
      */
     select?: DeviceTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeviceToken
+     */
+    omit?: DeviceTokenOmit<ExtArgs> | null
   }
 
 
@@ -6255,6 +7036,16 @@ export namespace Prisma {
     updated_at?: boolean
   }, ExtArgs["result"]["notificationSetting"]>
 
+  export type NotificationSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    org_id?: boolean
+    email_enabled?: boolean
+    sms_enabled?: boolean
+    push_enabled?: boolean
+    settings?: boolean
+    updated_at?: boolean
+  }, ExtArgs["result"]["notificationSetting"]>
+
   export type NotificationSettingSelectScalar = {
     id?: boolean
     org_id?: boolean
@@ -6265,6 +7056,7 @@ export namespace Prisma {
     updated_at?: boolean
   }
 
+  export type NotificationSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "org_id" | "email_enabled" | "sms_enabled" | "push_enabled" | "settings" | "updated_at", ExtArgs["result"]["notificationSetting"]>
 
   export type $NotificationSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "NotificationSetting"
@@ -6283,12 +7075,12 @@ export namespace Prisma {
 
   type NotificationSettingGetPayload<S extends boolean | null | undefined | NotificationSettingDefaultArgs> = $Result.GetResult<Prisma.$NotificationSettingPayload, S>
 
-  type NotificationSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<NotificationSettingFindManyArgs, 'select' | 'include' | 'distinct'> & {
+  type NotificationSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NotificationSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
       select?: NotificationSettingCountAggregateInputType | true
     }
 
-  export interface NotificationSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+  export interface NotificationSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NotificationSetting'], meta: { name: 'NotificationSetting' } }
     /**
      * Find zero or one NotificationSetting that matches the filter.
@@ -6301,10 +7093,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends NotificationSettingFindUniqueArgs>(args: SelectSubset<T, NotificationSettingFindUniqueArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+    findUnique<T extends NotificationSettingFindUniqueArgs>(args: SelectSubset<T, NotificationSettingFindUniqueArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one NotificationSetting that matches the filter or throw an error with `error.code='P2025'` 
+     * Find one NotificationSetting that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
      * @param {NotificationSettingFindUniqueOrThrowArgs} args - Arguments to find a NotificationSetting
      * @example
@@ -6315,7 +7107,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends NotificationSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+    findUniqueOrThrow<T extends NotificationSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first NotificationSetting that matches the filter.
@@ -6330,7 +7122,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends NotificationSettingFindFirstArgs>(args?: SelectSubset<T, NotificationSettingFindFirstArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+    findFirst<T extends NotificationSettingFindFirstArgs>(args?: SelectSubset<T, NotificationSettingFindFirstArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first NotificationSetting that matches the filter or
@@ -6346,7 +7138,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends NotificationSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+    findFirstOrThrow<T extends NotificationSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more NotificationSettings that matches the filter.
@@ -6364,7 +7156,7 @@ export namespace Prisma {
      * const notificationSettingWithIdOnly = await prisma.notificationSetting.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends NotificationSettingFindManyArgs>(args?: SelectSubset<T, NotificationSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findMany">>
+    findMany<T extends NotificationSettingFindManyArgs>(args?: SelectSubset<T, NotificationSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a NotificationSetting.
@@ -6378,7 +7170,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends NotificationSettingCreateArgs>(args: SelectSubset<T, NotificationSettingCreateArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "create">, never, ExtArgs>
+    create<T extends NotificationSettingCreateArgs>(args: SelectSubset<T, NotificationSettingCreateArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many NotificationSettings.
@@ -6406,7 +7198,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many NotificationSettings and only return the `id`
-     * const notificationSettingWithIdOnly = await prisma.notificationSetting.createManyAndReturn({ 
+     * const notificationSettingWithIdOnly = await prisma.notificationSetting.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -6416,7 +7208,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends NotificationSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "createManyAndReturn">>
+    createManyAndReturn<T extends NotificationSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a NotificationSetting.
@@ -6430,7 +7222,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends NotificationSettingDeleteArgs>(args: SelectSubset<T, NotificationSettingDeleteArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+    delete<T extends NotificationSettingDeleteArgs>(args: SelectSubset<T, NotificationSettingDeleteArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one NotificationSetting.
@@ -6447,7 +7239,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends NotificationSettingUpdateArgs>(args: SelectSubset<T, NotificationSettingUpdateArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "update">, never, ExtArgs>
+    update<T extends NotificationSettingUpdateArgs>(args: SelectSubset<T, NotificationSettingUpdateArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more NotificationSettings.
@@ -6483,6 +7275,36 @@ export namespace Prisma {
     updateMany<T extends NotificationSettingUpdateManyArgs>(args: SelectSubset<T, NotificationSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
+     * Update zero or more NotificationSettings and returns the data updated in the database.
+     * @param {NotificationSettingUpdateManyAndReturnArgs} args - Arguments to update many NotificationSettings.
+     * @example
+     * // Update many NotificationSettings
+     * const notificationSetting = await prisma.notificationSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more NotificationSettings and only return the `id`
+     * const notificationSettingWithIdOnly = await prisma.notificationSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NotificationSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, NotificationSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
      * Create or update one NotificationSetting.
      * @param {NotificationSettingUpsertArgs} args - Arguments to update or create a NotificationSetting.
      * @example
@@ -6499,7 +7321,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends NotificationSettingUpsertArgs>(args: SelectSubset<T, NotificationSettingUpsertArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+    upsert<T extends NotificationSettingUpsertArgs>(args: SelectSubset<T, NotificationSettingUpsertArgs<ExtArgs>>): Prisma__NotificationSettingClient<$Result.GetResult<Prisma.$NotificationSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
@@ -6639,7 +7461,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__NotificationSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__NotificationSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -6668,7 +7490,7 @@ export namespace Prisma {
 
   /**
    * Fields of the NotificationSetting model
-   */ 
+   */
   interface NotificationSettingFieldRefs {
     readonly id: FieldRef<"NotificationSetting", 'String'>
     readonly org_id: FieldRef<"NotificationSetting", 'String'>
@@ -6690,6 +7512,10 @@ export namespace Prisma {
      */
     select?: NotificationSettingSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
      * Filter, which NotificationSetting to fetch.
      */
     where: NotificationSettingWhereUniqueInput
@@ -6704,6 +7530,10 @@ export namespace Prisma {
      */
     select?: NotificationSettingSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
      * Filter, which NotificationSetting to fetch.
      */
     where: NotificationSettingWhereUniqueInput
@@ -6717,6 +7547,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the NotificationSetting
      */
     select?: NotificationSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
     /**
      * Filter, which NotificationSetting to fetch.
      */
@@ -6762,6 +7596,10 @@ export namespace Prisma {
      */
     select?: NotificationSettingSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
      * Filter, which NotificationSetting to fetch.
      */
     where?: NotificationSettingWhereInput
@@ -6806,6 +7644,10 @@ export namespace Prisma {
      */
     select?: NotificationSettingSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
      * Filter, which NotificationSettings to fetch.
      */
     where?: NotificationSettingWhereInput
@@ -6845,6 +7687,10 @@ export namespace Prisma {
      */
     select?: NotificationSettingSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
      * The data needed to create a NotificationSetting.
      */
     data: XOR<NotificationSettingCreateInput, NotificationSettingUncheckedCreateInput>
@@ -6870,6 +7716,10 @@ export namespace Prisma {
      */
     select?: NotificationSettingSelectCreateManyAndReturn<ExtArgs> | null
     /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
      * The data used to create many NotificationSettings.
      */
     data: NotificationSettingCreateManyInput | NotificationSettingCreateManyInput[]
@@ -6884,6 +7734,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the NotificationSetting
      */
     select?: NotificationSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
     /**
      * The data needed to update a NotificationSetting.
      */
@@ -6906,6 +7760,36 @@ export namespace Prisma {
      * Filter which NotificationSettings to update
      */
     where?: NotificationSettingWhereInput
+    /**
+     * Limit how many NotificationSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NotificationSetting updateManyAndReturn
+   */
+  export type NotificationSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationSetting
+     */
+    select?: NotificationSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update NotificationSettings.
+     */
+    data: XOR<NotificationSettingUpdateManyMutationInput, NotificationSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which NotificationSettings to update
+     */
+    where?: NotificationSettingWhereInput
+    /**
+     * Limit how many NotificationSettings to update.
+     */
+    limit?: number
   }
 
   /**
@@ -6916,6 +7800,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the NotificationSetting
      */
     select?: NotificationSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
     /**
      * The filter to search for the NotificationSetting to update in case it exists.
      */
@@ -6939,6 +7827,10 @@ export namespace Prisma {
      */
     select?: NotificationSettingSelect<ExtArgs> | null
     /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+    /**
      * Filter which NotificationSetting to delete.
      */
     where: NotificationSettingWhereUniqueInput
@@ -6952,6 +7844,10 @@ export namespace Prisma {
      * Filter which NotificationSettings to delete
      */
     where?: NotificationSettingWhereInput
+    /**
+     * Limit how many NotificationSettings to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -6962,6 +7858,1092 @@ export namespace Prisma {
      * Select specific fields to fetch from the NotificationSetting
      */
     select?: NotificationSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationSetting
+     */
+    omit?: NotificationSettingOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ContactPhoneVerification
+   */
+
+  export type AggregateContactPhoneVerification = {
+    _count: ContactPhoneVerificationCountAggregateOutputType | null
+    _min: ContactPhoneVerificationMinAggregateOutputType | null
+    _max: ContactPhoneVerificationMaxAggregateOutputType | null
+  }
+
+  export type ContactPhoneVerificationMinAggregateOutputType = {
+    id: string | null
+    orgId: string | null
+    userRef: string | null
+    phoneNumber: string | null
+    verificationCode: string | null
+    source: string | null
+    status: string | null
+    expiresAt: Date | null
+    verifiedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ContactPhoneVerificationMaxAggregateOutputType = {
+    id: string | null
+    orgId: string | null
+    userRef: string | null
+    phoneNumber: string | null
+    verificationCode: string | null
+    source: string | null
+    status: string | null
+    expiresAt: Date | null
+    verifiedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ContactPhoneVerificationCountAggregateOutputType = {
+    id: number
+    orgId: number
+    userRef: number
+    phoneNumber: number
+    verificationCode: number
+    source: number
+    status: number
+    expiresAt: number
+    verifiedAt: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ContactPhoneVerificationMinAggregateInputType = {
+    id?: true
+    orgId?: true
+    userRef?: true
+    phoneNumber?: true
+    verificationCode?: true
+    source?: true
+    status?: true
+    expiresAt?: true
+    verifiedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ContactPhoneVerificationMaxAggregateInputType = {
+    id?: true
+    orgId?: true
+    userRef?: true
+    phoneNumber?: true
+    verificationCode?: true
+    source?: true
+    status?: true
+    expiresAt?: true
+    verifiedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ContactPhoneVerificationCountAggregateInputType = {
+    id?: true
+    orgId?: true
+    userRef?: true
+    phoneNumber?: true
+    verificationCode?: true
+    source?: true
+    status?: true
+    expiresAt?: true
+    verifiedAt?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ContactPhoneVerificationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ContactPhoneVerification to aggregate.
+     */
+    where?: ContactPhoneVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactPhoneVerifications to fetch.
+     */
+    orderBy?: ContactPhoneVerificationOrderByWithRelationInput | ContactPhoneVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ContactPhoneVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactPhoneVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactPhoneVerifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ContactPhoneVerifications
+    **/
+    _count?: true | ContactPhoneVerificationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ContactPhoneVerificationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ContactPhoneVerificationMaxAggregateInputType
+  }
+
+  export type GetContactPhoneVerificationAggregateType<T extends ContactPhoneVerificationAggregateArgs> = {
+        [P in keyof T & keyof AggregateContactPhoneVerification]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateContactPhoneVerification[P]>
+      : GetScalarType<T[P], AggregateContactPhoneVerification[P]>
+  }
+
+
+
+
+  export type ContactPhoneVerificationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ContactPhoneVerificationWhereInput
+    orderBy?: ContactPhoneVerificationOrderByWithAggregationInput | ContactPhoneVerificationOrderByWithAggregationInput[]
+    by: ContactPhoneVerificationScalarFieldEnum[] | ContactPhoneVerificationScalarFieldEnum
+    having?: ContactPhoneVerificationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ContactPhoneVerificationCountAggregateInputType | true
+    _min?: ContactPhoneVerificationMinAggregateInputType
+    _max?: ContactPhoneVerificationMaxAggregateInputType
+  }
+
+  export type ContactPhoneVerificationGroupByOutputType = {
+    id: string
+    orgId: string | null
+    userRef: string | null
+    phoneNumber: string
+    verificationCode: string
+    source: string | null
+    status: string
+    expiresAt: Date
+    verifiedAt: Date | null
+    metadata: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: ContactPhoneVerificationCountAggregateOutputType | null
+    _min: ContactPhoneVerificationMinAggregateOutputType | null
+    _max: ContactPhoneVerificationMaxAggregateOutputType | null
+  }
+
+  type GetContactPhoneVerificationGroupByPayload<T extends ContactPhoneVerificationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ContactPhoneVerificationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ContactPhoneVerificationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ContactPhoneVerificationGroupByOutputType[P]>
+            : GetScalarType<T[P], ContactPhoneVerificationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ContactPhoneVerificationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    userRef?: boolean
+    phoneNumber?: boolean
+    verificationCode?: boolean
+    source?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    verifiedAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["contactPhoneVerification"]>
+
+  export type ContactPhoneVerificationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    userRef?: boolean
+    phoneNumber?: boolean
+    verificationCode?: boolean
+    source?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    verifiedAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["contactPhoneVerification"]>
+
+  export type ContactPhoneVerificationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    userRef?: boolean
+    phoneNumber?: boolean
+    verificationCode?: boolean
+    source?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    verifiedAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["contactPhoneVerification"]>
+
+  export type ContactPhoneVerificationSelectScalar = {
+    id?: boolean
+    orgId?: boolean
+    userRef?: boolean
+    phoneNumber?: boolean
+    verificationCode?: boolean
+    source?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    verifiedAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ContactPhoneVerificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "userRef" | "phoneNumber" | "verificationCode" | "source" | "status" | "expiresAt" | "verifiedAt" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["contactPhoneVerification"]>
+
+  export type $ContactPhoneVerificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ContactPhoneVerification"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      orgId: string | null
+      userRef: string | null
+      phoneNumber: string
+      verificationCode: string
+      source: string | null
+      status: string
+      expiresAt: Date
+      verifiedAt: Date | null
+      metadata: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["contactPhoneVerification"]>
+    composites: {}
+  }
+
+  type ContactPhoneVerificationGetPayload<S extends boolean | null | undefined | ContactPhoneVerificationDefaultArgs> = $Result.GetResult<Prisma.$ContactPhoneVerificationPayload, S>
+
+  type ContactPhoneVerificationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ContactPhoneVerificationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ContactPhoneVerificationCountAggregateInputType | true
+    }
+
+  export interface ContactPhoneVerificationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ContactPhoneVerification'], meta: { name: 'ContactPhoneVerification' } }
+    /**
+     * Find zero or one ContactPhoneVerification that matches the filter.
+     * @param {ContactPhoneVerificationFindUniqueArgs} args - Arguments to find a ContactPhoneVerification
+     * @example
+     * // Get one ContactPhoneVerification
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ContactPhoneVerificationFindUniqueArgs>(args: SelectSubset<T, ContactPhoneVerificationFindUniqueArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ContactPhoneVerification that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ContactPhoneVerificationFindUniqueOrThrowArgs} args - Arguments to find a ContactPhoneVerification
+     * @example
+     * // Get one ContactPhoneVerification
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ContactPhoneVerificationFindUniqueOrThrowArgs>(args: SelectSubset<T, ContactPhoneVerificationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ContactPhoneVerification that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactPhoneVerificationFindFirstArgs} args - Arguments to find a ContactPhoneVerification
+     * @example
+     * // Get one ContactPhoneVerification
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ContactPhoneVerificationFindFirstArgs>(args?: SelectSubset<T, ContactPhoneVerificationFindFirstArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ContactPhoneVerification that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactPhoneVerificationFindFirstOrThrowArgs} args - Arguments to find a ContactPhoneVerification
+     * @example
+     * // Get one ContactPhoneVerification
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ContactPhoneVerificationFindFirstOrThrowArgs>(args?: SelectSubset<T, ContactPhoneVerificationFindFirstOrThrowArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ContactPhoneVerifications that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactPhoneVerificationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ContactPhoneVerifications
+     * const contactPhoneVerifications = await prisma.contactPhoneVerification.findMany()
+     * 
+     * // Get first 10 ContactPhoneVerifications
+     * const contactPhoneVerifications = await prisma.contactPhoneVerification.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const contactPhoneVerificationWithIdOnly = await prisma.contactPhoneVerification.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ContactPhoneVerificationFindManyArgs>(args?: SelectSubset<T, ContactPhoneVerificationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ContactPhoneVerification.
+     * @param {ContactPhoneVerificationCreateArgs} args - Arguments to create a ContactPhoneVerification.
+     * @example
+     * // Create one ContactPhoneVerification
+     * const ContactPhoneVerification = await prisma.contactPhoneVerification.create({
+     *   data: {
+     *     // ... data to create a ContactPhoneVerification
+     *   }
+     * })
+     * 
+     */
+    create<T extends ContactPhoneVerificationCreateArgs>(args: SelectSubset<T, ContactPhoneVerificationCreateArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ContactPhoneVerifications.
+     * @param {ContactPhoneVerificationCreateManyArgs} args - Arguments to create many ContactPhoneVerifications.
+     * @example
+     * // Create many ContactPhoneVerifications
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ContactPhoneVerificationCreateManyArgs>(args?: SelectSubset<T, ContactPhoneVerificationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ContactPhoneVerifications and returns the data saved in the database.
+     * @param {ContactPhoneVerificationCreateManyAndReturnArgs} args - Arguments to create many ContactPhoneVerifications.
+     * @example
+     * // Create many ContactPhoneVerifications
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ContactPhoneVerifications and only return the `id`
+     * const contactPhoneVerificationWithIdOnly = await prisma.contactPhoneVerification.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ContactPhoneVerificationCreateManyAndReturnArgs>(args?: SelectSubset<T, ContactPhoneVerificationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ContactPhoneVerification.
+     * @param {ContactPhoneVerificationDeleteArgs} args - Arguments to delete one ContactPhoneVerification.
+     * @example
+     * // Delete one ContactPhoneVerification
+     * const ContactPhoneVerification = await prisma.contactPhoneVerification.delete({
+     *   where: {
+     *     // ... filter to delete one ContactPhoneVerification
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ContactPhoneVerificationDeleteArgs>(args: SelectSubset<T, ContactPhoneVerificationDeleteArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ContactPhoneVerification.
+     * @param {ContactPhoneVerificationUpdateArgs} args - Arguments to update one ContactPhoneVerification.
+     * @example
+     * // Update one ContactPhoneVerification
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ContactPhoneVerificationUpdateArgs>(args: SelectSubset<T, ContactPhoneVerificationUpdateArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ContactPhoneVerifications.
+     * @param {ContactPhoneVerificationDeleteManyArgs} args - Arguments to filter ContactPhoneVerifications to delete.
+     * @example
+     * // Delete a few ContactPhoneVerifications
+     * const { count } = await prisma.contactPhoneVerification.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ContactPhoneVerificationDeleteManyArgs>(args?: SelectSubset<T, ContactPhoneVerificationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ContactPhoneVerifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactPhoneVerificationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ContactPhoneVerifications
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ContactPhoneVerificationUpdateManyArgs>(args: SelectSubset<T, ContactPhoneVerificationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ContactPhoneVerifications and returns the data updated in the database.
+     * @param {ContactPhoneVerificationUpdateManyAndReturnArgs} args - Arguments to update many ContactPhoneVerifications.
+     * @example
+     * // Update many ContactPhoneVerifications
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ContactPhoneVerifications and only return the `id`
+     * const contactPhoneVerificationWithIdOnly = await prisma.contactPhoneVerification.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ContactPhoneVerificationUpdateManyAndReturnArgs>(args: SelectSubset<T, ContactPhoneVerificationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ContactPhoneVerification.
+     * @param {ContactPhoneVerificationUpsertArgs} args - Arguments to update or create a ContactPhoneVerification.
+     * @example
+     * // Update or create a ContactPhoneVerification
+     * const contactPhoneVerification = await prisma.contactPhoneVerification.upsert({
+     *   create: {
+     *     // ... data to create a ContactPhoneVerification
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ContactPhoneVerification we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ContactPhoneVerificationUpsertArgs>(args: SelectSubset<T, ContactPhoneVerificationUpsertArgs<ExtArgs>>): Prisma__ContactPhoneVerificationClient<$Result.GetResult<Prisma.$ContactPhoneVerificationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ContactPhoneVerifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactPhoneVerificationCountArgs} args - Arguments to filter ContactPhoneVerifications to count.
+     * @example
+     * // Count the number of ContactPhoneVerifications
+     * const count = await prisma.contactPhoneVerification.count({
+     *   where: {
+     *     // ... the filter for the ContactPhoneVerifications we want to count
+     *   }
+     * })
+    **/
+    count<T extends ContactPhoneVerificationCountArgs>(
+      args?: Subset<T, ContactPhoneVerificationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ContactPhoneVerificationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ContactPhoneVerification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactPhoneVerificationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ContactPhoneVerificationAggregateArgs>(args: Subset<T, ContactPhoneVerificationAggregateArgs>): Prisma.PrismaPromise<GetContactPhoneVerificationAggregateType<T>>
+
+    /**
+     * Group by ContactPhoneVerification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ContactPhoneVerificationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ContactPhoneVerificationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ContactPhoneVerificationGroupByArgs['orderBy'] }
+        : { orderBy?: ContactPhoneVerificationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ContactPhoneVerificationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetContactPhoneVerificationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ContactPhoneVerification model
+   */
+  readonly fields: ContactPhoneVerificationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ContactPhoneVerification.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ContactPhoneVerificationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ContactPhoneVerification model
+   */
+  interface ContactPhoneVerificationFieldRefs {
+    readonly id: FieldRef<"ContactPhoneVerification", 'String'>
+    readonly orgId: FieldRef<"ContactPhoneVerification", 'String'>
+    readonly userRef: FieldRef<"ContactPhoneVerification", 'String'>
+    readonly phoneNumber: FieldRef<"ContactPhoneVerification", 'String'>
+    readonly verificationCode: FieldRef<"ContactPhoneVerification", 'String'>
+    readonly source: FieldRef<"ContactPhoneVerification", 'String'>
+    readonly status: FieldRef<"ContactPhoneVerification", 'String'>
+    readonly expiresAt: FieldRef<"ContactPhoneVerification", 'DateTime'>
+    readonly verifiedAt: FieldRef<"ContactPhoneVerification", 'DateTime'>
+    readonly metadata: FieldRef<"ContactPhoneVerification", 'Json'>
+    readonly createdAt: FieldRef<"ContactPhoneVerification", 'DateTime'>
+    readonly updatedAt: FieldRef<"ContactPhoneVerification", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ContactPhoneVerification findUnique
+   */
+  export type ContactPhoneVerificationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactPhoneVerification to fetch.
+     */
+    where: ContactPhoneVerificationWhereUniqueInput
+  }
+
+  /**
+   * ContactPhoneVerification findUniqueOrThrow
+   */
+  export type ContactPhoneVerificationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactPhoneVerification to fetch.
+     */
+    where: ContactPhoneVerificationWhereUniqueInput
+  }
+
+  /**
+   * ContactPhoneVerification findFirst
+   */
+  export type ContactPhoneVerificationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactPhoneVerification to fetch.
+     */
+    where?: ContactPhoneVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactPhoneVerifications to fetch.
+     */
+    orderBy?: ContactPhoneVerificationOrderByWithRelationInput | ContactPhoneVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ContactPhoneVerifications.
+     */
+    cursor?: ContactPhoneVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactPhoneVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactPhoneVerifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ContactPhoneVerifications.
+     */
+    distinct?: ContactPhoneVerificationScalarFieldEnum | ContactPhoneVerificationScalarFieldEnum[]
+  }
+
+  /**
+   * ContactPhoneVerification findFirstOrThrow
+   */
+  export type ContactPhoneVerificationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactPhoneVerification to fetch.
+     */
+    where?: ContactPhoneVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactPhoneVerifications to fetch.
+     */
+    orderBy?: ContactPhoneVerificationOrderByWithRelationInput | ContactPhoneVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ContactPhoneVerifications.
+     */
+    cursor?: ContactPhoneVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactPhoneVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactPhoneVerifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ContactPhoneVerifications.
+     */
+    distinct?: ContactPhoneVerificationScalarFieldEnum | ContactPhoneVerificationScalarFieldEnum[]
+  }
+
+  /**
+   * ContactPhoneVerification findMany
+   */
+  export type ContactPhoneVerificationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * Filter, which ContactPhoneVerifications to fetch.
+     */
+    where?: ContactPhoneVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ContactPhoneVerifications to fetch.
+     */
+    orderBy?: ContactPhoneVerificationOrderByWithRelationInput | ContactPhoneVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ContactPhoneVerifications.
+     */
+    cursor?: ContactPhoneVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ContactPhoneVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ContactPhoneVerifications.
+     */
+    skip?: number
+    distinct?: ContactPhoneVerificationScalarFieldEnum | ContactPhoneVerificationScalarFieldEnum[]
+  }
+
+  /**
+   * ContactPhoneVerification create
+   */
+  export type ContactPhoneVerificationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ContactPhoneVerification.
+     */
+    data: XOR<ContactPhoneVerificationCreateInput, ContactPhoneVerificationUncheckedCreateInput>
+  }
+
+  /**
+   * ContactPhoneVerification createMany
+   */
+  export type ContactPhoneVerificationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ContactPhoneVerifications.
+     */
+    data: ContactPhoneVerificationCreateManyInput | ContactPhoneVerificationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ContactPhoneVerification createManyAndReturn
+   */
+  export type ContactPhoneVerificationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * The data used to create many ContactPhoneVerifications.
+     */
+    data: ContactPhoneVerificationCreateManyInput | ContactPhoneVerificationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ContactPhoneVerification update
+   */
+  export type ContactPhoneVerificationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ContactPhoneVerification.
+     */
+    data: XOR<ContactPhoneVerificationUpdateInput, ContactPhoneVerificationUncheckedUpdateInput>
+    /**
+     * Choose, which ContactPhoneVerification to update.
+     */
+    where: ContactPhoneVerificationWhereUniqueInput
+  }
+
+  /**
+   * ContactPhoneVerification updateMany
+   */
+  export type ContactPhoneVerificationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ContactPhoneVerifications.
+     */
+    data: XOR<ContactPhoneVerificationUpdateManyMutationInput, ContactPhoneVerificationUncheckedUpdateManyInput>
+    /**
+     * Filter which ContactPhoneVerifications to update
+     */
+    where?: ContactPhoneVerificationWhereInput
+    /**
+     * Limit how many ContactPhoneVerifications to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ContactPhoneVerification updateManyAndReturn
+   */
+  export type ContactPhoneVerificationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * The data used to update ContactPhoneVerifications.
+     */
+    data: XOR<ContactPhoneVerificationUpdateManyMutationInput, ContactPhoneVerificationUncheckedUpdateManyInput>
+    /**
+     * Filter which ContactPhoneVerifications to update
+     */
+    where?: ContactPhoneVerificationWhereInput
+    /**
+     * Limit how many ContactPhoneVerifications to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ContactPhoneVerification upsert
+   */
+  export type ContactPhoneVerificationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ContactPhoneVerification to update in case it exists.
+     */
+    where: ContactPhoneVerificationWhereUniqueInput
+    /**
+     * In case the ContactPhoneVerification found by the `where` argument doesn't exist, create a new ContactPhoneVerification with this data.
+     */
+    create: XOR<ContactPhoneVerificationCreateInput, ContactPhoneVerificationUncheckedCreateInput>
+    /**
+     * In case the ContactPhoneVerification was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ContactPhoneVerificationUpdateInput, ContactPhoneVerificationUncheckedUpdateInput>
+  }
+
+  /**
+   * ContactPhoneVerification delete
+   */
+  export type ContactPhoneVerificationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
+    /**
+     * Filter which ContactPhoneVerification to delete.
+     */
+    where: ContactPhoneVerificationWhereUniqueInput
+  }
+
+  /**
+   * ContactPhoneVerification deleteMany
+   */
+  export type ContactPhoneVerificationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ContactPhoneVerifications to delete
+     */
+    where?: ContactPhoneVerificationWhereInput
+    /**
+     * Limit how many ContactPhoneVerifications to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ContactPhoneVerification without action
+   */
+  export type ContactPhoneVerificationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ContactPhoneVerification
+     */
+    select?: ContactPhoneVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ContactPhoneVerification
+     */
+    omit?: ContactPhoneVerificationOmit<ExtArgs> | null
   }
 
 
@@ -6989,7 +8971,9 @@ export namespace Prisma {
     body: 'body',
     is_seen: 'is_seen',
     is_read: 'is_read',
+    is_archived: 'is_archived',
     seen_at: 'seen_at',
+    archived_at: 'archived_at',
     ref_id: 'ref_id',
     ref_type: 'ref_type',
     metadata: 'metadata',
@@ -7083,6 +9067,24 @@ export namespace Prisma {
   export type NotificationSettingScalarFieldEnum = (typeof NotificationSettingScalarFieldEnum)[keyof typeof NotificationSettingScalarFieldEnum]
 
 
+  export const ContactPhoneVerificationScalarFieldEnum: {
+    id: 'id',
+    orgId: 'orgId',
+    userRef: 'userRef',
+    phoneNumber: 'phoneNumber',
+    verificationCode: 'verificationCode',
+    source: 'source',
+    status: 'status',
+    expiresAt: 'expiresAt',
+    verifiedAt: 'verifiedAt',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ContactPhoneVerificationScalarFieldEnum = (typeof ContactPhoneVerificationScalarFieldEnum)[keyof typeof ContactPhoneVerificationScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -7124,7 +9126,7 @@ export namespace Prisma {
 
 
   /**
-   * Field references 
+   * Field references
    */
 
 
@@ -7171,6 +9173,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -7200,7 +9209,9 @@ export namespace Prisma {
     body?: StringNullableFilter<"Notification"> | string | null
     is_seen?: BoolFilter<"Notification"> | boolean
     is_read?: BoolFilter<"Notification"> | boolean
+    is_archived?: BoolFilter<"Notification"> | boolean
     seen_at?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    archived_at?: DateTimeNullableFilter<"Notification"> | Date | string | null
     ref_id?: StringNullableFilter<"Notification"> | string | null
     ref_type?: StringNullableFilter<"Notification"> | string | null
     metadata?: JsonFilter<"Notification">
@@ -7217,7 +9228,9 @@ export namespace Prisma {
     body?: SortOrderInput | SortOrder
     is_seen?: SortOrder
     is_read?: SortOrder
+    is_archived?: SortOrder
     seen_at?: SortOrderInput | SortOrder
+    archived_at?: SortOrderInput | SortOrder
     ref_id?: SortOrderInput | SortOrder
     ref_type?: SortOrderInput | SortOrder
     metadata?: SortOrder
@@ -7237,7 +9250,9 @@ export namespace Prisma {
     body?: StringNullableFilter<"Notification"> | string | null
     is_seen?: BoolFilter<"Notification"> | boolean
     is_read?: BoolFilter<"Notification"> | boolean
+    is_archived?: BoolFilter<"Notification"> | boolean
     seen_at?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    archived_at?: DateTimeNullableFilter<"Notification"> | Date | string | null
     ref_id?: StringNullableFilter<"Notification"> | string | null
     ref_type?: StringNullableFilter<"Notification"> | string | null
     metadata?: JsonFilter<"Notification">
@@ -7254,7 +9269,9 @@ export namespace Prisma {
     body?: SortOrderInput | SortOrder
     is_seen?: SortOrder
     is_read?: SortOrder
+    is_archived?: SortOrder
     seen_at?: SortOrderInput | SortOrder
+    archived_at?: SortOrderInput | SortOrder
     ref_id?: SortOrderInput | SortOrder
     ref_type?: SortOrderInput | SortOrder
     metadata?: SortOrder
@@ -7277,7 +9294,9 @@ export namespace Prisma {
     body?: StringNullableWithAggregatesFilter<"Notification"> | string | null
     is_seen?: BoolWithAggregatesFilter<"Notification"> | boolean
     is_read?: BoolWithAggregatesFilter<"Notification"> | boolean
+    is_archived?: BoolWithAggregatesFilter<"Notification"> | boolean
     seen_at?: DateTimeNullableWithAggregatesFilter<"Notification"> | Date | string | null
+    archived_at?: DateTimeNullableWithAggregatesFilter<"Notification"> | Date | string | null
     ref_id?: StringNullableWithAggregatesFilter<"Notification"> | string | null
     ref_type?: StringNullableWithAggregatesFilter<"Notification"> | string | null
     metadata?: JsonWithAggregatesFilter<"Notification">
@@ -7690,6 +9709,93 @@ export namespace Prisma {
     updated_at?: DateTimeWithAggregatesFilter<"NotificationSetting"> | Date | string
   }
 
+  export type ContactPhoneVerificationWhereInput = {
+    AND?: ContactPhoneVerificationWhereInput | ContactPhoneVerificationWhereInput[]
+    OR?: ContactPhoneVerificationWhereInput[]
+    NOT?: ContactPhoneVerificationWhereInput | ContactPhoneVerificationWhereInput[]
+    id?: UuidFilter<"ContactPhoneVerification"> | string
+    orgId?: UuidNullableFilter<"ContactPhoneVerification"> | string | null
+    userRef?: StringNullableFilter<"ContactPhoneVerification"> | string | null
+    phoneNumber?: StringFilter<"ContactPhoneVerification"> | string
+    verificationCode?: StringFilter<"ContactPhoneVerification"> | string
+    source?: StringNullableFilter<"ContactPhoneVerification"> | string | null
+    status?: StringFilter<"ContactPhoneVerification"> | string
+    expiresAt?: DateTimeFilter<"ContactPhoneVerification"> | Date | string
+    verifiedAt?: DateTimeNullableFilter<"ContactPhoneVerification"> | Date | string | null
+    metadata?: JsonFilter<"ContactPhoneVerification">
+    createdAt?: DateTimeFilter<"ContactPhoneVerification"> | Date | string
+    updatedAt?: DateTimeFilter<"ContactPhoneVerification"> | Date | string
+  }
+
+  export type ContactPhoneVerificationOrderByWithRelationInput = {
+    id?: SortOrder
+    orgId?: SortOrderInput | SortOrder
+    userRef?: SortOrderInput | SortOrder
+    phoneNumber?: SortOrder
+    verificationCode?: SortOrder
+    source?: SortOrderInput | SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    verifiedAt?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ContactPhoneVerificationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ContactPhoneVerificationWhereInput | ContactPhoneVerificationWhereInput[]
+    OR?: ContactPhoneVerificationWhereInput[]
+    NOT?: ContactPhoneVerificationWhereInput | ContactPhoneVerificationWhereInput[]
+    orgId?: UuidNullableFilter<"ContactPhoneVerification"> | string | null
+    userRef?: StringNullableFilter<"ContactPhoneVerification"> | string | null
+    phoneNumber?: StringFilter<"ContactPhoneVerification"> | string
+    verificationCode?: StringFilter<"ContactPhoneVerification"> | string
+    source?: StringNullableFilter<"ContactPhoneVerification"> | string | null
+    status?: StringFilter<"ContactPhoneVerification"> | string
+    expiresAt?: DateTimeFilter<"ContactPhoneVerification"> | Date | string
+    verifiedAt?: DateTimeNullableFilter<"ContactPhoneVerification"> | Date | string | null
+    metadata?: JsonFilter<"ContactPhoneVerification">
+    createdAt?: DateTimeFilter<"ContactPhoneVerification"> | Date | string
+    updatedAt?: DateTimeFilter<"ContactPhoneVerification"> | Date | string
+  }, "id">
+
+  export type ContactPhoneVerificationOrderByWithAggregationInput = {
+    id?: SortOrder
+    orgId?: SortOrderInput | SortOrder
+    userRef?: SortOrderInput | SortOrder
+    phoneNumber?: SortOrder
+    verificationCode?: SortOrder
+    source?: SortOrderInput | SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    verifiedAt?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ContactPhoneVerificationCountOrderByAggregateInput
+    _max?: ContactPhoneVerificationMaxOrderByAggregateInput
+    _min?: ContactPhoneVerificationMinOrderByAggregateInput
+  }
+
+  export type ContactPhoneVerificationScalarWhereWithAggregatesInput = {
+    AND?: ContactPhoneVerificationScalarWhereWithAggregatesInput | ContactPhoneVerificationScalarWhereWithAggregatesInput[]
+    OR?: ContactPhoneVerificationScalarWhereWithAggregatesInput[]
+    NOT?: ContactPhoneVerificationScalarWhereWithAggregatesInput | ContactPhoneVerificationScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ContactPhoneVerification"> | string
+    orgId?: UuidNullableWithAggregatesFilter<"ContactPhoneVerification"> | string | null
+    userRef?: StringNullableWithAggregatesFilter<"ContactPhoneVerification"> | string | null
+    phoneNumber?: StringWithAggregatesFilter<"ContactPhoneVerification"> | string
+    verificationCode?: StringWithAggregatesFilter<"ContactPhoneVerification"> | string
+    source?: StringNullableWithAggregatesFilter<"ContactPhoneVerification"> | string | null
+    status?: StringWithAggregatesFilter<"ContactPhoneVerification"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"ContactPhoneVerification"> | Date | string
+    verifiedAt?: DateTimeNullableWithAggregatesFilter<"ContactPhoneVerification"> | Date | string | null
+    metadata?: JsonWithAggregatesFilter<"ContactPhoneVerification">
+    createdAt?: DateTimeWithAggregatesFilter<"ContactPhoneVerification"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ContactPhoneVerification"> | Date | string
+  }
+
   export type NotificationCreateInput = {
     id?: string
     org_id: string
@@ -7700,7 +9806,9 @@ export namespace Prisma {
     body?: string | null
     is_seen?: boolean
     is_read?: boolean
+    is_archived?: boolean
     seen_at?: Date | string | null
+    archived_at?: Date | string | null
     ref_id?: string | null
     ref_type?: string | null
     metadata?: JsonNullValueInput | InputJsonValue
@@ -7717,7 +9825,9 @@ export namespace Prisma {
     body?: string | null
     is_seen?: boolean
     is_read?: boolean
+    is_archived?: boolean
     seen_at?: Date | string | null
+    archived_at?: Date | string | null
     ref_id?: string | null
     ref_type?: string | null
     metadata?: JsonNullValueInput | InputJsonValue
@@ -7734,7 +9844,9 @@ export namespace Prisma {
     body?: NullableStringFieldUpdateOperationsInput | string | null
     is_seen?: BoolFieldUpdateOperationsInput | boolean
     is_read?: BoolFieldUpdateOperationsInput | boolean
+    is_archived?: BoolFieldUpdateOperationsInput | boolean
     seen_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archived_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ref_id?: NullableStringFieldUpdateOperationsInput | string | null
     ref_type?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: JsonNullValueInput | InputJsonValue
@@ -7751,7 +9863,9 @@ export namespace Prisma {
     body?: NullableStringFieldUpdateOperationsInput | string | null
     is_seen?: BoolFieldUpdateOperationsInput | boolean
     is_read?: BoolFieldUpdateOperationsInput | boolean
+    is_archived?: BoolFieldUpdateOperationsInput | boolean
     seen_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archived_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ref_id?: NullableStringFieldUpdateOperationsInput | string | null
     ref_type?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: JsonNullValueInput | InputJsonValue
@@ -7768,7 +9882,9 @@ export namespace Prisma {
     body?: string | null
     is_seen?: boolean
     is_read?: boolean
+    is_archived?: boolean
     seen_at?: Date | string | null
+    archived_at?: Date | string | null
     ref_id?: string | null
     ref_type?: string | null
     metadata?: JsonNullValueInput | InputJsonValue
@@ -7785,7 +9901,9 @@ export namespace Prisma {
     body?: NullableStringFieldUpdateOperationsInput | string | null
     is_seen?: BoolFieldUpdateOperationsInput | boolean
     is_read?: BoolFieldUpdateOperationsInput | boolean
+    is_archived?: BoolFieldUpdateOperationsInput | boolean
     seen_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archived_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ref_id?: NullableStringFieldUpdateOperationsInput | string | null
     ref_type?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: JsonNullValueInput | InputJsonValue
@@ -7802,7 +9920,9 @@ export namespace Prisma {
     body?: NullableStringFieldUpdateOperationsInput | string | null
     is_seen?: BoolFieldUpdateOperationsInput | boolean
     is_read?: BoolFieldUpdateOperationsInput | boolean
+    is_archived?: BoolFieldUpdateOperationsInput | boolean
     seen_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archived_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ref_id?: NullableStringFieldUpdateOperationsInput | string | null
     ref_type?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: JsonNullValueInput | InputJsonValue
@@ -8292,6 +10412,111 @@ export namespace Prisma {
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ContactPhoneVerificationCreateInput = {
+    id?: string
+    orgId?: string | null
+    userRef?: string | null
+    phoneNumber: string
+    verificationCode: string
+    source?: string | null
+    status?: string
+    expiresAt: Date | string
+    verifiedAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ContactPhoneVerificationUncheckedCreateInput = {
+    id?: string
+    orgId?: string | null
+    userRef?: string | null
+    phoneNumber: string
+    verificationCode: string
+    source?: string | null
+    status?: string
+    expiresAt: Date | string
+    verifiedAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ContactPhoneVerificationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    userRef?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    verificationCode?: StringFieldUpdateOperationsInput | string
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ContactPhoneVerificationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    userRef?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    verificationCode?: StringFieldUpdateOperationsInput | string
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ContactPhoneVerificationCreateManyInput = {
+    id?: string
+    orgId?: string | null
+    userRef?: string | null
+    phoneNumber: string
+    verificationCode: string
+    source?: string | null
+    status?: string
+    expiresAt: Date | string
+    verifiedAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ContactPhoneVerificationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    userRef?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    verificationCode?: StringFieldUpdateOperationsInput | string
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ContactPhoneVerificationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: NullableStringFieldUpdateOperationsInput | string | null
+    userRef?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: StringFieldUpdateOperationsInput | string
+    verificationCode?: StringFieldUpdateOperationsInput | string
+    source?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -8349,7 +10574,7 @@ export namespace Prisma {
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
-  export type JsonFilter<$PrismaModel = never> = 
+  export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonFilterBase<$PrismaModel>>
@@ -8359,12 +10584,13 @@ export namespace Prisma {
   export type JsonFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -8398,7 +10624,9 @@ export namespace Prisma {
     body?: SortOrder
     is_seen?: SortOrder
     is_read?: SortOrder
+    is_archived?: SortOrder
     seen_at?: SortOrder
+    archived_at?: SortOrder
     ref_id?: SortOrder
     ref_type?: SortOrder
     metadata?: SortOrder
@@ -8415,7 +10643,9 @@ export namespace Prisma {
     body?: SortOrder
     is_seen?: SortOrder
     is_read?: SortOrder
+    is_archived?: SortOrder
     seen_at?: SortOrder
+    archived_at?: SortOrder
     ref_id?: SortOrder
     ref_type?: SortOrder
     created_at?: SortOrder
@@ -8431,7 +10661,9 @@ export namespace Prisma {
     body?: SortOrder
     is_seen?: SortOrder
     is_read?: SortOrder
+    is_archived?: SortOrder
     seen_at?: SortOrder
+    archived_at?: SortOrder
     ref_id?: SortOrder
     ref_type?: SortOrder
     created_at?: SortOrder
@@ -8509,7 +10741,7 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonWithAggregatesFilterBase<$PrismaModel>>
@@ -8519,12 +10751,13 @@ export namespace Prisma {
   export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -8782,6 +11015,49 @@ export namespace Prisma {
     updated_at?: SortOrder
   }
 
+  export type ContactPhoneVerificationCountOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    userRef?: SortOrder
+    phoneNumber?: SortOrder
+    verificationCode?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    verifiedAt?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ContactPhoneVerificationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    userRef?: SortOrder
+    phoneNumber?: SortOrder
+    verificationCode?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    verifiedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ContactPhoneVerificationMinOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    userRef?: SortOrder
+    phoneNumber?: SortOrder
+    verificationCode?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    verifiedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -8986,7 +11262,7 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
-  export type NestedJsonFilter<$PrismaModel = never> = 
+  export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
         Required<NestedJsonFilterBase<$PrismaModel>>
@@ -8996,12 +11272,13 @@ export namespace Prisma {
   export type NestedJsonFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -9049,34 +11326,6 @@ export namespace Prisma {
   }
 
 
-
-  /**
-   * Aliases for legacy arg types
-   */
-    /**
-     * @deprecated Use NotificationDefaultArgs instead
-     */
-    export type NotificationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use EmailMessageDefaultArgs instead
-     */
-    export type EmailMessageArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = EmailMessageDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use EmailCampaignDefaultArgs instead
-     */
-    export type EmailCampaignArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = EmailCampaignDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use SmsMessageDefaultArgs instead
-     */
-    export type SmsMessageArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SmsMessageDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use DeviceTokenDefaultArgs instead
-     */
-    export type DeviceTokenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DeviceTokenDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use NotificationSettingDefaultArgs instead
-     */
-    export type NotificationSettingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationSettingDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany
