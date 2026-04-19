@@ -596,7 +596,7 @@ services:
       PORT: 7120
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://device:device@device-db:5432/device
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - device-db

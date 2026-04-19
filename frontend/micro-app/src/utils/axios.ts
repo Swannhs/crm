@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { CONFIG } from 'src/config-global';
+import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
 
@@ -53,8 +54,23 @@ axiosInstance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('accessToken');
+        showToast({
+          message: 'Your session has expired. Please sign in again.',
+          severity: 'warning',
+        });
         window.dispatchEvent(new CustomEvent('auth-unauthorized'));
       }
+    } else if (typeof window !== 'undefined') {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Something went wrong!';
+
+      showToast({
+        message,
+        severity: 'error',
+      });
     }
     return Promise.reject((error.response && error.response.data) || 'Something went wrong!');
   }
