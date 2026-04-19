@@ -7692,6 +7692,26 @@
       ]
     },
     {
+      "endpoint": "/org/v1/locations",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://organization-service:7010"],
+          "url_pattern": "/v1/locations"
+        }
+      ]
+    },
+    {
       "endpoint": "/api/public/help-center/articles",
       "method": "GET",
       "input_headers": ["Content-Type", "X-Org-Id"],
@@ -7710,6 +7730,245 @@
         {
           "host": ["http://monolith:5000"],
           "url_pattern": "/api/public/help-center/articles/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/form-builder/forms",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/form-builder/forms"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/form-builder/templates",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/form-builder/templates"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/form-builder/create",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/form-builder/create"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/form-builder/preview/{id}",
+      "method": "GET",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/form-builder/preview/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/webbuilder",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/webbuilder"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/webbuilder",
+      "method": "POST",
+      "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/webbuilder"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/webbuilder/{id}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/webbuilder/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/webbuilder/preview-data/{websiteId}",
+      "method": "GET",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/webbuilder/preview-data/{websiteId}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/webbuilder/preview-data/{websiteId}/page/{pageSlug}",
+      "method": "GET",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/webbuilder/preview-data/{websiteId}/page/{pageSlug}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/reputation/dashboard-stats",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/reputation/dashboard-stats"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/checkout-page/public/{slug}",
+      "method": "GET",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/checkout-page/public/{slug}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/qr-pay-page/public/{slug}",
+      "method": "GET",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/qr-pay-page/public/{slug}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/qr-pay-page/public/{slug}/track",
+      "method": "POST",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/qr-pay-page/public/{slug}/track"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/contact-waiver/public/{id}",
+      "method": "GET",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/contact-waiver/public/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/contact-waiver/public/sign/{id}",
+      "method": "PUT",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/contact-waiver/public/sign/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/authenticate-contact/generate",
+      "method": "POST",
+      "input_headers": ["Content-Type", "X-Org-Id"],
+      "backend": [
+        {
+          "host": ["http://monolith:5000"],
+          "url_pattern": "/authenticate-contact/generate"
         }
       ]
     },

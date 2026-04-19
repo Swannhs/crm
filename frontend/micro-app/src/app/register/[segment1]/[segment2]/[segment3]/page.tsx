@@ -6,9 +6,9 @@ export const metadata = {
 
 type Props = {
   params: {
-    orderId: string;
-    roomId: string;
-    table: string;
+    segment1: string;
+    segment2: string;
+    segment3: string;
   };
 };
 
@@ -16,9 +16,9 @@ export default function Page({ params }: Props) {
   return (
     <PosWorkspaceView
       mode="table-register"
-      orderId={params.orderId}
-      roomId={params.roomId}
-      table={params.table}
+      orderId={params.segment1}
+      roomId={params.segment2}
+      table={params.segment3}
     />
   );
 }

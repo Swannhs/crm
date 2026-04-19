@@ -21,9 +21,15 @@ export async function getLocations() {
   return response.data?.data ?? response.data ?? [];
 }
 
+export async function createLocation(data: any) {
+  const response = await axiosInstance.post('/org/v1/locations', data);
+  return response.data?.data ?? response.data;
+}
+
 export const organizationService = {
   getOrganizationDetails,
   updateOrganization,
   getRoles,
   getLocations,
+  createLocation,
 };
