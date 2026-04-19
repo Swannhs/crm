@@ -52,4 +52,30 @@ export class InvoiceRepository {
       data,
     });
   }
+
+  async summarize(orgId: string) {
+    const where: Prisma.InvoiceWhereInput = { orgId };
+
+    const [aggregate, grouped] = await Promise.all([
+      this.client.invoice.aggregate({
+        where,
+        _count: { _all: true },
+        _sum: {
+          amountCents: true,
+          paidAmountCents: true,
+        },
+      }),
+      this.client.invoice.groupBy({
+        by: ['status'],
+        where,
+        _count: { _all: true },
+        _sum: {
+          amountCents: true,
+          paidAmountCents: true,
+        },
+      }),
+    ]);
+
+    return { aggregate, grouped };
+  }
 }

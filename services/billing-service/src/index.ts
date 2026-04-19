@@ -17,6 +17,11 @@ app.get("/v1/invoices",
   billingController.listInvoices
 );
 
+app.get("/v1/invoices/stats",
+  identityMiddleware,
+  billingController.getInvoiceStats
+);
+
 app.get("/v1/invoices/:id", 
   identityMiddleware,
   billingController.getInvoice

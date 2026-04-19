@@ -52,3 +52,15 @@ export class DocumentActivityRepository {
     return db.documentActivity.create({ data });
   }
 }
+
+export class ContactWaiverRepository {
+  async findPublicById(id: string) {
+    return db.contactWaiver.findFirst({
+      where: { id, isDeleted: false },
+    });
+  }
+
+  async update(id: string, data: any) {
+    return db.contactWaiver.update({ where: { id }, data });
+  }
+}

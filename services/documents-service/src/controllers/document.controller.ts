@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { DocumentService } from '../services/document.service.js';
+import { ContactWaiverService, DocumentService } from '../services/document.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
 export class DocumentController {
@@ -42,6 +42,37 @@ export class DocumentController {
       const data = await this.docService.getStatusCounts(req.identity.orgId);
       return res.json({ data });
     } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+}
+
+export class ContactWaiverController {
+  private waiverService = new ContactWaiverService();
+
+  async getPublic(req: any, res: Response) {
+    try {
+      const waiver = await this.waiverService.getPublicWaiver(req.params.id);
+      return res.json({ data: waiver });
+    } catch (err: any) {
+      if (err.message === 'Not found') return res.status(404).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async signPublic(req: any, res: Response) {
+    try {
+      const ua = req.get?.("user-agent") || req.headers?.["user-agent"] || "";
+      const ip = req.headers?.["x-forwarded-for"]?.split?.(",")?.[0]?.trim?.() || req.ip || "";
+      const signingInfo = {
+        signingIp: ip,
+        signingUserAgent: ua,
+        signingVia: "public",
+      };
+      const waiver = await this.waiverService.signPublicWaiver(req.params.id, req.body, signingInfo);
+      return res.json({ data: waiver });
+    } catch (err: any) {
+      if (err.message === 'Not found') return res.status(404).json({ message: err.message });
       return res.status(500).json({ message: err.message });
     }
   }

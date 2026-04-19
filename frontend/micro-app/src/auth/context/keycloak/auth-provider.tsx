@@ -39,6 +39,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       keycloakRef.current = keycloak;
       (window as any).keycloak = keycloak;
 
+      keycloak.onTokenExpired = () => {
+        console.warn('Token expired, attempting refresh...');
+        keycloak.updateToken(30).catch(() => {
+          console.error('Immediate refresh failed after expiration');
+          // The interval will also catch this and clear the state, 
+          // but we can be proactive here if needed.
+        });
+      };
+
       // onLoad: 'check-sso' is the standard SPA approach:
       //   - Automatically processes any ?code in the URL (authorization code exchange)
       //   - If no code, silently checks for an active SSO session via iframe
@@ -90,7 +99,59 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (initializedRef.current) return;
     initializedRef.current = true;
     initKeycloak();
-  }, [initKeycloak]);
+
+    // Set up an interval to refresh the token periodically
+    const interval = setInterval(async () => {
+      try {
+        if (keycloakRef.current?.authenticated) {
+          // updateToken(60) means refresh the token if it expires in less than 60 seconds
+          const refreshed = await keycloakRef.current.updateToken(60);
+          if (refreshed) {
+            console.log('Token refreshed successfully');
+            const keycloak = keycloakRef.current;
+            
+            // Update session storage
+            sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
+            
+            // Update local state to ensure the new token is available to the rest of the app
+            setState((prev) => ({
+              ...prev,
+              user: prev.user ? { ...prev.user, accessToken: keycloak.token } : null
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        
+        // If refresh fails, it means the session is likely invalid or expired on the server
+        // We should clear the local state to prevent the app from using an expired token
+        sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+        sessionStorage.removeItem(ORG_ID_KEY);
+        sessionStorage.removeItem(USER_ID_KEY);
+        
+        setState({ user: null, loading: false });
+        keycloakRef.current = null;
+        initializedRef.current = false;
+      }
+    }, 30000); // Check every 30 seconds
+
+    const handleUnauthorized = () => {
+      console.warn('Unauthorized access detected via event');
+      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+      sessionStorage.removeItem(ORG_ID_KEY);
+      sessionStorage.removeItem(USER_ID_KEY);
+      setState({ user: null, loading: false });
+      keycloakRef.current = null;
+      initializedRef.current = false;
+    };
+
+    window.addEventListener('auth-unauthorized', handleUnauthorized);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('auth-unauthorized', handleUnauthorized);
+    };
+  }, [initKeycloak, setState]);
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
   const status = state.loading ? 'loading' : checkAuthenticated;
@@ -113,28 +174,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const redirectUri = `${window.location.origin}/`;
 
         try {
-          setState({ user: null, loading: false });
+          const keycloak = keycloakRef.current;
+          if (!keycloak) {
+            window.location.replace(redirectUri);
+            return;
+          }
+
+          // Clear local storage/state
           sessionStorage.removeItem(ACCESS_TOKEN_KEY);
           sessionStorage.removeItem(ORG_ID_KEY);
           sessionStorage.removeItem(USER_ID_KEY);
+          setState({ user: null, loading: false });
 
-          const keycloak = keycloakRef.current;
+          // Reset refs
           keycloakRef.current = null;
           initializedRef.current = false;
 
-          if (keycloak?.clearToken) {
-            keycloak.clearToken();
-          }
-
-          if (keycloak?.logout) {
-            await keycloak.logout({ redirectUri });
-            return;
-          }
+          // Initiate Keycloak logout (this will redirect the browser)
+          await keycloak.logout({ redirectUri });
         } catch (error) {
           console.error('Logout error:', error);
+          window.location.replace(redirectUri);
         }
-
-        window.location.replace(redirectUri);
       },
       checkUserSession: async () => {
         try {

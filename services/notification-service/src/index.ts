@@ -1,5 +1,11 @@
 import { createServiceApp, connectAmqpWithRetry, ensureTopicExchange } from "@mymanager/node-service-kit";
-import { NotificationController, NotificationSettingController, EmailMessageController, SmsController } from "./controllers/notification.controller.js";
+import {
+  NotificationController,
+  NotificationSettingController,
+  EmailMessageController,
+  SmsController,
+  ContactPhoneVerificationController,
+} from "./controllers/notification.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ serviceName: "notification-service" });
@@ -10,6 +16,7 @@ const notifCtrl = new NotificationController();
 const settingsCtrl = new NotificationSettingController();
 const emailCtrl = new EmailMessageController();
 const smsCtrl = new SmsController();
+const contactPhoneVerificationCtrl = new ContactPhoneVerificationController();
 
 // --- Notifications ---
 app.get("/v1/notifications", auth, (req, res) => notifCtrl.list(cast(req), res));
@@ -31,6 +38,11 @@ app.put("/v1/email-messages/:id/sent", auth, (req, res) => emailCtrl.markSent(ca
 // --- SMS ---
 app.get("/v1/sms", auth, (req, res) => smsCtrl.list(cast(req), res));
 app.post("/v1/sms", auth, (req, res) => smsCtrl.send(cast(req), res));
+
+// --- Public contact phone verification ---
+app.post("/v1/contact-phone-verifications/generate", (req, res) =>
+  contactPhoneVerificationCtrl.generate(cast(req), res)
+);
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "notification-service (TS)" }));

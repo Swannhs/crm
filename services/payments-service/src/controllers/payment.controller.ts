@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { InvoiceService, DepositService } from '../services/payment.service.js';
+import { InvoiceService, DepositService, CheckoutPageService, QrPayPageService } from '../services/payment.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
 export class InvoiceController {
@@ -55,5 +55,43 @@ export class DepositController {
       const deposit = await this.depositService.createDeposit(orgId, userId, req.body);
       return res.status(201).json({ data: deposit });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+}
+
+export class CheckoutPageController {
+  private checkoutService = new CheckoutPageService();
+
+  async getPublic(req: any, res: Response) {
+    try {
+      const page = await this.checkoutService.getPublicPage(req.params.slug);
+      return res.json({ data: page });
+    } catch (err: any) {
+      if (err.message === "Not found") return res.status(404).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+}
+
+export class QrPayPageController {
+  private qrPayService = new QrPayPageService();
+
+  async getPublic(req: any, res: Response) {
+    try {
+      const page = await this.qrPayService.getPublicPage(req.params.slug);
+      return res.json({ data: page });
+    } catch (err: any) {
+      if (err.message === "Not found") return res.status(404).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async trackPublic(req: any, res: Response) {
+    try {
+      const transaction = await this.qrPayService.trackPublicPayment(req.params.slug, req.body);
+      return res.status(201).json({ data: transaction });
+    } catch (err: any) {
+      if (err.message === "Not found") return res.status(404).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
   }
 }

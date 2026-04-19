@@ -1,4 +1,11 @@
-import { NotificationRepository, NotificationSettingRepository, DeviceTokenRepository, EmailMessageRepository, SmsRepository } from '../repositories/notification.repository.js';
+import {
+  NotificationRepository,
+  NotificationSettingRepository,
+  DeviceTokenRepository,
+  EmailMessageRepository,
+  SmsRepository,
+  ContactPhoneVerificationRepository,
+} from '../repositories/notification.repository.js';
 
 export class NotificationService {
   private repo = new NotificationRepository();
@@ -6,7 +13,7 @@ export class NotificationService {
   async getNotifications(orgId: string, userId: string, filters: any) {
     const page = parseInt(filters.page || '1');
     const limit = parseInt(filters.limit || '30');
-    const where: any = { orgId, userId };
+    const where: any = { org_id: orgId, user_id: userId };
     if (filters.category) where.category = filters.category;
     return this.repo.findMany(where, (page - 1) * limit, limit);
   }
@@ -16,7 +23,7 @@ export class NotificationService {
   }
 
   async markAsRead(orgId: string, userId: string, ids?: string[]) {
-    const where: any = { orgId, userId };
+    const where: any = { org_id: orgId, user_id: userId };
     if (ids?.length) where.id = { in: ids };
     return this.repo.markRead(where);
   }
@@ -35,14 +42,14 @@ export class NotificationSettingService {
 
   async getSettings(orgId: string) {
     const settings = await this.repo.findByOrg(orgId);
-    return settings || { orgId, emailEnabled: true, smsEnabled: true, pushEnabled: true, settings: {} };
+    return settings || { org_id: orgId, email_enabled: true, sms_enabled: true, push_enabled: true, settings: {} };
   }
 
   async saveSettings(orgId: string, data: any) {
     return this.repo.upsert(orgId, {
-      emailEnabled: data.email_enabled ?? true,
-      smsEnabled: data.sms_enabled ?? true,
-      pushEnabled: data.push_enabled ?? true,
+      email_enabled: data.email_enabled ?? true,
+      sms_enabled: data.sms_enabled ?? true,
+      push_enabled: data.push_enabled ?? true,
       settings: data.settings || {}
     });
   }
@@ -77,16 +84,16 @@ export class EmailMessageService {
 
   async createMessage(orgId: string, userId: string, data: any) {
     return this.repo.create({
-      orgId, createdBy: userId, subject: data.subject, body: data.body,
+      org_id: orgId, created_by: userId, subject: data.subject, body: data.body,
       to: data.to || [], cc: data.cc || [], bcc: data.bcc || [],
-      fromEmail: data.from_email, fromName: data.from_name, metadata: data.metadata || {}
+      from_email: data.from_email, from_name: data.from_name, metadata: data.metadata || {}
     });
   }
 
   async markAsSent(id: string, orgId: string) {
     const msg = await this.repo.findUnique(id, orgId);
     if (!msg) throw new Error('Not found');
-    return this.repo.update(id, { isSent: true, sentAt: new Date() });
+    return this.repo.update(id, { is_sent: true, sent_at: new Date() });
   }
 
   async bulkDelete(ids: string[], orgId: string) {
@@ -104,6 +111,27 @@ export class SmsService {
   }
 
   async sendSms(orgId: string, userId: string, to: string, body: string) {
-    return this.repo.create({ orgId, createdBy: userId, to, body });
+    return this.repo.create({ org_id: orgId, created_by: userId, to, body });
+  }
+}
+
+export class ContactPhoneVerificationService {
+  private repo = new ContactPhoneVerificationRepository();
+
+  async generate(data: any) {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    return this.repo.create({
+      orgId: data.organizationId || null,
+      userRef: data.userId || null,
+      phoneNumber: data.phoneNumber,
+      verificationCode: code,
+      source: data.source || null,
+      expiresAt,
+      metadata: {
+        backTo: data.source || null,
+      },
+    });
   }
 }

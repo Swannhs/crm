@@ -29,6 +29,16 @@ export class BillingController {
     }
   };
 
+  getInvoiceStats = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { orgId } = req.identity;
+      const result = await this.billingService.getInvoiceStats(orgId);
+      return res.json(result);
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  };
+
   getInvoice = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { orgId } = req.identity;

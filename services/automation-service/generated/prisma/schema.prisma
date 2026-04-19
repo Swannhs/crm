@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Automation {
+  id             String   @id @default(uuid()) @db.Uuid
+  automationName String?
+  contactInfo    Json?
+  activationUpon Json?
+  activateTime   Json?
+  userEmail      String?
+  userPhone      String?
+  userName       String?
+  userId         String?  @db.Uuid
+  organizationId String?  @db.Uuid
+  isActive       Boolean  @default(false)
+  isDelete       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model Workflow {
+  id                           String   @id @default(uuid()) @db.Uuid
+  userId                       String   @db.Uuid
+  organizationId               String?  @db.Uuid
+  workspaceId                  String   @db.Uuid
+  title                        String
+  description                  String?
+  status                       String   @default("Draft")
+  verticalFlow                 Boolean  @default(false)
+  creatorType                  String   @default("user")
+  isForSystemNotification      Boolean  @default(false)
+  isForUserNotification        Boolean  @default(false)
+  isForClientNotification      Boolean  @default(false)
+  isCopyFromSystemNotification Boolean  @default(false)
+  parentWorkflowId             String?  @db.Uuid
+  isDeleted                    Boolean  @default(false)
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([workspaceId])
+}
+
+model WorkflowNode {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  organizationId   String?  @db.Uuid
+  workflowId       String   @db.Uuid
+  key              String?
+  data             Json?
+  type             String
+  source           String[] @db.Uuid
+  height           Int      @default(0)
+  width            Int      @default(0)
+  position         Json?
+  positionAbsolute Json?
+  sourcePosition   String   @default("right")
+  targetPosition   String   @default("left")
+  isDeleted        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([workflowId])
+  @@index([organizationId])
+}
+
+model WorkflowWorkspace {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  organizationId String?  @db.Uuid
+  name           String
+  description    String?
+  isDeleted      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model WorkflowStartAction {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @db.Uuid
+  organizationId        String?  @db.Uuid
+  workflowId            String   @db.Uuid
+  actionType            String?
+  duration              Json?
+  parentId              String?  @db.Uuid
+  setCustomTime         Boolean  @default(false)
+  useSubscriberTimeZone Boolean  @default(false)
+  customTime            Json?
+  subject               String?
+  content               String?
+  template              Json?
+  attachments           Json?
+  condition             String?
+  confirmProgress       Json?
+  notificationTo        Json?
+  taskContent           Json?
+  isStart               Boolean  @default(false)
+  isLast                Boolean  @default(false)
+  isCondition           Boolean  @default(false)
+  isException           Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([workflowId])
+  @@index([organizationId])
+}
+
+model WorkflowActivityLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  organizationId String?  @db.Uuid
+  workflowId     String   @db.Uuid
+  contactId      String?  @db.Uuid
+  nodeId         String?  @db.Uuid
+  action         String?
+  details        Json?
+  createdAt      DateTime @default(now())
+
+  @@index([workflowId])
+  @@index([contactId])
+  @@index([organizationId])
+}
+
+model WorkflowExecutionHistory {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  organizationId String?   @db.Uuid
+  workflowId     String    @db.Uuid
+  contactId      String?   @db.Uuid
+  status         String?
+  startedAt      DateTime
+  completedAt    DateTime?
+  errorMessage   String?
+  createdAt      DateTime  @default(now())
+
+  @@index([workflowId])
+  @@index([contactId])
+  @@index([organizationId])
+}

@@ -1,4 +1,11 @@
-import { InvoiceRepository, PaymentRepository, InvoiceActivityRepository, DepositRepository } from '../repositories/payment.repository.js';
+import {
+  InvoiceRepository,
+  PaymentRepository,
+  InvoiceActivityRepository,
+  DepositRepository,
+  CheckoutPageRepository,
+  QrPayPageRepository,
+} from '../repositories/payment.repository.js';
 
 export class InvoiceService {
   private invoiceRepo = new InvoiceRepository();
@@ -8,33 +15,52 @@ export class InvoiceService {
   async getInvoices(orgId: string, filters: any) {
     const page = parseInt(filters.page || '1');
     const limit = parseInt(filters.limit || '20');
-    const where: any = { orgId, isDelete: false };
+    const where: any = { org_id: orgId, is_delete: false };
     if (filters.status) where.status = filters.status;
-    if (filters.contact_id) where.contactId = filters.contact_id;
+    if (filters.contact_id) where.contact_id = filters.contact_id;
     return this.invoiceRepo.findMany(where, (page - 1) * limit, limit);
   }
 
   async createInvoice(orgId: string, userId: string, data: any) {
     const totalCents = (data.amount_cents || 0) + (data.tax_cents || 0) - (data.discount_cents || 0);
     return this.invoiceRepo.create({
-      orgId,
-      createdByUserId: userId,
-      contactId: data.contact_id,
+      org_id: orgId,
+      created_by_user_id: userId,
+      contact_id: data.contact_id,
       title: data.title,
-      invoiceNumber: data.invoice_number,
-      lineItems: data.line_items || [],
-      amountCents: BigInt(data.amount_cents || 0),
-      taxCents: BigInt(data.tax_cents || 0),
-      discountCents: BigInt(data.discount_cents || 0),
-      totalCents: BigInt(totalCents),
+      invoice_number: data.invoice_number,
+      line_items: data.line_items || [],
+      amount_cents: BigInt(data.amount_cents || 0),
+      tax_cents: BigInt(data.tax_cents || 0),
+      discount_cents: BigInt(data.discount_cents || 0),
+      total_cents: BigInt(totalCents),
       currency: data.currency || "USD",
-      dueDate: data.due_date ? new Date(data.due_date) : null,
+      due_date: data.due_date ? new Date(data.due_date) : null,
       metadata: data.metadata || {}
     });
   }
 
   async getStats(orgId: string) {
-    return this.invoiceRepo.groupByStatus(orgId);
+    const [summary, byStatus] = await Promise.all([
+      this.invoiceRepo.summarize(orgId),
+      this.invoiceRepo.groupByStatus(orgId),
+    ]);
+
+    const totalRevenueCents = Number(summary._sum.total_cents ?? summary._sum.amount_cents ?? 0n);
+    const paidCents = Number(summary._sum.paid_cents ?? 0n);
+    const outstandingCents = Math.max(totalRevenueCents - paidCents, 0);
+
+    return {
+      invoiceCount: summary._count ?? 0,
+      totalRevenue: totalRevenueCents / 100,
+      paid: paidCents / 100,
+      outstanding: outstandingCents / 100,
+      byStatus: byStatus.map((item) => ({
+        status: item.status,
+        count: typeof item._count === 'number' ? item._count : item._count?.status ?? 0,
+        total: Number(item._sum?.total_cents ?? 0n) / 100,
+      })),
+    };
   }
 
   async recordPayment(invoiceId: string, orgId: string, userId: string, data: any) {
@@ -42,21 +68,21 @@ export class InvoiceService {
     if (!invoice) throw new Error('Not found');
 
     const payment = await this.paymentRepo.create({
-      invoiceId: invoice.id, orgId, createdByUserId: userId,
-      amountCents: BigInt(data.amount_cents),
+      invoice_id: invoice.id, org_id: orgId, created_by_user_id: userId,
+      amount_cents: BigInt(data.amount_cents),
       method: data.method || "cash",
       reference: data.reference, notes: data.notes
     });
 
-    const newPaid = invoice.paidCents + BigInt(data.amount_cents);
-    const newStatus = newPaid >= invoice.totalCents ? "paid" : invoice.status;
+    const newPaid = invoice.paid_cents + BigInt(data.amount_cents);
+    const newStatus = newPaid >= invoice.total_cents ? "paid" : invoice.status;
     await this.invoiceRepo.update(invoice.id, {
-      paidCents: newPaid, status: newStatus,
-      ...(newStatus === "paid" && { paidAt: new Date() })
+      paid_cents: newPaid, status: newStatus,
+      ...(newStatus === "paid" && { paid_at: new Date() })
     });
 
     await this.activityRepo.create({
-      invoiceId: invoice.id, orgId, userId, action: "payment_added",
+      invoice_id: invoice.id, org_id: orgId, user_id: userId, action: "payment_added",
       note: `Payment of ${data.amount_cents} cents via ${data.method || "cash"}`
     });
 
@@ -71,9 +97,57 @@ export class DepositService {
 
   async createDeposit(orgId: string, userId: string, data: any) {
     return this.depositRepo.create({
-      orgId, createdByUserId: userId, contactId: data.contact_id,
-      amountCents: BigInt(data.amount_cents), currency: data.currency || "USD",
-      description: data.description, paymentMethod: data.payment_method
+      org_id: orgId, created_by_user_id: userId, contact_id: data.contact_id,
+      amount_cents: BigInt(data.amount_cents), currency: data.currency || "USD",
+      description: data.description, payment_method: data.payment_method
+    });
+  }
+}
+
+export class CheckoutPageService {
+  private checkoutRepo = new CheckoutPageRepository();
+
+  async getPublicPage(slug: string) {
+    const page = await this.checkoutRepo.findPublicBySlug(slug);
+    if (!page) throw new Error("Not found");
+    return page;
+  }
+
+  async trackPublicEvent(slug: string, data: any) {
+    const page = await this.checkoutRepo.findPublicBySlug(slug);
+    if (!page) throw new Error("Not found");
+
+    return this.checkoutRepo.createEvent({
+      checkoutPageId: page.id,
+      eventType: data.event_type || "view",
+      customerEmail: data.email || null,
+      customerPhone: data.phone || null,
+      amountCents: data.amount ? BigInt(Math.round(Number(data.amount) * 100)) : null,
+      payload: data || {},
+    });
+  }
+}
+
+export class QrPayPageService {
+  private qrPayRepo = new QrPayPageRepository();
+
+  async getPublicPage(slug: string) {
+    const page = await this.qrPayRepo.findPublicBySlug(slug);
+    if (!page) throw new Error("Not found");
+    return page;
+  }
+
+  async trackPublicPayment(slug: string, data: any) {
+    const page = await this.qrPayRepo.findPublicBySlug(slug);
+    if (!page) throw new Error("Not found");
+
+    return this.qrPayRepo.createTransaction({
+      qrPayPageId: page.id,
+      amountCents: data.amount ? BigInt(Math.round(Number(data.amount) * 100)) : page.defaultAmountCents ?? null,
+      customerEmail: data.email || null,
+      customerPhone: data.phone || null,
+      status: "tracked",
+      metadata: data || {},
     });
   }
 }

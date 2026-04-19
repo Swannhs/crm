@@ -7749,7 +7749,7 @@
       "backend": [
         {
           "host": ["http://monolith:5000"],
-          "url_pattern": "/form-builder/forms"
+          "url_pattern": "/api/form-builder/forms"
         }
       ]
     },
@@ -7769,7 +7769,7 @@
       "backend": [
         {
           "host": ["http://monolith:5000"],
-          "url_pattern": "/form-builder/templates"
+          "url_pattern": "/api/form-builder/templates"
         }
       ]
     },
@@ -7789,7 +7789,7 @@
       "backend": [
         {
           "host": ["http://monolith:5000"],
-          "url_pattern": "/form-builder/create"
+          "url_pattern": "/api/form-builder/create"
         }
       ]
     },
@@ -7800,7 +7800,7 @@
       "backend": [
         {
           "host": ["http://monolith:5000"],
-          "url_pattern": "/form-builder/preview/{id}"
+          "url_pattern": "/api/form-builder/preview/{id}"
         }
       ]
     },
@@ -9455,26 +9455,6 @@
       ]
     },
     {
-      "endpoint": "/api/{module}/{rest*}",
-      "method": "GET",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
-      "extra_config": {
-        "auth/validator": {
-          "alg": "RS256",
-          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
-          "disable_jwk_security": true,
-          "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
-        }
-      },
-      "backend": [
-        {
-          "host": ["http://api-router-service:7001"],
-          "url_pattern": "/api/{module}/{rest}"
-        }
-      ]
-    },
-    {
       "endpoint": "/api/{module}",
       "method": "POST",
       "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
@@ -9491,26 +9471,6 @@
         {
           "host": ["http://api-router-service:7001"],
           "url_pattern": "/api/{module}"
-        }
-      ]
-    },
-    {
-      "endpoint": "/api/{module}/{rest*}",
-      "method": "POST",
-      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
-      "extra_config": {
-        "auth/validator": {
-          "alg": "RS256",
-          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
-          "disable_jwk_security": true,
-          "cache": true,
-          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
-        }
-      },
-      "backend": [
-        {
-          "host": ["http://api-router-service:7001"],
-          "url_pattern": "/api/{module}/{rest}"
         }
       ]
     }
