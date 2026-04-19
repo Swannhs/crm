@@ -25,6 +25,16 @@ export const contactService = {
     return response.data?.data ?? response.data?.contact ?? response.data;
   },
 
+  getContactsByType: async (type: string, id?: string, params?: any) => {
+    if (id) {
+      const response = await axios.get(`/api/contact/get`, { params: { ...params, type, contactTypeId: id } });
+      return response.data?.data ?? response.data?.contacts ?? response.data ?? [];
+    }
+
+    const response = await axios.get('/api/contact/get', { params: { ...params, type } });
+    return response.data?.data ?? response.data?.contacts ?? response.data ?? [];
+  },
+
   createContact: async (data: any) => {
     const response = await axios.post('/api/contact/add', data);
     return response.data;

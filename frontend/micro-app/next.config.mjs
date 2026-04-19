@@ -1,6 +1,7 @@
 const isStaticExport = 'false';
 
 const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   trailingSlash: true,
   basePath: process.env.NEXT_PUBLIC_BASE_PATH,
   eslint: {

@@ -8,22 +8,29 @@
 </head>
 <body>
     <div class="login-card">
-        <div class="card-header" style="text-align: center;">
-            <div class="logo-text">MyManager</div>
-            <h1>Confirm log out</h1>
-            <p class="subtitle">Are you sure you want to log out of your session?</p>
+        <div class="card-header">
+            <div class="brand-section">
+                <div class="logo-symbol">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="logo-text">MyManager</div>
+            </div>
+            <h1>Confirm sign out</h1>
+            <p class="subtitle">Are you sure you want to end your current session?</p>
         </div>
 
         <form id="kc-logout-form" class="form-action" action="${url.logoutConfirmAction}" method="POST">
-            <input type="hidden" name="session_code" value="${logout.sessionCode}">
+            <#if logout?? && logout.sessionCode??>
+                <input type="hidden" name="session_code" value="${logout.sessionCode}">
+            </#if>
             
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 24px;">
-                <button type="submit" name="confirmLogout" id="kc-logout" style="width: 100%; padding: 11px 22px; font-size: 0.9375rem; font-weight: 700; color: #FFFFFF; background-color: var(--error-main); border: none; border-radius: 8px; cursor: pointer;">
-                    Yes, log out
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 32px;">
+                <button type="submit" name="confirmLogout" id="kc-logout" style="width: 100%; padding: 14px 22px; font-size: 0.9375rem; font-weight: 700; color: #FFFFFF; background-color: var(--error-main); border: none; border-radius: 12px; cursor: pointer; transition: all 250ms ease; box-shadow: 0 8px 16px 0 rgba(255, 86, 48, 0.2);">
+                    Yes, sign out
                 </button>
                 
                 <a href="${client.baseUrl!''}" style="text-decoration: none; width: 100%;">
-                    <button type="button" style="width: 100%; padding: 11px 22px; font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); background-color: transparent; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;">
+                    <button type="button" style="width: 100%; padding: 14px 22px; font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); background-color: transparent; border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 250ms ease;">
                         Cancel
                     </button>
                 </a>

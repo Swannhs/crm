@@ -30,12 +30,13 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 type Props = {
   id: string;
+  mode?: string;
 };
 
-export function ContactDetailsView({ id }: Props) {
+export function ContactDetailsView({ id, mode = 'overview' }: Props) {
   const router = useRouter();
 
-  const [currentTab, setCurrentTab] = useState('overview');
+  const [currentTab, setCurrentTab] = useState(mode);
 
   const { data: contact, isLoading: contactLoading } = useQuery({
     queryKey: ['contact', id],

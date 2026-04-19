@@ -13,8 +13,18 @@ export type IDocument = {
 };
 
 export const documentService = {
-  getDocuments: async () => {
-    const response = await axios.get('/api/document');
-    return response.data;
+  getDocuments: async (params?: any) => {
+    const response = await axios.get('/api/documents', { params });
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  getDocument: async (id: string) => {
+    const response = await axios.get(`/api/documents/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  getSharedDocument: async (hashcode: string) => {
+    const response = await axios.get(`/api/documents/share/${hashcode}`);
+    return response.data?.data ?? response.data;
   },
 };

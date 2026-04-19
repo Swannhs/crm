@@ -29,4 +29,19 @@ export const billingService = {
     const response = await axios.get(`/api/invoice/${id}`);
     return response.data?.data ?? response.data;
   },
+
+  createInvoice: async (data: any) => {
+    const response = await axios.post('/api/invoice', data);
+    return response.data?.data ?? response.data;
+  },
+
+  updateInvoice: async (id: string, data: any) => {
+    const response = await axios.put(`/api/invoice/update/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+
+  getPayments: async () => {
+    const response = await axios.get('/api/payments');
+    return response.data?.data ?? response.data ?? [];
+  },
 };
