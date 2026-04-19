@@ -29,6 +29,7 @@ services:
       - "8080:8080"
     volumes:
       - ../../auth/keycloak/realm:/opt/keycloak/data/import:ro
+      - ../../auth/keycloak/themes:/opt/keycloak/themes:ro
     depends_on:
       - keycloak-db
 

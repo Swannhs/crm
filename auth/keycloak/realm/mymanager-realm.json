@@ -2,6 +2,7 @@
   "realm": "mymanager",
   "enabled": true,
   "displayName": "MyManager",
+  "loginTheme": "mymanager",
   "sslRequired": "none",
   "clients": [
     {

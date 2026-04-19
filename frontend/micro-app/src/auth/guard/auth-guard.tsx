@@ -52,6 +52,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         amplify: paths.auth.amplify.signIn,
         firebase: paths.auth.firebase.signIn,
         supabase: paths.auth.supabase.signIn,
+        keycloak: paths.auth.keycloak.signIn,
       }[method];
 
       const href = `${signInPath}?${createQueryString('returnTo', pathname)}`;

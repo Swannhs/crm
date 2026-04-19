@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useEffect, ReactNode, useCallback } from 'react';
+import Keycloak from 'keycloak-js';
+import { useMemo, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { useSetState } from 'src/hooks/use-set-state';
 import { CONFIG } from 'src/config-global';
 import { AuthContext } from '../auth-context';
@@ -17,36 +18,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
     loading: true,
   });
 
+  const keycloakRef = useRef<Keycloak | null>(null);
+  const initializedRef = useRef(false);
+
   const initKeycloak = useCallback(async () => {
     try {
-      // Inject Keycloak script if not present
-      if (!window.Keycloak) {
-        const script = document.createElement('script');
-        script.src = `${CONFIG.keycloak.url}/js/keycloak.js`;
-        script.async = true;
-        document.body.appendChild(script);
-
-        await new Promise((resolve, reject) => {
-          script.onload = resolve;
-          script.onerror = reject;
-        });
-      }
-
-      const keycloak = new window.Keycloak({
+      const keycloak = new Keycloak({
         url: CONFIG.keycloak.url,
         realm: CONFIG.keycloak.realm,
         clientId: CONFIG.keycloak.clientId,
       });
 
+      keycloakRef.current = keycloak;
+      window.keycloak = keycloak;
+
+      // onLoad: 'check-sso' is the standard SPA approach:
+      //   - Automatically processes any ?code in the URL (authorization code exchange)
+      //   - If no code, silently checks for an active SSO session via iframe
+      //   - NEVER redirects to Keycloak login on its own — no redirect loops possible
+      // silentCheckSsoFallback: false — if silent iframe check can't run, return false safely
+      // checkLoginIframe: false — disable the periodic background session check via iframe
       const authenticated = await keycloak.init({
         onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
         pkceMethod: 'S256',
+        checkLoginIframe: false,
+        silentCheckSsoFallback: false,
+        responseMode: 'query',
       });
 
       if (authenticated) {
+        // Remove OIDC callback params from the URL without triggering a re-render
+        const url = new URL(window.location.href);
+        ['code', 'state', 'session_state', 'iss'].forEach((p) => url.searchParams.delete(p));
+        window.history.replaceState({}, '', url.toString());
+
         const profile = await keycloak.loadUserProfile();
-        
+
         const user = {
           id: profile.id || keycloak.subject,
           email: profile.email,
@@ -54,22 +61,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
           username: profile.username,
           accessToken: keycloak.token,
           refreshToken: keycloak.refreshToken,
-          role: 'admin', // Default to admin for demo
+          role: 'admin',
           org_id: keycloak.tokenParsed?.org_id,
         };
 
-        // Sync with session storage for axios interceptors
-        sessionStorage.setItem('accessToken', keycloak.token);
+        sessionStorage.setItem('accessToken', keycloak.token || '');
         sessionStorage.setItem('organizationId', user.org_id || '');
 
         setState({ user, loading: false });
       } else {
         setState({ user: null, loading: false });
       }
-
-      // Store keycloak instance globally for logout/actions
-      window.keycloak = keycloak;
-
     } catch (error) {
       console.error('Keycloak Init Error:', error);
       setState({ user: null, loading: false });
@@ -77,10 +79,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [setState]);
 
   useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
     initKeycloak();
   }, [initKeycloak]);
-
-  // ----------------------------------------------------------------------
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
   const status = state.loading ? 'loading' : checkAuthenticated;
@@ -91,11 +93,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
       loading: status === 'loading',
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
-      login: () => window.keycloak?.login(),
-      logout: () => {
-        sessionStorage.removeItem('accessToken');
-        sessionStorage.removeItem('organizationId');
-        window.keycloak?.logout();
+      // Always redirect back to root — this matches the URL Keycloak is actually sending to.
+      // Using a fixed URI avoids redirect_uri mismatches when login() is called from
+      // different pathnames across the app.
+      login: () => {
+        keycloakRef.current?.login({
+          redirectUri: window.location.origin + '/',
+        });
+      },
+      logout: async () => {
+        try {
+          sessionStorage.removeItem('accessToken');
+          sessionStorage.removeItem('organizationId');
+          await keycloakRef.current?.logout({
+            redirectUri: window.location.origin + '/',
+          });
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
       },
     }),
     [state.user, status]

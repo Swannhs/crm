@@ -7,6 +7,13 @@
   "extra_config": {
     "auth/validator": {
       "shared_cache_duration": 900
+    },
+    "security/cors": {
+      "allow_origins": ["*"],
+      "allow_methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "allow_headers": ["Content-Type", "Authorization", "X-Org-Id", "X-User-Id"],
+      "expose_headers": ["Content-Length"],
+      "max_age": "12h"
     }
   },
   "endpoints": [
