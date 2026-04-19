@@ -1,0 +1,15 @@
+The Keycloak side is now in a working state and the frontend auth loop is resolved.
+
+What was fixed:
+- prevented double `keycloak.init()` execution in auth-provider.tsx
+- replaced the old test user with `appuser`
+- added a working `org_id` claim on `mymanager-web`
+
+Current login:
+- username: `appuser`
+- password: `Appuser123!`
+
+If you want, the next sensible cleanup is:
+1. restrict Keycloak redirect URIs from `*` to `http://localhost:3034/*`
+2. stop using the hardcoded `org_id` mapper and move back to proper per-user or per-org claims
+3. persist this setup in realm import/config so it survives container resets

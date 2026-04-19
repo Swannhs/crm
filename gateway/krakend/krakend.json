@@ -756,6 +756,121 @@
       ]
     },
     {
+      "endpoint": "/api/booking/appointments",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://booking-service:7040"
+          ],
+          "url_pattern": "/v1/appointments",
+          "extra_config": {
+            "auth/validator": {}
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/booking/appointments/user",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://booking-service:7040"
+          ],
+          "url_pattern": "/v1/appointments/user",
+          "extra_config": {
+            "auth/validator": {}
+          }
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/booking/appointments/{id}",
+      "method": "DELETE",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://booking-service:7040"
+          ],
+          "url_pattern": "/v1/appointments/{id}",
+          "extra_config": {
+            "auth/validator": {}
+          }
+        }
+      ]
+    },
+    {
       "endpoint": "/api/contact/get-employee-by-punchid",
       "method": "GET",
       "input_headers": [
@@ -8760,6 +8875,33 @@
       "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/chats-and-contacts"}]
     },
     {
+      "endpoint": "/api/chat/v1/contacts",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://crm-service:8010"], "url_pattern": "/api/v1/contacts"}]
+    },
+    {
+      "endpoint": "/api/chat/v1/messages/{channelId}",
+      "method": "GET",
+      "extra_config": {},
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/chathistory/{channelId}"}]
+    },
+    {
+      "endpoint": "/api/chat/v1/messages",
+      "method": "POST",
+      "extra_config": {},
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/livechat/newmessage"}]
+    },
+    {
       "endpoint": "/api/livechat/widget-setting",
       "method": "POST",
       "input_headers": ["Authorization", "Content-Type", "X-User-Id", "X-Org-Id"],
@@ -8813,6 +8955,86 @@
     {
       "endpoint": "/api/realtime/health",
       "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/health"}]
+    },
+    {
+      "endpoint": "/api/{module}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://api-router-service:7001"],
+          "url_pattern": "/api/{module}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/{module}/{rest*}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://api-router-service:7001"],
+          "url_pattern": "/api/{module}/{rest}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/{module}",
+      "method": "POST",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://api-router-service:7001"],
+          "url_pattern": "/api/{module}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/{module}/{rest*}",
+      "method": "POST",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [
+        {
+          "host": ["http://api-router-service:7001"],
+          "url_pattern": "/api/{module}/{rest}"
+        }
+      ]
     }
   ]
 }

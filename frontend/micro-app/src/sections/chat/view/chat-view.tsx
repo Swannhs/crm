@@ -29,9 +29,9 @@ export function ChatView() {
   });
 
   const { data: messages, isLoading: messagesLoading } = useQuery({
-    queryKey: ['chat-messages', selectedContact?._id],
-    queryFn: () => chatService.getMessages(selectedContact?._id),
-    enabled: !!selectedContact?._id,
+    queryKey: ['chat-messages', selectedContact?.channelId],
+    queryFn: () => chatService.getMessages(selectedContact.channelId),
+    enabled: !!selectedContact?.channelId,
   });
 
   if (contactsLoading) {
@@ -54,7 +54,7 @@ export function ChatView() {
             <Stack spacing={0.5} sx={{ p: 1 }}>
               {(contacts || []).map((contact: any) => (
                 <Box
-                  key={contact._id}
+                  key={contact.id}
                   onClick={() => setSelectedContact(contact)}
                   sx={{
                     p: 1.5,
@@ -63,7 +63,7 @@ export function ChatView() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
-                    bgcolor: selectedContact?._id === contact._id ? 'action.selected' : 'transparent',
+                    bgcolor: selectedContact?.id === contact.id ? 'action.selected' : 'transparent',
                     '&:hover': { bgcolor: 'action.hover' },
                   }}
                 >
@@ -96,9 +96,10 @@ export function ChatView() {
               <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2 }}>
                  <Scrollbar>
                     <Stack spacing={2}>
+                      {messagesLoading && <CircularProgress size={24} />}
                        {(messages || []).map((msg: any) => (
-                         <Box key={msg._id} sx={{ display: 'flex', justifyContent: msg.isMe ? 'flex-end' : 'flex-start' }}>
-                            <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: msg.isMe ? 'primary.main' : 'background.neutral', color: msg.isMe ? 'primary.contrastText' : 'text.primary', maxWidth: '70%' }}>
+                         <Box key={msg.id} sx={{ display: 'flex', justifyContent: msg.senderType === 'user' ? 'flex-end' : 'flex-start' }}>
+                            <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: msg.senderType === 'user' ? 'primary.main' : 'background.neutral', color: msg.senderType === 'user' ? 'primary.contrastText' : 'text.primary', maxWidth: '70%' }}>
                                <Typography variant="body2">{msg.content}</Typography>
                             </Box>
                          </Box>

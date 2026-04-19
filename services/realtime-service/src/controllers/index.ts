@@ -46,6 +46,8 @@ export class LiveChatChannelController {
 
 export class LiveChatMessageController {
   private svc = new LiveChatMessageService();
+  private contactSvc = new LiveChatContactService();
+  private channelSvc = new LiveChatChannelService();
 
   async getChatHistory(req: AuthenticatedRequest, res: Response) {
     try {
@@ -76,7 +78,54 @@ export class LiveChatMessageController {
   }
 
   async getChatsAndContacts(req: AuthenticatedRequest, res: Response) {
-    return res.json({ success: true, data: { chats: [], contacts: [] } });
+    try {
+      const userId = req.identity.userId;
+      const [channels, contacts] = await Promise.all([
+        this.channelSvc.getChannelsByAdminId(userId),
+        this.contactSvc.getContactsByUserId(userId),
+      ]);
+
+      const channelsWithMessages = await Promise.all(
+        channels.map(async (channel) => {
+          const messages = await this.svc.getChatHistory(channel.id, 1);
+          return {
+            ...channel,
+            lastMessage: messages[0] || null,
+          };
+        })
+      );
+
+      const channelByContactId = new Map(
+        channelsWithMessages
+          .filter((channel) => channel.contactId)
+          .map((channel) => [channel.contactId as string, channel])
+      );
+
+      const normalizedContacts = contacts.map((contact) => {
+        const channel = channelByContactId.get(contact.id);
+        return {
+          id: contact.id,
+          channelId: channel?.id || null,
+          fullName: contact.name || contact.email || contact.phone || 'Unknown contact',
+          name: contact.name || null,
+          email: contact.email || null,
+          phone: contact.phone || null,
+          avatar: contact.avatar || null,
+          lastMessage: channel?.lastMessage?.content || null,
+          lastMessageAt: channel?.lastMessage?.createdAt || channel?.updatedAt || contact.updatedAt,
+        };
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          chats: channelsWithMessages,
+          contacts: normalizedContacts,
+        },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
   }
 }
 

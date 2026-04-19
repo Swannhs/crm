@@ -1,0 +1,107 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model LiveChatChannel {
+  id             String    @id @default(uuid()) @db.Uuid
+  adminId        String    @db.Uuid
+  organizationId String?   @db.Uuid
+  contactId      String?   @db.Uuid
+  name           String?
+  type           String    @default("direct")
+  isActive       Boolean   @default(true)
+  lastMessageAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([adminId])
+  @@index([organizationId])
+  @@index([contactId])
+}
+
+model LiveChatMessage {
+  id          String   @id @default(uuid()) @db.Uuid
+  channelId   String   @db.Uuid
+  senderId    String   @db.Uuid
+  senderType  String   @default("user")
+  content     String
+  messageType String   @default("text")
+  metadata    Json?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([channelId])
+  @@index([senderId])
+}
+
+model LiveChatContact {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  organizationId String?  @db.Uuid
+  name           String?
+  email          String?
+  phone          String?
+  avatar         String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model LiveChatWidgetSetting {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId  String?  @db.Uuid
+  widgetName      String?
+  primaryColor    String   @default("#007bff")
+  headerTitle     String   @default("Chat with us")
+  greetingMessage String?
+  offlineMessage  String?
+  position        String   @default("right")
+  showPowerBy     Boolean  @default(true)
+  enabled         Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model LiveChatStatistics {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String?  @db.Uuid
+  totalChats      Int      @default(0)
+  activeChats     Int      @default(0)
+  resolvedChats   Int      @default(0)
+  missedChats     Int      @default(0)
+  avgResponseTime Int      @default(0)
+  date            DateTime @db.Date
+  createdAt       DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([date])
+}
+
+model SocketConnection {
+  id             String    @id @default(uuid()) @db.Uuid
+  socketId       String    @unique
+  userId         String?   @db.Uuid
+  organizationId String?   @db.Uuid
+  contactId      String?   @db.Uuid
+  deviceType     String?
+  metadata       Json?
+  connectedAt    DateTime  @default(now())
+  disconnectedAt DateTime?
+
+  @@index([userId])
+  @@index([organizationId])
+}

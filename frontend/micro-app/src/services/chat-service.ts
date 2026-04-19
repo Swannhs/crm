@@ -3,18 +3,46 @@ import axiosInstance from 'src/utils/axios';
 // ----------------------------------------------------------------------
 
 export async function getContacts() {
-  const response = await axiosInstance.get('/api/chat/v1/contacts');
-  return response.data;
+  const response = await axiosInstance.get('/api/contact/get', { params: { search: '' } });
+  const contacts = Array.isArray(response.data)
+    ? response.data
+    : Array.isArray(response.data?.data)
+      ? response.data.data
+      : Array.isArray(response.data?.contacts)
+        ? response.data.contacts
+        : [];
+
+  return contacts.map((contact: any) => ({
+    id: contact.id || contact._id,
+    fullName: contact.fullName || contact.name || [contact.firstName, contact.lastName].filter(Boolean).join(' ') || contact.email || 'Unknown contact',
+    email: contact.email || null,
+    phone: contact.phone || null,
+    avatar: contact.photo || contact.avatar || null,
+    channelId: null,
+    lastMessage: null,
+  }));
 }
 
-export async function getMessages(contactId: string) {
-  const response = await axiosInstance.get(`/api/chat/v1/messages/${contactId}`);
-  return response.data;
+export async function getMessages(channelId: string) {
+  if (!channelId) return [];
+  const response = await axiosInstance.get(`/api/livechat/chathistory/${channelId}`);
+  const messages = Array.isArray(response.data?.data) ? response.data.data : [];
+
+  return messages
+    .slice()
+    .reverse()
+    .map((message: any) => ({
+      ...message,
+      id: message.id,
+    }));
 }
 
-export async function sendMessage(contactId: string, content: string) {
-  const response = await axiosInstance.post('/api/chat/v1/messages', { contactId, content });
-  return response.data;
+export async function sendMessage(channelId: string, content: string) {
+  if (!channelId) {
+    throw new Error('Chat channel is not available for this contact yet');
+  }
+  const response = await axiosInstance.post('/api/livechat/newmessage', { channelId, content });
+  return response.data?.data ?? response.data;
 }
 
 export const chatService = {

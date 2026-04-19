@@ -1,5 +1,6 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
 import { AppointmentController } from "./controllers/appointment.controller.js";
+import { BookingTypeController } from "./controllers/booking-type.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ 
@@ -8,8 +9,30 @@ const { app, logger } = createServiceApp({
 });
 
 const appointmentController = new AppointmentController();
+const bookingTypeController = new BookingTypeController();
 
 // --- Routes ---
+
+// Booking types
+app.get("/v1/booking-types",
+  identityMiddleware,
+  (req, res) => bookingTypeController.list(req as any, res)
+);
+
+app.post("/v1/booking-types",
+  identityMiddleware,
+  (req, res) => bookingTypeController.create(req as any, res)
+);
+
+app.get("/v1/booking-types-count",
+  identityMiddleware,
+  (req, res) => bookingTypeController.count(req as any, res)
+);
+
+app.get("/v1/booking-types/:link",
+  identityMiddleware,
+  (req, res) => bookingTypeController.getByLink(req as any, res)
+);
 
 // Appointments
 app.get("/v1/appointments", 

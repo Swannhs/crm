@@ -4,7 +4,13 @@ export class BookingTypeRepository {
   async findMany(orgId: string) {
     return db.bookingType.findMany({
       where: { org_id: orgId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { created_at: 'desc' }
+    });
+  }
+
+  async count(orgId: string) {
+    return db.bookingType.count({
+      where: { org_id: orgId }
     });
   }
 
@@ -12,8 +18,13 @@ export class BookingTypeRepository {
     return db.bookingType.findUnique({ where: { id } });
   }
 
-  async findByLink(link: string) {
-    return db.bookingType.findFirst({ where: { link } });
+  async findByLink(orgId: string, link: string) {
+    return db.bookingType.findFirst({
+      where: {
+        org_id: orgId,
+        link
+      }
+    });
   }
 
   async create(data: any) {

@@ -37,7 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       keycloakRef.current = keycloak;
-      window.keycloak = keycloak;
+      (window as any).keycloak = keycloak;
 
       // onLoad: 'check-sso' is the standard SPA approach:
       //   - Automatically processes any ?code in the URL (authorization code exchange)
