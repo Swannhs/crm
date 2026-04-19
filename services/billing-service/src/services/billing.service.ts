@@ -1,5 +1,5 @@
 import { publishJson } from '@mymanager/node-service-kit';
-import type { Invoice, Payment } from '@prisma/client';
+import type { Invoice, Payment } from '../generated/prisma/index.js';
 import { getChannel } from '../amqp.js';
 import { NotFoundError, ValidationError } from '../errors.js';
 import { InvoiceRepository } from '../repositories/invoice.repository.js';

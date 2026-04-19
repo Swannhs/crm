@@ -16,17 +16,17 @@ export type IInvoice = {
 
 export const billingService = {
   getInvoices: async (params?: any) => {
-    const response = await axios.get('/api/invoice/get', { params });
-    return response.data;
+    const response = await axios.get('/api/invoice', { params });
+    return response.data?.data ?? response.data;
   },
 
   getDueStats: async (params?: any) => {
-    const response = await axios.get('/api/invoice/get-due-stats', { params });
+    const response = await axios.get('/api/invoice/due-stats', { params });
     return response.data;
   },
 
   getInvoice: async (id: string) => {
-    const response = await axios.get(`/api/invoice/getById/${id}`);
-    return response.data;
+    const response = await axios.get(`/api/invoice/${id}`);
+    return response.data?.data ?? response.data;
   },
 };

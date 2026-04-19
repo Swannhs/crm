@@ -16,12 +16,13 @@ export type IContact = {
 export const contactService = {
   getContacts: async (params?: any) => {
     const response = await axios.get('/api/contact/get', { params });
-    return response.data;
+    if (Array.isArray(response.data)) return response.data;
+    return response.data?.data ?? response.data?.contacts ?? [];
   },
 
   getContact: async (id: string) => {
     const response = await axios.get(`/api/contact/getById/${id}`);
-    return response.data;
+    return response.data?.data ?? response.data?.contact ?? response.data;
   },
 
   createContact: async (data: any) => {

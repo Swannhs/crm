@@ -6,10 +6,29 @@ import { CONFIG } from 'src/config-global';
 
 const axiosInstance = axios.create({ baseURL: CONFIG.site.serverUrl });
 
+const decodeJwtSub = (token: string | null) => {
+  if (!token) return null;
+
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(atob(normalized));
+    return decoded?.sub || null;
+  } catch {
+    return null;
+  }
+};
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
     const orgId = typeof window !== 'undefined' ? sessionStorage.getItem('organizationId') : null;
+    const userId =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('userId') || decodeJwtSub(accessToken)
+        : null;
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -17,6 +36,10 @@ axiosInstance.interceptors.request.use(
 
     if (orgId) {
       config.headers['X-Org-Id'] = orgId;
+    }
+
+    if (userId) {
+      config.headers['X-User-Id'] = userId;
     }
 
     return config;

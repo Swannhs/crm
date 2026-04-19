@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient } from '../generated/prisma/index.js';
 import { db } from '../db.js';
 
 export class PaymentRepository {

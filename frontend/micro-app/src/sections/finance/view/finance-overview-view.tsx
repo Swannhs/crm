@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
@@ -27,17 +28,12 @@ const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 // ----------------------------------------------------------------------
 
 export function FinanceOverviewView() {
-  const { data: revenueData, isLoading: revenueLoading } = useQuery({
-    queryKey: ['finance-revenue'],
-    queryFn: () => financeService.getRevenueStats(),
-  });
-
   const { data: invoices, isLoading: invoicesLoading } = useQuery({
     queryKey: ['finance-invoices'],
     queryFn: () => financeService.getInvoices(),
   });
 
-  if (revenueLoading || invoicesLoading) {
+  if (invoicesLoading) {
     return (
       <Box sx={{ p: 5, textAlign: 'center' }}>
         <CircularProgress />
@@ -65,7 +61,7 @@ export function FinanceOverviewView() {
             title="Total Revenue"
             total={72450}
             color="success"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.png" />}
+            icon="solar:wallet-money-bold"
           />
         </Grid>
 
@@ -74,7 +70,7 @@ export function FinanceOverviewView() {
             title="Net Profit"
             total={42100}
             color="info"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.png" />}
+            icon="solar:chart-square-bold"
           />
         </Grid>
 
@@ -83,7 +79,7 @@ export function FinanceOverviewView() {
             title="Pending Invoices"
             total={12}
             color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.png" />}
+            icon="solar:bill-list-bold"
           />
         </Grid>
 
@@ -92,7 +88,7 @@ export function FinanceOverviewView() {
             title="Expenses"
             total={15200}
             color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.png" />}
+            icon="solar:card-recive-bold"
           />
         </Grid>
 
@@ -143,12 +139,12 @@ export function FinanceOverviewView() {
                   </TableHead>
                   <TableBody>
                     {(invoices || []).slice(0, 5).map((row: any) => (
-                      <TableRow key={row._id} hover>
-                        <TableCell>{row.invoiceNumber || row._id.slice(0, 8)}</TableCell>
+                      <TableRow key={row.id || row._id} hover>
+                        <TableCell>{row.invoiceNumber || row.no || (row.id || row._id || '').slice(0, 8) || 'N/A'}</TableCell>
                         <TableCell>{row.customerName || 'Syncing...'}</TableCell>
-                        <TableCell>{new Date(row.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell>${row.totalAmount.toFixed(2)}</TableCell>
-                        <TableCell>{row.status}</TableCell>
+                        <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
+                        <TableCell>${(((row.totalAmount ?? row.totalDue) ?? row.amountCents ?? 0) / (row.amountCents != null && row.totalAmount == null && row.totalDue == null ? 100 : 1)).toFixed(2)}</TableCell>
+                        <TableCell>{row.status || 'unknown'}</TableCell>
                       </TableRow>
                     ))}
                     {(invoices || []).length === 0 && (

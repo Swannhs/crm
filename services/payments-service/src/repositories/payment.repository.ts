@@ -19,7 +19,12 @@ export class InvoiceRepository {
   async create(data: any) { return db.invoice.create({ data }); }
   async update(id: string, data: any) { return db.invoice.update({ where: { id }, data }); }
   async groupByStatus(orgId: string) {
-    return db.invoice.groupBy({ by: ["status"], where: { orgId, isDelete: false }, _count: true, _sum: { totalCents: true } });
+    return db.invoice.groupBy({
+      by: ["status"],
+      where: { org_id: orgId, is_delete: false },
+      _count: true,
+      _sum: { total_cents: true },
+    });
   }
 }
 

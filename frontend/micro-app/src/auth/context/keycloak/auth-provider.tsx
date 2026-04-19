@@ -1,9 +1,12 @@
 'use client';
 
 import Keycloak from 'keycloak-js';
-import { useMemo, useEffect, ReactNode, useCallback, useRef } from 'react';
+import { useRef, useMemo, useEffect, ReactNode, useCallback } from 'react';
+
 import { useSetState } from 'src/hooks/use-set-state';
+
 import { CONFIG } from 'src/config-global';
+
 import { AuthContext } from '../auth-context';
 
 // ----------------------------------------------------------------------
@@ -11,6 +14,10 @@ import { AuthContext } from '../auth-context';
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+const ACCESS_TOKEN_KEY = 'accessToken';
+const ORG_ID_KEY = 'organizationId';
+const USER_ID_KEY = 'userId';
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { state, setState } = useSetState({
@@ -65,8 +72,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           org_id: keycloak.tokenParsed?.org_id,
         };
 
-        sessionStorage.setItem('accessToken', keycloak.token || '');
-        sessionStorage.setItem('organizationId', user.org_id || '');
+        sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
+        sessionStorage.setItem(ORG_ID_KEY, user.org_id || '');
+        sessionStorage.setItem(USER_ID_KEY, user.id || '');
 
         setState({ user, loading: false });
       } else {
@@ -98,22 +106,67 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // different pathnames across the app.
       login: () => {
         keycloakRef.current?.login({
-          redirectUri: window.location.origin + '/',
+          redirectUri: `${window.location.origin}/`,
         });
       },
       logout: async () => {
+        const redirectUri = `${window.location.origin}/`;
+
         try {
-          sessionStorage.removeItem('accessToken');
-          sessionStorage.removeItem('organizationId');
-          await keycloakRef.current?.logout({
-            redirectUri: window.location.origin + '/',
-          });
+          setState({ user: null, loading: false });
+          sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+          sessionStorage.removeItem(ORG_ID_KEY);
+          sessionStorage.removeItem(USER_ID_KEY);
+
+          const keycloak = keycloakRef.current;
+          keycloakRef.current = null;
+          initializedRef.current = false;
+
+          if (keycloak?.clearToken) {
+            keycloak.clearToken();
+          }
+
+          if (keycloak?.logout) {
+            await keycloak.logout({ redirectUri });
+            return;
+          }
         } catch (error) {
           console.error('Logout error:', error);
         }
+
+        window.location.replace(redirectUri);
+      },
+      checkUserSession: async () => {
+        try {
+          if (keycloakRef.current?.authenticated && keycloakRef.current.token) {
+            const keycloak = keycloakRef.current;
+            const profile = await keycloak.loadUserProfile();
+            const user = {
+              id: profile.id || keycloak.subject,
+              email: profile.email,
+              fullName: `${profile.firstName} ${profile.lastName}`,
+              username: profile.username,
+              accessToken: keycloak.token,
+              refreshToken: keycloak.refreshToken,
+              role: 'admin',
+              org_id: keycloak.tokenParsed?.org_id,
+            };
+
+            sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
+            sessionStorage.setItem(ORG_ID_KEY, user.org_id || '');
+            sessionStorage.setItem(USER_ID_KEY, user.id || '');
+            setState({ user, loading: false });
+            return;
+          }
+
+          setState({ user: null, loading: false });
+        } catch (error) {
+          console.error('Check session error:', error);
+          setState({ user: null, loading: false });
+        }
       },
     }),
-    [state.user, status]
+    [setState, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

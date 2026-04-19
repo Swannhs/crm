@@ -9,7 +9,9 @@ interface AuthContextType {
   loading: boolean;
   authenticated: boolean;
   unauthenticated: boolean;
-  checkUserSession: () => Promise<void>;
+  checkUserSession?: () => Promise<void>;
+  login?: () => void | Promise<void>;
+  logout?: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

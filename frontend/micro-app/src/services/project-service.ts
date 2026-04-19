@@ -43,12 +43,6 @@ export async function createTask(data: any) {
   return response.data;
 }
 
-// Boards
-export async function getProjectBoards(projectId: string) {
-  const response = await axiosInstance.get(`/api/projects/v1/projects/${projectId}/boards`);
-  return response.data;
-}
-
 export async function createBoard(projectId: string, data: any) {
   const response = await axiosInstance.post(`/api/projects/v1/projects/${projectId}/boards`, data);
   return response.data;
