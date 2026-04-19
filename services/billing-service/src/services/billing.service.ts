@@ -142,6 +142,7 @@ export class BillingService {
           paymentId: payment.id,
           invoiceId,
           orgId,
+          userId,
           amountCents: amount,
         });
       } catch (err) {

@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated-local/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -18,7 +19,9 @@ model Notification {
   body        String?
   is_seen     Boolean   @default(false)
   is_read     Boolean   @default(false)
+  is_archived Boolean   @default(false)
   seen_at     DateTime?
+  archived_at DateTime?
   ref_id      String?   // external reference (e.g. message id)
   ref_type    String?   // type of reference
   metadata    Json      @default("{}")

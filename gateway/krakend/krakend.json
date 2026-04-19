@@ -5545,6 +5545,148 @@
       ]
     },
     {
+      "endpoint": "/api/notification/total",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications/total"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/notification/archive",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id",
+        "Content-Type"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications/archive"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/notification/unarchive",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id",
+        "Content-Type"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications/unarchive"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/notification/mark-seen/{notificationId}/{userId}",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications/mark-seen/{notificationId}/{userId}"
+        }
+      ]
+    },
+    {
       "endpoint": "/api/employees/schedules",
       "method": "GET",
       "input_headers": [
@@ -8695,6 +8837,38 @@
         }
       },
       "backend": [{"host": ["http://automation-service:7110"], "url_pattern": "/v1/workflow-workspace"}]
+    },
+    {
+      "endpoint": "/api/employee-schedule/get-contacts-with-categories-and-shifts",
+      "method": "GET",
+      "input_query_strings": ["*"],
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://employees-service:7070"], "url_pattern": "/v1/employee-schedule/get-contacts-with-categories-and-shifts"}]
+    },
+    {
+      "endpoint": "/api/employee-schedule/get-employee-category-schedule-data",
+      "method": "GET",
+      "input_query_strings": ["*"],
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://employees-service:7070"], "url_pattern": "/v1/employee-schedule/get-employee-category-schedule-data"}]
     },
     {
       "endpoint": "/api/workflow-action/start-action",

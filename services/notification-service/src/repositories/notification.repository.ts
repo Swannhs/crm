@@ -18,7 +18,7 @@ export class NotificationRepository {
   }
 
   async markRead(where: any) {
-    return db.notification.updateMany({ where, data: { is_read: true } });
+    return db.notification.updateMany({ where, data: { is_read: true, is_seen: true, seen_at: new Date() } });
   }
 
   async markSeen(id: string, userId: string) {
@@ -30,8 +30,31 @@ export class NotificationRepository {
 
   async unseenCount(orgId: string, groupId: string, userId: string) {
     return db.notification.count({
-      where: { org_id: orgId, category: groupId, user_id: userId, is_seen: false },
+      where: { org_id: orgId, category: groupId, user_id: userId, is_seen: false, is_archived: false },
     });
+  }
+
+  async archive(where: any) {
+    return db.notification.updateMany({
+      where,
+      data: { is_archived: true, archived_at: new Date() },
+    });
+  }
+
+  async unarchive(where: any) {
+    return db.notification.updateMany({
+      where,
+      data: { is_archived: false, archived_at: null },
+    });
+  }
+
+  async create(data: any) {
+    return db.notification.create({ data });
+  }
+
+  async createMany(data: any[]) {
+    if (!data.length) return { count: 0 };
+    return db.notification.createMany({ data, skipDuplicates: true });
   }
 }
 

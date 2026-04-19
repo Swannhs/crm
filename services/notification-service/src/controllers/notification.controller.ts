@@ -35,6 +35,22 @@ export class NotificationController {
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
 
+  async archive(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { orgId, userId } = req.identity;
+      await this.svc.archive(orgId, userId, req.body.ids);
+      return res.json({ message: 'Archived notifications' });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async unarchive(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { orgId, userId } = req.identity;
+      await this.svc.unarchive(orgId, userId, req.body.ids);
+      return res.json({ message: 'Unarchived notifications' });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
   async markSeen(req: AuthenticatedRequest, res: Response) {
     try {
       await this.svc.markAsSeen(String(req.params.notificationId), String(req.params.userId));
@@ -51,6 +67,10 @@ export class NotificationController {
       );
       return res.json({ data: { count } });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async handleDomainEvent(routingKey: string, payload: any) {
+    return this.svc.createFromDomainEvent(routingKey, payload);
   }
 }
 

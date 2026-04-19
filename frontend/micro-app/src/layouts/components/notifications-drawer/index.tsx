@@ -1,7 +1,8 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { useState, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
@@ -13,6 +14,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -22,20 +24,17 @@ import { varHover } from 'src/components/animate';
 import { Scrollbar } from 'src/components/scrollbar';
 import { CustomTabs } from 'src/components/custom-tabs';
 
+import { notificationService } from 'src/services/notification-service';
+
 import { NotificationItem } from './notification-item';
 
 // ----------------------------------------------------------------------
-
-const TABS = [
-  { value: 'all', label: 'All', count: 22 },
-  { value: 'unread', label: 'Unread', count: 12 },
-  { value: 'archived', label: 'Archived', count: 10 },
-];
 
 // ----------------------------------------------------------------------
 
 export function NotificationsDrawer({ data = [], sx, ...other }) {
   const drawer = useBoolean();
+  const queryClient = useQueryClient();
 
   const [currentTab, setCurrentTab] = useState('all');
 
@@ -43,12 +42,63 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
     setCurrentTab(newValue);
   }, []);
 
-  const [notifications, setNotifications] = useState(data);
+  const { data: totals } = useQuery({
+    queryKey: ['notification-totals'],
+    queryFn: notificationService.getNotificationTotals,
+    refetchInterval: 30000,
+  });
 
-  const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
+  const {
+    data: notifications = [],
+    isLoading,
+  } = useQuery({
+    queryKey: ['notifications', currentTab],
+    queryFn: () =>
+      notificationService.getNotifications({
+        archived: currentTab === 'archived' ? true : false,
+        unread: currentTab === 'unread',
+      }),
+    enabled: drawer.value,
+    initialData: [],
+    refetchInterval: drawer.value ? 30000 : false,
+  });
+
+  const totalUnRead = totals?.unread ?? notifications.filter((item) => !item.isRead && !item.isArchived).length;
+
+  const invalidateNotifications = useCallback(async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+      queryClient.invalidateQueries({ queryKey: ['notification-totals'] }),
+    ]);
+  }, [queryClient]);
+
+  const markReadMutation = useMutation({
+    mutationFn: (ids?: string[]) => notificationService.markNotificationsRead(ids),
+    onSuccess: invalidateNotifications,
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: (ids?: string[]) => notificationService.archiveNotifications(ids),
+    onSuccess: invalidateNotifications,
+  });
+
+  const unarchiveMutation = useMutation({
+    mutationFn: (ids?: string[]) => notificationService.unarchiveNotifications(ids),
+    onSuccess: invalidateNotifications,
+  });
+
+  const tabs = useMemo(
+    () => [
+      { value: 'all', label: 'All', count: totals?.all ?? 0 },
+      { value: 'unread', label: 'Unread', count: totals?.unread ?? 0 },
+      { value: 'archived', label: 'Archived', count: totals?.archived ?? 0 },
+    ],
+    [totals]
+  );
 
   const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map((notification) => ({ ...notification, isUnRead: false })));
+    const unreadIds = notifications.filter((notification) => !notification.isRead).map((notification) => notification.id);
+    markReadMutation.mutate(unreadIds);
   };
 
   const renderHead = (
@@ -77,7 +127,7 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
 
   const renderTabs = (
     <CustomTabs variant="fullWidth" value={currentTab} onChange={handleChangeTab}>
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <Tab
           key={tab.value}
           iconPosition="end"
@@ -103,11 +153,29 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
   const renderList = (
     <Scrollbar>
       <Box component="ul">
-        {notifications?.map((notification) => (
-          <Box component="li" key={notification.id} sx={{ display: 'flex' }}>
-            <NotificationItem notification={notification} />
-          </Box>
-        ))}
+        {isLoading ? (
+          <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
+            <CircularProgress size={28} />
+          </Stack>
+        ) : notifications.length ? (
+          notifications.map((notification) => (
+            <Box component="li" key={notification.id} sx={{ display: 'flex' }}>
+              <NotificationItem
+                notification={notification}
+                onMarkRead={(id) => markReadMutation.mutate([id])}
+                onArchive={(id) => archiveMutation.mutate([id])}
+                onUnarchive={(id) => unarchiveMutation.mutate([id])}
+              />
+            </Box>
+          ))
+        ) : (
+          <Stack spacing={1} alignItems="center" justifyContent="center" sx={{ py: 8, px: 3 }}>
+            <Typography variant="subtitle2">No notifications yet</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
+              New activity from billing, email, SMS, and other product events will show up here.
+            </Typography>
+          </Stack>
+        )}
       </Box>
     </Scrollbar>
   );

@@ -295,7 +295,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.19.3
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
     client: string
@@ -758,6 +758,10 @@ export namespace Prisma {
             args: Prisma.AutomationUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.AutomationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationPayload>[]
+          }
           upsert: {
             args: Prisma.AutomationUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$AutomationPayload>
@@ -827,6 +831,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.WorkflowUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WorkflowUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkflowPayload>[]
           }
           upsert: {
             args: Prisma.WorkflowUpsertArgs<ExtArgs>
@@ -898,6 +906,10 @@ export namespace Prisma {
             args: Prisma.WorkflowNodeUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.WorkflowNodeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkflowNodePayload>[]
+          }
           upsert: {
             args: Prisma.WorkflowNodeUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$WorkflowNodePayload>
@@ -967,6 +979,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.WorkflowWorkspaceUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WorkflowWorkspaceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkflowWorkspacePayload>[]
           }
           upsert: {
             args: Prisma.WorkflowWorkspaceUpsertArgs<ExtArgs>
@@ -1038,6 +1054,10 @@ export namespace Prisma {
             args: Prisma.WorkflowStartActionUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.WorkflowStartActionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkflowStartActionPayload>[]
+          }
           upsert: {
             args: Prisma.WorkflowStartActionUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$WorkflowStartActionPayload>
@@ -1108,6 +1128,10 @@ export namespace Prisma {
             args: Prisma.WorkflowActivityLogUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.WorkflowActivityLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkflowActivityLogPayload>[]
+          }
           upsert: {
             args: Prisma.WorkflowActivityLogUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$WorkflowActivityLogPayload>
@@ -1177,6 +1201,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.WorkflowExecutionHistoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WorkflowExecutionHistoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WorkflowExecutionHistoryPayload>[]
           }
           upsert: {
             args: Prisma.WorkflowExecutionHistoryUpsertArgs<ExtArgs>
@@ -1622,6 +1650,22 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["automation"]>
 
+  export type AutomationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    automationName?: boolean
+    contactInfo?: boolean
+    activationUpon?: boolean
+    activateTime?: boolean
+    userEmail?: boolean
+    userPhone?: boolean
+    userName?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    isActive?: boolean
+    isDelete?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["automation"]>
 
   export type AutomationSelectScalar = {
     id?: boolean
@@ -1864,6 +1908,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends AutomationUpdateManyArgs>(args: SelectSubset<T, AutomationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Automations and returns the data updated in the database.
+     * @param {AutomationUpdateManyAndReturnArgs} args - Arguments to update many Automations.
+     * @example
+     * // Update many Automations
+     * const automation = await prisma.automation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Automations and only return the `id`
+     * const automationWithIdOnly = await prisma.automation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AutomationUpdateManyAndReturnArgs>(args: SelectSubset<T, AutomationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AutomationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Automation.
@@ -2328,6 +2402,36 @@ export namespace Prisma {
      * Filter which Automations to update
      */
     where?: AutomationWhereInput
+    /**
+     * Limit how many Automations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Automation updateManyAndReturn
+   */
+  export type AutomationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Automation
+     */
+    select?: AutomationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Automation
+     */
+    omit?: AutomationOmit<ExtArgs> | null
+    /**
+     * The data used to update Automations.
+     */
+    data: XOR<AutomationUpdateManyMutationInput, AutomationUncheckedUpdateManyInput>
+    /**
+     * Filter which Automations to update
+     */
+    where?: AutomationWhereInput
+    /**
+     * Limit how many Automations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -2382,6 +2486,10 @@ export namespace Prisma {
      * Filter which Automations to delete
      */
     where?: AutomationWhereInput
+    /**
+     * Limit how many Automations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -2681,6 +2789,25 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["workflow"]>
 
+  export type WorkflowSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    workspaceId?: boolean
+    title?: boolean
+    description?: boolean
+    status?: boolean
+    verticalFlow?: boolean
+    creatorType?: boolean
+    isForSystemNotification?: boolean
+    isForUserNotification?: boolean
+    isForClientNotification?: boolean
+    isCopyFromSystemNotification?: boolean
+    parentWorkflowId?: boolean
+    isDeleted?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["workflow"]>
 
   export type WorkflowSelectScalar = {
     id?: boolean
@@ -2929,6 +3056,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends WorkflowUpdateManyArgs>(args: SelectSubset<T, WorkflowUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Workflows and returns the data updated in the database.
+     * @param {WorkflowUpdateManyAndReturnArgs} args - Arguments to update many Workflows.
+     * @example
+     * // Update many Workflows
+     * const workflow = await prisma.workflow.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Workflows and only return the `id`
+     * const workflowWithIdOnly = await prisma.workflow.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WorkflowUpdateManyAndReturnArgs>(args: SelectSubset<T, WorkflowUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Workflow.
@@ -3396,6 +3553,36 @@ export namespace Prisma {
      * Filter which Workflows to update
      */
     where?: WorkflowWhereInput
+    /**
+     * Limit how many Workflows to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Workflow updateManyAndReturn
+   */
+  export type WorkflowUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Workflow
+     */
+    select?: WorkflowSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Workflow
+     */
+    omit?: WorkflowOmit<ExtArgs> | null
+    /**
+     * The data used to update Workflows.
+     */
+    data: XOR<WorkflowUpdateManyMutationInput, WorkflowUncheckedUpdateManyInput>
+    /**
+     * Filter which Workflows to update
+     */
+    where?: WorkflowWhereInput
+    /**
+     * Limit how many Workflows to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3450,6 +3637,10 @@ export namespace Prisma {
      * Filter which Workflows to delete
      */
     where?: WorkflowWhereInput
+    /**
+     * Limit how many Workflows to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -3771,6 +3962,25 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["workflowNode"]>
 
+  export type WorkflowNodeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    workflowId?: boolean
+    key?: boolean
+    data?: boolean
+    type?: boolean
+    source?: boolean
+    height?: boolean
+    width?: boolean
+    position?: boolean
+    positionAbsolute?: boolean
+    sourcePosition?: boolean
+    targetPosition?: boolean
+    isDeleted?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["workflowNode"]>
 
   export type WorkflowNodeSelectScalar = {
     id?: boolean
@@ -4019,6 +4229,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends WorkflowNodeUpdateManyArgs>(args: SelectSubset<T, WorkflowNodeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WorkflowNodes and returns the data updated in the database.
+     * @param {WorkflowNodeUpdateManyAndReturnArgs} args - Arguments to update many WorkflowNodes.
+     * @example
+     * // Update many WorkflowNodes
+     * const workflowNode = await prisma.workflowNode.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WorkflowNodes and only return the `id`
+     * const workflowNodeWithIdOnly = await prisma.workflowNode.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WorkflowNodeUpdateManyAndReturnArgs>(args: SelectSubset<T, WorkflowNodeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowNodePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one WorkflowNode.
@@ -4486,6 +4726,36 @@ export namespace Prisma {
      * Filter which WorkflowNodes to update
      */
     where?: WorkflowNodeWhereInput
+    /**
+     * Limit how many WorkflowNodes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WorkflowNode updateManyAndReturn
+   */
+  export type WorkflowNodeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkflowNode
+     */
+    select?: WorkflowNodeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkflowNode
+     */
+    omit?: WorkflowNodeOmit<ExtArgs> | null
+    /**
+     * The data used to update WorkflowNodes.
+     */
+    data: XOR<WorkflowNodeUpdateManyMutationInput, WorkflowNodeUncheckedUpdateManyInput>
+    /**
+     * Filter which WorkflowNodes to update
+     */
+    where?: WorkflowNodeWhereInput
+    /**
+     * Limit how many WorkflowNodes to update.
+     */
+    limit?: number
   }
 
   /**
@@ -4540,6 +4810,10 @@ export namespace Prisma {
      * Filter which WorkflowNodes to delete
      */
     where?: WorkflowNodeWhereInput
+    /**
+     * Limit how many WorkflowNodes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -4758,6 +5032,16 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["workflowWorkspace"]>
 
+  export type WorkflowWorkspaceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    description?: boolean
+    isDeleted?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["workflowWorkspace"]>
 
   export type WorkflowWorkspaceSelectScalar = {
     id?: boolean
@@ -4988,6 +5272,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends WorkflowWorkspaceUpdateManyArgs>(args: SelectSubset<T, WorkflowWorkspaceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WorkflowWorkspaces and returns the data updated in the database.
+     * @param {WorkflowWorkspaceUpdateManyAndReturnArgs} args - Arguments to update many WorkflowWorkspaces.
+     * @example
+     * // Update many WorkflowWorkspaces
+     * const workflowWorkspace = await prisma.workflowWorkspace.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WorkflowWorkspaces and only return the `id`
+     * const workflowWorkspaceWithIdOnly = await prisma.workflowWorkspace.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WorkflowWorkspaceUpdateManyAndReturnArgs>(args: SelectSubset<T, WorkflowWorkspaceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowWorkspacePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one WorkflowWorkspace.
@@ -5446,6 +5760,36 @@ export namespace Prisma {
      * Filter which WorkflowWorkspaces to update
      */
     where?: WorkflowWorkspaceWhereInput
+    /**
+     * Limit how many WorkflowWorkspaces to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WorkflowWorkspace updateManyAndReturn
+   */
+  export type WorkflowWorkspaceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkflowWorkspace
+     */
+    select?: WorkflowWorkspaceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkflowWorkspace
+     */
+    omit?: WorkflowWorkspaceOmit<ExtArgs> | null
+    /**
+     * The data used to update WorkflowWorkspaces.
+     */
+    data: XOR<WorkflowWorkspaceUpdateManyMutationInput, WorkflowWorkspaceUncheckedUpdateManyInput>
+    /**
+     * Filter which WorkflowWorkspaces to update
+     */
+    where?: WorkflowWorkspaceWhereInput
+    /**
+     * Limit how many WorkflowWorkspaces to update.
+     */
+    limit?: number
   }
 
   /**
@@ -5500,6 +5844,10 @@ export namespace Prisma {
      * Filter which WorkflowWorkspaces to delete
      */
     where?: WorkflowWorkspaceWhereInput
+    /**
+     * Limit how many WorkflowWorkspaces to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5834,6 +6182,32 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["workflowStartAction"]>
 
+  export type WorkflowStartActionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    workflowId?: boolean
+    actionType?: boolean
+    duration?: boolean
+    parentId?: boolean
+    setCustomTime?: boolean
+    useSubscriberTimeZone?: boolean
+    customTime?: boolean
+    subject?: boolean
+    content?: boolean
+    template?: boolean
+    attachments?: boolean
+    condition?: boolean
+    confirmProgress?: boolean
+    notificationTo?: boolean
+    taskContent?: boolean
+    isStart?: boolean
+    isLast?: boolean
+    isCondition?: boolean
+    isException?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["workflowStartAction"]>
 
   export type WorkflowStartActionSelectScalar = {
     id?: boolean
@@ -6096,6 +6470,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends WorkflowStartActionUpdateManyArgs>(args: SelectSubset<T, WorkflowStartActionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WorkflowStartActions and returns the data updated in the database.
+     * @param {WorkflowStartActionUpdateManyAndReturnArgs} args - Arguments to update many WorkflowStartActions.
+     * @example
+     * // Update many WorkflowStartActions
+     * const workflowStartAction = await prisma.workflowStartAction.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WorkflowStartActions and only return the `id`
+     * const workflowStartActionWithIdOnly = await prisma.workflowStartAction.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WorkflowStartActionUpdateManyAndReturnArgs>(args: SelectSubset<T, WorkflowStartActionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowStartActionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one WorkflowStartAction.
@@ -6570,6 +6974,36 @@ export namespace Prisma {
      * Filter which WorkflowStartActions to update
      */
     where?: WorkflowStartActionWhereInput
+    /**
+     * Limit how many WorkflowStartActions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WorkflowStartAction updateManyAndReturn
+   */
+  export type WorkflowStartActionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkflowStartAction
+     */
+    select?: WorkflowStartActionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkflowStartAction
+     */
+    omit?: WorkflowStartActionOmit<ExtArgs> | null
+    /**
+     * The data used to update WorkflowStartActions.
+     */
+    data: XOR<WorkflowStartActionUpdateManyMutationInput, WorkflowStartActionUncheckedUpdateManyInput>
+    /**
+     * Filter which WorkflowStartActions to update
+     */
+    where?: WorkflowStartActionWhereInput
+    /**
+     * Limit how many WorkflowStartActions to update.
+     */
+    limit?: number
   }
 
   /**
@@ -6624,6 +7058,10 @@ export namespace Prisma {
      * Filter which WorkflowStartActions to delete
      */
     where?: WorkflowStartActionWhereInput
+    /**
+     * Limit how many WorkflowStartActions to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -6847,6 +7285,17 @@ export namespace Prisma {
     createdAt?: boolean
   }, ExtArgs["result"]["workflowActivityLog"]>
 
+  export type WorkflowActivityLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    workflowId?: boolean
+    contactId?: boolean
+    nodeId?: boolean
+    action?: boolean
+    details?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["workflowActivityLog"]>
 
   export type WorkflowActivityLogSelectScalar = {
     id?: boolean
@@ -7079,6 +7528,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends WorkflowActivityLogUpdateManyArgs>(args: SelectSubset<T, WorkflowActivityLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WorkflowActivityLogs and returns the data updated in the database.
+     * @param {WorkflowActivityLogUpdateManyAndReturnArgs} args - Arguments to update many WorkflowActivityLogs.
+     * @example
+     * // Update many WorkflowActivityLogs
+     * const workflowActivityLog = await prisma.workflowActivityLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WorkflowActivityLogs and only return the `id`
+     * const workflowActivityLogWithIdOnly = await prisma.workflowActivityLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WorkflowActivityLogUpdateManyAndReturnArgs>(args: SelectSubset<T, WorkflowActivityLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowActivityLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one WorkflowActivityLog.
@@ -7538,6 +8017,36 @@ export namespace Prisma {
      * Filter which WorkflowActivityLogs to update
      */
     where?: WorkflowActivityLogWhereInput
+    /**
+     * Limit how many WorkflowActivityLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WorkflowActivityLog updateManyAndReturn
+   */
+  export type WorkflowActivityLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkflowActivityLog
+     */
+    select?: WorkflowActivityLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkflowActivityLog
+     */
+    omit?: WorkflowActivityLogOmit<ExtArgs> | null
+    /**
+     * The data used to update WorkflowActivityLogs.
+     */
+    data: XOR<WorkflowActivityLogUpdateManyMutationInput, WorkflowActivityLogUncheckedUpdateManyInput>
+    /**
+     * Filter which WorkflowActivityLogs to update
+     */
+    where?: WorkflowActivityLogWhereInput
+    /**
+     * Limit how many WorkflowActivityLogs to update.
+     */
+    limit?: number
   }
 
   /**
@@ -7592,6 +8101,10 @@ export namespace Prisma {
      * Filter which WorkflowActivityLogs to delete
      */
     where?: WorkflowActivityLogWhereInput
+    /**
+     * Limit how many WorkflowActivityLogs to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -7828,6 +8341,18 @@ export namespace Prisma {
     createdAt?: boolean
   }, ExtArgs["result"]["workflowExecutionHistory"]>
 
+  export type WorkflowExecutionHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    workflowId?: boolean
+    contactId?: boolean
+    status?: boolean
+    startedAt?: boolean
+    completedAt?: boolean
+    errorMessage?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["workflowExecutionHistory"]>
 
   export type WorkflowExecutionHistorySelectScalar = {
     id?: boolean
@@ -8062,6 +8587,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends WorkflowExecutionHistoryUpdateManyArgs>(args: SelectSubset<T, WorkflowExecutionHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WorkflowExecutionHistories and returns the data updated in the database.
+     * @param {WorkflowExecutionHistoryUpdateManyAndReturnArgs} args - Arguments to update many WorkflowExecutionHistories.
+     * @example
+     * // Update many WorkflowExecutionHistories
+     * const workflowExecutionHistory = await prisma.workflowExecutionHistory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WorkflowExecutionHistories and only return the `id`
+     * const workflowExecutionHistoryWithIdOnly = await prisma.workflowExecutionHistory.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WorkflowExecutionHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, WorkflowExecutionHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WorkflowExecutionHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one WorkflowExecutionHistory.
@@ -8522,6 +9077,36 @@ export namespace Prisma {
      * Filter which WorkflowExecutionHistories to update
      */
     where?: WorkflowExecutionHistoryWhereInput
+    /**
+     * Limit how many WorkflowExecutionHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WorkflowExecutionHistory updateManyAndReturn
+   */
+  export type WorkflowExecutionHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WorkflowExecutionHistory
+     */
+    select?: WorkflowExecutionHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WorkflowExecutionHistory
+     */
+    omit?: WorkflowExecutionHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to update WorkflowExecutionHistories.
+     */
+    data: XOR<WorkflowExecutionHistoryUpdateManyMutationInput, WorkflowExecutionHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which WorkflowExecutionHistories to update
+     */
+    where?: WorkflowExecutionHistoryWhereInput
+    /**
+     * Limit how many WorkflowExecutionHistories to update.
+     */
+    limit?: number
   }
 
   /**
@@ -8576,6 +9161,10 @@ export namespace Prisma {
      * Filter which WorkflowExecutionHistories to delete
      */
     where?: WorkflowExecutionHistoryWhereInput
+    /**
+     * Limit how many WorkflowExecutionHistories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -8812,6 +9401,13 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -10429,12 +11025,13 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -10562,12 +11159,13 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -11168,12 +11766,13 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>

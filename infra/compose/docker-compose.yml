@@ -278,7 +278,7 @@ services:
       PORT: 7010
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://organization:organization@organization-db:5432/organization
-    command: sh -c "npx --no-install prisma generate && npx --no-install prisma db push --skip-generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - organization-db
@@ -295,7 +295,7 @@ services:
       PORT: 7020
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://billing:billing@billing-db:5432/billing
-    command: sh -c "npx --no-install prisma generate && npx --no-install prisma db push --skip-generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - billing-db
@@ -312,7 +312,7 @@ services:
       PORT: 7040
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://booking:booking@booking-db:5432/booking
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - booking-db
@@ -341,7 +341,7 @@ services:
       PORT: 7050
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://community:community@community-db:5432/community
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - community-db
@@ -358,7 +358,7 @@ services:
       PORT: 7060
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://commerce:commerce@commerce-db:5432/commerce
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - commerce-db
@@ -375,7 +375,7 @@ services:
       PORT: 7080
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://documents:documents@documents-db:5432/documents
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - documents-db
@@ -392,7 +392,7 @@ services:
       PORT: 7090
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://payments:payments@payments-db:5432/payments
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - payments-db
@@ -410,7 +410,7 @@ services:
       PORT: 8000
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://notification:notification@notification-db:5432/notification
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     ports:
       - "8000:8000"
     depends_on:
@@ -427,7 +427,7 @@ services:
       PORT: 7070
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://employees:employees@employees-db:5432/employees
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - employees-db
@@ -567,7 +567,7 @@ services:
       PORT: 7110
       RABBITMQ_URL: amqp://rabbitmq:5672
       DB_URL: postgres://automation:automation@automation-db:5432/automation
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
+    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
       - rabbitmq
       - automation-db

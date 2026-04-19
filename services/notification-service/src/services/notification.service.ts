@@ -15,11 +15,31 @@ export class NotificationService {
     const limit = parseInt(filters.limit || '30');
     const where: any = { org_id: orgId, user_id: userId };
     if (filters.category) where.category = filters.category;
+    if (filters.archived === 'true') {
+      where.is_archived = true;
+    } else if (filters.archived === 'false' || !filters.archived) {
+      where.is_archived = false;
+    }
+    if (filters.unread === 'true') {
+      where.is_read = false;
+    }
     return this.repo.findMany(where, (page - 1) * limit, limit);
   }
 
   async getUnreadTotals(orgId: string, userId: string) {
-    return this.repo.groupByCategory(orgId, userId);
+    const [all, unread, archived, grouped] = await Promise.all([
+      this.repo.findMany({ org_id: orgId, user_id: userId }, 0, 200),
+      this.repo.findMany({ org_id: orgId, user_id: userId, is_read: false, is_archived: false }, 0, 200),
+      this.repo.findMany({ org_id: orgId, user_id: userId, is_archived: true }, 0, 200),
+      this.repo.groupByCategory(orgId, userId),
+    ]);
+
+    return {
+      all: all.total,
+      unread: unread.total,
+      archived: archived.total,
+      categories: grouped,
+    };
   }
 
   async markAsRead(orgId: string, userId: string, ids?: string[]) {
@@ -28,12 +48,71 @@ export class NotificationService {
     return this.repo.markRead(where);
   }
 
+  async archive(orgId: string, userId: string, ids?: string[]) {
+    const where: any = { org_id: orgId, user_id: userId };
+    if (ids?.length) where.id = { in: ids };
+    return this.repo.archive(where);
+  }
+
+  async unarchive(orgId: string, userId: string, ids?: string[]) {
+    const where: any = { org_id: orgId, user_id: userId };
+    if (ids?.length) where.id = { in: ids };
+    return this.repo.unarchive(where);
+  }
+
   async markAsSeen(notificationId: string, userId: string) {
     return this.repo.markSeen(notificationId, userId);
   }
 
   async getUnseenCount(orgId: string, groupId: string, userId: string) {
     return this.repo.unseenCount(orgId, groupId, userId);
+  }
+
+  async createNotification(data: {
+    orgId: string;
+    userId: string;
+    type?: string;
+    category?: string | null;
+    title?: string | null;
+    body?: string | null;
+    refId?: string | null;
+    refType?: string | null;
+    metadata?: Record<string, unknown>;
+  }) {
+    return this.repo.create({
+      org_id: data.orgId,
+      user_id: data.userId,
+      type: data.type || 'system',
+      category: data.category || 'system',
+      title: data.title || '',
+      body: data.body || '',
+      ref_id: data.refId || null,
+      ref_type: data.refType || null,
+      metadata: data.metadata || {},
+    });
+  }
+
+  async createFromDomainEvent(routingKey: string, payload: any) {
+    if (routingKey === 'billing.payment.recorded' && payload?.orgId) {
+      const userId = String(payload.userId || payload.createdByUserId || '');
+      if (!userId) return null;
+
+      const amount = Number(payload.amountCents || 0) / 100;
+
+      return this.createNotification({
+        orgId: String(payload.orgId),
+        userId,
+        type: 'payment',
+        category: 'payment',
+        title: 'Payment recorded',
+        body: amount > 0 ? `A payment of $${amount.toFixed(2)} was recorded.` : 'A payment was recorded.',
+        refId: payload.paymentId || payload.invoiceId || null,
+        refType: payload.paymentId ? 'payment' : 'invoice',
+        metadata: payload,
+      });
+    }
+
+    return null;
   }
 }
 
@@ -65,6 +144,7 @@ export class DeviceTokenService {
 
 export class EmailMessageService {
   private repo = new EmailMessageRepository();
+  private notificationRepo = new NotificationRepository();
 
   async getMessages(orgId: string, filters: any) {
     const page = parseInt(filters.page || '1');
@@ -83,11 +163,28 @@ export class EmailMessageService {
   }
 
   async createMessage(orgId: string, userId: string, data: any) {
-    return this.repo.create({
+    const message = await this.repo.create({
       org_id: orgId, created_by: userId, subject: data.subject, body: data.body,
       to: data.to || [], cc: data.cc || [], bcc: data.bcc || [],
       from_email: data.from_email, from_name: data.from_name, metadata: data.metadata || {}
     });
+
+    await this.notificationRepo.create({
+      org_id: orgId,
+      user_id: userId,
+      type: 'mail',
+      category: 'communication',
+      title: data.subject || 'Email drafted',
+      body: data.body || '',
+      ref_id: message.id,
+      ref_type: 'email-message',
+      metadata: {
+        to: data.to || [],
+        from_name: data.from_name || null,
+      },
+    });
+
+    return message;
   }
 
   async markAsSent(id: string, orgId: string) {
@@ -103,6 +200,7 @@ export class EmailMessageService {
 
 export class SmsService {
   private repo = new SmsRepository();
+  private notificationRepo = new NotificationRepository();
 
   async getMessages(orgId: string, filters: any) {
     const page = parseInt(filters.page || '1');
@@ -111,7 +209,19 @@ export class SmsService {
   }
 
   async sendSms(orgId: string, userId: string, to: string, body: string) {
-    return this.repo.create({ org_id: orgId, created_by: userId, to, body });
+    const sms = await this.repo.create({ org_id: orgId, created_by: userId, to, body });
+    await this.notificationRepo.create({
+      org_id: orgId,
+      user_id: userId,
+      type: 'chat',
+      category: 'communication',
+      title: 'SMS queued',
+      body,
+      ref_id: sms.id,
+      ref_type: 'sms-message',
+      metadata: { to },
+    });
+    return sms;
   }
 }
 

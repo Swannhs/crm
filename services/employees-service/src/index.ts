@@ -14,6 +14,8 @@ const payCtrl = new PayrollController();
 app.get("/v1/employees", auth, (req, res) => empCtrl.list(cast(req), res));
 app.get("/v1/employees/:id", auth, (req, res) => empCtrl.get(cast(req), res));
 app.post("/v1/employees", auth, (req, res) => empCtrl.create(cast(req), res));
+app.get("/v1/employee-schedule/get-contacts-with-categories-and-shifts", auth, (req, res) => empCtrl.getContactsWithCategoriesAndShifts(cast(req), res));
+app.get("/v1/employee-schedule/get-employee-category-schedule-data", auth, (req, res) => empCtrl.getContactsWithCategoriesAndShifts(cast(req), res));
 
 app.get("/v1/shifts", auth, (req, res) => shiftCtrl.list(cast(req), res));
 app.post("/v1/shifts", auth, (req, res) => shiftCtrl.create(cast(req), res));

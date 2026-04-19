@@ -24,6 +24,8 @@ app.get("/v1/notifications/total", auth, (req, res) => notifCtrl.totals(cast(req
 app.get("/v1/notifications/unseen-count/:groupId/:userId", auth, (req, res) => notifCtrl.unseenCount(cast(req), res));
 app.post("/v1/notifications/mark-seen/:notificationId/:userId", auth, (req, res) => notifCtrl.markSeen(cast(req), res));
 app.post("/v1/notifications/read", auth, (req, res) => notifCtrl.markRead(cast(req), res));
+app.post("/v1/notifications/archive", auth, (req, res) => notifCtrl.archive(cast(req), res));
+app.post("/v1/notifications/unarchive", auth, (req, res) => notifCtrl.unarchive(cast(req), res));
 
 // --- Notification Settings ---
 app.get("/v1/notifications/settings", auth, (req, res) => settingsCtrl.get(cast(req), res));
@@ -63,7 +65,8 @@ async function startAmqp() {
   await ch.consume(queue, async (msg: any) => {
     if (!msg) return;
     try {
-      JSON.parse(msg.content.toString("utf8"));
+      const payload = JSON.parse(msg.content.toString("utf8"));
+      await notifCtrl.handleDomainEvent(msg.fields.routingKey, payload);
       logger.info({ routingKey: msg.fields.routingKey }, "domain event received");
     } catch (err) {
       logger.error({ err, routingKey: msg.fields.routingKey }, "Failed to process domain event");
