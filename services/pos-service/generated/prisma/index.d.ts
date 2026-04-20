@@ -250,7 +250,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.19.3
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
     client: string
@@ -710,6 +710,10 @@ export namespace Prisma {
             args: Prisma.PosSettingUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.PosSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>[]
+          }
           upsert: {
             args: Prisma.PosSettingUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$PosSettingPayload>
@@ -779,6 +783,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.PosTableUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PosTableUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosTablePayload>[]
           }
           upsert: {
             args: Prisma.PosTableUpsertArgs<ExtArgs>
@@ -850,6 +858,10 @@ export namespace Prisma {
             args: Prisma.PosTableModeUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.PosTableModeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosTableModePayload>[]
+          }
           upsert: {
             args: Prisma.PosTableModeUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$PosTableModePayload>
@@ -919,6 +931,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.PosTableOrderUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PosTableOrderUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PosTableOrderPayload>[]
           }
           upsert: {
             args: Prisma.PosTableOrderUpsertArgs<ExtArgs>
@@ -1432,6 +1448,23 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["posSetting"]>
 
+  export type PosSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shopId?: boolean
+    organizationId?: boolean
+    numberPadFirstValue?: boolean
+    numberPadSecondValue?: boolean
+    numberPadThirdValue?: boolean
+    configureTipFirstPercentage?: boolean
+    configureTipSecondPercentage?: boolean
+    configureTipThirdPercentage?: boolean
+    configureTipFourthPercentage?: boolean
+    cfd?: boolean
+    cfdSettings?: boolean
+    tipShifts?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["posSetting"]>
 
   export type PosSettingSelectScalar = {
     id?: boolean
@@ -1676,6 +1709,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends PosSettingUpdateManyArgs>(args: SelectSubset<T, PosSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosSettings and returns the data updated in the database.
+     * @param {PosSettingUpdateManyAndReturnArgs} args - Arguments to update many PosSettings.
+     * @example
+     * // Update many PosSettings
+     * const posSetting = await prisma.posSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PosSettings and only return the `id`
+     * const posSettingWithIdOnly = await prisma.posSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PosSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, PosSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one PosSetting.
@@ -2141,6 +2204,36 @@ export namespace Prisma {
      * Filter which PosSettings to update
      */
     where?: PosSettingWhereInput
+    /**
+     * Limit how many PosSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PosSetting updateManyAndReturn
+   */
+  export type PosSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosSetting
+     */
+    select?: PosSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PosSetting
+     */
+    omit?: PosSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update PosSettings.
+     */
+    data: XOR<PosSettingUpdateManyMutationInput, PosSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which PosSettings to update
+     */
+    where?: PosSettingWhereInput
+    /**
+     * Limit how many PosSettings to update.
+     */
+    limit?: number
   }
 
   /**
@@ -2195,6 +2288,10 @@ export namespace Prisma {
      * Filter which PosSettings to delete
      */
     where?: PosSettingWhereInput
+    /**
+     * Limit how many PosSettings to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -2468,6 +2565,23 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["posTable"]>
 
+  export type PosTableSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    shopId?: boolean
+    roomId?: boolean
+    serverId?: boolean
+    tableName?: boolean
+    tableShape?: boolean
+    tableLink?: boolean
+    tableColor?: boolean
+    tableDimension?: boolean
+    seats?: boolean
+    isDeleted?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["posTable"]>
 
   export type PosTableSelectScalar = {
     id?: boolean
@@ -2712,6 +2826,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends PosTableUpdateManyArgs>(args: SelectSubset<T, PosTableUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosTables and returns the data updated in the database.
+     * @param {PosTableUpdateManyAndReturnArgs} args - Arguments to update many PosTables.
+     * @example
+     * // Update many PosTables
+     * const posTable = await prisma.posTable.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PosTables and only return the `id`
+     * const posTableWithIdOnly = await prisma.posTable.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PosTableUpdateManyAndReturnArgs>(args: SelectSubset<T, PosTableUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosTablePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one PosTable.
@@ -3177,6 +3321,36 @@ export namespace Prisma {
      * Filter which PosTables to update
      */
     where?: PosTableWhereInput
+    /**
+     * Limit how many PosTables to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PosTable updateManyAndReturn
+   */
+  export type PosTableUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosTable
+     */
+    select?: PosTableSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PosTable
+     */
+    omit?: PosTableOmit<ExtArgs> | null
+    /**
+     * The data used to update PosTables.
+     */
+    data: XOR<PosTableUpdateManyMutationInput, PosTableUncheckedUpdateManyInput>
+    /**
+     * Filter which PosTables to update
+     */
+    where?: PosTableWhereInput
+    /**
+     * Limit how many PosTables to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3231,6 +3405,10 @@ export namespace Prisma {
      * Filter which PosTables to delete
      */
     where?: PosTableWhereInput
+    /**
+     * Limit how many PosTables to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -3515,6 +3693,20 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["posTableMode"]>
 
+  export type PosTableModeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    shopId?: boolean
+    organizationId?: boolean
+    tableNo?: boolean
+    guestCount?: boolean
+    orderState?: boolean
+    serverId?: boolean
+    seats?: boolean
+    sendTime?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["posTableMode"]>
 
   export type PosTableModeSelectScalar = {
     id?: boolean
@@ -3753,6 +3945,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends PosTableModeUpdateManyArgs>(args: SelectSubset<T, PosTableModeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosTableModes and returns the data updated in the database.
+     * @param {PosTableModeUpdateManyAndReturnArgs} args - Arguments to update many PosTableModes.
+     * @example
+     * // Update many PosTableModes
+     * const posTableMode = await prisma.posTableMode.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PosTableModes and only return the `id`
+     * const posTableModeWithIdOnly = await prisma.posTableMode.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PosTableModeUpdateManyAndReturnArgs>(args: SelectSubset<T, PosTableModeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosTableModePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one PosTableMode.
@@ -4215,6 +4437,36 @@ export namespace Prisma {
      * Filter which PosTableModes to update
      */
     where?: PosTableModeWhereInput
+    /**
+     * Limit how many PosTableModes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PosTableMode updateManyAndReturn
+   */
+  export type PosTableModeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosTableMode
+     */
+    select?: PosTableModeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PosTableMode
+     */
+    omit?: PosTableModeOmit<ExtArgs> | null
+    /**
+     * The data used to update PosTableModes.
+     */
+    data: XOR<PosTableModeUpdateManyMutationInput, PosTableModeUncheckedUpdateManyInput>
+    /**
+     * Filter which PosTableModes to update
+     */
+    where?: PosTableModeWhereInput
+    /**
+     * Limit how many PosTableModes to update.
+     */
+    limit?: number
   }
 
   /**
@@ -4269,6 +4521,10 @@ export namespace Prisma {
      * Filter which PosTableModes to delete
      */
     where?: PosTableModeWhereInput
+    /**
+     * Limit how many PosTableModes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -4519,6 +4775,20 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["posTableOrder"]>
 
+  export type PosTableOrderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tableId?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    shopId?: boolean
+    roomId?: boolean
+    tableName?: boolean
+    seats?: boolean
+    orderStatus?: boolean
+    isDelete?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["posTableOrder"]>
 
   export type PosTableOrderSelectScalar = {
     id?: boolean
@@ -4757,6 +5027,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends PosTableOrderUpdateManyArgs>(args: SelectSubset<T, PosTableOrderUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PosTableOrders and returns the data updated in the database.
+     * @param {PosTableOrderUpdateManyAndReturnArgs} args - Arguments to update many PosTableOrders.
+     * @example
+     * // Update many PosTableOrders
+     * const posTableOrder = await prisma.posTableOrder.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PosTableOrders and only return the `id`
+     * const posTableOrderWithIdOnly = await prisma.posTableOrder.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PosTableOrderUpdateManyAndReturnArgs>(args: SelectSubset<T, PosTableOrderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PosTableOrderPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one PosTableOrder.
@@ -5219,6 +5519,36 @@ export namespace Prisma {
      * Filter which PosTableOrders to update
      */
     where?: PosTableOrderWhereInput
+    /**
+     * Limit how many PosTableOrders to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PosTableOrder updateManyAndReturn
+   */
+  export type PosTableOrderUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PosTableOrder
+     */
+    select?: PosTableOrderSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PosTableOrder
+     */
+    omit?: PosTableOrderOmit<ExtArgs> | null
+    /**
+     * The data used to update PosTableOrders.
+     */
+    data: XOR<PosTableOrderUpdateManyMutationInput, PosTableOrderUncheckedUpdateManyInput>
+    /**
+     * Filter which PosTableOrders to update
+     */
+    where?: PosTableOrderWhereInput
+    /**
+     * Limit how many PosTableOrders to update.
+     */
+    limit?: number
   }
 
   /**
@@ -5273,6 +5603,10 @@ export namespace Prisma {
      * Filter which PosTableOrders to delete
      */
     where?: PosTableOrderWhereInput
+    /**
+     * Limit how many PosTableOrders to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5467,6 +5801,13 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -6394,12 +6735,13 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -6556,12 +6898,13 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -7009,12 +7352,13 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>

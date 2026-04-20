@@ -1,4 +1,6 @@
-import { ContactDetailsView } from 'src/sections/contacts/view/contact-details-view';
+import { redirect } from 'next/navigation';
+
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
@@ -13,7 +15,5 @@ type Props = {
 };
 
 export default function Page({ params }: Props) {
-  const { id } = params;
-
-  return <ContactDetailsView id={id} />;
+  redirect(paths.dashboard.contactView(params.id, 'overview'));
 }

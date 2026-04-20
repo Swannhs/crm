@@ -8,9 +8,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Menu from '@mui/material/Menu';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TextField from '@mui/material/TextField';
@@ -36,6 +38,7 @@ import { contactService } from 'src/services/contact-service';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { Form, RHFTextField } from 'src/components/hook-form';
+import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
 
@@ -57,6 +60,8 @@ export const NewContactSchema = zod.object({
 
 export function ContactListView() {
   const [search, setSearch] = useState('');
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const router = useRouter();
   const quickEdit = useBoolean();
 
@@ -84,14 +89,36 @@ export function ContactListView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await contactService.createContact(data);
+      const created = await contactService.createContact(data);
+      const createdId = created?._id ?? created?.id;
       reset();
       quickEdit.onFalse();
-      refetch();
+      await refetch();
+      showToast({ message: 'Contact created successfully.', severity: 'success' });
+
+      if (createdId) {
+        router.push(paths.dashboard.contactView(createdId, 'overview'));
+      }
     } catch (error) {
       console.error(error);
     }
   });
+
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, contactId: string) => {
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedContactId(contactId);
+  };
+
+  const handleCloseMenu = () => {
+    setMenuAnchorEl(null);
+    setSelectedContactId(null);
+  };
+
+  const handleOpenContact = (mode: string = 'overview') => {
+    if (!selectedContactId) return;
+    router.push(paths.dashboard.contactView(selectedContactId, mode));
+    handleCloseMenu();
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -150,7 +177,7 @@ export function ContactListView() {
                         <TableCell>
                           <Typography
                             variant="subtitle2"
-                            onClick={() => router.push(paths.dashboard.contact(row._id))}
+                            onClick={() => router.push(paths.dashboard.contactView(row._id, 'overview'))}
                             sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                           >
                             {row.fullName}
@@ -160,8 +187,8 @@ export function ContactListView() {
                         <TableCell>{row.phone}</TableCell>
                         <TableCell>{row.status}</TableCell>
                         <TableCell align="right">
-                          <IconButton onClick={() => router.push(paths.dashboard.contact(row._id))}>
-                            <Iconify icon="eva:arrow-ios-forward-fill" />
+                          <IconButton onClick={(event) => handleOpenMenu(event, row._id)}>
+                            <Iconify icon="solar:menu-dots-bold" />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -181,6 +208,19 @@ export function ContactListView() {
           </Scrollbar>
         </TableContainer>
       </Card>
+
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleCloseMenu}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MenuItem onClick={() => handleOpenContact('overview')}>View details</MenuItem>
+        <MenuItem onClick={() => handleOpenContact('invoices')}>View invoices</MenuItem>
+        <MenuItem onClick={() => handleOpenContact('notes')}>View notes</MenuItem>
+        <MenuItem onClick={() => handleOpenContact('tasks')}>View tasks</MenuItem>
+      </Menu>
 
       <Dialog fullWidth maxWidth="sm" open={quickEdit.value} onClose={quickEdit.onFalse}>
         <Form methods={methods} onSubmit={onSubmit}>

@@ -5147,6 +5147,41 @@
       ]
     },
     {
+      "endpoint": "/api/notifications",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://notification-service:8000"
+          ],
+          "url_pattern": "/v1/notifications"
+        }
+      ]
+    },
+    {
       "endpoint": "/api/notification",
       "method": "GET",
       "input_headers": [

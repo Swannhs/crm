@@ -280,7 +280,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.19.3
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
     client: string
@@ -742,6 +742,10 @@ export namespace Prisma {
             args: Prisma.LiveChatChannelUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.LiveChatChannelUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LiveChatChannelPayload>[]
+          }
           upsert: {
             args: Prisma.LiveChatChannelUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$LiveChatChannelPayload>
@@ -811,6 +815,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.LiveChatMessageUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LiveChatMessageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LiveChatMessagePayload>[]
           }
           upsert: {
             args: Prisma.LiveChatMessageUpsertArgs<ExtArgs>
@@ -882,6 +890,10 @@ export namespace Prisma {
             args: Prisma.LiveChatContactUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.LiveChatContactUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LiveChatContactPayload>[]
+          }
           upsert: {
             args: Prisma.LiveChatContactUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$LiveChatContactPayload>
@@ -951,6 +963,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.LiveChatWidgetSettingUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LiveChatWidgetSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LiveChatWidgetSettingPayload>[]
           }
           upsert: {
             args: Prisma.LiveChatWidgetSettingUpsertArgs<ExtArgs>
@@ -1022,6 +1038,10 @@ export namespace Prisma {
             args: Prisma.LiveChatStatisticsUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.LiveChatStatisticsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LiveChatStatisticsPayload>[]
+          }
           upsert: {
             args: Prisma.LiveChatStatisticsUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$LiveChatStatisticsPayload>
@@ -1091,6 +1111,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.SocketConnectionUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SocketConnectionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SocketConnectionPayload>[]
           }
           upsert: {
             args: Prisma.SocketConnectionUpsertArgs<ExtArgs>
@@ -1511,6 +1535,18 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["liveChatChannel"]>
 
+  export type LiveChatChannelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    adminId?: boolean
+    organizationId?: boolean
+    contactId?: boolean
+    name?: boolean
+    type?: boolean
+    isActive?: boolean
+    lastMessageAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["liveChatChannel"]>
 
   export type LiveChatChannelSelectScalar = {
     id?: boolean
@@ -1745,6 +1781,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends LiveChatChannelUpdateManyArgs>(args: SelectSubset<T, LiveChatChannelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LiveChatChannels and returns the data updated in the database.
+     * @param {LiveChatChannelUpdateManyAndReturnArgs} args - Arguments to update many LiveChatChannels.
+     * @example
+     * // Update many LiveChatChannels
+     * const liveChatChannel = await prisma.liveChatChannel.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LiveChatChannels and only return the `id`
+     * const liveChatChannelWithIdOnly = await prisma.liveChatChannel.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LiveChatChannelUpdateManyAndReturnArgs>(args: SelectSubset<T, LiveChatChannelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LiveChatChannelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one LiveChatChannel.
@@ -2205,6 +2271,36 @@ export namespace Prisma {
      * Filter which LiveChatChannels to update
      */
     where?: LiveChatChannelWhereInput
+    /**
+     * Limit how many LiveChatChannels to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LiveChatChannel updateManyAndReturn
+   */
+  export type LiveChatChannelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LiveChatChannel
+     */
+    select?: LiveChatChannelSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LiveChatChannel
+     */
+    omit?: LiveChatChannelOmit<ExtArgs> | null
+    /**
+     * The data used to update LiveChatChannels.
+     */
+    data: XOR<LiveChatChannelUpdateManyMutationInput, LiveChatChannelUncheckedUpdateManyInput>
+    /**
+     * Filter which LiveChatChannels to update
+     */
+    where?: LiveChatChannelWhereInput
+    /**
+     * Limit how many LiveChatChannels to update.
+     */
+    limit?: number
   }
 
   /**
@@ -2259,6 +2355,10 @@ export namespace Prisma {
      * Filter which LiveChatChannels to delete
      */
     where?: LiveChatChannelWhereInput
+    /**
+     * Limit how many LiveChatChannels to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -2482,6 +2582,17 @@ export namespace Prisma {
     createdAt?: boolean
   }, ExtArgs["result"]["liveChatMessage"]>
 
+  export type LiveChatMessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    channelId?: boolean
+    senderId?: boolean
+    senderType?: boolean
+    content?: boolean
+    messageType?: boolean
+    metadata?: boolean
+    isRead?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["liveChatMessage"]>
 
   export type LiveChatMessageSelectScalar = {
     id?: boolean
@@ -2714,6 +2825,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends LiveChatMessageUpdateManyArgs>(args: SelectSubset<T, LiveChatMessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LiveChatMessages and returns the data updated in the database.
+     * @param {LiveChatMessageUpdateManyAndReturnArgs} args - Arguments to update many LiveChatMessages.
+     * @example
+     * // Update many LiveChatMessages
+     * const liveChatMessage = await prisma.liveChatMessage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LiveChatMessages and only return the `id`
+     * const liveChatMessageWithIdOnly = await prisma.liveChatMessage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LiveChatMessageUpdateManyAndReturnArgs>(args: SelectSubset<T, LiveChatMessageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LiveChatMessagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one LiveChatMessage.
@@ -3173,6 +3314,36 @@ export namespace Prisma {
      * Filter which LiveChatMessages to update
      */
     where?: LiveChatMessageWhereInput
+    /**
+     * Limit how many LiveChatMessages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LiveChatMessage updateManyAndReturn
+   */
+  export type LiveChatMessageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LiveChatMessage
+     */
+    select?: LiveChatMessageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LiveChatMessage
+     */
+    omit?: LiveChatMessageOmit<ExtArgs> | null
+    /**
+     * The data used to update LiveChatMessages.
+     */
+    data: XOR<LiveChatMessageUpdateManyMutationInput, LiveChatMessageUncheckedUpdateManyInput>
+    /**
+     * Filter which LiveChatMessages to update
+     */
+    where?: LiveChatMessageWhereInput
+    /**
+     * Limit how many LiveChatMessages to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3227,6 +3398,10 @@ export namespace Prisma {
      * Filter which LiveChatMessages to delete
      */
     where?: LiveChatMessageWhereInput
+    /**
+     * Limit how many LiveChatMessages to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -3459,6 +3634,18 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["liveChatContact"]>
 
+  export type LiveChatContactSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    email?: boolean
+    phone?: boolean
+    avatar?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["liveChatContact"]>
 
   export type LiveChatContactSelectScalar = {
     id?: boolean
@@ -3693,6 +3880,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends LiveChatContactUpdateManyArgs>(args: SelectSubset<T, LiveChatContactUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LiveChatContacts and returns the data updated in the database.
+     * @param {LiveChatContactUpdateManyAndReturnArgs} args - Arguments to update many LiveChatContacts.
+     * @example
+     * // Update many LiveChatContacts
+     * const liveChatContact = await prisma.liveChatContact.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LiveChatContacts and only return the `id`
+     * const liveChatContactWithIdOnly = await prisma.liveChatContact.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LiveChatContactUpdateManyAndReturnArgs>(args: SelectSubset<T, LiveChatContactUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LiveChatContactPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one LiveChatContact.
@@ -4153,6 +4370,36 @@ export namespace Prisma {
      * Filter which LiveChatContacts to update
      */
     where?: LiveChatContactWhereInput
+    /**
+     * Limit how many LiveChatContacts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LiveChatContact updateManyAndReturn
+   */
+  export type LiveChatContactUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LiveChatContact
+     */
+    select?: LiveChatContactSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LiveChatContact
+     */
+    omit?: LiveChatContactOmit<ExtArgs> | null
+    /**
+     * The data used to update LiveChatContacts.
+     */
+    data: XOR<LiveChatContactUpdateManyMutationInput, LiveChatContactUncheckedUpdateManyInput>
+    /**
+     * Filter which LiveChatContacts to update
+     */
+    where?: LiveChatContactWhereInput
+    /**
+     * Limit how many LiveChatContacts to update.
+     */
+    limit?: number
   }
 
   /**
@@ -4207,6 +4454,10 @@ export namespace Prisma {
      * Filter which LiveChatContacts to delete
      */
     where?: LiveChatContactWhereInput
+    /**
+     * Limit how many LiveChatContacts to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -4470,6 +4721,21 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["liveChatWidgetSetting"]>
 
+  export type LiveChatWidgetSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    widgetName?: boolean
+    primaryColor?: boolean
+    headerTitle?: boolean
+    greetingMessage?: boolean
+    offlineMessage?: boolean
+    position?: boolean
+    showPowerBy?: boolean
+    enabled?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["liveChatWidgetSetting"]>
 
   export type LiveChatWidgetSettingSelectScalar = {
     id?: boolean
@@ -4710,6 +4976,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends LiveChatWidgetSettingUpdateManyArgs>(args: SelectSubset<T, LiveChatWidgetSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LiveChatWidgetSettings and returns the data updated in the database.
+     * @param {LiveChatWidgetSettingUpdateManyAndReturnArgs} args - Arguments to update many LiveChatWidgetSettings.
+     * @example
+     * // Update many LiveChatWidgetSettings
+     * const liveChatWidgetSetting = await prisma.liveChatWidgetSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LiveChatWidgetSettings and only return the `id`
+     * const liveChatWidgetSettingWithIdOnly = await prisma.liveChatWidgetSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LiveChatWidgetSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, LiveChatWidgetSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LiveChatWidgetSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one LiveChatWidgetSetting.
@@ -5173,6 +5469,36 @@ export namespace Prisma {
      * Filter which LiveChatWidgetSettings to update
      */
     where?: LiveChatWidgetSettingWhereInput
+    /**
+     * Limit how many LiveChatWidgetSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LiveChatWidgetSetting updateManyAndReturn
+   */
+  export type LiveChatWidgetSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LiveChatWidgetSetting
+     */
+    select?: LiveChatWidgetSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LiveChatWidgetSetting
+     */
+    omit?: LiveChatWidgetSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update LiveChatWidgetSettings.
+     */
+    data: XOR<LiveChatWidgetSettingUpdateManyMutationInput, LiveChatWidgetSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which LiveChatWidgetSettings to update
+     */
+    where?: LiveChatWidgetSettingWhereInput
+    /**
+     * Limit how many LiveChatWidgetSettings to update.
+     */
+    limit?: number
   }
 
   /**
@@ -5227,6 +5553,10 @@ export namespace Prisma {
      * Filter which LiveChatWidgetSettings to delete
      */
     where?: LiveChatWidgetSettingWhereInput
+    /**
+     * Limit how many LiveChatWidgetSettings to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5504,6 +5834,17 @@ export namespace Prisma {
     createdAt?: boolean
   }, ExtArgs["result"]["liveChatStatistics"]>
 
+  export type LiveChatStatisticsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    totalChats?: boolean
+    activeChats?: boolean
+    resolvedChats?: boolean
+    missedChats?: boolean
+    avgResponseTime?: boolean
+    date?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["liveChatStatistics"]>
 
   export type LiveChatStatisticsSelectScalar = {
     id?: boolean
@@ -5736,6 +6077,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends LiveChatStatisticsUpdateManyArgs>(args: SelectSubset<T, LiveChatStatisticsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LiveChatStatistics and returns the data updated in the database.
+     * @param {LiveChatStatisticsUpdateManyAndReturnArgs} args - Arguments to update many LiveChatStatistics.
+     * @example
+     * // Update many LiveChatStatistics
+     * const liveChatStatistics = await prisma.liveChatStatistics.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LiveChatStatistics and only return the `id`
+     * const liveChatStatisticsWithIdOnly = await prisma.liveChatStatistics.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LiveChatStatisticsUpdateManyAndReturnArgs>(args: SelectSubset<T, LiveChatStatisticsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LiveChatStatisticsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one LiveChatStatistics.
@@ -6195,6 +6566,36 @@ export namespace Prisma {
      * Filter which LiveChatStatistics to update
      */
     where?: LiveChatStatisticsWhereInput
+    /**
+     * Limit how many LiveChatStatistics to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LiveChatStatistics updateManyAndReturn
+   */
+  export type LiveChatStatisticsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LiveChatStatistics
+     */
+    select?: LiveChatStatisticsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LiveChatStatistics
+     */
+    omit?: LiveChatStatisticsOmit<ExtArgs> | null
+    /**
+     * The data used to update LiveChatStatistics.
+     */
+    data: XOR<LiveChatStatisticsUpdateManyMutationInput, LiveChatStatisticsUncheckedUpdateManyInput>
+    /**
+     * Filter which LiveChatStatistics to update
+     */
+    where?: LiveChatStatisticsWhereInput
+    /**
+     * Limit how many LiveChatStatistics to update.
+     */
+    limit?: number
   }
 
   /**
@@ -6249,6 +6650,10 @@ export namespace Prisma {
      * Filter which LiveChatStatistics to delete
      */
     where?: LiveChatStatisticsWhereInput
+    /**
+     * Limit how many LiveChatStatistics to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -6472,6 +6877,17 @@ export namespace Prisma {
     disconnectedAt?: boolean
   }, ExtArgs["result"]["socketConnection"]>
 
+  export type SocketConnectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    socketId?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    contactId?: boolean
+    deviceType?: boolean
+    metadata?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+  }, ExtArgs["result"]["socketConnection"]>
 
   export type SocketConnectionSelectScalar = {
     id?: boolean
@@ -6704,6 +7120,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends SocketConnectionUpdateManyArgs>(args: SelectSubset<T, SocketConnectionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SocketConnections and returns the data updated in the database.
+     * @param {SocketConnectionUpdateManyAndReturnArgs} args - Arguments to update many SocketConnections.
+     * @example
+     * // Update many SocketConnections
+     * const socketConnection = await prisma.socketConnection.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SocketConnections and only return the `id`
+     * const socketConnectionWithIdOnly = await prisma.socketConnection.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SocketConnectionUpdateManyAndReturnArgs>(args: SelectSubset<T, SocketConnectionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SocketConnectionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one SocketConnection.
@@ -7163,6 +7609,36 @@ export namespace Prisma {
      * Filter which SocketConnections to update
      */
     where?: SocketConnectionWhereInput
+    /**
+     * Limit how many SocketConnections to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SocketConnection updateManyAndReturn
+   */
+  export type SocketConnectionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SocketConnection
+     */
+    select?: SocketConnectionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SocketConnection
+     */
+    omit?: SocketConnectionOmit<ExtArgs> | null
+    /**
+     * The data used to update SocketConnections.
+     */
+    data: XOR<SocketConnectionUpdateManyMutationInput, SocketConnectionUncheckedUpdateManyInput>
+    /**
+     * Filter which SocketConnections to update
+     */
+    where?: SocketConnectionWhereInput
+    /**
+     * Limit how many SocketConnections to update.
+     */
+    limit?: number
   }
 
   /**
@@ -7217,6 +7693,10 @@ export namespace Prisma {
      * Filter which SocketConnections to delete
      */
     where?: SocketConnectionWhereInput
+    /**
+     * Limit how many SocketConnections to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -7429,6 +7909,13 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -8709,12 +9196,13 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -8765,12 +9253,13 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -9213,12 +9702,13 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>

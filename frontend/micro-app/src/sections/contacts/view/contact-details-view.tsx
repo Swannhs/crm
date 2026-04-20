@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
@@ -11,9 +11,15 @@ import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
+import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import LoadingButton from '@mui/lab/LoadingButton';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -23,7 +29,7 @@ import { billingService } from 'src/services/billing-service';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
-import { CustomTabs } from 'src/components/custom-tabs';
+import { showToast } from 'src/components/toast';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
@@ -37,8 +43,16 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
   const router = useRouter();
 
   const [currentTab, setCurrentTab] = useState(mode);
+  const [editOpen, setEditOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editValues, setEditValues] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    status: 'active',
+  });
 
-  const { data: contact, isLoading: contactLoading } = useQuery({
+  const { data: contact, isLoading: contactLoading, refetch: refetchContact } = useQuery({
     queryKey: ['contact', id],
     queryFn: () => contactService.getContact(id),
   });
@@ -49,9 +63,48 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
     enabled: currentTab === 'invoices',
   });
 
+  useEffect(() => {
+    setCurrentTab(mode);
+  }, [mode]);
+
+  useEffect(() => {
+    if (!contact) return;
+
+    setEditValues({
+      fullName: contact.fullName || '',
+      email: contact.email || '',
+      phone: contact.phone || '',
+      status: contact.status || 'active',
+    });
+  }, [contact]);
+
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
-  }, []);
+    router.push(paths.dashboard.contactView(id, newValue));
+  }, [id, router]);
+
+  const handleEditValueChange =
+    (field: 'fullName' | 'email' | 'phone' | 'status') =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setEditValues((current) => ({
+        ...current,
+        [field]: event.target.value,
+      }));
+    };
+
+  const handleSaveContact = async () => {
+    try {
+      setIsSaving(true);
+      await contactService.updateContact(id, editValues);
+      await refetchContact();
+      setEditOpen(false);
+      showToast({ message: 'Contact updated successfully.', severity: 'success' });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (contactLoading) {
     return (
@@ -91,15 +144,15 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
 
             <Typography variant="h6">{contact.fullName}</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-              {contact.email}
+              {contact.email || 'No email on file'}
             </Typography>
 
             <Stack direction="row" justifyContent="center" spacing={1} sx={{ mb: 3 }}>
               <Label color="success" variant="soft">
-                {contact.status}
+                {contact.status || 'active'}
               </Label>
               <Label color="info" variant="soft">
-                {contact.contactType[0] || 'Client'}
+                {contact.contactType?.[0] || 'Client'}
               </Label>
             </Stack>
 
@@ -108,12 +161,12 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
             <Stack spacing={2} sx={{ textAlign: 'left' }}>
               <Stack direction="row" spacing={1}>
                 <Iconify icon="solar:phone-bold" />
-                <Typography variant="body2">{contact.phone}</Typography>
+                <Typography variant="body2">{contact.phone || 'No phone on file'}</Typography>
               </Stack>
               <Stack direction="row" spacing={1}>
                 <Iconify icon="solar:calendar-bold" />
                 <Typography variant="body2">
-                  Joined: {new Date(contact.createdAt).toLocaleDateString()}
+                  Joined: {contact.createdAt ? new Date(contact.createdAt).toLocaleDateString() : 'Unknown'}
                 </Typography>
               </Stack>
             </Stack>
@@ -123,6 +176,7 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="solar:pen-bold" />}
+              onClick={() => setEditOpen(true)}
               sx={{ mt: 3 }}
             >
               Edit Profile
@@ -175,12 +229,16 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
                         }}
                       >
                         <Box>
-                          <Typography variant="subtitle2">Invoice #{inv.no}</Typography>
+                          <Typography variant="subtitle2">
+                            Invoice #{inv.no || inv.number || inv.id || 'Draft'}
+                          </Typography>
                           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            Due: {new Date(inv.dueDate).toLocaleDateString()}
+                            Due: {inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : 'Not scheduled'}
                           </Typography>
                         </Box>
-                        <Typography variant="subtitle2">${inv.totalDue}</Typography>
+                        <Typography variant="subtitle2">
+                          ${inv.totalDue ?? inv.amount ?? 0}
+                        </Typography>
                       </Box>
                     ))
                   )}
@@ -199,6 +257,44 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
           </Card>
         </Grid>
       </Grid>
+
+      <Dialog fullWidth maxWidth="sm" open={editOpen} onClose={() => setEditOpen(false)}>
+        <DialogTitle>Edit Contact</DialogTitle>
+
+        <DialogContent>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            <TextField
+              label="Full Name"
+              value={editValues.fullName}
+              onChange={handleEditValueChange('fullName')}
+            />
+            <TextField
+              label="Email"
+              value={editValues.email}
+              onChange={handleEditValueChange('email')}
+            />
+            <TextField
+              label="Phone"
+              value={editValues.phone}
+              onChange={handleEditValueChange('phone')}
+            />
+            <TextField
+              label="Status"
+              value={editValues.status}
+              onChange={handleEditValueChange('status')}
+            />
+          </Stack>
+        </DialogContent>
+
+        <DialogActions>
+          <Button variant="outlined" onClick={() => setEditOpen(false)}>
+            Cancel
+          </Button>
+          <LoadingButton variant="contained" loading={isSaving} onClick={handleSaveContact}>
+            Save changes
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }

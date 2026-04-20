@@ -110,7 +110,19 @@ async function handleApiCompat(req: Request, res: Response) {
         const id = rest.split("/").pop();
         return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: `/api/v1/contacts/${id}` });
       }
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: GET /get, POST /add, GET /getById/:id" });
+      if ((req.method === "PATCH" || req.method === "PUT") && rest.startsWith("/update/")) {
+        const id = rest.split("/").pop();
+        return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: `/api/v1/contacts/${id}` });
+      }
+      if (req.method === "DELETE" && rest === "/delete") {
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+        const firstId = ids[0];
+        if (!firstId) {
+          return res.status(400).json({ message: "Contact id is required for delete." });
+        }
+        return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: `/api/v1/contacts/${firstId}` });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: GET /get, POST /add, GET /getById/:id, PATCH /update/:id, DELETE /delete" });
     }
 
     if (module === "invoice") {

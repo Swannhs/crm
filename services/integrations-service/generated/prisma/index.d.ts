@@ -310,7 +310,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.19.3
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
     client: string
@@ -774,6 +774,10 @@ export namespace Prisma {
             args: Prisma.IntegrationConnectionUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.IntegrationConnectionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IntegrationConnectionPayload>[]
+          }
           upsert: {
             args: Prisma.IntegrationConnectionUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$IntegrationConnectionPayload>
@@ -843,6 +847,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.GoogleIntegrationUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GoogleIntegrationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GoogleIntegrationPayload>[]
           }
           upsert: {
             args: Prisma.GoogleIntegrationUpsertArgs<ExtArgs>
@@ -914,6 +922,10 @@ export namespace Prisma {
             args: Prisma.ZoomIntegrationUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ZoomIntegrationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ZoomIntegrationPayload>[]
+          }
           upsert: {
             args: Prisma.ZoomIntegrationUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ZoomIntegrationPayload>
@@ -983,6 +995,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ZoomMeetingUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ZoomMeetingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ZoomMeetingPayload>[]
           }
           upsert: {
             args: Prisma.ZoomMeetingUpsertArgs<ExtArgs>
@@ -1054,6 +1070,10 @@ export namespace Prisma {
             args: Prisma.ShopifyStoreUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ShopifyStoreUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ShopifyStorePayload>[]
+          }
           upsert: {
             args: Prisma.ShopifyStoreUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ShopifyStorePayload>
@@ -1123,6 +1143,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.UberEatsConfigUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UberEatsConfigUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UberEatsConfigPayload>[]
           }
           upsert: {
             args: Prisma.UberEatsConfigUpsertArgs<ExtArgs>
@@ -1194,6 +1218,10 @@ export namespace Prisma {
             args: Prisma.EasyPostConfigUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.EasyPostConfigUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EasyPostConfigPayload>[]
+          }
           upsert: {
             args: Prisma.EasyPostConfigUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$EasyPostConfigPayload>
@@ -1263,6 +1291,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.IntegrationActivityUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.IntegrationActivityUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IntegrationActivityPayload>[]
           }
           upsert: {
             args: Prisma.IntegrationActivityUpsertArgs<ExtArgs>
@@ -1726,6 +1758,23 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["integrationConnection"]>
 
+  export type IntegrationConnectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    provider?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
+    tokenType?: boolean
+    scope?: boolean
+    accountId?: boolean
+    accountName?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["integrationConnection"]>
 
   export type IntegrationConnectionSelectScalar = {
     id?: boolean
@@ -1970,6 +2019,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends IntegrationConnectionUpdateManyArgs>(args: SelectSubset<T, IntegrationConnectionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more IntegrationConnections and returns the data updated in the database.
+     * @param {IntegrationConnectionUpdateManyAndReturnArgs} args - Arguments to update many IntegrationConnections.
+     * @example
+     * // Update many IntegrationConnections
+     * const integrationConnection = await prisma.integrationConnection.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more IntegrationConnections and only return the `id`
+     * const integrationConnectionWithIdOnly = await prisma.integrationConnection.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends IntegrationConnectionUpdateManyAndReturnArgs>(args: SelectSubset<T, IntegrationConnectionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$IntegrationConnectionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one IntegrationConnection.
@@ -2435,6 +2514,36 @@ export namespace Prisma {
      * Filter which IntegrationConnections to update
      */
     where?: IntegrationConnectionWhereInput
+    /**
+     * Limit how many IntegrationConnections to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * IntegrationConnection updateManyAndReturn
+   */
+  export type IntegrationConnectionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IntegrationConnection
+     */
+    select?: IntegrationConnectionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the IntegrationConnection
+     */
+    omit?: IntegrationConnectionOmit<ExtArgs> | null
+    /**
+     * The data used to update IntegrationConnections.
+     */
+    data: XOR<IntegrationConnectionUpdateManyMutationInput, IntegrationConnectionUncheckedUpdateManyInput>
+    /**
+     * Filter which IntegrationConnections to update
+     */
+    where?: IntegrationConnectionWhereInput
+    /**
+     * Limit how many IntegrationConnections to update.
+     */
+    limit?: number
   }
 
   /**
@@ -2489,6 +2598,10 @@ export namespace Prisma {
      * Filter which IntegrationConnections to delete
      */
     where?: IntegrationConnectionWhereInput
+    /**
+     * Limit how many IntegrationConnections to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -2716,6 +2829,17 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["googleIntegration"]>
 
+  export type GoogleIntegrationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
+    isConnected?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["googleIntegration"]>
 
   export type GoogleIntegrationSelectScalar = {
     id?: boolean
@@ -2948,6 +3072,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends GoogleIntegrationUpdateManyArgs>(args: SelectSubset<T, GoogleIntegrationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GoogleIntegrations and returns the data updated in the database.
+     * @param {GoogleIntegrationUpdateManyAndReturnArgs} args - Arguments to update many GoogleIntegrations.
+     * @example
+     * // Update many GoogleIntegrations
+     * const googleIntegration = await prisma.googleIntegration.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GoogleIntegrations and only return the `id`
+     * const googleIntegrationWithIdOnly = await prisma.googleIntegration.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GoogleIntegrationUpdateManyAndReturnArgs>(args: SelectSubset<T, GoogleIntegrationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoogleIntegrationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one GoogleIntegration.
@@ -3407,6 +3561,36 @@ export namespace Prisma {
      * Filter which GoogleIntegrations to update
      */
     where?: GoogleIntegrationWhereInput
+    /**
+     * Limit how many GoogleIntegrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GoogleIntegration updateManyAndReturn
+   */
+  export type GoogleIntegrationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GoogleIntegration
+     */
+    select?: GoogleIntegrationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GoogleIntegration
+     */
+    omit?: GoogleIntegrationOmit<ExtArgs> | null
+    /**
+     * The data used to update GoogleIntegrations.
+     */
+    data: XOR<GoogleIntegrationUpdateManyMutationInput, GoogleIntegrationUncheckedUpdateManyInput>
+    /**
+     * Filter which GoogleIntegrations to update
+     */
+    where?: GoogleIntegrationWhereInput
+    /**
+     * Limit how many GoogleIntegrations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3461,6 +3645,10 @@ export namespace Prisma {
      * Filter which GoogleIntegrations to delete
      */
     where?: GoogleIntegrationWhereInput
+    /**
+     * Limit how many GoogleIntegrations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -3706,6 +3894,19 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["zoomIntegration"]>
 
+  export type ZoomIntegrationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    accountId?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
+    webhookSecret?: boolean
+    isConnected?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["zoomIntegration"]>
 
   export type ZoomIntegrationSelectScalar = {
     id?: boolean
@@ -3942,6 +4143,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ZoomIntegrationUpdateManyArgs>(args: SelectSubset<T, ZoomIntegrationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ZoomIntegrations and returns the data updated in the database.
+     * @param {ZoomIntegrationUpdateManyAndReturnArgs} args - Arguments to update many ZoomIntegrations.
+     * @example
+     * // Update many ZoomIntegrations
+     * const zoomIntegration = await prisma.zoomIntegration.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ZoomIntegrations and only return the `id`
+     * const zoomIntegrationWithIdOnly = await prisma.zoomIntegration.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ZoomIntegrationUpdateManyAndReturnArgs>(args: SelectSubset<T, ZoomIntegrationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ZoomIntegrationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ZoomIntegration.
@@ -4403,6 +4634,36 @@ export namespace Prisma {
      * Filter which ZoomIntegrations to update
      */
     where?: ZoomIntegrationWhereInput
+    /**
+     * Limit how many ZoomIntegrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ZoomIntegration updateManyAndReturn
+   */
+  export type ZoomIntegrationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ZoomIntegration
+     */
+    select?: ZoomIntegrationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ZoomIntegration
+     */
+    omit?: ZoomIntegrationOmit<ExtArgs> | null
+    /**
+     * The data used to update ZoomIntegrations.
+     */
+    data: XOR<ZoomIntegrationUpdateManyMutationInput, ZoomIntegrationUncheckedUpdateManyInput>
+    /**
+     * Filter which ZoomIntegrations to update
+     */
+    where?: ZoomIntegrationWhereInput
+    /**
+     * Limit how many ZoomIntegrations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -4457,6 +4718,10 @@ export namespace Prisma {
      * Filter which ZoomIntegrations to delete
      */
     where?: ZoomIntegrationWhereInput
+    /**
+     * Limit how many ZoomIntegrations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -4745,6 +5010,20 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["zoomMeeting"]>
 
+  export type ZoomMeetingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    zoomId?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    topic?: boolean
+    startTime?: boolean
+    duration?: boolean
+    joinUrl?: boolean
+    password?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["zoomMeeting"]>
 
   export type ZoomMeetingSelectScalar = {
     id?: boolean
@@ -4983,6 +5262,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ZoomMeetingUpdateManyArgs>(args: SelectSubset<T, ZoomMeetingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ZoomMeetings and returns the data updated in the database.
+     * @param {ZoomMeetingUpdateManyAndReturnArgs} args - Arguments to update many ZoomMeetings.
+     * @example
+     * // Update many ZoomMeetings
+     * const zoomMeeting = await prisma.zoomMeeting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ZoomMeetings and only return the `id`
+     * const zoomMeetingWithIdOnly = await prisma.zoomMeeting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ZoomMeetingUpdateManyAndReturnArgs>(args: SelectSubset<T, ZoomMeetingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ZoomMeetingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ZoomMeeting.
@@ -5445,6 +5754,36 @@ export namespace Prisma {
      * Filter which ZoomMeetings to update
      */
     where?: ZoomMeetingWhereInput
+    /**
+     * Limit how many ZoomMeetings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ZoomMeeting updateManyAndReturn
+   */
+  export type ZoomMeetingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ZoomMeeting
+     */
+    select?: ZoomMeetingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ZoomMeeting
+     */
+    omit?: ZoomMeetingOmit<ExtArgs> | null
+    /**
+     * The data used to update ZoomMeetings.
+     */
+    data: XOR<ZoomMeetingUpdateManyMutationInput, ZoomMeetingUncheckedUpdateManyInput>
+    /**
+     * Filter which ZoomMeetings to update
+     */
+    where?: ZoomMeetingWhereInput
+    /**
+     * Limit how many ZoomMeetings to update.
+     */
+    limit?: number
   }
 
   /**
@@ -5499,6 +5838,10 @@ export namespace Prisma {
      * Filter which ZoomMeetings to delete
      */
     where?: ZoomMeetingWhereInput
+    /**
+     * Limit how many ZoomMeetings to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5726,6 +6069,17 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["shopifyStore"]>
 
+  export type ShopifyStoreSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    shopDomain?: boolean
+    accessToken?: boolean
+    scope?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["shopifyStore"]>
 
   export type ShopifyStoreSelectScalar = {
     id?: boolean
@@ -5958,6 +6312,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ShopifyStoreUpdateManyArgs>(args: SelectSubset<T, ShopifyStoreUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ShopifyStores and returns the data updated in the database.
+     * @param {ShopifyStoreUpdateManyAndReturnArgs} args - Arguments to update many ShopifyStores.
+     * @example
+     * // Update many ShopifyStores
+     * const shopifyStore = await prisma.shopifyStore.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ShopifyStores and only return the `id`
+     * const shopifyStoreWithIdOnly = await prisma.shopifyStore.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ShopifyStoreUpdateManyAndReturnArgs>(args: SelectSubset<T, ShopifyStoreUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShopifyStorePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ShopifyStore.
@@ -6417,6 +6801,36 @@ export namespace Prisma {
      * Filter which ShopifyStores to update
      */
     where?: ShopifyStoreWhereInput
+    /**
+     * Limit how many ShopifyStores to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ShopifyStore updateManyAndReturn
+   */
+  export type ShopifyStoreUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ShopifyStore
+     */
+    select?: ShopifyStoreSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ShopifyStore
+     */
+    omit?: ShopifyStoreOmit<ExtArgs> | null
+    /**
+     * The data used to update ShopifyStores.
+     */
+    data: XOR<ShopifyStoreUpdateManyMutationInput, ShopifyStoreUncheckedUpdateManyInput>
+    /**
+     * Filter which ShopifyStores to update
+     */
+    where?: ShopifyStoreWhereInput
+    /**
+     * Limit how many ShopifyStores to update.
+     */
+    limit?: number
   }
 
   /**
@@ -6471,6 +6885,10 @@ export namespace Prisma {
      * Filter which ShopifyStores to delete
      */
     where?: ShopifyStoreWhereInput
+    /**
+     * Limit how many ShopifyStores to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -6698,6 +7116,17 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["uberEatsConfig"]>
 
+  export type UberEatsConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    storeId?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["uberEatsConfig"]>
 
   export type UberEatsConfigSelectScalar = {
     id?: boolean
@@ -6930,6 +7359,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends UberEatsConfigUpdateManyArgs>(args: SelectSubset<T, UberEatsConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UberEatsConfigs and returns the data updated in the database.
+     * @param {UberEatsConfigUpdateManyAndReturnArgs} args - Arguments to update many UberEatsConfigs.
+     * @example
+     * // Update many UberEatsConfigs
+     * const uberEatsConfig = await prisma.uberEatsConfig.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UberEatsConfigs and only return the `id`
+     * const uberEatsConfigWithIdOnly = await prisma.uberEatsConfig.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UberEatsConfigUpdateManyAndReturnArgs>(args: SelectSubset<T, UberEatsConfigUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UberEatsConfigPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one UberEatsConfig.
@@ -7389,6 +7848,36 @@ export namespace Prisma {
      * Filter which UberEatsConfigs to update
      */
     where?: UberEatsConfigWhereInput
+    /**
+     * Limit how many UberEatsConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UberEatsConfig updateManyAndReturn
+   */
+  export type UberEatsConfigUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UberEatsConfig
+     */
+    select?: UberEatsConfigSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UberEatsConfig
+     */
+    omit?: UberEatsConfigOmit<ExtArgs> | null
+    /**
+     * The data used to update UberEatsConfigs.
+     */
+    data: XOR<UberEatsConfigUpdateManyMutationInput, UberEatsConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which UberEatsConfigs to update
+     */
+    where?: UberEatsConfigWhereInput
+    /**
+     * Limit how many UberEatsConfigs to update.
+     */
+    limit?: number
   }
 
   /**
@@ -7443,6 +7932,10 @@ export namespace Prisma {
      * Filter which UberEatsConfigs to delete
      */
     where?: UberEatsConfigWhereInput
+    /**
+     * Limit how many UberEatsConfigs to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -7652,6 +8145,15 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["easyPostConfig"]>
 
+  export type EasyPostConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    apiKey?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["easyPostConfig"]>
 
   export type EasyPostConfigSelectScalar = {
     id?: boolean
@@ -7880,6 +8382,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends EasyPostConfigUpdateManyArgs>(args: SelectSubset<T, EasyPostConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EasyPostConfigs and returns the data updated in the database.
+     * @param {EasyPostConfigUpdateManyAndReturnArgs} args - Arguments to update many EasyPostConfigs.
+     * @example
+     * // Update many EasyPostConfigs
+     * const easyPostConfig = await prisma.easyPostConfig.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EasyPostConfigs and only return the `id`
+     * const easyPostConfigWithIdOnly = await prisma.easyPostConfig.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EasyPostConfigUpdateManyAndReturnArgs>(args: SelectSubset<T, EasyPostConfigUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EasyPostConfigPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one EasyPostConfig.
@@ -8337,6 +8869,36 @@ export namespace Prisma {
      * Filter which EasyPostConfigs to update
      */
     where?: EasyPostConfigWhereInput
+    /**
+     * Limit how many EasyPostConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EasyPostConfig updateManyAndReturn
+   */
+  export type EasyPostConfigUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EasyPostConfig
+     */
+    select?: EasyPostConfigSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EasyPostConfig
+     */
+    omit?: EasyPostConfigOmit<ExtArgs> | null
+    /**
+     * The data used to update EasyPostConfigs.
+     */
+    data: XOR<EasyPostConfigUpdateManyMutationInput, EasyPostConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which EasyPostConfigs to update
+     */
+    where?: EasyPostConfigWhereInput
+    /**
+     * Limit how many EasyPostConfigs to update.
+     */
+    limit?: number
   }
 
   /**
@@ -8391,6 +8953,10 @@ export namespace Prisma {
      * Filter which EasyPostConfigs to delete
      */
     where?: EasyPostConfigWhereInput
+    /**
+     * Limit how many EasyPostConfigs to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -8605,6 +9171,16 @@ export namespace Prisma {
     createdAt?: boolean
   }, ExtArgs["result"]["integrationActivity"]>
 
+  export type IntegrationActivitySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    provider?: boolean
+    action?: boolean
+    status?: boolean
+    details?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["integrationActivity"]>
 
   export type IntegrationActivitySelectScalar = {
     id?: boolean
@@ -8835,6 +9411,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends IntegrationActivityUpdateManyArgs>(args: SelectSubset<T, IntegrationActivityUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more IntegrationActivities and returns the data updated in the database.
+     * @param {IntegrationActivityUpdateManyAndReturnArgs} args - Arguments to update many IntegrationActivities.
+     * @example
+     * // Update many IntegrationActivities
+     * const integrationActivity = await prisma.integrationActivity.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more IntegrationActivities and only return the `id`
+     * const integrationActivityWithIdOnly = await prisma.integrationActivity.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends IntegrationActivityUpdateManyAndReturnArgs>(args: SelectSubset<T, IntegrationActivityUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$IntegrationActivityPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one IntegrationActivity.
@@ -9293,6 +9899,36 @@ export namespace Prisma {
      * Filter which IntegrationActivities to update
      */
     where?: IntegrationActivityWhereInput
+    /**
+     * Limit how many IntegrationActivities to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * IntegrationActivity updateManyAndReturn
+   */
+  export type IntegrationActivityUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IntegrationActivity
+     */
+    select?: IntegrationActivitySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the IntegrationActivity
+     */
+    omit?: IntegrationActivityOmit<ExtArgs> | null
+    /**
+     * The data used to update IntegrationActivities.
+     */
+    data: XOR<IntegrationActivityUpdateManyMutationInput, IntegrationActivityUncheckedUpdateManyInput>
+    /**
+     * Filter which IntegrationActivities to update
+     */
+    where?: IntegrationActivityWhereInput
+    /**
+     * Limit how many IntegrationActivities to update.
+     */
+    limit?: number
   }
 
   /**
@@ -9347,6 +9983,10 @@ export namespace Prisma {
      * Filter which IntegrationActivities to delete
      */
     where?: IntegrationActivityWhereInput
+    /**
+     * Limit how many IntegrationActivities to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -9591,6 +10231,13 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -11051,12 +11698,13 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -11234,12 +11882,13 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -11775,12 +12424,13 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>

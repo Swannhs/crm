@@ -6,6 +6,7 @@ import { useRef, useMemo, useEffect, ReactNode, useCallback } from 'react';
 import { useSetState } from 'src/hooks/use-set-state';
 
 import { CONFIG } from 'src/config-global';
+import { paths } from 'src/routes/paths';
 
 import { AuthContext } from '../auth-context';
 
@@ -16,8 +17,10 @@ interface AuthProviderProps {
 }
 
 const ACCESS_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
 const ORG_ID_KEY = 'organizationId';
 const USER_ID_KEY = 'userId';
+const KEYCLOAK_SIGN_IN_PATH = paths.auth.keycloak.signIn;
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { state, setState } = useSetState({
@@ -27,6 +30,95 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const keycloakRef = useRef<Keycloak | null>(null);
   const initializedRef = useRef(false);
+  const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
+
+  const clearSession = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(ORG_ID_KEY);
+    sessionStorage.removeItem(USER_ID_KEY);
+  }, []);
+
+  const syncAuthenticatedUser = useCallback(
+    async (keycloak: Keycloak) => {
+      const profile = await keycloak.loadUserProfile();
+
+      const user = {
+        id: profile.id || keycloak.subject,
+        email: profile.email,
+        fullName: `${profile.firstName} ${profile.lastName}`.trim(),
+        username: profile.username,
+        accessToken: keycloak.token,
+        refreshToken: keycloak.refreshToken,
+        role: 'admin',
+        org_id: keycloak.tokenParsed?.org_id,
+      };
+
+      sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
+      sessionStorage.setItem(REFRESH_TOKEN_KEY, keycloak.refreshToken || '');
+      sessionStorage.setItem(ORG_ID_KEY, user.org_id || '');
+      sessionStorage.setItem(USER_ID_KEY, user.id || '');
+
+      setState({ user, loading: false });
+
+      return user;
+    },
+    [setState]
+  );
+
+  const redirectToLogin = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    const alreadyOnLogin = window.location.pathname === KEYCLOAK_SIGN_IN_PATH;
+
+    if (alreadyOnLogin) return;
+
+    const loginUrl = new URL(KEYCLOAK_SIGN_IN_PATH, window.location.origin);
+    loginUrl.searchParams.set('returnTo', currentPath);
+    window.location.replace(loginUrl.toString());
+  }, []);
+
+  const handleRefreshFailure = useCallback(() => {
+    clearSession();
+    setState({ user: null, loading: false });
+    keycloakRef.current = null;
+    initializedRef.current = false;
+    refreshPromiseRef.current = null;
+    redirectToLogin();
+  }, [clearSession, redirectToLogin, setState]);
+
+  const refreshSession = useCallback(
+    async (minValidity: number = 60) => {
+      const keycloak = keycloakRef.current;
+
+      if (!keycloak?.authenticated) {
+        return false;
+      }
+
+      if (refreshPromiseRef.current) {
+        return refreshPromiseRef.current;
+      }
+
+      refreshPromiseRef.current = (async () => {
+        try {
+          const refreshed = await keycloak.updateToken(minValidity);
+          await syncAuthenticatedUser(keycloak);
+          return refreshed;
+        } catch (error) {
+          console.error('Token refresh failed:', error);
+          handleRefreshFailure();
+          return false;
+        } finally {
+          refreshPromiseRef.current = null;
+        }
+      })();
+
+      return refreshPromiseRef.current;
+    },
+    [handleRefreshFailure, syncAuthenticatedUser]
+  );
 
   const initKeycloak = useCallback(async () => {
     try {
@@ -41,11 +133,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       keycloak.onTokenExpired = () => {
         console.warn('Token expired, attempting refresh...');
-        keycloak.updateToken(30).catch(() => {
-          console.error('Immediate refresh failed after expiration');
-          // The interval will also catch this and clear the state, 
-          // but we can be proactive here if needed.
-        });
+        refreshSession(0);
+      };
+
+      keycloak.onAuthRefreshSuccess = () => {
+        if (keycloakRef.current) {
+          syncAuthenticatedUser(keycloakRef.current).catch((error) => {
+            console.error('Failed to sync refreshed Keycloak session:', error);
+          });
+        }
+      };
+
+      keycloak.onAuthRefreshError = () => {
+        console.error('Keycloak reported refresh error');
+        handleRefreshFailure();
       };
 
       // onLoad: 'check-sso' is the standard SPA approach:
@@ -68,24 +169,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         ['code', 'state', 'session_state', 'iss'].forEach((p) => url.searchParams.delete(p));
         window.history.replaceState({}, '', url.toString());
 
-        const profile = await keycloak.loadUserProfile();
-
-        const user = {
-          id: profile.id || keycloak.subject,
-          email: profile.email,
-          fullName: `${profile.firstName} ${profile.lastName}`,
-          username: profile.username,
-          accessToken: keycloak.token,
-          refreshToken: keycloak.refreshToken,
-          role: 'admin',
-          org_id: keycloak.tokenParsed?.org_id,
-        };
-
-        sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
-        sessionStorage.setItem(ORG_ID_KEY, user.org_id || '');
-        sessionStorage.setItem(USER_ID_KEY, user.id || '');
-
-        setState({ user, loading: false });
+        await syncAuthenticatedUser(keycloak);
       } else {
         setState({ user: null, loading: false });
       }
@@ -93,7 +177,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error('Keycloak Init Error:', error);
       setState({ user: null, loading: false });
     }
-  }, [setState]);
+  }, [handleRefreshFailure, refreshSession, setState, syncAuthenticatedUser]);
 
   useEffect(() => {
     if (initializedRef.current) return;
@@ -102,47 +186,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Set up an interval to refresh the token periodically
     const interval = setInterval(async () => {
-      try {
-        if (keycloakRef.current?.authenticated) {
-          // updateToken(60) means refresh the token if it expires in less than 60 seconds
-          const refreshed = await keycloakRef.current.updateToken(60);
-          if (refreshed) {
-            console.log('Token refreshed successfully');
-            const keycloak = keycloakRef.current;
-            
-            // Update session storage
-            sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
-            
-            // Update local state to ensure the new token is available to the rest of the app
-            setState((prev) => ({
-              ...prev,
-              user: prev.user ? { ...prev.user, accessToken: keycloak.token } : null
-            }));
-          }
-        }
-      } catch (error) {
-        console.error('Token refresh failed:', error);
-        
-        // If refresh fails, it means the session is likely invalid or expired on the server
-        // We should clear the local state to prevent the app from using an expired token
-        sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-        sessionStorage.removeItem(ORG_ID_KEY);
-        sessionStorage.removeItem(USER_ID_KEY);
-        
-        setState({ user: null, loading: false });
-        keycloakRef.current = null;
-        initializedRef.current = false;
+      if (keycloakRef.current?.authenticated) {
+        await refreshSession(60);
       }
     }, 30000); // Check every 30 seconds
 
     const handleUnauthorized = () => {
       console.warn('Unauthorized access detected via event');
-      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-      sessionStorage.removeItem(ORG_ID_KEY);
-      sessionStorage.removeItem(USER_ID_KEY);
-      setState({ user: null, loading: false });
-      keycloakRef.current = null;
-      initializedRef.current = false;
+      refreshSession(0).catch(() => {
+        handleRefreshFailure();
+      });
     };
 
     window.addEventListener('auth-unauthorized', handleUnauthorized);
@@ -151,7 +204,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       clearInterval(interval);
       window.removeEventListener('auth-unauthorized', handleUnauthorized);
     };
-  }, [initKeycloak, setState]);
+  }, [handleRefreshFailure, initKeycloak, refreshSession]);
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
   const status = state.loading ? 'loading' : checkAuthenticated;
@@ -181,9 +234,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
 
           // Clear local storage/state
-          sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-          sessionStorage.removeItem(ORG_ID_KEY);
-          sessionStorage.removeItem(USER_ID_KEY);
+          clearSession();
           setState({ user: null, loading: false });
 
           // Reset refs
@@ -201,22 +252,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
           if (keycloakRef.current?.authenticated && keycloakRef.current.token) {
             const keycloak = keycloakRef.current;
-            const profile = await keycloak.loadUserProfile();
-            const user = {
-              id: profile.id || keycloak.subject,
-              email: profile.email,
-              fullName: `${profile.firstName} ${profile.lastName}`,
-              username: profile.username,
-              accessToken: keycloak.token,
-              refreshToken: keycloak.refreshToken,
-              role: 'admin',
-              org_id: keycloak.tokenParsed?.org_id,
-            };
-
-            sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
-            sessionStorage.setItem(ORG_ID_KEY, user.org_id || '');
-            sessionStorage.setItem(USER_ID_KEY, user.id || '');
-            setState({ user, loading: false });
+            await syncAuthenticatedUser(keycloak);
             return;
           }
 
@@ -227,7 +263,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       },
     }),
-    [setState, state.user, status]
+    [clearSession, setState, state.user, status, syncAuthenticatedUser]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
