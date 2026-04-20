@@ -1,26 +1,60 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
-import { OrganizationController, LocationController, OnboardingController } from "./controllers/organization.controller.js";
+import {
+  OrganizationController,
+  LocationController,
+  OnboardingController,
+  MembershipController,
+} from "./controllers/organization.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
+import { attachRoleContext, requireOrgRoles } from "./middleware/authorization.js";
 
 const { app, logger } = createServiceApp({ serviceName: "organization-service", jsonLimit: "1mb" });
-const auth = identityMiddleware;
+const auth = [identityMiddleware, attachRoleContext];
 const cast = (req: any) => req as any;
 
 const orgCtrl = new OrganizationController();
 const locationCtrl = new LocationController();
 const onboardingCtrl = new OnboardingController();
+const membershipCtrl = new MembershipController();
+const ownerOrAdmin = requireOrgRoles(['org_owner', 'org_admin']) as any;
+const managerUp = requireOrgRoles(['org_owner', 'org_admin', 'org_manager']) as any;
 
 // --- Organizations ---
-app.get("/v1/organizations", auth, (req, res) => orgCtrl.get(cast(req), res));
-app.put("/v1/organizations", auth, (req, res) => orgCtrl.update(cast(req), res));
+app.get("/v1/organizations", identityMiddleware as any, attachRoleContext as any, (req, res) => orgCtrl.get(cast(req), res));
+app.put("/v1/organizations", identityMiddleware as any, attachRoleContext as any, ownerOrAdmin, (req, res) =>
+  orgCtrl.update(cast(req), res)
+);
 
 // --- Locations ---
-app.get("/v1/locations", auth, (req, res) => locationCtrl.list(cast(req), res));
-app.post("/v1/locations", auth, (req, res) => locationCtrl.create(cast(req), res));
+app.get("/v1/locations", identityMiddleware as any, attachRoleContext as any, (req, res) => locationCtrl.list(cast(req), res));
+app.post("/v1/locations", identityMiddleware as any, attachRoleContext as any, managerUp, (req, res) =>
+  locationCtrl.create(cast(req), res)
+);
+
+// --- Memberships ---
+app.get("/v1/memberships/resolve", identityMiddleware as any, attachRoleContext as any, (req, res) =>
+  membershipCtrl.resolve(cast(req), res)
+);
+app.get("/v1/memberships/me", identityMiddleware as any, attachRoleContext as any, (req, res) =>
+  membershipCtrl.resolve(cast(req), res)
+);
+app.get("/v1/memberships", identityMiddleware as any, attachRoleContext as any, ownerOrAdmin, (req, res) =>
+  membershipCtrl.list(cast(req), res)
+);
+app.post("/v1/memberships", identityMiddleware as any, attachRoleContext as any, ownerOrAdmin, (req, res) =>
+  membershipCtrl.upsert(cast(req), res)
+);
+app.patch("/v1/memberships/:userId", identityMiddleware as any, attachRoleContext as any, ownerOrAdmin, (req, res) =>
+  membershipCtrl.upsert(cast(req), res)
+);
 
 // --- Onboarding ---
-app.get("/v1/onboarding/status", auth, (req, res) => onboardingCtrl.list(cast(req), res));
-app.post("/v1/onboarding/status", auth, (req, res) => onboardingCtrl.create(cast(req), res));
+app.get("/v1/onboarding/status", identityMiddleware as any, attachRoleContext as any, (req, res) =>
+  onboardingCtrl.list(cast(req), res)
+);
+app.post("/v1/onboarding/status", identityMiddleware as any, attachRoleContext as any, (req, res) =>
+  onboardingCtrl.create(cast(req), res)
+);
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "organization-service (TS)" }));

@@ -24,6 +24,9 @@ import { HeaderBase } from '../core/header-base';
 import { _workspaces } from '../config-nav-workspace';
 import { LayoutSection } from '../core/layout-section';
 import { navData as dashboardNavData } from '../config-nav-dashboard';
+import { usePathname } from 'src/routes/hooks';
+import { useAuthContext } from 'src/auth/hooks';
+import { RoleBasedGuard } from 'src/auth/guard';
 
 import { AIChatBox } from 'src/components/ai-chat/ai-chat-box';
 
@@ -41,6 +44,8 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
   const mobileNavOpen = useBoolean();
 
   const settings = useSettingsContext();
+  const pathname = usePathname();
+  const { currentRole, currentRoles } = useAuthContext();
 
   const navColorVars = useNavColorVars(theme, settings);
 
@@ -54,6 +59,39 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
 
   const isNavVertical = isNavMini || settings.navLayout === 'vertical';
 
+  const routeRoleMap = [
+    {
+      match: (path: string) =>
+        path.startsWith('/dashboard/organizations') ||
+        path.startsWith('/dashboard/settings') ||
+        path.startsWith('/dashboard/domain') ||
+        path.startsWith('/dashboard/white-label') ||
+        path.startsWith('/dashboard/devices'),
+      roles: ['org_admin', 'org_owner', 'platform_admin'],
+    },
+    {
+      match: (path: string) =>
+        path.startsWith('/dashboard/employees') ||
+        path.startsWith('/dashboard/marketing/workflow/builder') ||
+        path.startsWith('/dashboard/workflow'),
+      roles: ['org_manager', 'org_admin', 'org_owner', 'platform_admin'],
+    },
+    {
+      match: (path: string) =>
+        path.startsWith('/dashboard/finance') || path.startsWith('/dashboard/admin'),
+      roles: ['org_manager', 'org_admin', 'org_owner', 'platform_admin'],
+    },
+  ];
+
+  const routeRoles = routeRoleMap.find((item) => item.match(pathname))?.roles;
+  const protectedChildren = routeRoles ? (
+    <RoleBasedGuard hasContent currentRole={currentRole} currentRoles={currentRoles} acceptRoles={routeRoles}>
+      {children}
+    </RoleBasedGuard>
+  ) : (
+    children
+  );
+
   return (
     <>
       <NavMobile
@@ -61,6 +99,7 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
         open={mobileNavOpen.value}
         onClose={mobileNavOpen.onFalse}
         cssVars={navColorVars.section}
+        slotProps={{ currentRole, currentRoles }}
       />
 
       <LayoutSection
@@ -97,10 +136,11 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
                 </Alert>
               ),
               bottomArea: isNavHorizontal ? (
-                <NavHorizontal
+              <NavHorizontal
                   data={navData}
                   layoutQuery={layoutQuery}
                   cssVars={navColorVars.section}
+                  slotProps={{ currentRole, currentRoles }}
                 />
               ) : null,
             }}
@@ -157,6 +197,7 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
               isNavMini={isNavMini}
               layoutQuery={layoutQuery}
               cssVars={navColorVars.section}
+              slotProps={{ currentRole, currentRoles }}
               onToggleNav={() =>
                 settings.onUpdateField(
                   'navLayout',
@@ -197,7 +238,7 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
           ...sx,
         }}
       >
-        <Main isNavHorizontal={isNavHorizontal}>{children}</Main>
+        <Main isNavHorizontal={isNavHorizontal}>{protectedChildren}</Main>
         <AIChatBox />
       </LayoutSection>
     </>

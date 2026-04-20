@@ -59,8 +59,14 @@ export function NavList({ data, render, depth, slotProps, enabledRootRedirect })
   );
 
   // Hidden item by role
-  if (data.roles && slotProps?.currentRole) {
-    if (!data?.roles?.includes(slotProps?.currentRole)) {
+  if (data.roles) {
+    const currentRoles = slotProps?.currentRoles?.length
+      ? slotProps.currentRoles
+      : slotProps?.currentRole
+        ? [slotProps.currentRole]
+        : [];
+
+    if (currentRoles.length && !data.roles.some((role) => currentRoles.includes(role))) {
       return null;
     }
   }

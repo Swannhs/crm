@@ -9,6 +9,11 @@ import { CONFIG } from 'src/config-global';
 import { paths } from 'src/routes/paths';
 
 import { AuthContext } from '../auth-context';
+import {
+  extractPlatformRolesFromToken,
+  getHighestPriorityRole,
+  toCurrentRoles,
+} from '../../utils/roles';
 
 // ----------------------------------------------------------------------
 
@@ -20,6 +25,8 @@ const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const ORG_ID_KEY = 'organizationId';
 const USER_ID_KEY = 'userId';
+const ORG_ROLE_KEY = 'orgRole';
+const PLATFORM_ROLE_KEY = 'platformRole';
 const KEYCLOAK_SIGN_IN_PATH = paths.auth.keycloak.signIn;
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -38,11 +45,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
     sessionStorage.removeItem(REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(ORG_ID_KEY);
     sessionStorage.removeItem(USER_ID_KEY);
+    sessionStorage.removeItem(ORG_ROLE_KEY);
+    sessionStorage.removeItem(PLATFORM_ROLE_KEY);
+  }, []);
+
+  const fetchMembership = useCallback(async (accessToken?: string | null) => {
+    if (typeof window === 'undefined' || !accessToken) return null;
+
+    const response = await fetch(`${window.location.origin}/org/v1/memberships/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Unable to load membership (${response.status})`);
+    }
+
+    const json = await response.json();
+    return json?.data ?? null;
   }, []);
 
   const syncAuthenticatedUser = useCallback(
     async (keycloak: Keycloak) => {
       const profile = await keycloak.loadUserProfile();
+      const tokenParsed = keycloak.tokenParsed as any;
+      const platformRoles = extractPlatformRolesFromToken(tokenParsed, CONFIG.keycloak.clientId);
+      const platformRole = getHighestPriorityRole(platformRoles);
+      const membership = tokenParsed?.org_id ? await fetchMembership(keycloak.token) : null;
+      const orgRole = membership?.role ?? null;
 
       const user = {
         id: profile.id || keycloak.subject,
@@ -51,20 +87,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         username: profile.username,
         accessToken: keycloak.token,
         refreshToken: keycloak.refreshToken,
-        role: 'admin',
-        org_id: keycloak.tokenParsed?.org_id,
+        role: orgRole || platformRole || null,
+        org_id: tokenParsed?.org_id,
+        orgRole,
+        platformRole,
+        platformRoles,
+        membership,
       };
 
       sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
       sessionStorage.setItem(REFRESH_TOKEN_KEY, keycloak.refreshToken || '');
       sessionStorage.setItem(ORG_ID_KEY, user.org_id || '');
       sessionStorage.setItem(USER_ID_KEY, user.id || '');
+      sessionStorage.setItem(ORG_ROLE_KEY, user.orgRole || '');
+      sessionStorage.setItem(PLATFORM_ROLE_KEY, user.platformRole || '');
 
       setState({ user, loading: false });
 
       return user;
     },
-    [setState]
+    [fetchMembership, setState]
   );
 
   const redirectToLogin = useCallback(() => {
@@ -215,6 +257,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       loading: status === 'loading',
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
+      currentRole: state.user?.orgRole || state.user?.platformRole || null,
+      currentRoles: toCurrentRoles(state.user),
       // Always redirect back to root — this matches the URL Keycloak is actually sending to.
       // Using a fixed URI avoids redirect_uri mismatches when login() is called from
       // different pathnames across the app.

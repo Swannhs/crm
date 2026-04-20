@@ -1,4 +1,4 @@
-import { createServiceApp } from "@mymanager/node-service-kit";
+import { createServiceApp, createRoleContextMiddleware, requireOrgRoles } from "@mymanager/node-service-kit";
 import { BillingController } from "./controllers/billing.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
@@ -8,38 +8,41 @@ const { app, logger } = createServiceApp({
 });
 
 const billingController = new BillingController();
+const auth = [identityMiddleware, createRoleContextMiddleware()];
+const readAccess = [...auth, requireOrgRoles(['org_viewer', 'org_staff', 'org_manager', 'org_admin', 'org_owner'])];
+const writeAccess = [...auth, requireOrgRoles(['org_staff', 'org_manager', 'org_admin', 'org_owner'])];
 
 // --- Routes ---
 
 // Invoices
 app.get("/v1/invoices", 
-  identityMiddleware, 
+  readAccess, 
   billingController.listInvoices
 );
 
 app.get("/v1/invoices/stats",
-  identityMiddleware,
+  readAccess,
   billingController.getInvoiceStats
 );
 
 app.get("/v1/invoices/:id", 
-  identityMiddleware,
+  readAccess,
   billingController.getInvoice
 );
 
 app.post("/v1/invoices", 
-  identityMiddleware, 
+  writeAccess, 
   billingController.createInvoice
 );
 
 // Payments
 app.get("/v1/payments",
-  identityMiddleware,
+  readAccess,
   billingController.listPayments
 );
 
 app.post("/v1/payments", 
-  identityMiddleware, 
+  writeAccess, 
   billingController.recordPayment
 );
 

@@ -16,7 +16,8 @@ export interface RoleBasedGuardProps {
   sx?: any;
   children?: ReactNode;
   hasContent?: boolean;
-  currentRole: string;
+  currentRole?: string | null;
+  currentRoles?: string[];
   acceptRoles: string[];
 }
 
@@ -25,9 +26,12 @@ export function RoleBasedGuard({
   children,
   hasContent,
   currentRole,
+  currentRoles,
   acceptRoles,
 }: RoleBasedGuardProps) {
-  if (typeof acceptRoles !== 'undefined' && !acceptRoles.includes(currentRole)) {
+  const activeRoles = currentRoles?.length ? currentRoles : currentRole ? [currentRole] : [];
+
+  if (typeof acceptRoles !== 'undefined' && !acceptRoles.some((role) => activeRoles.includes(role))) {
     return hasContent ? (
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
         <m.div variants={varBounce().in}>

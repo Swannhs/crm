@@ -9,6 +9,8 @@ interface AuthContextType {
   loading: boolean;
   authenticated: boolean;
   unauthenticated: boolean;
+  currentRole?: string | null;
+  currentRoles?: string[];
   checkUserSession?: () => Promise<void>;
   login?: () => void | Promise<void>;
   logout?: () => Promise<void>;
