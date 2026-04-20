@@ -514,3 +514,45 @@ export class OmniBroadcastController {
     }
   }
 }
+
+export class OmniWebhookController {
+  private service = new OmniWebhookService();
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const webhook = await this.service.create(req.body, req.identity.orgId);
+      return res.json({ success: true, data: webhook });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getAll(req: AuthenticatedRequest, res: Response) {
+    try {
+      const webhooks = await this.service.getAll(req.identity.orgId);
+      return res.json({ success: true, data: webhooks });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getLogs(req: AuthenticatedRequest, res: Response) {
+    try {
+      const logs = await this.service.getLogs(req.params.id);
+      return res.json({ success: true, data: logs });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  // Public endpoint for receiving webhooks
+  async receive(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const result = await this.service.handleWebhook(id, req.body, req.headers, req.app.get('logger') || console);
+      return res.status(result.status).json(result);
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}

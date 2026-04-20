@@ -248,3 +248,32 @@ model OmniBroadcastRecipient {
   @@index([status])
   @@map("omni_broadcast_recipients")
 }
+
+model OmniWebhook {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  name            String
+  secret          String   @default(uuid()) // For HMAC or simple token validation
+  workflowId      String?  @map("workflow_id") @db.Uuid
+  chatbotId       String?  @map("chatbot_id") @db.Uuid
+  isActive        Boolean  @default(true) @map("is_active")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@map("omni_webhooks")
+}
+
+model OmniWebhookLog {
+  id              String   @id @default(uuid()) @db.Uuid
+  webhookId       String   @map("webhook_id") @db.Uuid
+  payload         Json
+  headers         Json
+  status          Int
+  errorMessage    String?  @map("error_message")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([webhookId])
+  @@map("omni_webhook_logs")
+}

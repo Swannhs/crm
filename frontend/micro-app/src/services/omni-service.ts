@@ -88,6 +88,17 @@ export const omniAutomationService = {
   createTrigger: async (data: any) => {
     const response = await axiosInstance.post('/api/automation/v1/omni/triggers', data);
     return response.data?.data;
+  },
+
+  // Webhooks
+  getWebhooks: async () => {
+    const response = await axiosInstance.get('/api/automation/v1/omni/webhooks');
+    return response.data?.data || [];
+  },
+
+  getWebhookLogs: async (id: string) => {
+    const response = await axiosInstance.get(`/api/automation/v1/omni/webhooks/${id}/logs`);
+    return response.data?.data || [];
   }
 };
 

@@ -358,3 +358,48 @@ export class OmniContactFlowStateRepository {
     });
   }
 }
+
+export class OmniWebhookRepository {
+  async create(data: any) {
+    return db.omniWebhook.create({ data });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.omniWebhook.findMany({
+      where: { organizationId, isActive: true }
+    });
+  }
+
+  async findById(id: string) {
+    return db.omniWebhook.findUnique({
+      where: { id }
+    });
+  }
+
+  async update(id: string, data: any) {
+    return db.omniWebhook.update({
+      where: { id },
+      data
+    });
+  }
+
+  async delete(id: string) {
+    return db.omniWebhook.delete({
+      where: { id }
+    });
+  }
+
+  async log(data: { webhookId: string; payload: any; headers: any; status: number; errorMessage?: string }) {
+    return db.omniWebhookLog.create({
+      data
+    });
+  }
+
+  async getLogs(webhookId: string, limit = 100) {
+    return db.omniWebhookLog.findMany({
+      where: { webhookId },
+      orderBy: { createdAt: 'desc' },
+      take: limit
+    });
+  }
+}

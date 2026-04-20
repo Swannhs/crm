@@ -314,6 +314,29 @@ exports.Prisma.OmniBroadcastRecipientScalarFieldEnum = {
   processedAt: 'processedAt'
 };
 
+exports.Prisma.OmniWebhookScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  secret: 'secret',
+  workflowId: 'workflowId',
+  chatbotId: 'chatbotId',
+  isActive: 'isActive',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OmniWebhookLogScalarFieldEnum = {
+  id: 'id',
+  webhookId: 'webhookId',
+  payload: 'payload',
+  headers: 'headers',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -357,7 +380,9 @@ exports.Prisma.ModelName = {
   OmniContactFlowState: 'OmniContactFlowState',
   OmniKeywordTrigger: 'OmniKeywordTrigger',
   OmniBroadcast: 'OmniBroadcast',
-  OmniBroadcastRecipient: 'OmniBroadcastRecipient'
+  OmniBroadcastRecipient: 'OmniBroadcastRecipient',
+  OmniWebhook: 'OmniWebhook',
+  OmniWebhookLog: 'OmniWebhookLog'
 };
 
 /**

@@ -5,21 +5,26 @@ import { useEffect } from 'react';
 import { useRouter } from 'src/routes/hooks';
 
 import { CONFIG } from 'src/config-global';
+import { paths } from 'src/routes/paths';
 import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
 export default function Page() {
   const router = useRouter();
-  const { loading } = useAuthContext();
+  const { loading, authenticated } = useAuthContext();
 
   useEffect(() => {
     // Wait for Keycloak to resolve (processes any ?code callback automatically).
-    // Then send to the dashboard — AuthGuard handles the sign-in redirect if not authenticated.
+    // Then route directly based on auth state to avoid dashboard/auth ping-pong.
     if (!loading) {
-      router.replace(CONFIG.auth.redirectPath);
+      if (authenticated) {
+        router.replace(CONFIG.auth.redirectPath);
+      } else {
+        router.replace(`${paths.auth.keycloak.signIn}?returnTo=${encodeURIComponent(CONFIG.auth.redirectPath)}`);
+      }
     }
-  }, [loading, router]);
+  }, [authenticated, loading, router]);
 
   return null;
 }

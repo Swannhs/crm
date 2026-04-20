@@ -73,6 +73,16 @@ export type OmniBroadcast = $Result.DefaultSelection<Prisma.$OmniBroadcastPayloa
  * 
  */
 export type OmniBroadcastRecipient = $Result.DefaultSelection<Prisma.$OmniBroadcastRecipientPayload>
+/**
+ * Model OmniWebhook
+ * 
+ */
+export type OmniWebhook = $Result.DefaultSelection<Prisma.$OmniWebhookPayload>
+/**
+ * Model OmniWebhookLog
+ * 
+ */
+export type OmniWebhookLog = $Result.DefaultSelection<Prisma.$OmniWebhookLogPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -311,6 +321,26 @@ export class PrismaClient<
     * ```
     */
   get omniBroadcastRecipient(): Prisma.OmniBroadcastRecipientDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.omniWebhook`: Exposes CRUD operations for the **OmniWebhook** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OmniWebhooks
+    * const omniWebhooks = await prisma.omniWebhook.findMany()
+    * ```
+    */
+  get omniWebhook(): Prisma.OmniWebhookDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.omniWebhookLog`: Exposes CRUD operations for the **OmniWebhookLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OmniWebhookLogs
+    * const omniWebhookLogs = await prisma.omniWebhookLog.findMany()
+    * ```
+    */
+  get omniWebhookLog(): Prisma.OmniWebhookLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -763,7 +793,9 @@ export namespace Prisma {
     OmniContactFlowState: 'OmniContactFlowState',
     OmniKeywordTrigger: 'OmniKeywordTrigger',
     OmniBroadcast: 'OmniBroadcast',
-    OmniBroadcastRecipient: 'OmniBroadcastRecipient'
+    OmniBroadcastRecipient: 'OmniBroadcastRecipient',
+    OmniWebhook: 'OmniWebhook',
+    OmniWebhookLog: 'OmniWebhookLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -782,7 +814,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "automation" | "workflow" | "workflowNode" | "workflowWorkspace" | "workflowStartAction" | "workflowActivityLog" | "workflowExecutionHistory" | "omniChatbot" | "omniContactFlowState" | "omniKeywordTrigger" | "omniBroadcast" | "omniBroadcastRecipient"
+      modelProps: "automation" | "workflow" | "workflowNode" | "workflowWorkspace" | "workflowStartAction" | "workflowActivityLog" | "workflowExecutionHistory" | "omniChatbot" | "omniContactFlowState" | "omniKeywordTrigger" | "omniBroadcast" | "omniBroadcastRecipient" | "omniWebhook" | "omniWebhookLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1674,6 +1706,154 @@ export namespace Prisma {
           }
         }
       }
+      OmniWebhook: {
+        payload: Prisma.$OmniWebhookPayload<ExtArgs>
+        fields: Prisma.OmniWebhookFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OmniWebhookFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OmniWebhookFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>
+          }
+          findFirst: {
+            args: Prisma.OmniWebhookFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OmniWebhookFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>
+          }
+          findMany: {
+            args: Prisma.OmniWebhookFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>[]
+          }
+          create: {
+            args: Prisma.OmniWebhookCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>
+          }
+          createMany: {
+            args: Prisma.OmniWebhookCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OmniWebhookCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>[]
+          }
+          delete: {
+            args: Prisma.OmniWebhookDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>
+          }
+          update: {
+            args: Prisma.OmniWebhookUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>
+          }
+          deleteMany: {
+            args: Prisma.OmniWebhookDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OmniWebhookUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OmniWebhookUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>[]
+          }
+          upsert: {
+            args: Prisma.OmniWebhookUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookPayload>
+          }
+          aggregate: {
+            args: Prisma.OmniWebhookAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOmniWebhook>
+          }
+          groupBy: {
+            args: Prisma.OmniWebhookGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OmniWebhookGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OmniWebhookCountArgs<ExtArgs>
+            result: $Utils.Optional<OmniWebhookCountAggregateOutputType> | number
+          }
+        }
+      }
+      OmniWebhookLog: {
+        payload: Prisma.$OmniWebhookLogPayload<ExtArgs>
+        fields: Prisma.OmniWebhookLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OmniWebhookLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OmniWebhookLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>
+          }
+          findFirst: {
+            args: Prisma.OmniWebhookLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OmniWebhookLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>
+          }
+          findMany: {
+            args: Prisma.OmniWebhookLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>[]
+          }
+          create: {
+            args: Prisma.OmniWebhookLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>
+          }
+          createMany: {
+            args: Prisma.OmniWebhookLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OmniWebhookLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>[]
+          }
+          delete: {
+            args: Prisma.OmniWebhookLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>
+          }
+          update: {
+            args: Prisma.OmniWebhookLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.OmniWebhookLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OmniWebhookLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OmniWebhookLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.OmniWebhookLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniWebhookLogPayload>
+          }
+          aggregate: {
+            args: Prisma.OmniWebhookLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOmniWebhookLog>
+          }
+          groupBy: {
+            args: Prisma.OmniWebhookLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OmniWebhookLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OmniWebhookLogCountArgs<ExtArgs>
+            result: $Utils.Optional<OmniWebhookLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1782,6 +1962,8 @@ export namespace Prisma {
     omniKeywordTrigger?: OmniKeywordTriggerOmit
     omniBroadcast?: OmniBroadcastOmit
     omniBroadcastRecipient?: OmniBroadcastRecipientOmit
+    omniWebhook?: OmniWebhookOmit
+    omniWebhookLog?: OmniWebhookLogOmit
   }
 
   /* Types for Logging */
@@ -15236,6 +15418,2109 @@ export namespace Prisma {
 
 
   /**
+   * Model OmniWebhook
+   */
+
+  export type AggregateOmniWebhook = {
+    _count: OmniWebhookCountAggregateOutputType | null
+    _min: OmniWebhookMinAggregateOutputType | null
+    _max: OmniWebhookMaxAggregateOutputType | null
+  }
+
+  export type OmniWebhookMinAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    name: string | null
+    secret: string | null
+    workflowId: string | null
+    chatbotId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniWebhookMaxAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    name: string | null
+    secret: string | null
+    workflowId: string | null
+    chatbotId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniWebhookCountAggregateOutputType = {
+    id: number
+    organizationId: number
+    name: number
+    secret: number
+    workflowId: number
+    chatbotId: number
+    isActive: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type OmniWebhookMinAggregateInputType = {
+    id?: true
+    organizationId?: true
+    name?: true
+    secret?: true
+    workflowId?: true
+    chatbotId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniWebhookMaxAggregateInputType = {
+    id?: true
+    organizationId?: true
+    name?: true
+    secret?: true
+    workflowId?: true
+    chatbotId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniWebhookCountAggregateInputType = {
+    id?: true
+    organizationId?: true
+    name?: true
+    secret?: true
+    workflowId?: true
+    chatbotId?: true
+    isActive?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type OmniWebhookAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniWebhook to aggregate.
+     */
+    where?: OmniWebhookWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhooks to fetch.
+     */
+    orderBy?: OmniWebhookOrderByWithRelationInput | OmniWebhookOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OmniWebhookWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhooks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhooks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OmniWebhooks
+    **/
+    _count?: true | OmniWebhookCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OmniWebhookMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OmniWebhookMaxAggregateInputType
+  }
+
+  export type GetOmniWebhookAggregateType<T extends OmniWebhookAggregateArgs> = {
+        [P in keyof T & keyof AggregateOmniWebhook]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOmniWebhook[P]>
+      : GetScalarType<T[P], AggregateOmniWebhook[P]>
+  }
+
+
+
+
+  export type OmniWebhookGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OmniWebhookWhereInput
+    orderBy?: OmniWebhookOrderByWithAggregationInput | OmniWebhookOrderByWithAggregationInput[]
+    by: OmniWebhookScalarFieldEnum[] | OmniWebhookScalarFieldEnum
+    having?: OmniWebhookScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OmniWebhookCountAggregateInputType | true
+    _min?: OmniWebhookMinAggregateInputType
+    _max?: OmniWebhookMaxAggregateInputType
+  }
+
+  export type OmniWebhookGroupByOutputType = {
+    id: string
+    organizationId: string
+    name: string
+    secret: string
+    workflowId: string | null
+    chatbotId: string | null
+    isActive: boolean
+    metadata: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: OmniWebhookCountAggregateOutputType | null
+    _min: OmniWebhookMinAggregateOutputType | null
+    _max: OmniWebhookMaxAggregateOutputType | null
+  }
+
+  type GetOmniWebhookGroupByPayload<T extends OmniWebhookGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OmniWebhookGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OmniWebhookGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OmniWebhookGroupByOutputType[P]>
+            : GetScalarType<T[P], OmniWebhookGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OmniWebhookSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    secret?: boolean
+    workflowId?: boolean
+    chatbotId?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniWebhook"]>
+
+  export type OmniWebhookSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    secret?: boolean
+    workflowId?: boolean
+    chatbotId?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniWebhook"]>
+
+  export type OmniWebhookSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    secret?: boolean
+    workflowId?: boolean
+    chatbotId?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniWebhook"]>
+
+  export type OmniWebhookSelectScalar = {
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    secret?: boolean
+    workflowId?: boolean
+    chatbotId?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type OmniWebhookOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "name" | "secret" | "workflowId" | "chatbotId" | "isActive" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["omniWebhook"]>
+
+  export type $OmniWebhookPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OmniWebhook"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      organizationId: string
+      name: string
+      secret: string
+      workflowId: string | null
+      chatbotId: string | null
+      isActive: boolean
+      metadata: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["omniWebhook"]>
+    composites: {}
+  }
+
+  type OmniWebhookGetPayload<S extends boolean | null | undefined | OmniWebhookDefaultArgs> = $Result.GetResult<Prisma.$OmniWebhookPayload, S>
+
+  type OmniWebhookCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OmniWebhookFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OmniWebhookCountAggregateInputType | true
+    }
+
+  export interface OmniWebhookDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OmniWebhook'], meta: { name: 'OmniWebhook' } }
+    /**
+     * Find zero or one OmniWebhook that matches the filter.
+     * @param {OmniWebhookFindUniqueArgs} args - Arguments to find a OmniWebhook
+     * @example
+     * // Get one OmniWebhook
+     * const omniWebhook = await prisma.omniWebhook.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OmniWebhookFindUniqueArgs>(args: SelectSubset<T, OmniWebhookFindUniqueArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OmniWebhook that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OmniWebhookFindUniqueOrThrowArgs} args - Arguments to find a OmniWebhook
+     * @example
+     * // Get one OmniWebhook
+     * const omniWebhook = await prisma.omniWebhook.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OmniWebhookFindUniqueOrThrowArgs>(args: SelectSubset<T, OmniWebhookFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniWebhook that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookFindFirstArgs} args - Arguments to find a OmniWebhook
+     * @example
+     * // Get one OmniWebhook
+     * const omniWebhook = await prisma.omniWebhook.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OmniWebhookFindFirstArgs>(args?: SelectSubset<T, OmniWebhookFindFirstArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniWebhook that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookFindFirstOrThrowArgs} args - Arguments to find a OmniWebhook
+     * @example
+     * // Get one OmniWebhook
+     * const omniWebhook = await prisma.omniWebhook.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OmniWebhookFindFirstOrThrowArgs>(args?: SelectSubset<T, OmniWebhookFindFirstOrThrowArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OmniWebhooks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OmniWebhooks
+     * const omniWebhooks = await prisma.omniWebhook.findMany()
+     * 
+     * // Get first 10 OmniWebhooks
+     * const omniWebhooks = await prisma.omniWebhook.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const omniWebhookWithIdOnly = await prisma.omniWebhook.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OmniWebhookFindManyArgs>(args?: SelectSubset<T, OmniWebhookFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OmniWebhook.
+     * @param {OmniWebhookCreateArgs} args - Arguments to create a OmniWebhook.
+     * @example
+     * // Create one OmniWebhook
+     * const OmniWebhook = await prisma.omniWebhook.create({
+     *   data: {
+     *     // ... data to create a OmniWebhook
+     *   }
+     * })
+     * 
+     */
+    create<T extends OmniWebhookCreateArgs>(args: SelectSubset<T, OmniWebhookCreateArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OmniWebhooks.
+     * @param {OmniWebhookCreateManyArgs} args - Arguments to create many OmniWebhooks.
+     * @example
+     * // Create many OmniWebhooks
+     * const omniWebhook = await prisma.omniWebhook.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OmniWebhookCreateManyArgs>(args?: SelectSubset<T, OmniWebhookCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OmniWebhooks and returns the data saved in the database.
+     * @param {OmniWebhookCreateManyAndReturnArgs} args - Arguments to create many OmniWebhooks.
+     * @example
+     * // Create many OmniWebhooks
+     * const omniWebhook = await prisma.omniWebhook.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OmniWebhooks and only return the `id`
+     * const omniWebhookWithIdOnly = await prisma.omniWebhook.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OmniWebhookCreateManyAndReturnArgs>(args?: SelectSubset<T, OmniWebhookCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OmniWebhook.
+     * @param {OmniWebhookDeleteArgs} args - Arguments to delete one OmniWebhook.
+     * @example
+     * // Delete one OmniWebhook
+     * const OmniWebhook = await prisma.omniWebhook.delete({
+     *   where: {
+     *     // ... filter to delete one OmniWebhook
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OmniWebhookDeleteArgs>(args: SelectSubset<T, OmniWebhookDeleteArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OmniWebhook.
+     * @param {OmniWebhookUpdateArgs} args - Arguments to update one OmniWebhook.
+     * @example
+     * // Update one OmniWebhook
+     * const omniWebhook = await prisma.omniWebhook.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OmniWebhookUpdateArgs>(args: SelectSubset<T, OmniWebhookUpdateArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OmniWebhooks.
+     * @param {OmniWebhookDeleteManyArgs} args - Arguments to filter OmniWebhooks to delete.
+     * @example
+     * // Delete a few OmniWebhooks
+     * const { count } = await prisma.omniWebhook.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OmniWebhookDeleteManyArgs>(args?: SelectSubset<T, OmniWebhookDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniWebhooks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OmniWebhooks
+     * const omniWebhook = await prisma.omniWebhook.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OmniWebhookUpdateManyArgs>(args: SelectSubset<T, OmniWebhookUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniWebhooks and returns the data updated in the database.
+     * @param {OmniWebhookUpdateManyAndReturnArgs} args - Arguments to update many OmniWebhooks.
+     * @example
+     * // Update many OmniWebhooks
+     * const omniWebhook = await prisma.omniWebhook.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OmniWebhooks and only return the `id`
+     * const omniWebhookWithIdOnly = await prisma.omniWebhook.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OmniWebhookUpdateManyAndReturnArgs>(args: SelectSubset<T, OmniWebhookUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OmniWebhook.
+     * @param {OmniWebhookUpsertArgs} args - Arguments to update or create a OmniWebhook.
+     * @example
+     * // Update or create a OmniWebhook
+     * const omniWebhook = await prisma.omniWebhook.upsert({
+     *   create: {
+     *     // ... data to create a OmniWebhook
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OmniWebhook we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OmniWebhookUpsertArgs>(args: SelectSubset<T, OmniWebhookUpsertArgs<ExtArgs>>): Prisma__OmniWebhookClient<$Result.GetResult<Prisma.$OmniWebhookPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OmniWebhooks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookCountArgs} args - Arguments to filter OmniWebhooks to count.
+     * @example
+     * // Count the number of OmniWebhooks
+     * const count = await prisma.omniWebhook.count({
+     *   where: {
+     *     // ... the filter for the OmniWebhooks we want to count
+     *   }
+     * })
+    **/
+    count<T extends OmniWebhookCountArgs>(
+      args?: Subset<T, OmniWebhookCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OmniWebhookCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OmniWebhook.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OmniWebhookAggregateArgs>(args: Subset<T, OmniWebhookAggregateArgs>): Prisma.PrismaPromise<GetOmniWebhookAggregateType<T>>
+
+    /**
+     * Group by OmniWebhook.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OmniWebhookGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OmniWebhookGroupByArgs['orderBy'] }
+        : { orderBy?: OmniWebhookGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OmniWebhookGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOmniWebhookGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OmniWebhook model
+   */
+  readonly fields: OmniWebhookFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OmniWebhook.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OmniWebhookClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OmniWebhook model
+   */
+  interface OmniWebhookFieldRefs {
+    readonly id: FieldRef<"OmniWebhook", 'String'>
+    readonly organizationId: FieldRef<"OmniWebhook", 'String'>
+    readonly name: FieldRef<"OmniWebhook", 'String'>
+    readonly secret: FieldRef<"OmniWebhook", 'String'>
+    readonly workflowId: FieldRef<"OmniWebhook", 'String'>
+    readonly chatbotId: FieldRef<"OmniWebhook", 'String'>
+    readonly isActive: FieldRef<"OmniWebhook", 'Boolean'>
+    readonly metadata: FieldRef<"OmniWebhook", 'Json'>
+    readonly createdAt: FieldRef<"OmniWebhook", 'DateTime'>
+    readonly updatedAt: FieldRef<"OmniWebhook", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OmniWebhook findUnique
+   */
+  export type OmniWebhookFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhook to fetch.
+     */
+    where: OmniWebhookWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhook findUniqueOrThrow
+   */
+  export type OmniWebhookFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhook to fetch.
+     */
+    where: OmniWebhookWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhook findFirst
+   */
+  export type OmniWebhookFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhook to fetch.
+     */
+    where?: OmniWebhookWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhooks to fetch.
+     */
+    orderBy?: OmniWebhookOrderByWithRelationInput | OmniWebhookOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniWebhooks.
+     */
+    cursor?: OmniWebhookWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhooks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhooks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniWebhooks.
+     */
+    distinct?: OmniWebhookScalarFieldEnum | OmniWebhookScalarFieldEnum[]
+  }
+
+  /**
+   * OmniWebhook findFirstOrThrow
+   */
+  export type OmniWebhookFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhook to fetch.
+     */
+    where?: OmniWebhookWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhooks to fetch.
+     */
+    orderBy?: OmniWebhookOrderByWithRelationInput | OmniWebhookOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniWebhooks.
+     */
+    cursor?: OmniWebhookWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhooks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhooks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniWebhooks.
+     */
+    distinct?: OmniWebhookScalarFieldEnum | OmniWebhookScalarFieldEnum[]
+  }
+
+  /**
+   * OmniWebhook findMany
+   */
+  export type OmniWebhookFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhooks to fetch.
+     */
+    where?: OmniWebhookWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhooks to fetch.
+     */
+    orderBy?: OmniWebhookOrderByWithRelationInput | OmniWebhookOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OmniWebhooks.
+     */
+    cursor?: OmniWebhookWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhooks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhooks.
+     */
+    skip?: number
+    distinct?: OmniWebhookScalarFieldEnum | OmniWebhookScalarFieldEnum[]
+  }
+
+  /**
+   * OmniWebhook create
+   */
+  export type OmniWebhookCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * The data needed to create a OmniWebhook.
+     */
+    data: XOR<OmniWebhookCreateInput, OmniWebhookUncheckedCreateInput>
+  }
+
+  /**
+   * OmniWebhook createMany
+   */
+  export type OmniWebhookCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OmniWebhooks.
+     */
+    data: OmniWebhookCreateManyInput | OmniWebhookCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniWebhook createManyAndReturn
+   */
+  export type OmniWebhookCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * The data used to create many OmniWebhooks.
+     */
+    data: OmniWebhookCreateManyInput | OmniWebhookCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniWebhook update
+   */
+  export type OmniWebhookUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * The data needed to update a OmniWebhook.
+     */
+    data: XOR<OmniWebhookUpdateInput, OmniWebhookUncheckedUpdateInput>
+    /**
+     * Choose, which OmniWebhook to update.
+     */
+    where: OmniWebhookWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhook updateMany
+   */
+  export type OmniWebhookUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OmniWebhooks.
+     */
+    data: XOR<OmniWebhookUpdateManyMutationInput, OmniWebhookUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniWebhooks to update
+     */
+    where?: OmniWebhookWhereInput
+    /**
+     * Limit how many OmniWebhooks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniWebhook updateManyAndReturn
+   */
+  export type OmniWebhookUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * The data used to update OmniWebhooks.
+     */
+    data: XOR<OmniWebhookUpdateManyMutationInput, OmniWebhookUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniWebhooks to update
+     */
+    where?: OmniWebhookWhereInput
+    /**
+     * Limit how many OmniWebhooks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniWebhook upsert
+   */
+  export type OmniWebhookUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * The filter to search for the OmniWebhook to update in case it exists.
+     */
+    where: OmniWebhookWhereUniqueInput
+    /**
+     * In case the OmniWebhook found by the `where` argument doesn't exist, create a new OmniWebhook with this data.
+     */
+    create: XOR<OmniWebhookCreateInput, OmniWebhookUncheckedCreateInput>
+    /**
+     * In case the OmniWebhook was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OmniWebhookUpdateInput, OmniWebhookUncheckedUpdateInput>
+  }
+
+  /**
+   * OmniWebhook delete
+   */
+  export type OmniWebhookDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+    /**
+     * Filter which OmniWebhook to delete.
+     */
+    where: OmniWebhookWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhook deleteMany
+   */
+  export type OmniWebhookDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniWebhooks to delete
+     */
+    where?: OmniWebhookWhereInput
+    /**
+     * Limit how many OmniWebhooks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniWebhook without action
+   */
+  export type OmniWebhookDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhook
+     */
+    select?: OmniWebhookSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhook
+     */
+    omit?: OmniWebhookOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OmniWebhookLog
+   */
+
+  export type AggregateOmniWebhookLog = {
+    _count: OmniWebhookLogCountAggregateOutputType | null
+    _avg: OmniWebhookLogAvgAggregateOutputType | null
+    _sum: OmniWebhookLogSumAggregateOutputType | null
+    _min: OmniWebhookLogMinAggregateOutputType | null
+    _max: OmniWebhookLogMaxAggregateOutputType | null
+  }
+
+  export type OmniWebhookLogAvgAggregateOutputType = {
+    status: number | null
+  }
+
+  export type OmniWebhookLogSumAggregateOutputType = {
+    status: number | null
+  }
+
+  export type OmniWebhookLogMinAggregateOutputType = {
+    id: string | null
+    webhookId: string | null
+    status: number | null
+    errorMessage: string | null
+    createdAt: Date | null
+  }
+
+  export type OmniWebhookLogMaxAggregateOutputType = {
+    id: string | null
+    webhookId: string | null
+    status: number | null
+    errorMessage: string | null
+    createdAt: Date | null
+  }
+
+  export type OmniWebhookLogCountAggregateOutputType = {
+    id: number
+    webhookId: number
+    payload: number
+    headers: number
+    status: number
+    errorMessage: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type OmniWebhookLogAvgAggregateInputType = {
+    status?: true
+  }
+
+  export type OmniWebhookLogSumAggregateInputType = {
+    status?: true
+  }
+
+  export type OmniWebhookLogMinAggregateInputType = {
+    id?: true
+    webhookId?: true
+    status?: true
+    errorMessage?: true
+    createdAt?: true
+  }
+
+  export type OmniWebhookLogMaxAggregateInputType = {
+    id?: true
+    webhookId?: true
+    status?: true
+    errorMessage?: true
+    createdAt?: true
+  }
+
+  export type OmniWebhookLogCountAggregateInputType = {
+    id?: true
+    webhookId?: true
+    payload?: true
+    headers?: true
+    status?: true
+    errorMessage?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type OmniWebhookLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniWebhookLog to aggregate.
+     */
+    where?: OmniWebhookLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhookLogs to fetch.
+     */
+    orderBy?: OmniWebhookLogOrderByWithRelationInput | OmniWebhookLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OmniWebhookLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhookLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhookLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OmniWebhookLogs
+    **/
+    _count?: true | OmniWebhookLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: OmniWebhookLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: OmniWebhookLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OmniWebhookLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OmniWebhookLogMaxAggregateInputType
+  }
+
+  export type GetOmniWebhookLogAggregateType<T extends OmniWebhookLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateOmniWebhookLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOmniWebhookLog[P]>
+      : GetScalarType<T[P], AggregateOmniWebhookLog[P]>
+  }
+
+
+
+
+  export type OmniWebhookLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OmniWebhookLogWhereInput
+    orderBy?: OmniWebhookLogOrderByWithAggregationInput | OmniWebhookLogOrderByWithAggregationInput[]
+    by: OmniWebhookLogScalarFieldEnum[] | OmniWebhookLogScalarFieldEnum
+    having?: OmniWebhookLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OmniWebhookLogCountAggregateInputType | true
+    _avg?: OmniWebhookLogAvgAggregateInputType
+    _sum?: OmniWebhookLogSumAggregateInputType
+    _min?: OmniWebhookLogMinAggregateInputType
+    _max?: OmniWebhookLogMaxAggregateInputType
+  }
+
+  export type OmniWebhookLogGroupByOutputType = {
+    id: string
+    webhookId: string
+    payload: JsonValue
+    headers: JsonValue
+    status: number
+    errorMessage: string | null
+    createdAt: Date
+    _count: OmniWebhookLogCountAggregateOutputType | null
+    _avg: OmniWebhookLogAvgAggregateOutputType | null
+    _sum: OmniWebhookLogSumAggregateOutputType | null
+    _min: OmniWebhookLogMinAggregateOutputType | null
+    _max: OmniWebhookLogMaxAggregateOutputType | null
+  }
+
+  type GetOmniWebhookLogGroupByPayload<T extends OmniWebhookLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OmniWebhookLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OmniWebhookLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OmniWebhookLogGroupByOutputType[P]>
+            : GetScalarType<T[P], OmniWebhookLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OmniWebhookLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    webhookId?: boolean
+    payload?: boolean
+    headers?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["omniWebhookLog"]>
+
+  export type OmniWebhookLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    webhookId?: boolean
+    payload?: boolean
+    headers?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["omniWebhookLog"]>
+
+  export type OmniWebhookLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    webhookId?: boolean
+    payload?: boolean
+    headers?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["omniWebhookLog"]>
+
+  export type OmniWebhookLogSelectScalar = {
+    id?: boolean
+    webhookId?: boolean
+    payload?: boolean
+    headers?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    createdAt?: boolean
+  }
+
+  export type OmniWebhookLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "webhookId" | "payload" | "headers" | "status" | "errorMessage" | "createdAt", ExtArgs["result"]["omniWebhookLog"]>
+
+  export type $OmniWebhookLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OmniWebhookLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      webhookId: string
+      payload: Prisma.JsonValue
+      headers: Prisma.JsonValue
+      status: number
+      errorMessage: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["omniWebhookLog"]>
+    composites: {}
+  }
+
+  type OmniWebhookLogGetPayload<S extends boolean | null | undefined | OmniWebhookLogDefaultArgs> = $Result.GetResult<Prisma.$OmniWebhookLogPayload, S>
+
+  type OmniWebhookLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OmniWebhookLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OmniWebhookLogCountAggregateInputType | true
+    }
+
+  export interface OmniWebhookLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OmniWebhookLog'], meta: { name: 'OmniWebhookLog' } }
+    /**
+     * Find zero or one OmniWebhookLog that matches the filter.
+     * @param {OmniWebhookLogFindUniqueArgs} args - Arguments to find a OmniWebhookLog
+     * @example
+     * // Get one OmniWebhookLog
+     * const omniWebhookLog = await prisma.omniWebhookLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OmniWebhookLogFindUniqueArgs>(args: SelectSubset<T, OmniWebhookLogFindUniqueArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OmniWebhookLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OmniWebhookLogFindUniqueOrThrowArgs} args - Arguments to find a OmniWebhookLog
+     * @example
+     * // Get one OmniWebhookLog
+     * const omniWebhookLog = await prisma.omniWebhookLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OmniWebhookLogFindUniqueOrThrowArgs>(args: SelectSubset<T, OmniWebhookLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniWebhookLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookLogFindFirstArgs} args - Arguments to find a OmniWebhookLog
+     * @example
+     * // Get one OmniWebhookLog
+     * const omniWebhookLog = await prisma.omniWebhookLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OmniWebhookLogFindFirstArgs>(args?: SelectSubset<T, OmniWebhookLogFindFirstArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniWebhookLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookLogFindFirstOrThrowArgs} args - Arguments to find a OmniWebhookLog
+     * @example
+     * // Get one OmniWebhookLog
+     * const omniWebhookLog = await prisma.omniWebhookLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OmniWebhookLogFindFirstOrThrowArgs>(args?: SelectSubset<T, OmniWebhookLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OmniWebhookLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OmniWebhookLogs
+     * const omniWebhookLogs = await prisma.omniWebhookLog.findMany()
+     * 
+     * // Get first 10 OmniWebhookLogs
+     * const omniWebhookLogs = await prisma.omniWebhookLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const omniWebhookLogWithIdOnly = await prisma.omniWebhookLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OmniWebhookLogFindManyArgs>(args?: SelectSubset<T, OmniWebhookLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OmniWebhookLog.
+     * @param {OmniWebhookLogCreateArgs} args - Arguments to create a OmniWebhookLog.
+     * @example
+     * // Create one OmniWebhookLog
+     * const OmniWebhookLog = await prisma.omniWebhookLog.create({
+     *   data: {
+     *     // ... data to create a OmniWebhookLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends OmniWebhookLogCreateArgs>(args: SelectSubset<T, OmniWebhookLogCreateArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OmniWebhookLogs.
+     * @param {OmniWebhookLogCreateManyArgs} args - Arguments to create many OmniWebhookLogs.
+     * @example
+     * // Create many OmniWebhookLogs
+     * const omniWebhookLog = await prisma.omniWebhookLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OmniWebhookLogCreateManyArgs>(args?: SelectSubset<T, OmniWebhookLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OmniWebhookLogs and returns the data saved in the database.
+     * @param {OmniWebhookLogCreateManyAndReturnArgs} args - Arguments to create many OmniWebhookLogs.
+     * @example
+     * // Create many OmniWebhookLogs
+     * const omniWebhookLog = await prisma.omniWebhookLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OmniWebhookLogs and only return the `id`
+     * const omniWebhookLogWithIdOnly = await prisma.omniWebhookLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OmniWebhookLogCreateManyAndReturnArgs>(args?: SelectSubset<T, OmniWebhookLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OmniWebhookLog.
+     * @param {OmniWebhookLogDeleteArgs} args - Arguments to delete one OmniWebhookLog.
+     * @example
+     * // Delete one OmniWebhookLog
+     * const OmniWebhookLog = await prisma.omniWebhookLog.delete({
+     *   where: {
+     *     // ... filter to delete one OmniWebhookLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OmniWebhookLogDeleteArgs>(args: SelectSubset<T, OmniWebhookLogDeleteArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OmniWebhookLog.
+     * @param {OmniWebhookLogUpdateArgs} args - Arguments to update one OmniWebhookLog.
+     * @example
+     * // Update one OmniWebhookLog
+     * const omniWebhookLog = await prisma.omniWebhookLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OmniWebhookLogUpdateArgs>(args: SelectSubset<T, OmniWebhookLogUpdateArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OmniWebhookLogs.
+     * @param {OmniWebhookLogDeleteManyArgs} args - Arguments to filter OmniWebhookLogs to delete.
+     * @example
+     * // Delete a few OmniWebhookLogs
+     * const { count } = await prisma.omniWebhookLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OmniWebhookLogDeleteManyArgs>(args?: SelectSubset<T, OmniWebhookLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniWebhookLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OmniWebhookLogs
+     * const omniWebhookLog = await prisma.omniWebhookLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OmniWebhookLogUpdateManyArgs>(args: SelectSubset<T, OmniWebhookLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniWebhookLogs and returns the data updated in the database.
+     * @param {OmniWebhookLogUpdateManyAndReturnArgs} args - Arguments to update many OmniWebhookLogs.
+     * @example
+     * // Update many OmniWebhookLogs
+     * const omniWebhookLog = await prisma.omniWebhookLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OmniWebhookLogs and only return the `id`
+     * const omniWebhookLogWithIdOnly = await prisma.omniWebhookLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OmniWebhookLogUpdateManyAndReturnArgs>(args: SelectSubset<T, OmniWebhookLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OmniWebhookLog.
+     * @param {OmniWebhookLogUpsertArgs} args - Arguments to update or create a OmniWebhookLog.
+     * @example
+     * // Update or create a OmniWebhookLog
+     * const omniWebhookLog = await prisma.omniWebhookLog.upsert({
+     *   create: {
+     *     // ... data to create a OmniWebhookLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OmniWebhookLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OmniWebhookLogUpsertArgs>(args: SelectSubset<T, OmniWebhookLogUpsertArgs<ExtArgs>>): Prisma__OmniWebhookLogClient<$Result.GetResult<Prisma.$OmniWebhookLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OmniWebhookLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookLogCountArgs} args - Arguments to filter OmniWebhookLogs to count.
+     * @example
+     * // Count the number of OmniWebhookLogs
+     * const count = await prisma.omniWebhookLog.count({
+     *   where: {
+     *     // ... the filter for the OmniWebhookLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends OmniWebhookLogCountArgs>(
+      args?: Subset<T, OmniWebhookLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OmniWebhookLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OmniWebhookLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OmniWebhookLogAggregateArgs>(args: Subset<T, OmniWebhookLogAggregateArgs>): Prisma.PrismaPromise<GetOmniWebhookLogAggregateType<T>>
+
+    /**
+     * Group by OmniWebhookLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniWebhookLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OmniWebhookLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OmniWebhookLogGroupByArgs['orderBy'] }
+        : { orderBy?: OmniWebhookLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OmniWebhookLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOmniWebhookLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OmniWebhookLog model
+   */
+  readonly fields: OmniWebhookLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OmniWebhookLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OmniWebhookLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OmniWebhookLog model
+   */
+  interface OmniWebhookLogFieldRefs {
+    readonly id: FieldRef<"OmniWebhookLog", 'String'>
+    readonly webhookId: FieldRef<"OmniWebhookLog", 'String'>
+    readonly payload: FieldRef<"OmniWebhookLog", 'Json'>
+    readonly headers: FieldRef<"OmniWebhookLog", 'Json'>
+    readonly status: FieldRef<"OmniWebhookLog", 'Int'>
+    readonly errorMessage: FieldRef<"OmniWebhookLog", 'String'>
+    readonly createdAt: FieldRef<"OmniWebhookLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OmniWebhookLog findUnique
+   */
+  export type OmniWebhookLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhookLog to fetch.
+     */
+    where: OmniWebhookLogWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhookLog findUniqueOrThrow
+   */
+  export type OmniWebhookLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhookLog to fetch.
+     */
+    where: OmniWebhookLogWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhookLog findFirst
+   */
+  export type OmniWebhookLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhookLog to fetch.
+     */
+    where?: OmniWebhookLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhookLogs to fetch.
+     */
+    orderBy?: OmniWebhookLogOrderByWithRelationInput | OmniWebhookLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniWebhookLogs.
+     */
+    cursor?: OmniWebhookLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhookLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhookLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniWebhookLogs.
+     */
+    distinct?: OmniWebhookLogScalarFieldEnum | OmniWebhookLogScalarFieldEnum[]
+  }
+
+  /**
+   * OmniWebhookLog findFirstOrThrow
+   */
+  export type OmniWebhookLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhookLog to fetch.
+     */
+    where?: OmniWebhookLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhookLogs to fetch.
+     */
+    orderBy?: OmniWebhookLogOrderByWithRelationInput | OmniWebhookLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniWebhookLogs.
+     */
+    cursor?: OmniWebhookLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhookLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhookLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniWebhookLogs.
+     */
+    distinct?: OmniWebhookLogScalarFieldEnum | OmniWebhookLogScalarFieldEnum[]
+  }
+
+  /**
+   * OmniWebhookLog findMany
+   */
+  export type OmniWebhookLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniWebhookLogs to fetch.
+     */
+    where?: OmniWebhookLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniWebhookLogs to fetch.
+     */
+    orderBy?: OmniWebhookLogOrderByWithRelationInput | OmniWebhookLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OmniWebhookLogs.
+     */
+    cursor?: OmniWebhookLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniWebhookLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniWebhookLogs.
+     */
+    skip?: number
+    distinct?: OmniWebhookLogScalarFieldEnum | OmniWebhookLogScalarFieldEnum[]
+  }
+
+  /**
+   * OmniWebhookLog create
+   */
+  export type OmniWebhookLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a OmniWebhookLog.
+     */
+    data: XOR<OmniWebhookLogCreateInput, OmniWebhookLogUncheckedCreateInput>
+  }
+
+  /**
+   * OmniWebhookLog createMany
+   */
+  export type OmniWebhookLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OmniWebhookLogs.
+     */
+    data: OmniWebhookLogCreateManyInput | OmniWebhookLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniWebhookLog createManyAndReturn
+   */
+  export type OmniWebhookLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many OmniWebhookLogs.
+     */
+    data: OmniWebhookLogCreateManyInput | OmniWebhookLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniWebhookLog update
+   */
+  export type OmniWebhookLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a OmniWebhookLog.
+     */
+    data: XOR<OmniWebhookLogUpdateInput, OmniWebhookLogUncheckedUpdateInput>
+    /**
+     * Choose, which OmniWebhookLog to update.
+     */
+    where: OmniWebhookLogWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhookLog updateMany
+   */
+  export type OmniWebhookLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OmniWebhookLogs.
+     */
+    data: XOR<OmniWebhookLogUpdateManyMutationInput, OmniWebhookLogUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniWebhookLogs to update
+     */
+    where?: OmniWebhookLogWhereInput
+    /**
+     * Limit how many OmniWebhookLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniWebhookLog updateManyAndReturn
+   */
+  export type OmniWebhookLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * The data used to update OmniWebhookLogs.
+     */
+    data: XOR<OmniWebhookLogUpdateManyMutationInput, OmniWebhookLogUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniWebhookLogs to update
+     */
+    where?: OmniWebhookLogWhereInput
+    /**
+     * Limit how many OmniWebhookLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniWebhookLog upsert
+   */
+  export type OmniWebhookLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the OmniWebhookLog to update in case it exists.
+     */
+    where: OmniWebhookLogWhereUniqueInput
+    /**
+     * In case the OmniWebhookLog found by the `where` argument doesn't exist, create a new OmniWebhookLog with this data.
+     */
+    create: XOR<OmniWebhookLogCreateInput, OmniWebhookLogUncheckedCreateInput>
+    /**
+     * In case the OmniWebhookLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OmniWebhookLogUpdateInput, OmniWebhookLogUncheckedUpdateInput>
+  }
+
+  /**
+   * OmniWebhookLog delete
+   */
+  export type OmniWebhookLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+    /**
+     * Filter which OmniWebhookLog to delete.
+     */
+    where: OmniWebhookLogWhereUniqueInput
+  }
+
+  /**
+   * OmniWebhookLog deleteMany
+   */
+  export type OmniWebhookLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniWebhookLogs to delete
+     */
+    where?: OmniWebhookLogWhereInput
+    /**
+     * Limit how many OmniWebhookLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniWebhookLog without action
+   */
+  export type OmniWebhookLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniWebhookLog
+     */
+    select?: OmniWebhookLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniWebhookLog
+     */
+    omit?: OmniWebhookLogOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -15476,6 +17761,35 @@ export namespace Prisma {
   };
 
   export type OmniBroadcastRecipientScalarFieldEnum = (typeof OmniBroadcastRecipientScalarFieldEnum)[keyof typeof OmniBroadcastRecipientScalarFieldEnum]
+
+
+  export const OmniWebhookScalarFieldEnum: {
+    id: 'id',
+    organizationId: 'organizationId',
+    name: 'name',
+    secret: 'secret',
+    workflowId: 'workflowId',
+    chatbotId: 'chatbotId',
+    isActive: 'isActive',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type OmniWebhookScalarFieldEnum = (typeof OmniWebhookScalarFieldEnum)[keyof typeof OmniWebhookScalarFieldEnum]
+
+
+  export const OmniWebhookLogScalarFieldEnum: {
+    id: 'id',
+    webhookId: 'webhookId',
+    payload: 'payload',
+    headers: 'headers',
+    status: 'status',
+    errorMessage: 'errorMessage',
+    createdAt: 'createdAt'
+  };
+
+  export type OmniWebhookLogScalarFieldEnum = (typeof OmniWebhookLogScalarFieldEnum)[keyof typeof OmniWebhookLogScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -16729,6 +19043,147 @@ export namespace Prisma {
     status?: StringWithAggregatesFilter<"OmniBroadcastRecipient"> | string
     errorMessage?: StringNullableWithAggregatesFilter<"OmniBroadcastRecipient"> | string | null
     processedAt?: DateTimeNullableWithAggregatesFilter<"OmniBroadcastRecipient"> | Date | string | null
+  }
+
+  export type OmniWebhookWhereInput = {
+    AND?: OmniWebhookWhereInput | OmniWebhookWhereInput[]
+    OR?: OmniWebhookWhereInput[]
+    NOT?: OmniWebhookWhereInput | OmniWebhookWhereInput[]
+    id?: UuidFilter<"OmniWebhook"> | string
+    organizationId?: UuidFilter<"OmniWebhook"> | string
+    name?: StringFilter<"OmniWebhook"> | string
+    secret?: StringFilter<"OmniWebhook"> | string
+    workflowId?: UuidNullableFilter<"OmniWebhook"> | string | null
+    chatbotId?: UuidNullableFilter<"OmniWebhook"> | string | null
+    isActive?: BoolFilter<"OmniWebhook"> | boolean
+    metadata?: JsonFilter<"OmniWebhook">
+    createdAt?: DateTimeFilter<"OmniWebhook"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniWebhook"> | Date | string
+  }
+
+  export type OmniWebhookOrderByWithRelationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    secret?: SortOrder
+    workflowId?: SortOrderInput | SortOrder
+    chatbotId?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniWebhookWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OmniWebhookWhereInput | OmniWebhookWhereInput[]
+    OR?: OmniWebhookWhereInput[]
+    NOT?: OmniWebhookWhereInput | OmniWebhookWhereInput[]
+    organizationId?: UuidFilter<"OmniWebhook"> | string
+    name?: StringFilter<"OmniWebhook"> | string
+    secret?: StringFilter<"OmniWebhook"> | string
+    workflowId?: UuidNullableFilter<"OmniWebhook"> | string | null
+    chatbotId?: UuidNullableFilter<"OmniWebhook"> | string | null
+    isActive?: BoolFilter<"OmniWebhook"> | boolean
+    metadata?: JsonFilter<"OmniWebhook">
+    createdAt?: DateTimeFilter<"OmniWebhook"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniWebhook"> | Date | string
+  }, "id">
+
+  export type OmniWebhookOrderByWithAggregationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    secret?: SortOrder
+    workflowId?: SortOrderInput | SortOrder
+    chatbotId?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: OmniWebhookCountOrderByAggregateInput
+    _max?: OmniWebhookMaxOrderByAggregateInput
+    _min?: OmniWebhookMinOrderByAggregateInput
+  }
+
+  export type OmniWebhookScalarWhereWithAggregatesInput = {
+    AND?: OmniWebhookScalarWhereWithAggregatesInput | OmniWebhookScalarWhereWithAggregatesInput[]
+    OR?: OmniWebhookScalarWhereWithAggregatesInput[]
+    NOT?: OmniWebhookScalarWhereWithAggregatesInput | OmniWebhookScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"OmniWebhook"> | string
+    organizationId?: UuidWithAggregatesFilter<"OmniWebhook"> | string
+    name?: StringWithAggregatesFilter<"OmniWebhook"> | string
+    secret?: StringWithAggregatesFilter<"OmniWebhook"> | string
+    workflowId?: UuidNullableWithAggregatesFilter<"OmniWebhook"> | string | null
+    chatbotId?: UuidNullableWithAggregatesFilter<"OmniWebhook"> | string | null
+    isActive?: BoolWithAggregatesFilter<"OmniWebhook"> | boolean
+    metadata?: JsonWithAggregatesFilter<"OmniWebhook">
+    createdAt?: DateTimeWithAggregatesFilter<"OmniWebhook"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"OmniWebhook"> | Date | string
+  }
+
+  export type OmniWebhookLogWhereInput = {
+    AND?: OmniWebhookLogWhereInput | OmniWebhookLogWhereInput[]
+    OR?: OmniWebhookLogWhereInput[]
+    NOT?: OmniWebhookLogWhereInput | OmniWebhookLogWhereInput[]
+    id?: UuidFilter<"OmniWebhookLog"> | string
+    webhookId?: UuidFilter<"OmniWebhookLog"> | string
+    payload?: JsonFilter<"OmniWebhookLog">
+    headers?: JsonFilter<"OmniWebhookLog">
+    status?: IntFilter<"OmniWebhookLog"> | number
+    errorMessage?: StringNullableFilter<"OmniWebhookLog"> | string | null
+    createdAt?: DateTimeFilter<"OmniWebhookLog"> | Date | string
+  }
+
+  export type OmniWebhookLogOrderByWithRelationInput = {
+    id?: SortOrder
+    webhookId?: SortOrder
+    payload?: SortOrder
+    headers?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OmniWebhookLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OmniWebhookLogWhereInput | OmniWebhookLogWhereInput[]
+    OR?: OmniWebhookLogWhereInput[]
+    NOT?: OmniWebhookLogWhereInput | OmniWebhookLogWhereInput[]
+    webhookId?: UuidFilter<"OmniWebhookLog"> | string
+    payload?: JsonFilter<"OmniWebhookLog">
+    headers?: JsonFilter<"OmniWebhookLog">
+    status?: IntFilter<"OmniWebhookLog"> | number
+    errorMessage?: StringNullableFilter<"OmniWebhookLog"> | string | null
+    createdAt?: DateTimeFilter<"OmniWebhookLog"> | Date | string
+  }, "id">
+
+  export type OmniWebhookLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    webhookId?: SortOrder
+    payload?: SortOrder
+    headers?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: OmniWebhookLogCountOrderByAggregateInput
+    _avg?: OmniWebhookLogAvgOrderByAggregateInput
+    _max?: OmniWebhookLogMaxOrderByAggregateInput
+    _min?: OmniWebhookLogMinOrderByAggregateInput
+    _sum?: OmniWebhookLogSumOrderByAggregateInput
+  }
+
+  export type OmniWebhookLogScalarWhereWithAggregatesInput = {
+    AND?: OmniWebhookLogScalarWhereWithAggregatesInput | OmniWebhookLogScalarWhereWithAggregatesInput[]
+    OR?: OmniWebhookLogScalarWhereWithAggregatesInput[]
+    NOT?: OmniWebhookLogScalarWhereWithAggregatesInput | OmniWebhookLogScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"OmniWebhookLog"> | string
+    webhookId?: UuidWithAggregatesFilter<"OmniWebhookLog"> | string
+    payload?: JsonWithAggregatesFilter<"OmniWebhookLog">
+    headers?: JsonWithAggregatesFilter<"OmniWebhookLog">
+    status?: IntWithAggregatesFilter<"OmniWebhookLog"> | number
+    errorMessage?: StringNullableWithAggregatesFilter<"OmniWebhookLog"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"OmniWebhookLog"> | Date | string
   }
 
   export type AutomationCreateInput = {
@@ -18085,6 +20540,167 @@ export namespace Prisma {
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type OmniWebhookCreateInput = {
+    id?: string
+    organizationId: string
+    name: string
+    secret?: string
+    workflowId?: string | null
+    chatbotId?: string | null
+    isActive?: boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniWebhookUncheckedCreateInput = {
+    id?: string
+    organizationId: string
+    name: string
+    secret?: string
+    workflowId?: string | null
+    chatbotId?: string | null
+    isActive?: boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniWebhookUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    secret?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    chatbotId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniWebhookUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    secret?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    chatbotId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniWebhookCreateManyInput = {
+    id?: string
+    organizationId: string
+    name: string
+    secret?: string
+    workflowId?: string | null
+    chatbotId?: string | null
+    isActive?: boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniWebhookUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    secret?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    chatbotId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniWebhookUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    secret?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    chatbotId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniWebhookLogCreateInput = {
+    id?: string
+    webhookId: string
+    payload: JsonNullValueInput | InputJsonValue
+    headers: JsonNullValueInput | InputJsonValue
+    status: number
+    errorMessage?: string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniWebhookLogUncheckedCreateInput = {
+    id?: string
+    webhookId: string
+    payload: JsonNullValueInput | InputJsonValue
+    headers: JsonNullValueInput | InputJsonValue
+    status: number
+    errorMessage?: string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniWebhookLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    webhookId?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    headers?: JsonNullValueInput | InputJsonValue
+    status?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniWebhookLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    webhookId?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    headers?: JsonNullValueInput | InputJsonValue
+    status?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniWebhookLogCreateManyInput = {
+    id?: string
+    webhookId: string
+    payload: JsonNullValueInput | InputJsonValue
+    headers: JsonNullValueInput | InputJsonValue
+    status: number
+    errorMessage?: string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniWebhookLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    webhookId?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    headers?: JsonNullValueInput | InputJsonValue
+    status?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniWebhookLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    webhookId?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
+    headers?: JsonNullValueInput | InputJsonValue
+    status?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -18987,6 +21603,77 @@ export namespace Prisma {
     status?: SortOrder
     errorMessage?: SortOrder
     processedAt?: SortOrder
+  }
+
+  export type OmniWebhookCountOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    secret?: SortOrder
+    workflowId?: SortOrder
+    chatbotId?: SortOrder
+    isActive?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniWebhookMaxOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    secret?: SortOrder
+    workflowId?: SortOrder
+    chatbotId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniWebhookMinOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    secret?: SortOrder
+    workflowId?: SortOrder
+    chatbotId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniWebhookLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    webhookId?: SortOrder
+    payload?: SortOrder
+    headers?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OmniWebhookLogAvgOrderByAggregateInput = {
+    status?: SortOrder
+  }
+
+  export type OmniWebhookLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    webhookId?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OmniWebhookLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    webhookId?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OmniWebhookLogSumOrderByAggregateInput = {
+    status?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {

@@ -121,7 +121,13 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/omni`,
       chat: `${ROOTS.DASHBOARD}/omni/chat`,
       automation: `${ROOTS.DASHBOARD}/omni/automation`,
+      automation_flow: (id: string) => `${ROOTS.DASHBOARD}/omni/automation/${id}/flow`,
       marketing: `${ROOTS.DASHBOARD}/omni/marketing`,
+      marketing_create: `${ROOTS.DASHBOARD}/omni/marketing/create`,
+      marketing_details: (id: string) => `${ROOTS.DASHBOARD}/omni/marketing/${id}`,
+      channels: `${ROOTS.DASHBOARD}/omni/channels`,
+      webhook_list: `${ROOTS.DASHBOARD}/omni/webhooks`,
+      webhook_logs: (id: string) => `${ROOTS.DASHBOARD}/omni/webhooks/${id}/logs`,
     },
   },
   public: {

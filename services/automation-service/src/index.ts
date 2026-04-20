@@ -87,6 +87,13 @@ app.post("/v1/omni/broadcast", writeAccess, (req, res) => broadcastCtrl.create(c
 app.get("/v1/omni/broadcast", readAccess, (req, res) => broadcastCtrl.list(cast(req), res));
 app.get("/v1/omni/broadcast/:id", readAccess, (req, res) => broadcastCtrl.get(cast(req), res));
 
+// --- Omni Webhook ---
+const webhookCtrl = new OmniWebhookController();
+app.post("/v1/omni/webhooks", writeAccess, (req, res) => webhookCtrl.create(cast(req), res));
+app.get("/v1/omni/webhooks", readAccess, (req, res) => webhookCtrl.getAll(cast(req), res));
+app.get("/v1/omni/webhooks/:id/logs", readAccess, (req, res) => webhookCtrl.getLogs(cast(req), res));
+app.post("/v1/public/webhook/receive/:id", (req, res) => webhookCtrl.receive(req, res));
+
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "automation-service" }));
 

@@ -573,24 +573,18 @@ services:
     ports:
       - "7140:7140"
 
-  krakend:
-    image: krakend:2.13.4
-    container_name: ms-krakend
-    command: ["run", "-c", "/etc/krakend/krakend.json"]
+  nginx:
+    image: nginx:alpine
+    container_name: ms-nginx
+    volumes:
+      - ../../gateway/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "8081:8081"
-    volumes:
-      - ../../gateway/krakend/krakend.json:/etc/krakend/krakend.json:ro
     depends_on:
-      - keycloak
       - organization-service
       - crm-service
       - billing-service
-      - booking-service
-      - pos-service
       - automation-service
-      - device-service
-      - file-service
       - integrations-service
       - realtime-service
 
@@ -599,7 +593,8 @@ services:
     ports:
       - "3034:3034"
     depends_on:
-      - krakend
+      - nginx
+
 
 volumes:
   keycloak_db_data:

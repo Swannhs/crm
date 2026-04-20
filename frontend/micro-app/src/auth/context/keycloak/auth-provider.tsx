@@ -51,24 +51,43 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchMembership = useCallback(async (accessToken?: string | null) => {
     if (typeof window === 'undefined' || !accessToken) return null;
+    try {
+      let userId: string | null = null;
+      let orgId: string | null = null;
+      try {
+        const payload = JSON.parse(atob(accessToken.split('.')[1] || ''));
+        userId = payload?.sub || null;
+        orgId = payload?.org_id || null;
+      } catch {
+        // Best-effort token parse only.
+      }
 
-    const response = await fetch(`${CONFIG.site.serverUrl}/org/v1/memberships/me`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      cache: 'no-store',
-    });
+      const response = await fetch(`${CONFIG.site.serverUrl}/org/v1/memberships/me`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          ...(userId ? { 'X-User-Id': userId } : {}),
+          ...(orgId ? { 'X-Org-Id': orgId } : {}),
+        },
+        cache: 'no-store',
+      });
 
-    if (response.status === 404) {
+      if (response.status === 404) {
+        return null;
+      }
+
+      if (!response.ok) {
+        console.warn(`Unable to load membership (${response.status})`);
+        return null;
+      }
+
+      const json = await response.json();
+      return json?.data ?? null;
+    } catch (error) {
+      // Membership is optional for bootstrapping auth. Avoid auth redirect loops
+      // when organization-service or gateway has a transient failure.
+      console.warn('Membership lookup failed, continuing without membership.', error);
       return null;
     }
-
-    if (!response.ok) {
-      throw new Error(`Unable to load membership (${response.status})`);
-    }
-
-    const json = await response.json();
-    return json?.data ?? null;
   }, []);
 
   const syncAuthenticatedUser = useCallback(

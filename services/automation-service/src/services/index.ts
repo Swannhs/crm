@@ -332,3 +332,64 @@ export class OmniBroadcastService {
     await this.repo.update(broadcastId, { status: 'completed' });
   }
 }
+
+export class OmniWebhookService {
+  private repo = new OmniWebhookRepository();
+  private chatbotService = new OmniChatbotService();
+
+  async create(data: any, organizationId: string) {
+    return this.repo.create({ ...data, organizationId });
+  }
+
+  async getAll(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+
+  async getLogs(webhookId: string) {
+    return this.repo.getLogs(webhookId);
+  }
+
+  async handleWebhook(webhookId: string, payload: any, headers: any, logger: any) {
+    const webhook = await this.repo.findById(webhookId);
+    if (!webhook || !webhook.isActive) {
+      logger.warn({ webhookId }, "Received webhook but it's not found or inactive");
+      return { status: 404, message: "Webhook not found or inactive" };
+    }
+
+    // Logic for triggering bot or workflow
+    try {
+      if (webhook.chatbotId) {
+        // Trigger a chatbot flow for a specific contact if mobile is provided in payload
+        const mobile = payload.mobile || payload.phone || payload.contact_mobile;
+        if (mobile) {
+           // Simulate an event to trigger the bot
+           await this.chatbotService.processMessage({
+              provider: 'all',
+              instanceId: 'webhook-trigger',
+              contactMobile: mobile,
+              content: '/start', // Default start command
+              organizationId: webhook.organizationId
+           }, logger);
+        }
+      }
+
+      await this.repo.log({
+        webhookId,
+        payload,
+        headers,
+        status: 200
+      });
+
+      return { status: 200, message: "Success" };
+    } catch (err) {
+      await this.repo.log({
+        webhookId,
+        payload,
+        headers,
+        status: 500,
+        errorMessage: (err as any).message
+      });
+      return { status: 500, message: (err as any).message };
+    }
+  }
+}

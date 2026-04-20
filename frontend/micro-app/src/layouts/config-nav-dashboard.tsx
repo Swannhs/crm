@@ -88,6 +88,8 @@ export const navData: NavSection[] = [
       { title: 'Inbox', path: paths.dashboard.omni.chat, icon: ICONS.mail },
       { title: 'Automation', path: paths.dashboard.omni.automation, icon: ICONS.analytics },
       { title: 'Broadcasts', path: paths.dashboard.omni.marketing, icon: ICONS.blog },
+      { title: 'Channels', path: paths.dashboard.omni.channels, icon: ICONS.external },
+      { title: 'Webhooks', path: paths.dashboard.omni.webhook_list, icon: ICONS.setting },
     ],
   },
 ];
