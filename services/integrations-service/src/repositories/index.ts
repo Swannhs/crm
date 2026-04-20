@@ -208,3 +208,109 @@ export class IntegrationActivityRepository {
     });
   }
 }
+
+export class UserIntegrationSettingsRepository {
+  async findByUserId(userId: string) {
+    return db.userIntegrationSettings.findUnique({ where: { userId } });
+  }
+
+  async upsert(userId: string, data: UserIntegrationSettingsInput) {
+    const existing = await this.findByUserId(userId);
+    if (existing) {
+      return db.userIntegrationSettings.update({ where: { id: existing.id }, data });
+    }
+    return db.userIntegrationSettings.create({ data: { ...data, userId } });
+  }
+
+  async findByApiKey(apiKey: string) {
+    return db.userIntegrationSettings.findUnique({ where: { apiKey } });
+  }
+}
+
+export class MetaIntegrationRepository {
+  async findByUserId(userId: string) {
+    return db.metaIntegration.findUnique({ where: { userId } });
+  }
+
+  async upsert(userId: string, organizationId: string | undefined, data: MetaIntegrationInput) {
+    const existing = await this.findByUserId(userId);
+    if (existing) {
+      return db.metaIntegration.update({ where: { id: existing.id }, data });
+    }
+    return db.metaIntegration.create({ data: { ...data, userId, organizationId } });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.metaIntegration.findMany({ where: { organizationId } });
+  }
+}
+
+export class VoiceIntegrationRepository {
+  async findByUserId(userId: string) {
+    return db.voiceIntegration.findUnique({ where: { userId } });
+  }
+
+  async upsert(userId: string, organizationId: string | undefined, data: VoiceIntegrationInput) {
+    const existing = await this.findByUserId(userId);
+    if (existing) {
+      return db.voiceIntegration.update({ where: { id: existing.id }, data });
+    }
+    return db.voiceIntegration.create({ data: { ...data, userId, organizationId } });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.voiceIntegration.findMany({ where: { organizationId } });
+  }
+}
+
+export class WhatsAppInstanceRepository {
+  async create(data: WhatsAppInstanceInput & { userId: string; organizationId?: string }) {
+    return db.whatsAppInstance.create({ data });
+  }
+
+  async findByInstanceId(instanceId: string) {
+    return db.whatsAppInstance.findUnique({ where: { instanceId } });
+  }
+
+  async findByUserId(userId: string) {
+    return db.whatsAppInstance.findMany({ where: { userId } });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.whatsAppInstance.findMany({ where: { organizationId } });
+  }
+
+  async update(instanceId: string, data: Partial<WhatsAppInstanceInput>) {
+    return db.whatsAppInstance.update({ where: { instanceId }, data });
+  }
+
+  async delete(instanceId: string) {
+    return db.whatsAppInstance.delete({ where: { instanceId } });
+  }
+}
+
+export class TelegramSessionRepository {
+  async create(data: TelegramSessionInput & { userId: string; organizationId?: string }) {
+    return db.telegramSession.create({ data });
+  }
+
+  async findBySessionId(sessionId: string) {
+    return db.telegramSession.findUnique({ where: { sessionId } });
+  }
+
+  async findByUserId(userId: string) {
+    return db.telegramSession.findMany({ where: { userId } });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.telegramSession.findMany({ where: { organizationId } });
+  }
+
+  async update(sessionId: string, data: Partial<TelegramSessionInput>) {
+    return db.telegramSession.update({ where: { sessionId }, data });
+  }
+
+  async delete(sessionId: string) {
+    return db.telegramSession.delete({ where: { sessionId } });
+  }
+}

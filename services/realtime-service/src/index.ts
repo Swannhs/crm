@@ -6,7 +6,10 @@ import {
   LiveChatMessageController, 
   LiveChatContactController,
   LiveChatWidgetSettingController,
-  LiveChatStatisticsController
+  LiveChatStatisticsController,
+  OmniConversationController,
+  OmniMessageController,
+  OmniAIController
 } from "./controllers/index.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
@@ -19,7 +22,11 @@ const messageCtrl = new LiveChatMessageController();
 const contactCtrl = new LiveChatContactController();
 const widgetCtrl = new LiveChatWidgetSettingController();
 const statsCtrl = new LiveChatStatisticsController();
+const omniConvCtrl = new OmniConversationController();
+const omniMsgCtrl = new OmniMessageController();
+const omniAICtrl = new OmniAIController();
 
+// --- Live Chat ---
 app.post("/v1/livechat/channels", auth, (req, res) => channelCtrl.getChannelsByAdminId(cast(req), res));
 app.get("/v1/livechat/channel/:channelId", auth, (req, res) => channelCtrl.getChannelById(cast(req), res));
 app.delete("/v1/livechat/channel/:channelId/:contactId", auth, (req, res) => channelCtrl.deleteChannel(cast(req), res));
@@ -77,10 +84,42 @@ async function startConsumer() {
     clientId: "realtime-service",
     brokers,
     groupId: "realtime-service.domain-events",
-    topics: ["billing.payment.recorded"],
+    topics: ["billing.payment.recorded", "omni.message.received"],
     logger,
     onMessage: async ({ topic, payload }) => {
-      io.emit("domain-event", { routingKey: topic, data: payload });
+      if (topic === "omni.message.received") {
+        const event = payload as any;
+        logger.info({ event }, "Processing incoming omni message");
+        
+        try {
+          // Handle inbound message logic
+          // 1. Find or create contact
+          let contact = await contactCtrl.findOrCreateByPhone(event.contactMobile, event.organizationId, event.contactName);
+          
+          // 2. Find or create conversation
+          let conversation = await omniConvCtrl.findOrCreateByContact(contact.id, event.organizationId, event.provider, event.contactMobile);
+          
+          // 3. Add message
+          const message = await omniMsgCtrl.addInboundMessage({
+            conversationId: conversation.id,
+            senderId: contact.id,
+            content: event.content,
+            type: event.type,
+            metadata: event.metadata
+          });
+          
+          // 4. Push to sockets
+          io.to(`org:${event.organizationId}`).emit("omni:message", {
+            conversationId: conversation.id,
+            message
+          });
+          
+        } catch (err) {
+          logger.error({ err }, "Failed to process inbound omni message");
+        }
+      } else {
+        io.emit("domain-event", { routingKey: topic, data: payload });
+      }
     },
   });
 }

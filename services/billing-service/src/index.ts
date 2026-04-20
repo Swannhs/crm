@@ -4,7 +4,8 @@ import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ 
   serviceName: "billing-service", 
-  jsonLimit: "1mb" 
+  jsonLimit: "1mb",
+  enableCors: false
 });
 
 const billingController = new BillingController();
@@ -23,6 +24,11 @@ app.get("/v1/invoices",
 app.get("/v1/invoices/stats",
   readAccess,
   billingController.getInvoiceStats
+);
+
+app.get("/v1/invoices/finance-statistics",
+  readAccess,
+  billingController.getLegacyFinanceStatistics
 );
 
 app.get("/v1/invoices/:id", 

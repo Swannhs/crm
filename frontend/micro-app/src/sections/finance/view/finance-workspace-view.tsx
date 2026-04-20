@@ -18,8 +18,10 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 import { billingService } from 'src/services/billing-service';
 import { financeService } from 'src/services/finance-service';
+import { showToast } from 'src/components/toast';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 import { Form, RHFTextField } from 'src/components/hook-form';
 import { fCurrency } from 'src/utils/format-number';
@@ -40,6 +42,7 @@ type Props = {
 
 export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Props) {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const methods = useForm({
     resolver: zodResolver(InvoiceSchema),
@@ -76,14 +79,34 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
 
   const saveMutation = useMutation({
     mutationFn: async (values: any) => {
+      const payload = {
+        amount_cents: Math.round(values.totalAmount * 100),
+        metadata: {
+          customerName: values.customerName,
+          dueDate: values.dueDate,
+        },
+      };
+
       if (mode === 'edit' && invoiceId) {
-        return billingService.updateInvoice(invoiceId, values);
+        return billingService.updateInvoice(invoiceId, payload);
       }
 
-      return billingService.createInvoice(values);
+      return billingService.createInvoice(payload);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['invoice-list'] });
+      showToast({
+        message: mode === 'edit' ? 'Invoice updated successfully' : 'Invoice created successfully',
+        severity: 'success',
+      });
+      router.push(paths.dashboard.billing);
+    },
+    onError: (error: any) => {
+      console.error(error);
+      showToast({
+        message: error.message || 'Failed to save invoice',
+        severity: 'error',
+      });
     },
   });
 
@@ -208,18 +231,18 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
               {section === 'payouts' ? 'Payout History' : 'Invoices'}
             </Typography>
             <Stack spacing={2}>
-              {(section === 'payouts' ? paymentsQuery.data : invoicesQuery.data || []).map((item: any) => (
+              {((section === 'payouts' ? paymentsQuery.data : invoicesQuery.data) || []).map((item: any) => (
                 <Box key={item._id || item.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral' }}>
                   <Typography variant="subtitle2">
-                    {item.customerName || item.description || item.no || item.id}
+                    {item.customerName || item.metadata?.customerName || item.description || item.no || item.id}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {fCurrency(item.totalDue || item.amount || item.amount_cents / 100 || 0)}
+                    {fCurrency(item.totalDue || item.amount || (item.amountCents || item.amount_cents || 0) / 100)}
                   </Typography>
                 </Box>
               ))}
 
-              {!invoicesQuery.isLoading && !paymentsQuery.isLoading && (section === 'payouts' ? paymentsQuery.data : invoicesQuery.data || []).length === 0 && (
+              {!invoicesQuery.isLoading && !paymentsQuery.isLoading && ((section === 'payouts' ? paymentsQuery.data : invoicesQuery.data) || []).length === 0 && (
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   No records are available for this finance route yet.
                 </Typography>
@@ -240,9 +263,25 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
                 <Stack spacing={1.5}>
                   <Typography variant="body2">Reported metrics are sourced from the current finance APIs.</Typography>
                   <Divider />
-                  <Typography variant="body2">
-                    Revenue snapshot: {JSON.stringify(revenueQuery.data ?? {})}
-                  </Typography>
+                  <Stack spacing={2} sx={{ mt: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>Total Revenue</Typography>
+                      <Typography variant="subtitle2">{fCurrency(revenueQuery.data?.totalRevenue || 0)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>Paid</Typography>
+                      <Typography variant="subtitle2" sx={{ color: 'success.main' }}>{fCurrency(revenueQuery.data?.paid || 0)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>Outstanding</Typography>
+                      <Typography variant="subtitle2" sx={{ color: 'error.main' }}>{fCurrency(revenueQuery.data?.outstanding || 0)}</Typography>
+                    </Box>
+                    <Divider borderstyle="dashed" />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>Invoice Count</Typography>
+                      <Typography variant="subtitle2">{revenueQuery.data?.invoiceCount || 0}</Typography>
+                    </Box>
+                  </Stack>
                 </Stack>
               )}
             </Card>

@@ -1,0 +1,250 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Automation {
+  id             String   @id @default(uuid()) @db.Uuid
+  automationName String?
+  contactInfo    Json?
+  activationUpon Json?
+  activateTime   Json?
+  userEmail      String?
+  userPhone      String?
+  userName       String?
+  userId         String?  @db.Uuid
+  organizationId String?  @db.Uuid
+  isActive       Boolean  @default(false)
+  isDelete       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model Workflow {
+  id                           String   @id @default(uuid()) @db.Uuid
+  userId                       String   @db.Uuid
+  organizationId               String?  @db.Uuid
+  workspaceId                  String   @db.Uuid
+  title                        String
+  description                  String?
+  status                       String   @default("Draft")
+  verticalFlow                 Boolean  @default(false)
+  creatorType                  String   @default("user")
+  isForSystemNotification      Boolean  @default(false)
+  isForUserNotification        Boolean  @default(false)
+  isForClientNotification      Boolean  @default(false)
+  isCopyFromSystemNotification Boolean  @default(false)
+  parentWorkflowId             String?  @db.Uuid
+  isDeleted                    Boolean  @default(false)
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([workspaceId])
+  @@map("workflows")
+}
+
+model WorkflowNode {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  organizationId   String?  @db.Uuid
+  workflowId       String   @db.Uuid
+  key              String?
+  data             Json?
+  type             String
+  source           String[] @db.Uuid
+  height           Int      @default(0)
+  width            Int      @default(0)
+  position         Json?
+  positionAbsolute Json?
+  sourcePosition   String   @default("right")
+  targetPosition   String   @default("left")
+  isDeleted        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([workflowId])
+  @@index([organizationId])
+}
+
+model WorkflowWorkspace {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  organizationId String?  @db.Uuid
+  name           String
+  description    String?
+  isDeleted      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model WorkflowStartAction {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @db.Uuid
+  organizationId        String?  @db.Uuid
+  workflowId            String   @db.Uuid
+  actionType            String?
+  duration              Json?
+  parentId              String?  @db.Uuid
+  setCustomTime         Boolean  @default(false)
+  useSubscriberTimeZone Boolean  @default(false)
+  customTime            Json?
+  subject               String?
+  content               String?
+  template              Json?
+  attachments           Json?
+  condition             String?
+  confirmProgress       Json?
+  notificationTo        Json?
+  taskContent           Json?
+  isStart               Boolean  @default(false)
+  isLast                Boolean  @default(false)
+  isCondition           Boolean  @default(false)
+  isException           Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([workflowId])
+  @@index([organizationId])
+}
+
+model WorkflowActivityLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  organizationId String?  @db.Uuid
+  workflowId     String   @db.Uuid
+  contactId      String?  @db.Uuid
+  nodeId         String?  @db.Uuid
+  action         String?
+  details        Json?
+  createdAt      DateTime @default(now())
+
+  @@index([workflowId])
+  @@index([contactId])
+  @@index([organizationId])
+  @@map("workflow_activity_logs")
+}
+
+model WorkflowExecutionHistory {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  organizationId String?   @db.Uuid
+  workflowId     String    @db.Uuid
+  contactId      String?   @db.Uuid
+  status         String?
+  startedAt      DateTime
+  completedAt    DateTime?
+  errorMessage   String?
+  createdAt      DateTime  @default(now())
+
+  @@index([workflowId])
+  @@index([contactId])
+  @@index([organizationId])
+  @@map("workflow_execution_histories")
+}
+
+model OmniChatbot {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  name            String
+  provider        String // whatsapp | telegram | all
+  isActive        Boolean  @default(true) @map("is_active")
+  aiEnabled       Boolean  @default(false) @map("ai_enabled")
+  aiPrompt        String?  @map("ai_prompt") @db.Text
+  welcomeMessage  String?  @map("welcome_message") @db.Text
+  fallbackMessage String?  @map("fallback_message") @db.Text
+  flowData        Json?    @map("flow_data") // Stores React Flow nodes & edges
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@map("omni_chatbots")
+}
+
+model OmniContactFlowState {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  contactMobile   String   @map("contact_mobile")
+  chatbotId       String   @map("chatbot_id") @db.Uuid
+  currentNodeId   String   @map("current_node_id")
+  stateData       Json     @default("{}") @map("state_data") // Collected user data
+  lastInteraction DateTime @default(now()) @map("last_interaction")
+  isCompleted     Boolean  @default(false) @map("is_completed")
+
+  @@unique([contactMobile, chatbotId])
+  @@index([organizationId])
+  @@map("omni_contact_flow_states")
+}
+
+model OmniKeywordTrigger {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  keyword        String
+  matchType      String   @default("exact") // exact | contains | regex
+  workflowId     String?  @map("workflow_id") @db.Uuid
+  replyMessage   String?  @map("reply_message") @db.Text
+  isActive       Boolean  @default(true) @map("is_active")
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@map("omni_keyword_triggers")
+}
+
+model OmniBroadcast {
+  id             String                   @id @default(uuid()) @db.Uuid
+  organizationId String                   @map("organization_id") @db.Uuid
+  userId         String                   @map("user_id") @db.Uuid
+  name           String
+  provider       String // whatsapp | telegram
+  instanceId     String                   @map("instance_id") // WhatsApp instance or Telegram token
+  content        String                   @db.Text
+  type           String                   @default("text") // text | image | file | video
+  mediaUrl       String?                  @map("media_url")
+  scheduledAt    DateTime?                @map("scheduled_at")
+  status         String                   @default("draft") // draft | scheduled | processing | completed | cancelled
+  totalCount     Int                      @default(0) @map("total_count")
+  sentCount      Int                      @default(0) @map("sent_count")
+  deliveredCount Int                      @default(0) @map("delivered_count")
+  readCount      Int                      @default(0) @map("read_count")
+  failedCount    Int                      @default(0) @map("failed_count")
+  metadata       Json                     @default("{}")
+  recipients     OmniBroadcastRecipient[]
+  createdAt      DateTime                 @default(now()) @map("created_at")
+  updatedAt      DateTime                 @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("omni_broadcasts")
+}
+
+model OmniBroadcastRecipient {
+  id           String        @id @default(uuid()) @db.Uuid
+  broadcastId  String        @map("broadcast_id") @db.Uuid
+  contactId    String        @map("contact_id") @db.Uuid
+  mobile       String
+  variables    Json          @default("{}") // For dynamic content like {{name}}
+  status       String        @default("pending") // pending | sent | delivered | read | failed
+  errorMessage String?       @map("error_message")
+  processedAt  DateTime?     @map("processed_at")
+  broadcast    OmniBroadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+
+  @@index([broadcastId])
+  @@index([status])
+  @@map("omni_broadcast_recipients")
+}

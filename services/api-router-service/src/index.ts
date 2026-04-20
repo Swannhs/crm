@@ -3,7 +3,8 @@ import { createServiceApp } from "@mymanager/node-service-kit";
 const { app, logger } = createServiceApp({
   serviceName: "api-router-service",
   jsonLimit: "50mb",
-  urlEncodedLimit: "50mb"
+  urlEncodedLimit: "50mb",
+  enableCors: false
 });
 
 import type { Request, Response } from "express";
@@ -92,13 +93,36 @@ const domainRoutes: Record<string, string> = {
 };
 
 async function handleApiCompat(req: Request, res: Response) {
-  const ident = identityOr401(req, res);
-  if (!ident) return;
-
   const module = req.params.module;
   const rest = req.params[0] ? `/${req.params[0]}` : "";
 
+  if (module === "public" && req.method === "GET" && rest === "/help-center/articles") {
+    return res.json({ data: [], total: 0 });
+  }
+
+  const ident = identityOr401(req, res);
+  if (!ident) return;
+
   try {
+    if (module === "form-builder" && req.method === "GET" && (rest === "/forms" || rest === "/templates")) {
+      return res.json({ data: [] });
+    }
+
+    if (module === "webbuilder" && req.method === "GET" && (rest === "" || rest === "/")) {
+      return res.json({ data: [] });
+    }
+
+    if (module === "reputation" && req.method === "GET" && rest === "/dashboard-stats") {
+      return res.json({
+        data: {
+          reviews: 0,
+          averageRating: 0,
+          responseRate: 0,
+          mentions: 0,
+        },
+      });
+    }
+
     if (domainRoutes[module]) {
       return proxyTo(req, res, { baseUrl: domainRoutes[module], targetPath: `/api/${module}${rest}` });
     }
@@ -128,8 +152,13 @@ async function handleApiCompat(req: Request, res: Response) {
     if (module === "invoice") {
       if (req.method === "GET" && (rest === "" || rest === "/")) return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices" });
       if (req.method === "POST" && (rest === "" || rest === "/")) return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices" });
-      if (req.method === "GET" && (rest === "/stats" || rest === "/statistics/income")) {
+      if (req.method === "GET" && rest === "/stats") {
         return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices/stats" });
+      }
+      if (req.method === "GET" && rest === "/statistics/income") {
+        const qs = new URLSearchParams(req.query as Record<string, string>).toString();
+        const targetPath = qs ? `/v1/invoices/finance-statistics?${qs}` : "/v1/invoices/finance-statistics";
+        return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath });
       }
       return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: GET /, POST /" });
     }

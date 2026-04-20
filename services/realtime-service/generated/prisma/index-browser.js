@@ -199,6 +199,46 @@ exports.Prisma.SocketConnectionScalarFieldEnum = {
   disconnectedAt: 'disconnectedAt'
 };
 
+exports.Prisma.OmniConversationScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  contactId: 'contactId',
+  provider: 'provider',
+  providerRef: 'providerRef',
+  status: 'status',
+  subject: 'subject',
+  lastMessage: 'lastMessage',
+  lastMessageAt: 'lastMessageAt',
+  metadata: 'metadata',
+  assignedAgentId: 'assignedAgentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OmniMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  senderType: 'senderType',
+  content: 'content',
+  type: 'type',
+  status: 'status',
+  direction: 'direction',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OmniParticipantScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  participantId: 'participantId',
+  participantType: 'participantType',
+  role: 'role',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -232,7 +272,10 @@ exports.Prisma.ModelName = {
   LiveChatContact: 'LiveChatContact',
   LiveChatWidgetSetting: 'LiveChatWidgetSetting',
   LiveChatStatistics: 'LiveChatStatistics',
-  SocketConnection: 'SocketConnection'
+  SocketConnection: 'SocketConnection',
+  OmniConversation: 'OmniConversation',
+  OmniMessage: 'OmniMessage',
+  OmniParticipant: 'OmniParticipant'
 };
 
 /**

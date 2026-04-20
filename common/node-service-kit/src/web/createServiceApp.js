@@ -8,7 +8,8 @@ export function createServiceApp({
   serviceName,
   loggerLevel = process.env.LOG_LEVEL || "info",
   jsonLimit = "2mb",
-  urlEncodedLimit = "2mb"
+  urlEncodedLimit = "2mb",
+  enableCors = true
 }) {
   const logger = pino({ level: loggerLevel, name: serviceName });
   const app = express();
@@ -16,7 +17,9 @@ export function createServiceApp({
   app.disable("x-powered-by");
   app.use(pinoHttp({ logger }));
   app.use(helmet());
-  app.use(cors());
+  if (enableCors) {
+    app.use(cors());
+  }
   app.use(express.json({ limit: jsonLimit }));
   app.use(express.urlencoded({ limit: urlEncodedLimit, extended: true, parameterLimit: 50000 }));
 

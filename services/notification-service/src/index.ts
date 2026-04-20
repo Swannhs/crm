@@ -8,7 +8,10 @@ import {
 } from "./controllers/notification.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
-const { app, logger } = createServiceApp({ serviceName: "notification-service" });
+const { app, logger } = createServiceApp({ 
+  serviceName: "notification-service",
+  enableCors: false
+});
 const auth = identityMiddleware;
 const cast = (req: any) => req as any;
 

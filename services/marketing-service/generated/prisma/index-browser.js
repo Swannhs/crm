@@ -196,6 +196,37 @@ exports.Prisma.OptinFormScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.OmniBroadcastScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  createdBy: 'createdBy',
+  name: 'name',
+  provider: 'provider',
+  phonebookId: 'phonebookId',
+  message: 'message',
+  mediaUrl: 'mediaUrl',
+  status: 'status',
+  totalCount: 'totalCount',
+  sentCount: 'sentCount',
+  failedCount: 'failedCount',
+  scheduledAt: 'scheduledAt',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OmniBroadcastLogScalarFieldEnum = {
+  id: 'id',
+  broadcastId: 'broadcastId',
+  contactId: 'contactId',
+  phone: 'phone',
+  status: 'status',
+  error: 'error',
+  metadata: 'metadata',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -227,7 +258,9 @@ exports.Prisma.ModelName = {
   EmailMessage: 'EmailMessage',
   Subscriber: 'Subscriber',
   Automation: 'Automation',
-  OptinForm: 'OptinForm'
+  OptinForm: 'OptinForm',
+  OmniBroadcast: 'OmniBroadcast',
+  OmniBroadcastLog: 'OmniBroadcastLog'
 };
 
 /**

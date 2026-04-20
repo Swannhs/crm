@@ -79,4 +79,15 @@ export const navData: NavSection[] = [
       { title: 'Employees', path: paths.dashboard.employees, icon: ICONS.job, roles: ['org_manager', 'org_admin', 'org_owner', 'platform_admin'] },
     ],
   },
+  /**
+   * Omnichannel
+   */
+  {
+    subheader: 'Omnichannel',
+    items: [
+      { title: 'Inbox', path: paths.dashboard.omni.chat, icon: ICONS.mail },
+      { title: 'Automation', path: paths.dashboard.omni.automation, icon: ICONS.analytics },
+      { title: 'Broadcasts', path: paths.dashboard.omni.marketing, icon: ICONS.blog },
+    ],
+  },
 ];

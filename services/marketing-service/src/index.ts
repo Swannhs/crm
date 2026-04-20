@@ -1,8 +1,12 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
-import { CampaignController, AutomationController, SubscriberController, OptinFormController } from "./controllers/marketing.controller.js";
+import { CampaignController, AutomationController, SubscriberController, OptinFormController, OmniBroadcastController } from "./controllers/marketing.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
-const { app, logger } = createServiceApp({ serviceName: "marketing-service", jsonLimit: "5mb" });
+const { app, logger } = createServiceApp({ 
+  serviceName: "marketing-service", 
+  jsonLimit: "10mb",
+  enableCors: false
+});
 const auth = identityMiddleware;
 const cast = (req: any) => req as any;
 
@@ -10,6 +14,7 @@ const campaignCtrl = new CampaignController();
 const automationCtrl = new AutomationController();
 const subscriberCtrl = new SubscriberController();
 const formCtrl = new OptinFormController();
+const omniBroadcastCtrl = new OmniBroadcastController();
 
 // --- Campaigns ---
 app.get("/v1/campaigns", auth, (req, res) => campaignCtrl.list(cast(req), res));

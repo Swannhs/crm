@@ -48,6 +48,16 @@ export type WorkflowActivityLog = $Result.DefaultSelection<Prisma.$WorkflowActiv
  * 
  */
 export type WorkflowExecutionHistory = $Result.DefaultSelection<Prisma.$WorkflowExecutionHistoryPayload>
+/**
+ * Model OmniChatbot
+ * 
+ */
+export type OmniChatbot = $Result.DefaultSelection<Prisma.$OmniChatbotPayload>
+/**
+ * Model OmniKeywordTrigger
+ * 
+ */
+export type OmniKeywordTrigger = $Result.DefaultSelection<Prisma.$OmniKeywordTriggerPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -236,6 +246,26 @@ export class PrismaClient<
     * ```
     */
   get workflowExecutionHistory(): Prisma.WorkflowExecutionHistoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.omniChatbot`: Exposes CRUD operations for the **OmniChatbot** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OmniChatbots
+    * const omniChatbots = await prisma.omniChatbot.findMany()
+    * ```
+    */
+  get omniChatbot(): Prisma.OmniChatbotDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.omniKeywordTrigger`: Exposes CRUD operations for the **OmniKeywordTrigger** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OmniKeywordTriggers
+    * const omniKeywordTriggers = await prisma.omniKeywordTrigger.findMany()
+    * ```
+    */
+  get omniKeywordTrigger(): Prisma.OmniKeywordTriggerDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -683,7 +713,9 @@ export namespace Prisma {
     WorkflowWorkspace: 'WorkflowWorkspace',
     WorkflowStartAction: 'WorkflowStartAction',
     WorkflowActivityLog: 'WorkflowActivityLog',
-    WorkflowExecutionHistory: 'WorkflowExecutionHistory'
+    WorkflowExecutionHistory: 'WorkflowExecutionHistory',
+    OmniChatbot: 'OmniChatbot',
+    OmniKeywordTrigger: 'OmniKeywordTrigger'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -702,7 +734,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "automation" | "workflow" | "workflowNode" | "workflowWorkspace" | "workflowStartAction" | "workflowActivityLog" | "workflowExecutionHistory"
+      modelProps: "automation" | "workflow" | "workflowNode" | "workflowWorkspace" | "workflowStartAction" | "workflowActivityLog" | "workflowExecutionHistory" | "omniChatbot" | "omniKeywordTrigger"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1224,6 +1256,154 @@ export namespace Prisma {
           }
         }
       }
+      OmniChatbot: {
+        payload: Prisma.$OmniChatbotPayload<ExtArgs>
+        fields: Prisma.OmniChatbotFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OmniChatbotFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OmniChatbotFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>
+          }
+          findFirst: {
+            args: Prisma.OmniChatbotFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OmniChatbotFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>
+          }
+          findMany: {
+            args: Prisma.OmniChatbotFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>[]
+          }
+          create: {
+            args: Prisma.OmniChatbotCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>
+          }
+          createMany: {
+            args: Prisma.OmniChatbotCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OmniChatbotCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>[]
+          }
+          delete: {
+            args: Prisma.OmniChatbotDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>
+          }
+          update: {
+            args: Prisma.OmniChatbotUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>
+          }
+          deleteMany: {
+            args: Prisma.OmniChatbotDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OmniChatbotUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OmniChatbotUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>[]
+          }
+          upsert: {
+            args: Prisma.OmniChatbotUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniChatbotPayload>
+          }
+          aggregate: {
+            args: Prisma.OmniChatbotAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOmniChatbot>
+          }
+          groupBy: {
+            args: Prisma.OmniChatbotGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OmniChatbotGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OmniChatbotCountArgs<ExtArgs>
+            result: $Utils.Optional<OmniChatbotCountAggregateOutputType> | number
+          }
+        }
+      }
+      OmniKeywordTrigger: {
+        payload: Prisma.$OmniKeywordTriggerPayload<ExtArgs>
+        fields: Prisma.OmniKeywordTriggerFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OmniKeywordTriggerFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OmniKeywordTriggerFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>
+          }
+          findFirst: {
+            args: Prisma.OmniKeywordTriggerFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OmniKeywordTriggerFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>
+          }
+          findMany: {
+            args: Prisma.OmniKeywordTriggerFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>[]
+          }
+          create: {
+            args: Prisma.OmniKeywordTriggerCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>
+          }
+          createMany: {
+            args: Prisma.OmniKeywordTriggerCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OmniKeywordTriggerCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>[]
+          }
+          delete: {
+            args: Prisma.OmniKeywordTriggerDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>
+          }
+          update: {
+            args: Prisma.OmniKeywordTriggerUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>
+          }
+          deleteMany: {
+            args: Prisma.OmniKeywordTriggerDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OmniKeywordTriggerUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OmniKeywordTriggerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>[]
+          }
+          upsert: {
+            args: Prisma.OmniKeywordTriggerUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniKeywordTriggerPayload>
+          }
+          aggregate: {
+            args: Prisma.OmniKeywordTriggerAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOmniKeywordTrigger>
+          }
+          groupBy: {
+            args: Prisma.OmniKeywordTriggerGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OmniKeywordTriggerGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OmniKeywordTriggerCountArgs<ExtArgs>
+            result: $Utils.Optional<OmniKeywordTriggerCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1327,6 +1507,8 @@ export namespace Prisma {
     workflowStartAction?: WorkflowStartActionOmit
     workflowActivityLog?: WorkflowActivityLogOmit
     workflowExecutionHistory?: WorkflowExecutionHistoryOmit
+    omniChatbot?: OmniChatbotOmit
+    omniKeywordTrigger?: OmniKeywordTriggerOmit
   }
 
   /* Types for Logging */
@@ -9183,6 +9365,2144 @@ export namespace Prisma {
 
 
   /**
+   * Model OmniChatbot
+   */
+
+  export type AggregateOmniChatbot = {
+    _count: OmniChatbotCountAggregateOutputType | null
+    _min: OmniChatbotMinAggregateOutputType | null
+    _max: OmniChatbotMaxAggregateOutputType | null
+  }
+
+  export type OmniChatbotMinAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    name: string | null
+    provider: string | null
+    isActive: boolean | null
+    aiEnabled: boolean | null
+    aiPrompt: string | null
+    welcomeMessage: string | null
+    fallbackMessage: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniChatbotMaxAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    name: string | null
+    provider: string | null
+    isActive: boolean | null
+    aiEnabled: boolean | null
+    aiPrompt: string | null
+    welcomeMessage: string | null
+    fallbackMessage: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniChatbotCountAggregateOutputType = {
+    id: number
+    organizationId: number
+    name: number
+    provider: number
+    isActive: number
+    aiEnabled: number
+    aiPrompt: number
+    welcomeMessage: number
+    fallbackMessage: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type OmniChatbotMinAggregateInputType = {
+    id?: true
+    organizationId?: true
+    name?: true
+    provider?: true
+    isActive?: true
+    aiEnabled?: true
+    aiPrompt?: true
+    welcomeMessage?: true
+    fallbackMessage?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniChatbotMaxAggregateInputType = {
+    id?: true
+    organizationId?: true
+    name?: true
+    provider?: true
+    isActive?: true
+    aiEnabled?: true
+    aiPrompt?: true
+    welcomeMessage?: true
+    fallbackMessage?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniChatbotCountAggregateInputType = {
+    id?: true
+    organizationId?: true
+    name?: true
+    provider?: true
+    isActive?: true
+    aiEnabled?: true
+    aiPrompt?: true
+    welcomeMessage?: true
+    fallbackMessage?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type OmniChatbotAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniChatbot to aggregate.
+     */
+    where?: OmniChatbotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniChatbots to fetch.
+     */
+    orderBy?: OmniChatbotOrderByWithRelationInput | OmniChatbotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OmniChatbotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniChatbots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniChatbots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OmniChatbots
+    **/
+    _count?: true | OmniChatbotCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OmniChatbotMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OmniChatbotMaxAggregateInputType
+  }
+
+  export type GetOmniChatbotAggregateType<T extends OmniChatbotAggregateArgs> = {
+        [P in keyof T & keyof AggregateOmniChatbot]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOmniChatbot[P]>
+      : GetScalarType<T[P], AggregateOmniChatbot[P]>
+  }
+
+
+
+
+  export type OmniChatbotGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OmniChatbotWhereInput
+    orderBy?: OmniChatbotOrderByWithAggregationInput | OmniChatbotOrderByWithAggregationInput[]
+    by: OmniChatbotScalarFieldEnum[] | OmniChatbotScalarFieldEnum
+    having?: OmniChatbotScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OmniChatbotCountAggregateInputType | true
+    _min?: OmniChatbotMinAggregateInputType
+    _max?: OmniChatbotMaxAggregateInputType
+  }
+
+  export type OmniChatbotGroupByOutputType = {
+    id: string
+    organizationId: string
+    name: string
+    provider: string
+    isActive: boolean
+    aiEnabled: boolean
+    aiPrompt: string | null
+    welcomeMessage: string | null
+    fallbackMessage: string | null
+    metadata: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: OmniChatbotCountAggregateOutputType | null
+    _min: OmniChatbotMinAggregateOutputType | null
+    _max: OmniChatbotMaxAggregateOutputType | null
+  }
+
+  type GetOmniChatbotGroupByPayload<T extends OmniChatbotGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OmniChatbotGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OmniChatbotGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OmniChatbotGroupByOutputType[P]>
+            : GetScalarType<T[P], OmniChatbotGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OmniChatbotSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    provider?: boolean
+    isActive?: boolean
+    aiEnabled?: boolean
+    aiPrompt?: boolean
+    welcomeMessage?: boolean
+    fallbackMessage?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniChatbot"]>
+
+  export type OmniChatbotSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    provider?: boolean
+    isActive?: boolean
+    aiEnabled?: boolean
+    aiPrompt?: boolean
+    welcomeMessage?: boolean
+    fallbackMessage?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniChatbot"]>
+
+  export type OmniChatbotSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    provider?: boolean
+    isActive?: boolean
+    aiEnabled?: boolean
+    aiPrompt?: boolean
+    welcomeMessage?: boolean
+    fallbackMessage?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniChatbot"]>
+
+  export type OmniChatbotSelectScalar = {
+    id?: boolean
+    organizationId?: boolean
+    name?: boolean
+    provider?: boolean
+    isActive?: boolean
+    aiEnabled?: boolean
+    aiPrompt?: boolean
+    welcomeMessage?: boolean
+    fallbackMessage?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type OmniChatbotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "name" | "provider" | "isActive" | "aiEnabled" | "aiPrompt" | "welcomeMessage" | "fallbackMessage" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["omniChatbot"]>
+
+  export type $OmniChatbotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OmniChatbot"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      organizationId: string
+      name: string
+      provider: string
+      isActive: boolean
+      aiEnabled: boolean
+      aiPrompt: string | null
+      welcomeMessage: string | null
+      fallbackMessage: string | null
+      metadata: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["omniChatbot"]>
+    composites: {}
+  }
+
+  type OmniChatbotGetPayload<S extends boolean | null | undefined | OmniChatbotDefaultArgs> = $Result.GetResult<Prisma.$OmniChatbotPayload, S>
+
+  type OmniChatbotCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OmniChatbotFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OmniChatbotCountAggregateInputType | true
+    }
+
+  export interface OmniChatbotDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OmniChatbot'], meta: { name: 'OmniChatbot' } }
+    /**
+     * Find zero or one OmniChatbot that matches the filter.
+     * @param {OmniChatbotFindUniqueArgs} args - Arguments to find a OmniChatbot
+     * @example
+     * // Get one OmniChatbot
+     * const omniChatbot = await prisma.omniChatbot.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OmniChatbotFindUniqueArgs>(args: SelectSubset<T, OmniChatbotFindUniqueArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OmniChatbot that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OmniChatbotFindUniqueOrThrowArgs} args - Arguments to find a OmniChatbot
+     * @example
+     * // Get one OmniChatbot
+     * const omniChatbot = await prisma.omniChatbot.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OmniChatbotFindUniqueOrThrowArgs>(args: SelectSubset<T, OmniChatbotFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniChatbot that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniChatbotFindFirstArgs} args - Arguments to find a OmniChatbot
+     * @example
+     * // Get one OmniChatbot
+     * const omniChatbot = await prisma.omniChatbot.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OmniChatbotFindFirstArgs>(args?: SelectSubset<T, OmniChatbotFindFirstArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniChatbot that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniChatbotFindFirstOrThrowArgs} args - Arguments to find a OmniChatbot
+     * @example
+     * // Get one OmniChatbot
+     * const omniChatbot = await prisma.omniChatbot.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OmniChatbotFindFirstOrThrowArgs>(args?: SelectSubset<T, OmniChatbotFindFirstOrThrowArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OmniChatbots that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniChatbotFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OmniChatbots
+     * const omniChatbots = await prisma.omniChatbot.findMany()
+     * 
+     * // Get first 10 OmniChatbots
+     * const omniChatbots = await prisma.omniChatbot.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const omniChatbotWithIdOnly = await prisma.omniChatbot.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OmniChatbotFindManyArgs>(args?: SelectSubset<T, OmniChatbotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OmniChatbot.
+     * @param {OmniChatbotCreateArgs} args - Arguments to create a OmniChatbot.
+     * @example
+     * // Create one OmniChatbot
+     * const OmniChatbot = await prisma.omniChatbot.create({
+     *   data: {
+     *     // ... data to create a OmniChatbot
+     *   }
+     * })
+     * 
+     */
+    create<T extends OmniChatbotCreateArgs>(args: SelectSubset<T, OmniChatbotCreateArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OmniChatbots.
+     * @param {OmniChatbotCreateManyArgs} args - Arguments to create many OmniChatbots.
+     * @example
+     * // Create many OmniChatbots
+     * const omniChatbot = await prisma.omniChatbot.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OmniChatbotCreateManyArgs>(args?: SelectSubset<T, OmniChatbotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OmniChatbots and returns the data saved in the database.
+     * @param {OmniChatbotCreateManyAndReturnArgs} args - Arguments to create many OmniChatbots.
+     * @example
+     * // Create many OmniChatbots
+     * const omniChatbot = await prisma.omniChatbot.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OmniChatbots and only return the `id`
+     * const omniChatbotWithIdOnly = await prisma.omniChatbot.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OmniChatbotCreateManyAndReturnArgs>(args?: SelectSubset<T, OmniChatbotCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OmniChatbot.
+     * @param {OmniChatbotDeleteArgs} args - Arguments to delete one OmniChatbot.
+     * @example
+     * // Delete one OmniChatbot
+     * const OmniChatbot = await prisma.omniChatbot.delete({
+     *   where: {
+     *     // ... filter to delete one OmniChatbot
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OmniChatbotDeleteArgs>(args: SelectSubset<T, OmniChatbotDeleteArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OmniChatbot.
+     * @param {OmniChatbotUpdateArgs} args - Arguments to update one OmniChatbot.
+     * @example
+     * // Update one OmniChatbot
+     * const omniChatbot = await prisma.omniChatbot.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OmniChatbotUpdateArgs>(args: SelectSubset<T, OmniChatbotUpdateArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OmniChatbots.
+     * @param {OmniChatbotDeleteManyArgs} args - Arguments to filter OmniChatbots to delete.
+     * @example
+     * // Delete a few OmniChatbots
+     * const { count } = await prisma.omniChatbot.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OmniChatbotDeleteManyArgs>(args?: SelectSubset<T, OmniChatbotDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniChatbots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniChatbotUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OmniChatbots
+     * const omniChatbot = await prisma.omniChatbot.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OmniChatbotUpdateManyArgs>(args: SelectSubset<T, OmniChatbotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniChatbots and returns the data updated in the database.
+     * @param {OmniChatbotUpdateManyAndReturnArgs} args - Arguments to update many OmniChatbots.
+     * @example
+     * // Update many OmniChatbots
+     * const omniChatbot = await prisma.omniChatbot.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OmniChatbots and only return the `id`
+     * const omniChatbotWithIdOnly = await prisma.omniChatbot.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OmniChatbotUpdateManyAndReturnArgs>(args: SelectSubset<T, OmniChatbotUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OmniChatbot.
+     * @param {OmniChatbotUpsertArgs} args - Arguments to update or create a OmniChatbot.
+     * @example
+     * // Update or create a OmniChatbot
+     * const omniChatbot = await prisma.omniChatbot.upsert({
+     *   create: {
+     *     // ... data to create a OmniChatbot
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OmniChatbot we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OmniChatbotUpsertArgs>(args: SelectSubset<T, OmniChatbotUpsertArgs<ExtArgs>>): Prisma__OmniChatbotClient<$Result.GetResult<Prisma.$OmniChatbotPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OmniChatbots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniChatbotCountArgs} args - Arguments to filter OmniChatbots to count.
+     * @example
+     * // Count the number of OmniChatbots
+     * const count = await prisma.omniChatbot.count({
+     *   where: {
+     *     // ... the filter for the OmniChatbots we want to count
+     *   }
+     * })
+    **/
+    count<T extends OmniChatbotCountArgs>(
+      args?: Subset<T, OmniChatbotCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OmniChatbotCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OmniChatbot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniChatbotAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OmniChatbotAggregateArgs>(args: Subset<T, OmniChatbotAggregateArgs>): Prisma.PrismaPromise<GetOmniChatbotAggregateType<T>>
+
+    /**
+     * Group by OmniChatbot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniChatbotGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OmniChatbotGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OmniChatbotGroupByArgs['orderBy'] }
+        : { orderBy?: OmniChatbotGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OmniChatbotGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOmniChatbotGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OmniChatbot model
+   */
+  readonly fields: OmniChatbotFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OmniChatbot.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OmniChatbotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OmniChatbot model
+   */
+  interface OmniChatbotFieldRefs {
+    readonly id: FieldRef<"OmniChatbot", 'String'>
+    readonly organizationId: FieldRef<"OmniChatbot", 'String'>
+    readonly name: FieldRef<"OmniChatbot", 'String'>
+    readonly provider: FieldRef<"OmniChatbot", 'String'>
+    readonly isActive: FieldRef<"OmniChatbot", 'Boolean'>
+    readonly aiEnabled: FieldRef<"OmniChatbot", 'Boolean'>
+    readonly aiPrompt: FieldRef<"OmniChatbot", 'String'>
+    readonly welcomeMessage: FieldRef<"OmniChatbot", 'String'>
+    readonly fallbackMessage: FieldRef<"OmniChatbot", 'String'>
+    readonly metadata: FieldRef<"OmniChatbot", 'Json'>
+    readonly createdAt: FieldRef<"OmniChatbot", 'DateTime'>
+    readonly updatedAt: FieldRef<"OmniChatbot", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OmniChatbot findUnique
+   */
+  export type OmniChatbotFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniChatbot to fetch.
+     */
+    where: OmniChatbotWhereUniqueInput
+  }
+
+  /**
+   * OmniChatbot findUniqueOrThrow
+   */
+  export type OmniChatbotFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniChatbot to fetch.
+     */
+    where: OmniChatbotWhereUniqueInput
+  }
+
+  /**
+   * OmniChatbot findFirst
+   */
+  export type OmniChatbotFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniChatbot to fetch.
+     */
+    where?: OmniChatbotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniChatbots to fetch.
+     */
+    orderBy?: OmniChatbotOrderByWithRelationInput | OmniChatbotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniChatbots.
+     */
+    cursor?: OmniChatbotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniChatbots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniChatbots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniChatbots.
+     */
+    distinct?: OmniChatbotScalarFieldEnum | OmniChatbotScalarFieldEnum[]
+  }
+
+  /**
+   * OmniChatbot findFirstOrThrow
+   */
+  export type OmniChatbotFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniChatbot to fetch.
+     */
+    where?: OmniChatbotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniChatbots to fetch.
+     */
+    orderBy?: OmniChatbotOrderByWithRelationInput | OmniChatbotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniChatbots.
+     */
+    cursor?: OmniChatbotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniChatbots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniChatbots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniChatbots.
+     */
+    distinct?: OmniChatbotScalarFieldEnum | OmniChatbotScalarFieldEnum[]
+  }
+
+  /**
+   * OmniChatbot findMany
+   */
+  export type OmniChatbotFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniChatbots to fetch.
+     */
+    where?: OmniChatbotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniChatbots to fetch.
+     */
+    orderBy?: OmniChatbotOrderByWithRelationInput | OmniChatbotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OmniChatbots.
+     */
+    cursor?: OmniChatbotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniChatbots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniChatbots.
+     */
+    skip?: number
+    distinct?: OmniChatbotScalarFieldEnum | OmniChatbotScalarFieldEnum[]
+  }
+
+  /**
+   * OmniChatbot create
+   */
+  export type OmniChatbotCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * The data needed to create a OmniChatbot.
+     */
+    data: XOR<OmniChatbotCreateInput, OmniChatbotUncheckedCreateInput>
+  }
+
+  /**
+   * OmniChatbot createMany
+   */
+  export type OmniChatbotCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OmniChatbots.
+     */
+    data: OmniChatbotCreateManyInput | OmniChatbotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniChatbot createManyAndReturn
+   */
+  export type OmniChatbotCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * The data used to create many OmniChatbots.
+     */
+    data: OmniChatbotCreateManyInput | OmniChatbotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniChatbot update
+   */
+  export type OmniChatbotUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * The data needed to update a OmniChatbot.
+     */
+    data: XOR<OmniChatbotUpdateInput, OmniChatbotUncheckedUpdateInput>
+    /**
+     * Choose, which OmniChatbot to update.
+     */
+    where: OmniChatbotWhereUniqueInput
+  }
+
+  /**
+   * OmniChatbot updateMany
+   */
+  export type OmniChatbotUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OmniChatbots.
+     */
+    data: XOR<OmniChatbotUpdateManyMutationInput, OmniChatbotUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniChatbots to update
+     */
+    where?: OmniChatbotWhereInput
+    /**
+     * Limit how many OmniChatbots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniChatbot updateManyAndReturn
+   */
+  export type OmniChatbotUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * The data used to update OmniChatbots.
+     */
+    data: XOR<OmniChatbotUpdateManyMutationInput, OmniChatbotUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniChatbots to update
+     */
+    where?: OmniChatbotWhereInput
+    /**
+     * Limit how many OmniChatbots to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniChatbot upsert
+   */
+  export type OmniChatbotUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * The filter to search for the OmniChatbot to update in case it exists.
+     */
+    where: OmniChatbotWhereUniqueInput
+    /**
+     * In case the OmniChatbot found by the `where` argument doesn't exist, create a new OmniChatbot with this data.
+     */
+    create: XOR<OmniChatbotCreateInput, OmniChatbotUncheckedCreateInput>
+    /**
+     * In case the OmniChatbot was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OmniChatbotUpdateInput, OmniChatbotUncheckedUpdateInput>
+  }
+
+  /**
+   * OmniChatbot delete
+   */
+  export type OmniChatbotDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+    /**
+     * Filter which OmniChatbot to delete.
+     */
+    where: OmniChatbotWhereUniqueInput
+  }
+
+  /**
+   * OmniChatbot deleteMany
+   */
+  export type OmniChatbotDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniChatbots to delete
+     */
+    where?: OmniChatbotWhereInput
+    /**
+     * Limit how many OmniChatbots to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniChatbot without action
+   */
+  export type OmniChatbotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniChatbot
+     */
+    select?: OmniChatbotSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniChatbot
+     */
+    omit?: OmniChatbotOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OmniKeywordTrigger
+   */
+
+  export type AggregateOmniKeywordTrigger = {
+    _count: OmniKeywordTriggerCountAggregateOutputType | null
+    _min: OmniKeywordTriggerMinAggregateOutputType | null
+    _max: OmniKeywordTriggerMaxAggregateOutputType | null
+  }
+
+  export type OmniKeywordTriggerMinAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    keyword: string | null
+    matchType: string | null
+    workflowId: string | null
+    replyMessage: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniKeywordTriggerMaxAggregateOutputType = {
+    id: string | null
+    organizationId: string | null
+    keyword: string | null
+    matchType: string | null
+    workflowId: string | null
+    replyMessage: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniKeywordTriggerCountAggregateOutputType = {
+    id: number
+    organizationId: number
+    keyword: number
+    matchType: number
+    workflowId: number
+    replyMessage: number
+    isActive: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type OmniKeywordTriggerMinAggregateInputType = {
+    id?: true
+    organizationId?: true
+    keyword?: true
+    matchType?: true
+    workflowId?: true
+    replyMessage?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniKeywordTriggerMaxAggregateInputType = {
+    id?: true
+    organizationId?: true
+    keyword?: true
+    matchType?: true
+    workflowId?: true
+    replyMessage?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniKeywordTriggerCountAggregateInputType = {
+    id?: true
+    organizationId?: true
+    keyword?: true
+    matchType?: true
+    workflowId?: true
+    replyMessage?: true
+    isActive?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type OmniKeywordTriggerAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniKeywordTrigger to aggregate.
+     */
+    where?: OmniKeywordTriggerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniKeywordTriggers to fetch.
+     */
+    orderBy?: OmniKeywordTriggerOrderByWithRelationInput | OmniKeywordTriggerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OmniKeywordTriggerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniKeywordTriggers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniKeywordTriggers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OmniKeywordTriggers
+    **/
+    _count?: true | OmniKeywordTriggerCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OmniKeywordTriggerMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OmniKeywordTriggerMaxAggregateInputType
+  }
+
+  export type GetOmniKeywordTriggerAggregateType<T extends OmniKeywordTriggerAggregateArgs> = {
+        [P in keyof T & keyof AggregateOmniKeywordTrigger]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOmniKeywordTrigger[P]>
+      : GetScalarType<T[P], AggregateOmniKeywordTrigger[P]>
+  }
+
+
+
+
+  export type OmniKeywordTriggerGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OmniKeywordTriggerWhereInput
+    orderBy?: OmniKeywordTriggerOrderByWithAggregationInput | OmniKeywordTriggerOrderByWithAggregationInput[]
+    by: OmniKeywordTriggerScalarFieldEnum[] | OmniKeywordTriggerScalarFieldEnum
+    having?: OmniKeywordTriggerScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OmniKeywordTriggerCountAggregateInputType | true
+    _min?: OmniKeywordTriggerMinAggregateInputType
+    _max?: OmniKeywordTriggerMaxAggregateInputType
+  }
+
+  export type OmniKeywordTriggerGroupByOutputType = {
+    id: string
+    organizationId: string
+    keyword: string
+    matchType: string
+    workflowId: string | null
+    replyMessage: string | null
+    isActive: boolean
+    metadata: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: OmniKeywordTriggerCountAggregateOutputType | null
+    _min: OmniKeywordTriggerMinAggregateOutputType | null
+    _max: OmniKeywordTriggerMaxAggregateOutputType | null
+  }
+
+  type GetOmniKeywordTriggerGroupByPayload<T extends OmniKeywordTriggerGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OmniKeywordTriggerGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OmniKeywordTriggerGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OmniKeywordTriggerGroupByOutputType[P]>
+            : GetScalarType<T[P], OmniKeywordTriggerGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OmniKeywordTriggerSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    keyword?: boolean
+    matchType?: boolean
+    workflowId?: boolean
+    replyMessage?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniKeywordTrigger"]>
+
+  export type OmniKeywordTriggerSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    keyword?: boolean
+    matchType?: boolean
+    workflowId?: boolean
+    replyMessage?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniKeywordTrigger"]>
+
+  export type OmniKeywordTriggerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    keyword?: boolean
+    matchType?: boolean
+    workflowId?: boolean
+    replyMessage?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniKeywordTrigger"]>
+
+  export type OmniKeywordTriggerSelectScalar = {
+    id?: boolean
+    organizationId?: boolean
+    keyword?: boolean
+    matchType?: boolean
+    workflowId?: boolean
+    replyMessage?: boolean
+    isActive?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type OmniKeywordTriggerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "keyword" | "matchType" | "workflowId" | "replyMessage" | "isActive" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["omniKeywordTrigger"]>
+
+  export type $OmniKeywordTriggerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OmniKeywordTrigger"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      organizationId: string
+      keyword: string
+      matchType: string
+      workflowId: string | null
+      replyMessage: string | null
+      isActive: boolean
+      metadata: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["omniKeywordTrigger"]>
+    composites: {}
+  }
+
+  type OmniKeywordTriggerGetPayload<S extends boolean | null | undefined | OmniKeywordTriggerDefaultArgs> = $Result.GetResult<Prisma.$OmniKeywordTriggerPayload, S>
+
+  type OmniKeywordTriggerCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OmniKeywordTriggerFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OmniKeywordTriggerCountAggregateInputType | true
+    }
+
+  export interface OmniKeywordTriggerDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OmniKeywordTrigger'], meta: { name: 'OmniKeywordTrigger' } }
+    /**
+     * Find zero or one OmniKeywordTrigger that matches the filter.
+     * @param {OmniKeywordTriggerFindUniqueArgs} args - Arguments to find a OmniKeywordTrigger
+     * @example
+     * // Get one OmniKeywordTrigger
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OmniKeywordTriggerFindUniqueArgs>(args: SelectSubset<T, OmniKeywordTriggerFindUniqueArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OmniKeywordTrigger that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OmniKeywordTriggerFindUniqueOrThrowArgs} args - Arguments to find a OmniKeywordTrigger
+     * @example
+     * // Get one OmniKeywordTrigger
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OmniKeywordTriggerFindUniqueOrThrowArgs>(args: SelectSubset<T, OmniKeywordTriggerFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniKeywordTrigger that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniKeywordTriggerFindFirstArgs} args - Arguments to find a OmniKeywordTrigger
+     * @example
+     * // Get one OmniKeywordTrigger
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OmniKeywordTriggerFindFirstArgs>(args?: SelectSubset<T, OmniKeywordTriggerFindFirstArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniKeywordTrigger that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniKeywordTriggerFindFirstOrThrowArgs} args - Arguments to find a OmniKeywordTrigger
+     * @example
+     * // Get one OmniKeywordTrigger
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OmniKeywordTriggerFindFirstOrThrowArgs>(args?: SelectSubset<T, OmniKeywordTriggerFindFirstOrThrowArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OmniKeywordTriggers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniKeywordTriggerFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OmniKeywordTriggers
+     * const omniKeywordTriggers = await prisma.omniKeywordTrigger.findMany()
+     * 
+     * // Get first 10 OmniKeywordTriggers
+     * const omniKeywordTriggers = await prisma.omniKeywordTrigger.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const omniKeywordTriggerWithIdOnly = await prisma.omniKeywordTrigger.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OmniKeywordTriggerFindManyArgs>(args?: SelectSubset<T, OmniKeywordTriggerFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OmniKeywordTrigger.
+     * @param {OmniKeywordTriggerCreateArgs} args - Arguments to create a OmniKeywordTrigger.
+     * @example
+     * // Create one OmniKeywordTrigger
+     * const OmniKeywordTrigger = await prisma.omniKeywordTrigger.create({
+     *   data: {
+     *     // ... data to create a OmniKeywordTrigger
+     *   }
+     * })
+     * 
+     */
+    create<T extends OmniKeywordTriggerCreateArgs>(args: SelectSubset<T, OmniKeywordTriggerCreateArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OmniKeywordTriggers.
+     * @param {OmniKeywordTriggerCreateManyArgs} args - Arguments to create many OmniKeywordTriggers.
+     * @example
+     * // Create many OmniKeywordTriggers
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OmniKeywordTriggerCreateManyArgs>(args?: SelectSubset<T, OmniKeywordTriggerCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OmniKeywordTriggers and returns the data saved in the database.
+     * @param {OmniKeywordTriggerCreateManyAndReturnArgs} args - Arguments to create many OmniKeywordTriggers.
+     * @example
+     * // Create many OmniKeywordTriggers
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OmniKeywordTriggers and only return the `id`
+     * const omniKeywordTriggerWithIdOnly = await prisma.omniKeywordTrigger.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OmniKeywordTriggerCreateManyAndReturnArgs>(args?: SelectSubset<T, OmniKeywordTriggerCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OmniKeywordTrigger.
+     * @param {OmniKeywordTriggerDeleteArgs} args - Arguments to delete one OmniKeywordTrigger.
+     * @example
+     * // Delete one OmniKeywordTrigger
+     * const OmniKeywordTrigger = await prisma.omniKeywordTrigger.delete({
+     *   where: {
+     *     // ... filter to delete one OmniKeywordTrigger
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OmniKeywordTriggerDeleteArgs>(args: SelectSubset<T, OmniKeywordTriggerDeleteArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OmniKeywordTrigger.
+     * @param {OmniKeywordTriggerUpdateArgs} args - Arguments to update one OmniKeywordTrigger.
+     * @example
+     * // Update one OmniKeywordTrigger
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OmniKeywordTriggerUpdateArgs>(args: SelectSubset<T, OmniKeywordTriggerUpdateArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OmniKeywordTriggers.
+     * @param {OmniKeywordTriggerDeleteManyArgs} args - Arguments to filter OmniKeywordTriggers to delete.
+     * @example
+     * // Delete a few OmniKeywordTriggers
+     * const { count } = await prisma.omniKeywordTrigger.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OmniKeywordTriggerDeleteManyArgs>(args?: SelectSubset<T, OmniKeywordTriggerDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniKeywordTriggers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniKeywordTriggerUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OmniKeywordTriggers
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OmniKeywordTriggerUpdateManyArgs>(args: SelectSubset<T, OmniKeywordTriggerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniKeywordTriggers and returns the data updated in the database.
+     * @param {OmniKeywordTriggerUpdateManyAndReturnArgs} args - Arguments to update many OmniKeywordTriggers.
+     * @example
+     * // Update many OmniKeywordTriggers
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OmniKeywordTriggers and only return the `id`
+     * const omniKeywordTriggerWithIdOnly = await prisma.omniKeywordTrigger.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OmniKeywordTriggerUpdateManyAndReturnArgs>(args: SelectSubset<T, OmniKeywordTriggerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OmniKeywordTrigger.
+     * @param {OmniKeywordTriggerUpsertArgs} args - Arguments to update or create a OmniKeywordTrigger.
+     * @example
+     * // Update or create a OmniKeywordTrigger
+     * const omniKeywordTrigger = await prisma.omniKeywordTrigger.upsert({
+     *   create: {
+     *     // ... data to create a OmniKeywordTrigger
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OmniKeywordTrigger we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OmniKeywordTriggerUpsertArgs>(args: SelectSubset<T, OmniKeywordTriggerUpsertArgs<ExtArgs>>): Prisma__OmniKeywordTriggerClient<$Result.GetResult<Prisma.$OmniKeywordTriggerPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OmniKeywordTriggers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniKeywordTriggerCountArgs} args - Arguments to filter OmniKeywordTriggers to count.
+     * @example
+     * // Count the number of OmniKeywordTriggers
+     * const count = await prisma.omniKeywordTrigger.count({
+     *   where: {
+     *     // ... the filter for the OmniKeywordTriggers we want to count
+     *   }
+     * })
+    **/
+    count<T extends OmniKeywordTriggerCountArgs>(
+      args?: Subset<T, OmniKeywordTriggerCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OmniKeywordTriggerCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OmniKeywordTrigger.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniKeywordTriggerAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OmniKeywordTriggerAggregateArgs>(args: Subset<T, OmniKeywordTriggerAggregateArgs>): Prisma.PrismaPromise<GetOmniKeywordTriggerAggregateType<T>>
+
+    /**
+     * Group by OmniKeywordTrigger.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniKeywordTriggerGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OmniKeywordTriggerGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OmniKeywordTriggerGroupByArgs['orderBy'] }
+        : { orderBy?: OmniKeywordTriggerGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OmniKeywordTriggerGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOmniKeywordTriggerGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OmniKeywordTrigger model
+   */
+  readonly fields: OmniKeywordTriggerFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OmniKeywordTrigger.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OmniKeywordTriggerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OmniKeywordTrigger model
+   */
+  interface OmniKeywordTriggerFieldRefs {
+    readonly id: FieldRef<"OmniKeywordTrigger", 'String'>
+    readonly organizationId: FieldRef<"OmniKeywordTrigger", 'String'>
+    readonly keyword: FieldRef<"OmniKeywordTrigger", 'String'>
+    readonly matchType: FieldRef<"OmniKeywordTrigger", 'String'>
+    readonly workflowId: FieldRef<"OmniKeywordTrigger", 'String'>
+    readonly replyMessage: FieldRef<"OmniKeywordTrigger", 'String'>
+    readonly isActive: FieldRef<"OmniKeywordTrigger", 'Boolean'>
+    readonly metadata: FieldRef<"OmniKeywordTrigger", 'Json'>
+    readonly createdAt: FieldRef<"OmniKeywordTrigger", 'DateTime'>
+    readonly updatedAt: FieldRef<"OmniKeywordTrigger", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OmniKeywordTrigger findUnique
+   */
+  export type OmniKeywordTriggerFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniKeywordTrigger to fetch.
+     */
+    where: OmniKeywordTriggerWhereUniqueInput
+  }
+
+  /**
+   * OmniKeywordTrigger findUniqueOrThrow
+   */
+  export type OmniKeywordTriggerFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniKeywordTrigger to fetch.
+     */
+    where: OmniKeywordTriggerWhereUniqueInput
+  }
+
+  /**
+   * OmniKeywordTrigger findFirst
+   */
+  export type OmniKeywordTriggerFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniKeywordTrigger to fetch.
+     */
+    where?: OmniKeywordTriggerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniKeywordTriggers to fetch.
+     */
+    orderBy?: OmniKeywordTriggerOrderByWithRelationInput | OmniKeywordTriggerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniKeywordTriggers.
+     */
+    cursor?: OmniKeywordTriggerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniKeywordTriggers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniKeywordTriggers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniKeywordTriggers.
+     */
+    distinct?: OmniKeywordTriggerScalarFieldEnum | OmniKeywordTriggerScalarFieldEnum[]
+  }
+
+  /**
+   * OmniKeywordTrigger findFirstOrThrow
+   */
+  export type OmniKeywordTriggerFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniKeywordTrigger to fetch.
+     */
+    where?: OmniKeywordTriggerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniKeywordTriggers to fetch.
+     */
+    orderBy?: OmniKeywordTriggerOrderByWithRelationInput | OmniKeywordTriggerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniKeywordTriggers.
+     */
+    cursor?: OmniKeywordTriggerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniKeywordTriggers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniKeywordTriggers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniKeywordTriggers.
+     */
+    distinct?: OmniKeywordTriggerScalarFieldEnum | OmniKeywordTriggerScalarFieldEnum[]
+  }
+
+  /**
+   * OmniKeywordTrigger findMany
+   */
+  export type OmniKeywordTriggerFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * Filter, which OmniKeywordTriggers to fetch.
+     */
+    where?: OmniKeywordTriggerWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniKeywordTriggers to fetch.
+     */
+    orderBy?: OmniKeywordTriggerOrderByWithRelationInput | OmniKeywordTriggerOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OmniKeywordTriggers.
+     */
+    cursor?: OmniKeywordTriggerWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniKeywordTriggers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniKeywordTriggers.
+     */
+    skip?: number
+    distinct?: OmniKeywordTriggerScalarFieldEnum | OmniKeywordTriggerScalarFieldEnum[]
+  }
+
+  /**
+   * OmniKeywordTrigger create
+   */
+  export type OmniKeywordTriggerCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * The data needed to create a OmniKeywordTrigger.
+     */
+    data: XOR<OmniKeywordTriggerCreateInput, OmniKeywordTriggerUncheckedCreateInput>
+  }
+
+  /**
+   * OmniKeywordTrigger createMany
+   */
+  export type OmniKeywordTriggerCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OmniKeywordTriggers.
+     */
+    data: OmniKeywordTriggerCreateManyInput | OmniKeywordTriggerCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniKeywordTrigger createManyAndReturn
+   */
+  export type OmniKeywordTriggerCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * The data used to create many OmniKeywordTriggers.
+     */
+    data: OmniKeywordTriggerCreateManyInput | OmniKeywordTriggerCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniKeywordTrigger update
+   */
+  export type OmniKeywordTriggerUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * The data needed to update a OmniKeywordTrigger.
+     */
+    data: XOR<OmniKeywordTriggerUpdateInput, OmniKeywordTriggerUncheckedUpdateInput>
+    /**
+     * Choose, which OmniKeywordTrigger to update.
+     */
+    where: OmniKeywordTriggerWhereUniqueInput
+  }
+
+  /**
+   * OmniKeywordTrigger updateMany
+   */
+  export type OmniKeywordTriggerUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OmniKeywordTriggers.
+     */
+    data: XOR<OmniKeywordTriggerUpdateManyMutationInput, OmniKeywordTriggerUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniKeywordTriggers to update
+     */
+    where?: OmniKeywordTriggerWhereInput
+    /**
+     * Limit how many OmniKeywordTriggers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniKeywordTrigger updateManyAndReturn
+   */
+  export type OmniKeywordTriggerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * The data used to update OmniKeywordTriggers.
+     */
+    data: XOR<OmniKeywordTriggerUpdateManyMutationInput, OmniKeywordTriggerUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniKeywordTriggers to update
+     */
+    where?: OmniKeywordTriggerWhereInput
+    /**
+     * Limit how many OmniKeywordTriggers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniKeywordTrigger upsert
+   */
+  export type OmniKeywordTriggerUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * The filter to search for the OmniKeywordTrigger to update in case it exists.
+     */
+    where: OmniKeywordTriggerWhereUniqueInput
+    /**
+     * In case the OmniKeywordTrigger found by the `where` argument doesn't exist, create a new OmniKeywordTrigger with this data.
+     */
+    create: XOR<OmniKeywordTriggerCreateInput, OmniKeywordTriggerUncheckedCreateInput>
+    /**
+     * In case the OmniKeywordTrigger was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OmniKeywordTriggerUpdateInput, OmniKeywordTriggerUncheckedUpdateInput>
+  }
+
+  /**
+   * OmniKeywordTrigger delete
+   */
+  export type OmniKeywordTriggerDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+    /**
+     * Filter which OmniKeywordTrigger to delete.
+     */
+    where: OmniKeywordTriggerWhereUniqueInput
+  }
+
+  /**
+   * OmniKeywordTrigger deleteMany
+   */
+  export type OmniKeywordTriggerDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniKeywordTriggers to delete
+     */
+    where?: OmniKeywordTriggerWhereInput
+    /**
+     * Limit how many OmniKeywordTriggers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniKeywordTrigger without action
+   */
+  export type OmniKeywordTriggerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniKeywordTrigger
+     */
+    select?: OmniKeywordTriggerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniKeywordTrigger
+     */
+    omit?: OmniKeywordTriggerOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -9337,6 +11657,40 @@ export namespace Prisma {
   export type WorkflowExecutionHistoryScalarFieldEnum = (typeof WorkflowExecutionHistoryScalarFieldEnum)[keyof typeof WorkflowExecutionHistoryScalarFieldEnum]
 
 
+  export const OmniChatbotScalarFieldEnum: {
+    id: 'id',
+    organizationId: 'organizationId',
+    name: 'name',
+    provider: 'provider',
+    isActive: 'isActive',
+    aiEnabled: 'aiEnabled',
+    aiPrompt: 'aiPrompt',
+    welcomeMessage: 'welcomeMessage',
+    fallbackMessage: 'fallbackMessage',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type OmniChatbotScalarFieldEnum = (typeof OmniChatbotScalarFieldEnum)[keyof typeof OmniChatbotScalarFieldEnum]
+
+
+  export const OmniKeywordTriggerScalarFieldEnum: {
+    id: 'id',
+    organizationId: 'organizationId',
+    keyword: 'keyword',
+    matchType: 'matchType',
+    workflowId: 'workflowId',
+    replyMessage: 'replyMessage',
+    isActive: 'isActive',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type OmniKeywordTriggerScalarFieldEnum = (typeof OmniKeywordTriggerScalarFieldEnum)[keyof typeof OmniKeywordTriggerScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -9351,6 +11705,13 @@ export namespace Prisma {
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -10147,6 +12508,170 @@ export namespace Prisma {
     completedAt?: DateTimeNullableWithAggregatesFilter<"WorkflowExecutionHistory"> | Date | string | null
     errorMessage?: StringNullableWithAggregatesFilter<"WorkflowExecutionHistory"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"WorkflowExecutionHistory"> | Date | string
+  }
+
+  export type OmniChatbotWhereInput = {
+    AND?: OmniChatbotWhereInput | OmniChatbotWhereInput[]
+    OR?: OmniChatbotWhereInput[]
+    NOT?: OmniChatbotWhereInput | OmniChatbotWhereInput[]
+    id?: UuidFilter<"OmniChatbot"> | string
+    organizationId?: UuidFilter<"OmniChatbot"> | string
+    name?: StringFilter<"OmniChatbot"> | string
+    provider?: StringFilter<"OmniChatbot"> | string
+    isActive?: BoolFilter<"OmniChatbot"> | boolean
+    aiEnabled?: BoolFilter<"OmniChatbot"> | boolean
+    aiPrompt?: StringNullableFilter<"OmniChatbot"> | string | null
+    welcomeMessage?: StringNullableFilter<"OmniChatbot"> | string | null
+    fallbackMessage?: StringNullableFilter<"OmniChatbot"> | string | null
+    metadata?: JsonFilter<"OmniChatbot">
+    createdAt?: DateTimeFilter<"OmniChatbot"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniChatbot"> | Date | string
+  }
+
+  export type OmniChatbotOrderByWithRelationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    isActive?: SortOrder
+    aiEnabled?: SortOrder
+    aiPrompt?: SortOrderInput | SortOrder
+    welcomeMessage?: SortOrderInput | SortOrder
+    fallbackMessage?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniChatbotWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OmniChatbotWhereInput | OmniChatbotWhereInput[]
+    OR?: OmniChatbotWhereInput[]
+    NOT?: OmniChatbotWhereInput | OmniChatbotWhereInput[]
+    organizationId?: UuidFilter<"OmniChatbot"> | string
+    name?: StringFilter<"OmniChatbot"> | string
+    provider?: StringFilter<"OmniChatbot"> | string
+    isActive?: BoolFilter<"OmniChatbot"> | boolean
+    aiEnabled?: BoolFilter<"OmniChatbot"> | boolean
+    aiPrompt?: StringNullableFilter<"OmniChatbot"> | string | null
+    welcomeMessage?: StringNullableFilter<"OmniChatbot"> | string | null
+    fallbackMessage?: StringNullableFilter<"OmniChatbot"> | string | null
+    metadata?: JsonFilter<"OmniChatbot">
+    createdAt?: DateTimeFilter<"OmniChatbot"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniChatbot"> | Date | string
+  }, "id">
+
+  export type OmniChatbotOrderByWithAggregationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    isActive?: SortOrder
+    aiEnabled?: SortOrder
+    aiPrompt?: SortOrderInput | SortOrder
+    welcomeMessage?: SortOrderInput | SortOrder
+    fallbackMessage?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: OmniChatbotCountOrderByAggregateInput
+    _max?: OmniChatbotMaxOrderByAggregateInput
+    _min?: OmniChatbotMinOrderByAggregateInput
+  }
+
+  export type OmniChatbotScalarWhereWithAggregatesInput = {
+    AND?: OmniChatbotScalarWhereWithAggregatesInput | OmniChatbotScalarWhereWithAggregatesInput[]
+    OR?: OmniChatbotScalarWhereWithAggregatesInput[]
+    NOT?: OmniChatbotScalarWhereWithAggregatesInput | OmniChatbotScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"OmniChatbot"> | string
+    organizationId?: UuidWithAggregatesFilter<"OmniChatbot"> | string
+    name?: StringWithAggregatesFilter<"OmniChatbot"> | string
+    provider?: StringWithAggregatesFilter<"OmniChatbot"> | string
+    isActive?: BoolWithAggregatesFilter<"OmniChatbot"> | boolean
+    aiEnabled?: BoolWithAggregatesFilter<"OmniChatbot"> | boolean
+    aiPrompt?: StringNullableWithAggregatesFilter<"OmniChatbot"> | string | null
+    welcomeMessage?: StringNullableWithAggregatesFilter<"OmniChatbot"> | string | null
+    fallbackMessage?: StringNullableWithAggregatesFilter<"OmniChatbot"> | string | null
+    metadata?: JsonWithAggregatesFilter<"OmniChatbot">
+    createdAt?: DateTimeWithAggregatesFilter<"OmniChatbot"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"OmniChatbot"> | Date | string
+  }
+
+  export type OmniKeywordTriggerWhereInput = {
+    AND?: OmniKeywordTriggerWhereInput | OmniKeywordTriggerWhereInput[]
+    OR?: OmniKeywordTriggerWhereInput[]
+    NOT?: OmniKeywordTriggerWhereInput | OmniKeywordTriggerWhereInput[]
+    id?: UuidFilter<"OmniKeywordTrigger"> | string
+    organizationId?: UuidFilter<"OmniKeywordTrigger"> | string
+    keyword?: StringFilter<"OmniKeywordTrigger"> | string
+    matchType?: StringFilter<"OmniKeywordTrigger"> | string
+    workflowId?: UuidNullableFilter<"OmniKeywordTrigger"> | string | null
+    replyMessage?: StringNullableFilter<"OmniKeywordTrigger"> | string | null
+    isActive?: BoolFilter<"OmniKeywordTrigger"> | boolean
+    metadata?: JsonFilter<"OmniKeywordTrigger">
+    createdAt?: DateTimeFilter<"OmniKeywordTrigger"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniKeywordTrigger"> | Date | string
+  }
+
+  export type OmniKeywordTriggerOrderByWithRelationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    keyword?: SortOrder
+    matchType?: SortOrder
+    workflowId?: SortOrderInput | SortOrder
+    replyMessage?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniKeywordTriggerWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OmniKeywordTriggerWhereInput | OmniKeywordTriggerWhereInput[]
+    OR?: OmniKeywordTriggerWhereInput[]
+    NOT?: OmniKeywordTriggerWhereInput | OmniKeywordTriggerWhereInput[]
+    organizationId?: UuidFilter<"OmniKeywordTrigger"> | string
+    keyword?: StringFilter<"OmniKeywordTrigger"> | string
+    matchType?: StringFilter<"OmniKeywordTrigger"> | string
+    workflowId?: UuidNullableFilter<"OmniKeywordTrigger"> | string | null
+    replyMessage?: StringNullableFilter<"OmniKeywordTrigger"> | string | null
+    isActive?: BoolFilter<"OmniKeywordTrigger"> | boolean
+    metadata?: JsonFilter<"OmniKeywordTrigger">
+    createdAt?: DateTimeFilter<"OmniKeywordTrigger"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniKeywordTrigger"> | Date | string
+  }, "id">
+
+  export type OmniKeywordTriggerOrderByWithAggregationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    keyword?: SortOrder
+    matchType?: SortOrder
+    workflowId?: SortOrderInput | SortOrder
+    replyMessage?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: OmniKeywordTriggerCountOrderByAggregateInput
+    _max?: OmniKeywordTriggerMaxOrderByAggregateInput
+    _min?: OmniKeywordTriggerMinOrderByAggregateInput
+  }
+
+  export type OmniKeywordTriggerScalarWhereWithAggregatesInput = {
+    AND?: OmniKeywordTriggerScalarWhereWithAggregatesInput | OmniKeywordTriggerScalarWhereWithAggregatesInput[]
+    OR?: OmniKeywordTriggerScalarWhereWithAggregatesInput[]
+    NOT?: OmniKeywordTriggerScalarWhereWithAggregatesInput | OmniKeywordTriggerScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"OmniKeywordTrigger"> | string
+    organizationId?: UuidWithAggregatesFilter<"OmniKeywordTrigger"> | string
+    keyword?: StringWithAggregatesFilter<"OmniKeywordTrigger"> | string
+    matchType?: StringWithAggregatesFilter<"OmniKeywordTrigger"> | string
+    workflowId?: UuidNullableWithAggregatesFilter<"OmniKeywordTrigger"> | string | null
+    replyMessage?: StringNullableWithAggregatesFilter<"OmniKeywordTrigger"> | string | null
+    isActive?: BoolWithAggregatesFilter<"OmniKeywordTrigger"> | boolean
+    metadata?: JsonWithAggregatesFilter<"OmniKeywordTrigger">
+    createdAt?: DateTimeWithAggregatesFilter<"OmniKeywordTrigger"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"OmniKeywordTrigger"> | Date | string
   }
 
   export type AutomationCreateInput = {
@@ -10989,6 +13514,202 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type OmniChatbotCreateInput = {
+    id?: string
+    organizationId: string
+    name: string
+    provider: string
+    isActive?: boolean
+    aiEnabled?: boolean
+    aiPrompt?: string | null
+    welcomeMessage?: string | null
+    fallbackMessage?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniChatbotUncheckedCreateInput = {
+    id?: string
+    organizationId: string
+    name: string
+    provider: string
+    isActive?: boolean
+    aiEnabled?: boolean
+    aiPrompt?: string | null
+    welcomeMessage?: string | null
+    fallbackMessage?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniChatbotUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    aiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    aiPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fallbackMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniChatbotUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    aiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    aiPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fallbackMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniChatbotCreateManyInput = {
+    id?: string
+    organizationId: string
+    name: string
+    provider: string
+    isActive?: boolean
+    aiEnabled?: boolean
+    aiPrompt?: string | null
+    welcomeMessage?: string | null
+    fallbackMessage?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniChatbotUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    aiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    aiPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fallbackMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniChatbotUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    aiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    aiPrompt?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    fallbackMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniKeywordTriggerCreateInput = {
+    id?: string
+    organizationId: string
+    keyword: string
+    matchType?: string
+    workflowId?: string | null
+    replyMessage?: string | null
+    isActive?: boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniKeywordTriggerUncheckedCreateInput = {
+    id?: string
+    organizationId: string
+    keyword: string
+    matchType?: string
+    workflowId?: string | null
+    replyMessage?: string | null
+    isActive?: boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniKeywordTriggerUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    matchType?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    replyMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniKeywordTriggerUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    matchType?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    replyMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniKeywordTriggerCreateManyInput = {
+    id?: string
+    organizationId: string
+    keyword: string
+    matchType?: string
+    workflowId?: string | null
+    replyMessage?: string | null
+    isActive?: boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniKeywordTriggerUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    matchType?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    replyMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniKeywordTriggerUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    keyword?: StringFieldUpdateOperationsInput | string
+    matchType?: StringFieldUpdateOperationsInput | string
+    workflowId?: NullableStringFieldUpdateOperationsInput | string | null
+    replyMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -11600,6 +14321,135 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type OmniChatbotCountOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    isActive?: SortOrder
+    aiEnabled?: SortOrder
+    aiPrompt?: SortOrder
+    welcomeMessage?: SortOrder
+    fallbackMessage?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniChatbotMaxOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    isActive?: SortOrder
+    aiEnabled?: SortOrder
+    aiPrompt?: SortOrder
+    welcomeMessage?: SortOrder
+    fallbackMessage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniChatbotMinOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    isActive?: SortOrder
+    aiEnabled?: SortOrder
+    aiPrompt?: SortOrder
+    welcomeMessage?: SortOrder
+    fallbackMessage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type OmniKeywordTriggerCountOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    keyword?: SortOrder
+    matchType?: SortOrder
+    workflowId?: SortOrder
+    replyMessage?: SortOrder
+    isActive?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniKeywordTriggerMaxOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    keyword?: SortOrder
+    matchType?: SortOrder
+    workflowId?: SortOrder
+    replyMessage?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniKeywordTriggerMinOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    keyword?: SortOrder
+    matchType?: SortOrder
+    workflowId?: SortOrder
+    replyMessage?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
 
   export type StringFieldUpdateOperationsInput = {
     set?: string
@@ -11883,6 +14733,29 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
 

@@ -101,3 +101,44 @@ model OptinForm {
   @@index([orgId])
   @@map("optin_forms")
 }
+
+model OmniBroadcast {
+  id          String    @id @default(uuid()) @db.Uuid
+  orgId       String    @map("org_id") @db.Uuid
+  createdBy   String    @map("created_by")
+  name        String
+  provider    String // whatsapp | telegram
+  phonebookId String?   @map("phonebook_id") @db.Uuid
+  message     String    @db.Text
+  mediaUrl    String?   @map("media_url")
+  status      String    @default("pending") // pending | sending | completed | failed
+  totalCount  Int       @default(0) @map("total_count")
+  sentCount   Int       @default(0) @map("sent_count")
+  failedCount Int       @default(0) @map("failed_count")
+  scheduledAt DateTime? @map("scheduled_at")
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  logs OmniBroadcastLog[]
+
+  @@index([orgId])
+  @@map("omni_broadcasts")
+}
+
+model OmniBroadcastLog {
+  id          String    @id @default(uuid()) @db.Uuid
+  broadcastId String    @map("broadcast_id") @db.Uuid
+  contactId   String?   @map("contact_id") @db.Uuid
+  phone       String
+  status      String    @default("pending") // pending | sent | delivered | failed
+  error       String?
+  metadata    Json      @default("{}")
+  sentAt      DateTime? @map("sent_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  broadcast OmniBroadcast @relation(fields: [broadcastId], references: [id])
+
+  @@index([broadcastId])
+  @@map("omni_broadcast_logs")
+}

@@ -54,3 +54,46 @@ export interface ChatStatisticsInput {
   avgResponseTime?: number;
   date: Date;
 }
+
+export interface OmniConversationInput {
+  organizationId: string;
+  contactId: string;
+  provider: string;
+  providerRef?: string;
+  status?: string;
+  subject?: string;
+  lastMessage?: string;
+  lastMessageAt?: Date;
+  metadata?: any;
+  assignedAgentId?: string;
+}
+
+export interface OmniMessageInput {
+  conversationId: string;
+  senderId: string;
+  senderType: string;
+  content?: string;
+  type?: string;
+  status?: string;
+  direction?: string;
+  metadata?: any;
+}
+
+export interface OmniParticipantInput {
+  conversationId: string;
+  participantId: string;
+  participantType: string;
+  role?: string;
+}
+
+export interface OmniMessageReceivedEvent {
+  provider: 'whatsapp' | 'telegram';
+  instanceId: string;
+  contactMobile: string;
+  contactName?: string;
+  content: string;
+  type: string;
+  timestamp: number;
+  metadata?: any;
+  organizationId: string;
+}

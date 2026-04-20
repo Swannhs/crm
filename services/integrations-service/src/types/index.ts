@@ -62,6 +62,30 @@ export interface IntegrationActivityInput {
   details?: any;
 }
 
+export interface UserIntegrationSettingsInput {
+  timezone?: string;
+  apiKey?: string;
+  fcmData?: any;
+}
+
+export interface MetaIntegrationInput {
+  wabaId?: string;
+  accessToken?: string;
+  businessPhoneNumberId?: string;
+  appId?: string;
+  loginType?: string;
+  embedData?: any;
+  isActive?: boolean;
+}
+
+export interface VoiceIntegrationInput {
+  provider?: string;
+  apiKey?: string;
+  voiceId?: string;
+  settings?: any;
+  isActive?: boolean;
+}
+
 export type IntegrationProvider = 
   | 'google' 
   | 'facebook' 
@@ -72,4 +96,37 @@ export type IntegrationProvider =
   | 'shopify' 
   | 'uber' 
   | 'uber-eats' 
-  | 'easypost';
+  | 'easypost'
+  | 'meta'
+  | 'elevenlabs'
+  | 'whatsapp'
+  | 'telegram';
+
+export interface WhatsAppInstanceInput {
+  name?: string;
+  instanceId: string;
+  status?: string;
+  qr?: string;
+  phone?: string;
+  metadata?: any;
+}
+
+export interface TelegramSessionInput {
+  name?: string;
+  sessionId: string;
+  status?: string;
+  phone?: string;
+  metadata?: any;
+}
+
+export interface OmniMessageReceivedEvent {
+  provider: 'whatsapp' | 'telegram';
+  instanceId: string;
+  contactMobile: string;
+  contactName?: string;
+  content: string;
+  type: 'text' | 'image' | 'video' | 'audio' | 'document' | 'location' | 'interactive';
+  timestamp: number;
+  metadata?: any;
+  organizationId: string;
+}

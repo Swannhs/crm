@@ -4,14 +4,21 @@ import {
   WorkflowNodeRepository,
   WorkflowWorkspaceRepository,
   WorkflowStartActionRepository,
-  WorkflowActivityLogRepository
+  WorkflowActivityLogRepository,
+  OmniChatbotRepository,
+  OmniKeywordTriggerRepository,
+  OmniBroadcastRepository
 } from '../repositories/index.js';
 import type { 
   AutomationInput, 
   WorkflowInput, 
   WorkflowNodeInput, 
   WorkflowWorkspaceInput,
-  WorkflowStartActionInput
+  WorkflowStartActionInput,
+  OmniChatbotInput,
+  OmniKeywordTriggerInput,
+  OmniBroadcastInput,
+  OmniBroadcastRecipientInput
 } from '../types/index.js';
 
 export class AutomationService {
@@ -166,5 +173,162 @@ export class WorkflowStartActionService {
 
   async delete(id: string) {
     return this.repo.delete(id);
+  }
+}
+
+import { emitOmniMessageSend } from '../kafka/omni.producer.js';
+import { OmniMessageReceivedEvent } from '../types/index.js';
+import { OmniFlowExecutor } from './omni.flow.executor.js';
+
+export class OmniChatbotService {
+  private repo = new OmniChatbotRepository();
+  private executor = new OmniFlowExecutor();
+
+  async create(data: OmniChatbotInput, organizationId: string) {
+    return this.repo.create({ ...data, organizationId });
+  }
+
+  async getAll(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+
+  async getById(id: string) {
+    return this.repo.findById(id);
+  }
+
+  async update(id: string, data: Partial<OmniChatbotInput>) {
+    return this.repo.update(id, data);
+  }
+
+  async delete(id: string) {
+    return this.repo.delete(id);
+  }
+
+  async processMessage(event: OmniMessageReceivedEvent, logger: any) {
+    // Basic chatbot logic: find active chatbot for this provider
+    const chatbots = await this.repo.findByOrganizationId(event.organizationId);
+    const activeBot = chatbots.find(b => (b.provider === event.provider || b.provider === 'all') && b.isActive);
+    
+    if (activeBot) {
+      logger.info({ botId: activeBot.id }, "Executing chatbot flow via executor");
+      await this.executor.execute(activeBot, event, logger);
+    }
+  }
+}
+
+export class OmniKeywordTriggerService {
+  private repo = new OmniKeywordTriggerRepository();
+
+  async create(data: OmniKeywordTriggerInput, organizationId: string) {
+    return this.repo.create({ ...data, organizationId });
+  }
+
+  async getAll(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+
+  async getById(id: string) {
+    return this.repo.findById(id);
+  }
+
+  async update(id: string, data: Partial<OmniKeywordTriggerInput>) {
+    return this.repo.update(id, data);
+  }
+
+  async delete(id: string) {
+    return this.repo.delete(id);
+  }
+
+  async findMatchingTrigger(keyword: string, organizationId: string) {
+    return this.repo.findByKeyword(keyword, organizationId);
+  }
+
+  async executeTrigger(trigger: any, event: OmniMessageReceivedEvent, logger: any) {
+    logger.info({ triggerId: trigger.id }, "Executing keyword trigger response");
+    
+    // Send the response configured in the trigger
+    await emitOmniMessageSend({
+      provider: event.provider,
+      instanceId: event.instanceId,
+      to: event.contactMobile,
+      content: trigger.response,
+      type: 'text',
+      organizationId: event.organizationId
+    }, logger);
+  }
+}
+
+export class OmniBroadcastService {
+  private repo = new OmniBroadcastRepository();
+
+  async createBroadcast(data: OmniBroadcastInput, recipients: OmniBroadcastRecipientInput[], organizationId: string, userId: string) {
+    const broadcast = await this.repo.create({ 
+      ...data, 
+      organizationId, 
+      userId,
+      totalCount: recipients.length,
+      status: data.scheduledAt ? 'scheduled' : 'pending' 
+    });
+
+    await this.repo.addRecipients(broadcast.id, recipients);
+
+    if (!data.scheduledAt) {
+      // If not scheduled, start processing immediately (async)
+      this.processBroadcast(broadcast.id).catch(console.error);
+    }
+
+    return broadcast;
+  }
+
+  async getBroadcasts(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+
+  async getBroadcastById(id: string) {
+    return this.repo.findById(id);
+  }
+
+  async processBroadcast(broadcastId: string) {
+    const broadcast = await this.repo.findById(broadcastId);
+    if (!broadcast || broadcast.status === 'completed') return;
+
+    await this.repo.update(broadcastId, { status: 'processing' });
+
+    const recipients = await this.repo.getPendingRecipients(broadcastId);
+    
+    for (const recipient of recipients) {
+      try {
+        // Inject variables into content
+        let content = broadcast.content;
+        const vars = recipient.variables as any;
+        if (vars) {
+          Object.keys(vars).forEach(key => {
+            content = content.replace(new RegExp(`{{${key}}}`, 'g'), vars[key]);
+          });
+        }
+
+        // Emit Kafka event for delivery
+        await emitOmniMessageSend({
+          provider: broadcast.provider,
+          instanceId: broadcast.instanceId,
+          to: recipient.mobile,
+          content,
+          type: broadcast.type,
+          metadata: { ...broadcast.metadata, recipientId: recipient.id, broadcastId: broadcast.id },
+          organizationId: broadcast.organizationId
+        }, console);
+
+        await this.repo.updateRecipientStatus(recipient.id, 'sent');
+        await this.repo.incrementSentCount(broadcastId);
+
+      } catch (err) {
+        await this.repo.updateRecipientStatus(recipient.id, 'failed', (err as any).message);
+      }
+      
+      // Small delay to prevent rate limiting (should be more sophisticated in production)
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    await this.repo.update(broadcastId, { status: 'completed' });
   }
 }

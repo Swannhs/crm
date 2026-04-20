@@ -225,6 +225,71 @@ exports.Prisma.IntegrationActivityScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.UserIntegrationSettingsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  timezone: 'timezone',
+  apiKey: 'apiKey',
+  fcmData: 'fcmData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MetaIntegrationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  wabaId: 'wabaId',
+  accessToken: 'accessToken',
+  businessPhoneNumberId: 'businessPhoneNumberId',
+  appId: 'appId',
+  loginType: 'loginType',
+  embedData: 'embedData',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VoiceIntegrationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  provider: 'provider',
+  apiKey: 'apiKey',
+  voiceId: 'voiceId',
+  settings: 'settings',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.WhatsAppInstanceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  name: 'name',
+  instanceId: 'instanceId',
+  status: 'status',
+  qr: 'qr',
+  phone: 'phone',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TelegramSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  name: 'name',
+  sessionId: 'sessionId',
+  status: 'status',
+  phone: 'phone',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -260,7 +325,12 @@ exports.Prisma.ModelName = {
   ShopifyStore: 'ShopifyStore',
   UberEatsConfig: 'UberEatsConfig',
   EasyPostConfig: 'EasyPostConfig',
-  IntegrationActivity: 'IntegrationActivity'
+  IntegrationActivity: 'IntegrationActivity',
+  UserIntegrationSettings: 'UserIntegrationSettings',
+  MetaIntegration: 'MetaIntegration',
+  VoiceIntegration: 'VoiceIntegration',
+  WhatsAppInstance: 'WhatsAppInstance',
+  TelegramSession: 'TelegramSession'
 };
 
 /**

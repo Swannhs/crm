@@ -113,3 +113,58 @@ export interface WorkflowStartActionInput {
   isCondition?: boolean;
   isException?: boolean;
 }
+
+export interface OmniChatbotInput {
+  name: string;
+  provider: string;
+  isActive?: boolean;
+  aiEnabled?: boolean;
+  aiPrompt?: string;
+  welcomeMessage?: string;
+  fallbackMessage?: string;
+  metadata?: any;
+}
+
+export interface OmniBroadcastInput {
+  organizationId?: string;
+  userId?: string;
+  name: string;
+  provider: 'whatsapp' | 'telegram';
+  instanceId: string;
+  content: string;
+  type?: string;
+  mediaUrl?: string;
+  scheduledAt?: Date;
+  status?: string;
+  totalCount?: number;
+  metadata?: any;
+}
+
+export interface OmniBroadcastRecipientInput {
+  broadcastId: string;
+  contactId: string;
+  mobile: string;
+  variables?: any;
+  status?: string;
+}
+
+export interface OmniMessageReceivedEvent {
+  provider: 'whatsapp' | 'telegram';
+  instanceId: string;
+  contactMobile: string;
+  contactName?: string;
+  content: string;
+  type: string;
+  timestamp: number;
+  metadata?: any;
+  organizationId: string;
+}
+
+export interface OmniKeywordTriggerInput {
+  keyword: string;
+  matchType?: string;
+  workflowId?: string;
+  replyMessage?: string;
+  isActive?: boolean;
+  metadata?: any;
+}

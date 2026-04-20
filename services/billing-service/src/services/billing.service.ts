@@ -60,6 +60,115 @@ export class BillingService {
     };
   }
 
+  async getLegacyFinanceStatistics(
+    orgId: string,
+    query: { month?: unknown; year?: unknown; type?: unknown }
+  ) {
+    const now = new Date();
+    const month = Math.min(Math.max(Number(query.month || now.getUTCMonth() + 1), 1), 12);
+    const year = Number(query.year || now.getUTCFullYear());
+    const type = String(query.type || 'all');
+
+    const rangeStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    const rangeEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    console.log(`[BillingService] Range: ${rangeStart.toISOString()} to ${rangeEnd.toISOString()}`);
+    
+    const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+    const thisMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+    const lastMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1, 0, 0, 0, 0));
+    const lastMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999));
+
+    const invoices = await this.invoiceRepo.findAllByOrgId(orgId);
+    console.log(`[BillingService] Found ${invoices.length} total invoices for org: ${orgId}`);
+
+    const inRange = (value: Date | null | undefined, start: Date, end: Date) => {
+      if (!(value instanceof Date) || Number.isNaN(value.getTime())) return false;
+      return value >= start && value <= end;
+    };
+
+    const readMetadataString = (metadata: unknown, keys: string[]) => {
+      if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+      for (const key of keys) {
+        const value = (metadata as Record<string, unknown>)[key];
+        if (typeof value === 'string' && value.trim()) return value.trim();
+      }
+      return null;
+    };
+
+    const invoiceMatchesType = (invoice: Invoice) => {
+      if (type === 'all') return true;
+      const paymentType = readMetadataString(invoice.metadata, ['paymentType', 'payment_type', 'type']);
+      const itemType = readMetadataString(invoice.metadata, ['itemType', 'item_type', 'category']);
+      return [paymentType, itemType].some((value) => value?.toLowerCase() === type.toLowerCase());
+    };
+
+    const selectedInvoices = invoices.filter(invoiceMatchesType);
+    console.log(`[BillingService] ${selectedInvoices.length} invoices matched type: ${type}`);
+    const selectedPayments = selectedInvoices.flatMap((invoice: any) => invoice.payments || []);
+
+    const sumPaymentsInRange = (start: Date, end: Date) =>
+      selectedPayments
+        .filter((payment) => payment.status === 'succeeded' && inRange(payment.createdAt, start, end))
+        .reduce((total, payment) => total + Number(payment.amountCents || 0), 0) / 100;
+
+    const parseDueDate = (invoice: Invoice) => {
+      const raw = readMetadataString(invoice.metadata, ['dueDate', 'due_date', 'paymentDate', 'payment_date']);
+      if (!raw) return null;
+      const parsed = new Date(raw);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    let pastDue = 0;
+    let upcoming = 0;
+    let totalRevenue = 0;
+    let oneTime = 0;
+    let ongoing = 0;
+
+    for (const invoice of selectedInvoices) {
+      const isRecordInRange = inRange(invoice.createdAt, rangeStart, rangeEnd);
+      
+      if (isRecordInRange) {
+        totalRevenue += Number(invoice.amountCents || 0) / 100;
+        
+        const subType = readMetadataString(invoice.metadata, ['paymentType', 'payment_type', 'type'])?.toLowerCase();
+        if (['ongoing', 'recurring', 'subscription'].includes(subType || '')) {
+          ongoing += Number(invoice.amountCents || 0) / 100;
+        } else {
+          oneTime += Number(invoice.amountCents || 0) / 100;
+        }
+      }
+
+      const remainingCents = Math.max(Number(invoice.amountCents || 0) - Number(invoice.paidAmountCents || 0), 0);
+      if (remainingCents <= 0) continue;
+      
+      const dueDate = parseDueDate(invoice);
+      if (dueDate && inRange(dueDate, rangeStart, rangeEnd)) {
+        if (dueDate < now) pastDue += remainingCents / 100;
+        else upcoming += remainingCents / 100;
+      }
+    }
+
+    const paid = sumPaymentsInRange(rangeStart, rangeEnd);
+
+    return {
+      // Standard fields for modern dashboard
+      totalRevenue,
+      paid,
+      outstanding: Math.max(totalRevenue - paid, 0),
+      invoiceCount: selectedInvoices.filter(inv => inRange(inv.createdAt, rangeStart, rangeEnd)).length,
+      byStatus: [], // Placeholder for status grouping if needed in future
+      
+      // Legacy compatibility fields
+      thisMonth: sumPaymentsInRange(thisMonthStart, thisMonthEnd),
+      lastMonth: sumPaymentsInRange(lastMonthStart, lastMonthEnd),
+      totalCollected: paid,
+      pastDue,
+      upcoming,
+      oneTime,
+      ongoing,
+    };
+  }
+
   async getInvoiceById(orgId: string, invoiceId: string) {
     const invoice = await this.invoiceRepo.findUnique(invoiceId, orgId);
     if (!invoice) {

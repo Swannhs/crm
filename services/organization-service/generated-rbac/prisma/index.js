@@ -185,7 +185,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/swann/WebstormProjects/mymanager-main/microservices/services/organization-service/generated-rbac/prisma",
+      "value": "/workspace/services/organization-service/generated-rbac/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -194,12 +194,20 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "linux-musl-openssl-3.0.x",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/swann/WebstormProjects/mymanager-main/microservices/services/organization-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/organization-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -221,8 +229,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated-rbac/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DB_URL\")\n}\n\nmodel Organization {\n  id          String                   @id @default(uuid()) @db.Uuid\n  name        String\n  slug        String?                  @unique\n  metadata    Json                     @default(\"{}\")\n  createdAt   DateTime                 @default(now()) @map(\"created_at\")\n  updatedAt   DateTime                 @updatedAt @map(\"updated_at\")\n  locations   Location[]\n  memberships OrganizationMembership[]\n\n  @@map(\"organizations\")\n}\n\nmodel OrganizationMembership {\n  id             String       @id @default(uuid()) @db.Uuid\n  organizationId String       @map(\"organization_id\") @db.Uuid\n  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)\n  userId         String       @map(\"user_id\") @db.VarChar(80)\n  role           String       @default(\"org_staff\")\n  permissions    Json         @default(\"[]\")\n  metadata       Json         @default(\"{}\")\n  createdAt      DateTime     @default(now()) @map(\"created_at\")\n  updatedAt      DateTime     @updatedAt @map(\"updated_at\")\n\n  @@unique([organizationId, userId])\n  @@index([userId])\n  @@index([organizationId, role])\n  @@map(\"organization_memberships\")\n}\n\nmodel Location {\n  id             String       @id @default(uuid()) @db.Uuid\n  organizationId String       @map(\"organization_id\") @db.Uuid\n  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)\n\n  name    String\n  email   String?\n  phone   String?\n  street  String?\n  city    String?\n  state   String?\n  zipCode String? @map(\"zip_code\")\n  country String?\n\n  unitType     String? @map(\"unit_type\")\n  status       String?\n  isCompliance Boolean @default(false) @map(\"is_compliance\")\n\n  metadata  Json     @default(\"{}\")\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([organizationId])\n  @@map(\"locations\")\n}\n\nmodel OnboardingStatus {\n  id            String   @id @default(uuid()) @db.Uuid\n  userId        String   @map(\"user_id\") @db.VarChar(80)\n  tourStepId    String   @map(\"tour_step_id\")\n  tourCompleted Boolean  @default(false) @map(\"tour_completed\")\n  createdAt     DateTime @default(now()) @map(\"created_at\")\n  updatedAt     DateTime @updatedAt @map(\"updated_at\")\n\n  @@unique([userId, tourStepId])\n  @@index([userId])\n  @@map(\"onboarding_statuses\")\n}\n",
-  "inlineSchemaHash": "11f064fc5cb2a3add6dda654e1fd17940d8b784b1fe4359a5dc99e7c38b0e304",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../generated-rbac/prisma\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DB_URL\")\n}\n\nmodel Organization {\n  id          String                   @id @default(uuid()) @db.Uuid\n  name        String\n  slug        String?                  @unique\n  metadata    Json                     @default(\"{}\")\n  createdAt   DateTime                 @default(now()) @map(\"created_at\")\n  updatedAt   DateTime                 @updatedAt @map(\"updated_at\")\n  locations   Location[]\n  memberships OrganizationMembership[]\n\n  @@map(\"organizations\")\n}\n\nmodel OrganizationMembership {\n  id             String       @id @default(uuid()) @db.Uuid\n  organizationId String       @map(\"organization_id\") @db.Uuid\n  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)\n  userId         String       @map(\"user_id\") @db.VarChar(80)\n  role           String       @default(\"org_staff\")\n  permissions    Json         @default(\"[]\")\n  metadata       Json         @default(\"{}\")\n  createdAt      DateTime     @default(now()) @map(\"created_at\")\n  updatedAt      DateTime     @updatedAt @map(\"updated_at\")\n\n  @@unique([organizationId, userId])\n  @@index([userId])\n  @@index([organizationId, role])\n  @@map(\"organization_memberships\")\n}\n\nmodel Location {\n  id             String       @id @default(uuid()) @db.Uuid\n  organizationId String       @map(\"organization_id\") @db.Uuid\n  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)\n\n  name    String\n  email   String?\n  phone   String?\n  street  String?\n  city    String?\n  state   String?\n  zipCode String? @map(\"zip_code\")\n  country String?\n\n  unitType     String? @map(\"unit_type\")\n  status       String?\n  isCompliance Boolean @default(false) @map(\"is_compliance\")\n\n  metadata  Json     @default(\"{}\")\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  @@index([organizationId])\n  @@map(\"locations\")\n}\n\nmodel OnboardingStatus {\n  id            String   @id @default(uuid()) @db.Uuid\n  userId        String   @map(\"user_id\") @db.VarChar(80)\n  tourStepId    String   @map(\"tour_step_id\")\n  tourCompleted Boolean  @default(false) @map(\"tour_completed\")\n  createdAt     DateTime @default(now()) @map(\"created_at\")\n  updatedAt     DateTime @updatedAt @map(\"updated_at\")\n\n  @@unique([userId, tourStepId])\n  @@index([userId])\n  @@map(\"onboarding_statuses\")\n}\n",
+  "inlineSchemaHash": "cca214d69c6b82e9b8d25f50b007ea519b387305d2eb068824a21405c4061a3e",
   "copyEngine": true
 }
 
@@ -259,6 +267,10 @@ warnEnvConflicts({
 const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
 Object.assign(exports, Prisma)
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-linux-musl-openssl-3.0.x.so.node");
+path.join(process.cwd(), "generated-rbac/prisma/libquery_engine-linux-musl-openssl-3.0.x.so.node")
 
 // file annotations for bundling tools to include these files
 path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node");

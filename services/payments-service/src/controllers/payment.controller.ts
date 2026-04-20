@@ -56,6 +56,13 @@ export class DepositController {
       return res.status(201).json({ data: deposit });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
+
+  async listPayments(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.depositService.getDeposits(req.identity.orgId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
 }
 
 export class CheckoutPageController {

@@ -3,9 +3,13 @@ import {
   AutomationController, 
   WorkflowController, 
   WorkflowWorkspaceController,
-  WorkflowActionController 
+  WorkflowActionController,
+  OmniChatbotController,
+  OmniKeywordTriggerController,
+  OmniBroadcastController
 } from "./controllers/index.js";
 import { startBillingPaymentRecordedConsumer } from "./kafka/billing.consumer.js";
+import { startOmniMessageConsumer } from './kafka/omni.consumer.js';
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ serviceName: "automation-service", jsonLimit: "1mb" });
@@ -18,6 +22,9 @@ const automationCtrl = new AutomationController();
 const workflowCtrl = new WorkflowController();
 const workflowWorkspaceCtrl = new WorkflowWorkspaceController();
 const workflowActionCtrl = new WorkflowActionController();
+const chatbotCtrl = new OmniChatbotController();
+const triggerCtrl = new OmniKeywordTriggerController();
+const broadcastCtrl = new OmniBroadcastController();
 
 // --- Automation ---
 app.post("/v1/automation", writeAccess, (req, res) => automationCtrl.create(cast(req), res));
@@ -62,6 +69,24 @@ app.get("/v1/workflow-action/start-action/getById/:id", readAccess, (req, res) =
 app.put("/v1/workflow-action/start-action/:id", writeAccess, (req, res) => workflowActionCtrl.updateStartAction(cast(req), res));
 app.delete("/v1/workflow-action/start-action/:id", writeAccess, (req, res) => workflowActionCtrl.deleteStartAction(cast(req), res));
 
+// --- Omni Chatbot ---
+app.post("/v1/omni/chatbot", writeAccess, (req, res) => chatbotCtrl.create(cast(req), res));
+app.get("/v1/omni/chatbot", readAccess, (req, res) => chatbotCtrl.list(cast(req), res));
+app.get("/v1/omni/chatbot/:id", readAccess, (req, res) => chatbotCtrl.get(cast(req), res));
+app.put("/v1/omni/chatbot/:id", writeAccess, (req, res) => chatbotCtrl.update(cast(req), res));
+app.delete("/v1/omni/chatbot/:id", writeAccess, (req, res) => chatbotCtrl.delete(cast(req), res));
+
+// --- Omni Keyword Trigger ---
+app.post("/v1/omni/trigger", writeAccess, (req, res) => triggerCtrl.create(cast(req), res));
+app.get("/v1/omni/trigger", readAccess, (req, res) => triggerCtrl.list(cast(req), res));
+app.put("/v1/omni/trigger/:id", writeAccess, (req, res) => triggerCtrl.update(cast(req), res));
+app.delete("/v1/omni/trigger/:id", writeAccess, (req, res) => triggerCtrl.delete(cast(req), res));
+
+// --- Omni Broadcast ---
+app.post("/v1/omni/broadcast", writeAccess, (req, res) => broadcastCtrl.create(cast(req), res));
+app.get("/v1/omni/broadcast", readAccess, (req, res) => broadcastCtrl.list(cast(req), res));
+app.get("/v1/omni/broadcast/:id", readAccess, (req, res) => broadcastCtrl.get(cast(req), res));
+
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "automation-service" }));
 
@@ -71,3 +96,9 @@ app.listen(port, "0.0.0.0", () => logger.info({ port }, "automation-service list
 startBillingPaymentRecordedConsumer(logger).catch((err) => {
   logger.error({ err }, "Failed to start Kafka billing payment consumer");
 });
+
+startOmniMessageConsumer(logger).catch((err) => {
+  logger.error({ err }, "Failed to start Kafka omni message consumer");
+});
+
+import { startOmniMessageConsumer } from './kafka/omni.consumer.js';

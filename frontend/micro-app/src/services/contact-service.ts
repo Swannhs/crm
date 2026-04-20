@@ -45,7 +45,7 @@ const toContactPayload = (data: any) => ({
 
 export const contactService = {
   getContacts: async (params?: any) => {
-    const response = await axios.get('/api/contact/get', {
+    const response = await axios.get('/api/crm/v1/contacts', {
       params: {
         q: params?.search ?? params?.q ?? '',
         ...params,
@@ -58,20 +58,20 @@ export const contactService = {
   },
 
   getContact: async (id: string) => {
-    const response = await axios.get(`/api/contact/getById/${id}`);
+    const response = await axios.get(`/api/crm/v1/contacts/${id}`);
     return normalizeContact(response.data?.data ?? response.data?.contact ?? response.data);
   },
 
   getContactsByType: async (type: string, id?: string, params?: any) => {
     if (id) {
-      const response = await axios.get(`/api/contact/get`, {
+      const response = await axios.get(`/api/crm/v1/contacts`, {
         params: { q: params?.search ?? params?.q ?? '', ...params, type, contactTypeId: id },
       });
       const contacts = response.data?.data ?? response.data?.contacts ?? response.data ?? [];
       return contacts.map(normalizeContact);
     }
 
-    const response = await axios.get('/api/contact/get', {
+    const response = await axios.get('/api/crm/v1/contacts', {
       params: { q: params?.search ?? params?.q ?? '', ...params, type },
     });
     const contacts = response.data?.data ?? response.data?.contacts ?? response.data ?? [];
@@ -79,18 +79,18 @@ export const contactService = {
   },
 
   createContact: async (data: any) => {
-    const response = await axios.post('/api/contact/add', toContactPayload(data));
+    const response = await axios.post('/api/crm/v1/contacts', toContactPayload(data));
     return normalizeContact(response.data?.data ?? response.data?.contact ?? response.data);
   },
 
   updateContact: async (id: string, data: any) => {
-    const response = await axios.patch(`/api/contact/update/${id}`, toContactPayload(data));
+    const response = await axios.patch(`/api/crm/v1/contacts/${id}`, toContactPayload(data));
     return normalizeContact(response.data?.data ?? response.data?.contact ?? response.data);
   },
 
   deleteContact: async (ids: string[]) => {
     const [firstId] = ids;
-    const response = await axios.delete('/api/contact/delete', { data: { ids } });
+    const response = await axios.delete(`/crm/v1/contacts/${ids[0]}`);
     return response.data ?? { status: 'ok', deletedId: firstId };
   },
 

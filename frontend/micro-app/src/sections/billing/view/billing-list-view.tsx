@@ -8,7 +8,13 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Unstable_Grid2';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import Menu from '@mui/material/Menu';
 import TableRow from '@mui/material/TableRow';
+import MenuItem from '@mui/material/MenuItem';
 import TableBody from '@mui/material/TableBody';
 import TextField from '@mui/material/TextField';
 import TableCell from '@mui/material/TableCell';
@@ -21,6 +27,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { billingService } from 'src/services/billing-service';
+
+import { useBoolean } from 'src/hooks/use-boolean';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+import { showToast } from 'src/components/toast';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -46,10 +57,54 @@ const TABLE_HEAD = [
 export function BillingListView() {
   const [search, setSearch] = useState('');
   
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ['invoices', search],
     queryFn: () => billingService.getInvoices({ search }),
   });
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  
+  const router = useRouter();
+  const confirmDelete = useBoolean();
+
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, invoiceId: string) => {
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedInvoiceId(invoiceId);
+  };
+
+  const handleCloseMenu = () => {
+    setMenuAnchorEl(null);
+    setSelectedInvoiceId(null);
+  };
+
+  const handleView = () => {
+    if (selectedInvoiceId) {
+      router.push(paths.dashboard.invoiceDetails(selectedInvoiceId));
+    }
+    handleCloseMenu();
+  };
+
+  const handleEdit = () => {
+    if (selectedInvoiceId) {
+      router.push(paths.dashboard.invoiceEdit(selectedInvoiceId));
+    }
+    handleCloseMenu();
+  };
+
+  const handleDelete = async () => {
+    try {
+      if (selectedInvoiceId) {
+        await billingService.deleteInvoice(selectedInvoiceId);
+        await refetch();
+        showToast({ message: 'Invoice deleted successfully.', severity: 'success' });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    confirmDelete.onFalse();
+    handleCloseMenu();
+  };
 
   const invoices = data || [];
 
@@ -62,6 +117,7 @@ export function BillingListView() {
         <Button
           variant="contained"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={() => router.push(paths.dashboard.invoiceNew)}
         >
           New Invoice
         </Button>
@@ -154,7 +210,7 @@ export function BillingListView() {
                         </TableCell>
                         <TableCell>{new Date(row.dueDate).toLocaleDateString()}</TableCell>
                         <TableCell align="right">
-                          <IconButton>
+                          <IconButton onClick={(event) => handleOpenMenu(event, row.id)}>
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
                         </TableCell>
@@ -175,6 +231,39 @@ export function BillingListView() {
           </Scrollbar>
         </TableContainer>
       </Card>
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleCloseMenu}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MenuItem onClick={handleView}>
+          <Iconify icon="solar:eye-bold" sx={{ mr: 1 }} />
+          View Details
+        </MenuItem>
+        <MenuItem onClick={handleEdit}>
+          <Iconify icon="solar:pen-bold" sx={{ mr: 1 }} />
+          Edit
+        </MenuItem>
+        <MenuItem onClick={confirmDelete.onTrue} sx={{ color: 'error.main' }}>
+          <Iconify icon="solar:trash-bin-trash-bold" sx={{ mr: 1 }} />
+          Delete
+        </MenuItem>
+      </Menu>
+
+      <Dialog open={confirmDelete.value} onClose={confirmDelete.onFalse}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>Are you sure you want to delete this invoice?</DialogContent>
+        <DialogActions>
+          <Button onClick={confirmDelete.onFalse} variant="outlined">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} variant="contained" color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }

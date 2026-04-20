@@ -10,6 +10,8 @@ services:
     build:
       context: ../../services/crm-service
       dockerfile: docker/Dockerfile.dev
+    volumes:
+      - ../../services/crm-service:/app
 
   organization-service:
     build:

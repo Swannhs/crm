@@ -8,7 +8,11 @@ import {
 import { identityMiddleware } from "./middleware/identity.js";
 import { attachRoleContext, requireOrgRoles } from "./middleware/authorization.js";
 
-const { app, logger } = createServiceApp({ serviceName: "organization-service", jsonLimit: "1mb" });
+const { app, logger } = createServiceApp({ 
+  serviceName: "organization-service", 
+  jsonLimit: "1mb",
+  enableCors: false
+});
 const auth = [identityMiddleware, attachRoleContext];
 const cast = (req: any) => req as any;
 

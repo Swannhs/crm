@@ -96,10 +96,7 @@
           "host": [
             "http://crm-service:8010"
           ],
-          "url_pattern": "/api/v1/contacts",
-          "extra_config": {
-            "auth/validator": {}
-          }
+          "url_pattern": "/api/v1/contacts"
         }
       ]
     },
@@ -135,10 +132,7 @@
           "host": [
             "http://crm-service:8010"
           ],
-          "url_pattern": "/api/v1/contacts",
-          "extra_config": {
-            "auth/validator": {}
-          }
+          "url_pattern": "/api/v1/contacts"
         }
       ]
     },
@@ -173,10 +167,7 @@
           "host": [
             "http://crm-service:8010"
           ],
-          "url_pattern": "/api/v1/contacts/{contact}",
-          "extra_config": {
-            "auth/validator": {}
-          }
+          "url_pattern": "/api/v1/contacts/{contact}"
         }
       ]
     },
@@ -211,10 +202,7 @@
           "host": [
             "http://crm-service:8010"
           ],
-          "url_pattern": "/api/v1/contacts",
-          "extra_config": {
-            "auth/validator": {}
-          }
+          "url_pattern": "/api/v1/contacts"
         }
       ]
     },
@@ -5892,9 +5880,9 @@
       "backend": [
         {
           "host": [
-            "http://notification-service:8000"
+            "http://marketing-service:8030"
           ],
-          "url_pattern": "/v1/email-campaigns"
+          "url_pattern": "/v1/campaigns"
         }
       ]
     },
@@ -7364,7 +7352,12 @@
           "host": [
             "http://projects-service:8040"
           ],
-          "url_pattern": "/v1/projects"
+          "url_pattern": "/v1/projects",
+          "extra_config": {
+            "proxy": {
+              "status_code_as_is": true
+            }
+          }
         }
       ]
     },
@@ -7399,7 +7392,12 @@
           "host": [
             "http://projects-service:8040"
           ],
-          "url_pattern": "/v1/projects"
+          "url_pattern": "/v1/projects",
+          "extra_config": {
+            "proxy": {
+              "status_code_as_is": true
+            }
+          }
         }
       ]
     },
@@ -7434,7 +7432,12 @@
           "host": [
             "http://projects-service:8040"
           ],
-          "url_pattern": "/v1/projects/{id}"
+          "url_pattern": "/v1/projects/{id}",
+          "extra_config": {
+            "proxy": {
+              "status_code_as_is": true
+            }
+          }
         }
       ]
     },
@@ -7469,7 +7472,12 @@
           "host": [
             "http://projects-service:8040"
           ],
-          "url_pattern": "/v1/projects/{id}/boards"
+          "url_pattern": "/v1/projects/{id}/boards",
+          "extra_config": {
+            "proxy": {
+              "status_code_as_is": true
+            }
+          }
         }
       ]
     },
@@ -7504,7 +7512,12 @@
           "host": [
             "http://projects-service:8040"
           ],
-          "url_pattern": "/v1/boards/{id}"
+          "url_pattern": "/v1/boards/{id}",
+          "extra_config": {
+            "proxy": {
+              "status_code_as_is": true
+            }
+          }
         }
       ]
     },
@@ -7539,7 +7552,12 @@
           "host": [
             "http://projects-service:8040"
           ],
-          "url_pattern": "/v1/tasks"
+          "url_pattern": "/v1/tasks",
+          "extra_config": {
+            "proxy": {
+              "status_code_as_is": true
+            }
+          }
         }
       ]
     },
@@ -7574,7 +7592,12 @@
           "host": [
             "http://projects-service:8040"
           ],
-          "url_pattern": "/v1/tasks"
+          "url_pattern": "/v1/tasks",
+          "extra_config": {
+            "proxy": {
+              "status_code_as_is": true
+            }
+          }
         }
       ]
     },
@@ -7974,7 +7997,7 @@
       "input_headers": ["Content-Type", "X-Org-Id"],
       "backend": [
         {
-          "host": ["http://monolith:5000"],
+          "host": ["http://api-router-service:7001"],
           "url_pattern": "/api/public/help-center/articles"
         }
       ]
@@ -8005,7 +8028,7 @@
       },
       "backend": [
         {
-          "host": ["http://monolith:5000"],
+          "host": ["http://api-router-service:7001"],
           "url_pattern": "/api/form-builder/forms"
         }
       ]
@@ -8025,7 +8048,7 @@
       },
       "backend": [
         {
-          "host": ["http://monolith:5000"],
+          "host": ["http://api-router-service:7001"],
           "url_pattern": "/api/form-builder/templates"
         }
       ]
@@ -8076,8 +8099,8 @@
       },
       "backend": [
         {
-          "host": ["http://monolith:5000"],
-          "url_pattern": "/webbuilder"
+          "host": ["http://api-router-service:7001"],
+          "url_pattern": "/api/webbuilder"
         }
       ]
     },
@@ -8158,8 +8181,8 @@
       },
       "backend": [
         {
-          "host": ["http://monolith:5000"],
-          "url_pattern": "/reputation/dashboard-stats"
+          "host": ["http://api-router-service:7001"],
+          "url_pattern": "/api/reputation/dashboard-stats"
         }
       ]
     },
@@ -9762,6 +9785,141 @@
           "url_pattern": "/api/{module}"
         }
       ]
+    },
+    {
+      "endpoint": "/realtime/v1/omni/conversations",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/omni/conversations"}]
+    },
+    {
+      "endpoint": "/realtime/v1/omni/messages",
+      "method": "POST",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/omni/messages"}]
+    },
+    {
+      "endpoint": "/realtime/v1/omni/ai/translate",
+      "method": "POST",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://realtime-service:7030"], "url_pattern": "/v1/omni/ai/translate"}]
+    },
+    {
+      "endpoint": "/marketing/v1/broadcasts",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://marketing-service:8030"], "url_pattern": "/v1/marketing/broadcasts"}]
+    },
+    {
+      "endpoint": "/automation/v1/omni/chatbots",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://automation-service:7110"], "url_pattern": "/v1/omni/chatbots"}]
+    },
+    {
+      "endpoint": "/public/webhook/whatsapp",
+      "method": "GET",
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/webhook/whatsapp"}]
+    },
+    {
+      "endpoint": "/public/webhook/whatsapp",
+      "method": "POST",
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/webhook/whatsapp"}]
+    },
+    {
+      "endpoint": "/automation/v1/omni/broadcast",
+      "method": "POST",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id", "Content-Type"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://automation-service:7110"], "url_pattern": "/v1/omni/broadcast"}]
+    },
+    {
+      "endpoint": "/automation/v1/omni/broadcast",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://automation-service:7110"], "url_pattern": "/v1/omni/broadcast"}]
+    },
+    {
+      "endpoint": "/automation/v1/omni/broadcast/{id}",
+      "method": "GET",
+      "input_headers": ["Authorization", "X-User-Id", "X-Org-Id"],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [["sub", "X-User-Id"], ["org_id", "X-Org-Id"]]
+        }
+      },
+      "backend": [{"host": ["http://automation-service:7110"], "url_pattern": "/v1/omni/broadcast/{id}"}]
+    },
+    {
+      "endpoint": "/public/webhook/telegram",
+      "method": "POST",
+      "backend": [{"host": ["http://integrations-service:7140"], "url_pattern": "/v1/webhook/telegram"}]
     }
   ]
 }

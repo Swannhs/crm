@@ -53,6 +53,31 @@ export type EasyPostConfig = $Result.DefaultSelection<Prisma.$EasyPostConfigPayl
  * 
  */
 export type IntegrationActivity = $Result.DefaultSelection<Prisma.$IntegrationActivityPayload>
+/**
+ * Model UserIntegrationSettings
+ * 
+ */
+export type UserIntegrationSettings = $Result.DefaultSelection<Prisma.$UserIntegrationSettingsPayload>
+/**
+ * Model MetaIntegration
+ * 
+ */
+export type MetaIntegration = $Result.DefaultSelection<Prisma.$MetaIntegrationPayload>
+/**
+ * Model VoiceIntegration
+ * 
+ */
+export type VoiceIntegration = $Result.DefaultSelection<Prisma.$VoiceIntegrationPayload>
+/**
+ * Model WhatsAppInstance
+ * 
+ */
+export type WhatsAppInstance = $Result.DefaultSelection<Prisma.$WhatsAppInstancePayload>
+/**
+ * Model TelegramSession
+ * 
+ */
+export type TelegramSession = $Result.DefaultSelection<Prisma.$TelegramSessionPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -251,6 +276,56 @@ export class PrismaClient<
     * ```
     */
   get integrationActivity(): Prisma.IntegrationActivityDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.userIntegrationSettings`: Exposes CRUD operations for the **UserIntegrationSettings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserIntegrationSettings
+    * const userIntegrationSettings = await prisma.userIntegrationSettings.findMany()
+    * ```
+    */
+  get userIntegrationSettings(): Prisma.UserIntegrationSettingsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.metaIntegration`: Exposes CRUD operations for the **MetaIntegration** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MetaIntegrations
+    * const metaIntegrations = await prisma.metaIntegration.findMany()
+    * ```
+    */
+  get metaIntegration(): Prisma.MetaIntegrationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.voiceIntegration`: Exposes CRUD operations for the **VoiceIntegration** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VoiceIntegrations
+    * const voiceIntegrations = await prisma.voiceIntegration.findMany()
+    * ```
+    */
+  get voiceIntegration(): Prisma.VoiceIntegrationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.whatsAppInstance`: Exposes CRUD operations for the **WhatsAppInstance** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more WhatsAppInstances
+    * const whatsAppInstances = await prisma.whatsAppInstance.findMany()
+    * ```
+    */
+  get whatsAppInstance(): Prisma.WhatsAppInstanceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.telegramSession`: Exposes CRUD operations for the **TelegramSession** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TelegramSessions
+    * const telegramSessions = await prisma.telegramSession.findMany()
+    * ```
+    */
+  get telegramSession(): Prisma.TelegramSessionDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -699,7 +774,12 @@ export namespace Prisma {
     ShopifyStore: 'ShopifyStore',
     UberEatsConfig: 'UberEatsConfig',
     EasyPostConfig: 'EasyPostConfig',
-    IntegrationActivity: 'IntegrationActivity'
+    IntegrationActivity: 'IntegrationActivity',
+    UserIntegrationSettings: 'UserIntegrationSettings',
+    MetaIntegration: 'MetaIntegration',
+    VoiceIntegration: 'VoiceIntegration',
+    WhatsAppInstance: 'WhatsAppInstance',
+    TelegramSession: 'TelegramSession'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -718,7 +798,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "integrationConnection" | "googleIntegration" | "zoomIntegration" | "zoomMeeting" | "shopifyStore" | "uberEatsConfig" | "easyPostConfig" | "integrationActivity"
+      modelProps: "integrationConnection" | "googleIntegration" | "zoomIntegration" | "zoomMeeting" | "shopifyStore" | "uberEatsConfig" | "easyPostConfig" | "integrationActivity" | "userIntegrationSettings" | "metaIntegration" | "voiceIntegration" | "whatsAppInstance" | "telegramSession"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1314,6 +1394,376 @@ export namespace Prisma {
           }
         }
       }
+      UserIntegrationSettings: {
+        payload: Prisma.$UserIntegrationSettingsPayload<ExtArgs>
+        fields: Prisma.UserIntegrationSettingsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserIntegrationSettingsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserIntegrationSettingsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>
+          }
+          findFirst: {
+            args: Prisma.UserIntegrationSettingsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserIntegrationSettingsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>
+          }
+          findMany: {
+            args: Prisma.UserIntegrationSettingsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>[]
+          }
+          create: {
+            args: Prisma.UserIntegrationSettingsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>
+          }
+          createMany: {
+            args: Prisma.UserIntegrationSettingsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserIntegrationSettingsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>[]
+          }
+          delete: {
+            args: Prisma.UserIntegrationSettingsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>
+          }
+          update: {
+            args: Prisma.UserIntegrationSettingsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserIntegrationSettingsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserIntegrationSettingsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserIntegrationSettingsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>[]
+          }
+          upsert: {
+            args: Prisma.UserIntegrationSettingsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserIntegrationSettingsPayload>
+          }
+          aggregate: {
+            args: Prisma.UserIntegrationSettingsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserIntegrationSettings>
+          }
+          groupBy: {
+            args: Prisma.UserIntegrationSettingsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserIntegrationSettingsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserIntegrationSettingsCountArgs<ExtArgs>
+            result: $Utils.Optional<UserIntegrationSettingsCountAggregateOutputType> | number
+          }
+        }
+      }
+      MetaIntegration: {
+        payload: Prisma.$MetaIntegrationPayload<ExtArgs>
+        fields: Prisma.MetaIntegrationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MetaIntegrationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MetaIntegrationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>
+          }
+          findFirst: {
+            args: Prisma.MetaIntegrationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MetaIntegrationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>
+          }
+          findMany: {
+            args: Prisma.MetaIntegrationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>[]
+          }
+          create: {
+            args: Prisma.MetaIntegrationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>
+          }
+          createMany: {
+            args: Prisma.MetaIntegrationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MetaIntegrationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>[]
+          }
+          delete: {
+            args: Prisma.MetaIntegrationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>
+          }
+          update: {
+            args: Prisma.MetaIntegrationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>
+          }
+          deleteMany: {
+            args: Prisma.MetaIntegrationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MetaIntegrationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MetaIntegrationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>[]
+          }
+          upsert: {
+            args: Prisma.MetaIntegrationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MetaIntegrationPayload>
+          }
+          aggregate: {
+            args: Prisma.MetaIntegrationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMetaIntegration>
+          }
+          groupBy: {
+            args: Prisma.MetaIntegrationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MetaIntegrationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MetaIntegrationCountArgs<ExtArgs>
+            result: $Utils.Optional<MetaIntegrationCountAggregateOutputType> | number
+          }
+        }
+      }
+      VoiceIntegration: {
+        payload: Prisma.$VoiceIntegrationPayload<ExtArgs>
+        fields: Prisma.VoiceIntegrationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VoiceIntegrationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VoiceIntegrationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>
+          }
+          findFirst: {
+            args: Prisma.VoiceIntegrationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VoiceIntegrationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>
+          }
+          findMany: {
+            args: Prisma.VoiceIntegrationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>[]
+          }
+          create: {
+            args: Prisma.VoiceIntegrationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>
+          }
+          createMany: {
+            args: Prisma.VoiceIntegrationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VoiceIntegrationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>[]
+          }
+          delete: {
+            args: Prisma.VoiceIntegrationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>
+          }
+          update: {
+            args: Prisma.VoiceIntegrationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>
+          }
+          deleteMany: {
+            args: Prisma.VoiceIntegrationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VoiceIntegrationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VoiceIntegrationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>[]
+          }
+          upsert: {
+            args: Prisma.VoiceIntegrationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VoiceIntegrationPayload>
+          }
+          aggregate: {
+            args: Prisma.VoiceIntegrationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVoiceIntegration>
+          }
+          groupBy: {
+            args: Prisma.VoiceIntegrationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VoiceIntegrationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VoiceIntegrationCountArgs<ExtArgs>
+            result: $Utils.Optional<VoiceIntegrationCountAggregateOutputType> | number
+          }
+        }
+      }
+      WhatsAppInstance: {
+        payload: Prisma.$WhatsAppInstancePayload<ExtArgs>
+        fields: Prisma.WhatsAppInstanceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.WhatsAppInstanceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.WhatsAppInstanceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>
+          }
+          findFirst: {
+            args: Prisma.WhatsAppInstanceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.WhatsAppInstanceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>
+          }
+          findMany: {
+            args: Prisma.WhatsAppInstanceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>[]
+          }
+          create: {
+            args: Prisma.WhatsAppInstanceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>
+          }
+          createMany: {
+            args: Prisma.WhatsAppInstanceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.WhatsAppInstanceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>[]
+          }
+          delete: {
+            args: Prisma.WhatsAppInstanceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>
+          }
+          update: {
+            args: Prisma.WhatsAppInstanceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>
+          }
+          deleteMany: {
+            args: Prisma.WhatsAppInstanceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.WhatsAppInstanceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WhatsAppInstanceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>[]
+          }
+          upsert: {
+            args: Prisma.WhatsAppInstanceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppInstancePayload>
+          }
+          aggregate: {
+            args: Prisma.WhatsAppInstanceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateWhatsAppInstance>
+          }
+          groupBy: {
+            args: Prisma.WhatsAppInstanceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<WhatsAppInstanceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.WhatsAppInstanceCountArgs<ExtArgs>
+            result: $Utils.Optional<WhatsAppInstanceCountAggregateOutputType> | number
+          }
+        }
+      }
+      TelegramSession: {
+        payload: Prisma.$TelegramSessionPayload<ExtArgs>
+        fields: Prisma.TelegramSessionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TelegramSessionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TelegramSessionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>
+          }
+          findFirst: {
+            args: Prisma.TelegramSessionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TelegramSessionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>
+          }
+          findMany: {
+            args: Prisma.TelegramSessionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>[]
+          }
+          create: {
+            args: Prisma.TelegramSessionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>
+          }
+          createMany: {
+            args: Prisma.TelegramSessionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TelegramSessionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>[]
+          }
+          delete: {
+            args: Prisma.TelegramSessionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>
+          }
+          update: {
+            args: Prisma.TelegramSessionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>
+          }
+          deleteMany: {
+            args: Prisma.TelegramSessionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TelegramSessionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TelegramSessionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>[]
+          }
+          upsert: {
+            args: Prisma.TelegramSessionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TelegramSessionPayload>
+          }
+          aggregate: {
+            args: Prisma.TelegramSessionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTelegramSession>
+          }
+          groupBy: {
+            args: Prisma.TelegramSessionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TelegramSessionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TelegramSessionCountArgs<ExtArgs>
+            result: $Utils.Optional<TelegramSessionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1418,6 +1868,11 @@ export namespace Prisma {
     uberEatsConfig?: UberEatsConfigOmit
     easyPostConfig?: EasyPostConfigOmit
     integrationActivity?: IntegrationActivityOmit
+    userIntegrationSettings?: UserIntegrationSettingsOmit
+    metaIntegration?: MetaIntegrationOmit
+    voiceIntegration?: VoiceIntegrationOmit
+    whatsAppInstance?: WhatsAppInstanceOmit
+    telegramSession?: TelegramSessionOmit
   }
 
   /* Types for Logging */
@@ -10005,6 +10460,5286 @@ export namespace Prisma {
 
 
   /**
+   * Model UserIntegrationSettings
+   */
+
+  export type AggregateUserIntegrationSettings = {
+    _count: UserIntegrationSettingsCountAggregateOutputType | null
+    _min: UserIntegrationSettingsMinAggregateOutputType | null
+    _max: UserIntegrationSettingsMaxAggregateOutputType | null
+  }
+
+  export type UserIntegrationSettingsMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    timezone: string | null
+    apiKey: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserIntegrationSettingsMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    timezone: string | null
+    apiKey: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserIntegrationSettingsCountAggregateOutputType = {
+    id: number
+    userId: number
+    timezone: number
+    apiKey: number
+    fcmData: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type UserIntegrationSettingsMinAggregateInputType = {
+    id?: true
+    userId?: true
+    timezone?: true
+    apiKey?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserIntegrationSettingsMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    timezone?: true
+    apiKey?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserIntegrationSettingsCountAggregateInputType = {
+    id?: true
+    userId?: true
+    timezone?: true
+    apiKey?: true
+    fcmData?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type UserIntegrationSettingsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserIntegrationSettings to aggregate.
+     */
+    where?: UserIntegrationSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserIntegrationSettings to fetch.
+     */
+    orderBy?: UserIntegrationSettingsOrderByWithRelationInput | UserIntegrationSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserIntegrationSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserIntegrationSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserIntegrationSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserIntegrationSettings
+    **/
+    _count?: true | UserIntegrationSettingsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserIntegrationSettingsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserIntegrationSettingsMaxAggregateInputType
+  }
+
+  export type GetUserIntegrationSettingsAggregateType<T extends UserIntegrationSettingsAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserIntegrationSettings]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserIntegrationSettings[P]>
+      : GetScalarType<T[P], AggregateUserIntegrationSettings[P]>
+  }
+
+
+
+
+  export type UserIntegrationSettingsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserIntegrationSettingsWhereInput
+    orderBy?: UserIntegrationSettingsOrderByWithAggregationInput | UserIntegrationSettingsOrderByWithAggregationInput[]
+    by: UserIntegrationSettingsScalarFieldEnum[] | UserIntegrationSettingsScalarFieldEnum
+    having?: UserIntegrationSettingsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserIntegrationSettingsCountAggregateInputType | true
+    _min?: UserIntegrationSettingsMinAggregateInputType
+    _max?: UserIntegrationSettingsMaxAggregateInputType
+  }
+
+  export type UserIntegrationSettingsGroupByOutputType = {
+    id: string
+    userId: string
+    timezone: string | null
+    apiKey: string | null
+    fcmData: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: UserIntegrationSettingsCountAggregateOutputType | null
+    _min: UserIntegrationSettingsMinAggregateOutputType | null
+    _max: UserIntegrationSettingsMaxAggregateOutputType | null
+  }
+
+  type GetUserIntegrationSettingsGroupByPayload<T extends UserIntegrationSettingsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserIntegrationSettingsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserIntegrationSettingsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserIntegrationSettingsGroupByOutputType[P]>
+            : GetScalarType<T[P], UserIntegrationSettingsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserIntegrationSettingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    timezone?: boolean
+    apiKey?: boolean
+    fcmData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["userIntegrationSettings"]>
+
+  export type UserIntegrationSettingsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    timezone?: boolean
+    apiKey?: boolean
+    fcmData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["userIntegrationSettings"]>
+
+  export type UserIntegrationSettingsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    timezone?: boolean
+    apiKey?: boolean
+    fcmData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["userIntegrationSettings"]>
+
+  export type UserIntegrationSettingsSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    timezone?: boolean
+    apiKey?: boolean
+    fcmData?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type UserIntegrationSettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "timezone" | "apiKey" | "fcmData" | "createdAt" | "updatedAt", ExtArgs["result"]["userIntegrationSettings"]>
+
+  export type $UserIntegrationSettingsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserIntegrationSettings"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      timezone: string | null
+      apiKey: string | null
+      fcmData: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["userIntegrationSettings"]>
+    composites: {}
+  }
+
+  type UserIntegrationSettingsGetPayload<S extends boolean | null | undefined | UserIntegrationSettingsDefaultArgs> = $Result.GetResult<Prisma.$UserIntegrationSettingsPayload, S>
+
+  type UserIntegrationSettingsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserIntegrationSettingsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserIntegrationSettingsCountAggregateInputType | true
+    }
+
+  export interface UserIntegrationSettingsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserIntegrationSettings'], meta: { name: 'UserIntegrationSettings' } }
+    /**
+     * Find zero or one UserIntegrationSettings that matches the filter.
+     * @param {UserIntegrationSettingsFindUniqueArgs} args - Arguments to find a UserIntegrationSettings
+     * @example
+     * // Get one UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserIntegrationSettingsFindUniqueArgs>(args: SelectSubset<T, UserIntegrationSettingsFindUniqueArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UserIntegrationSettings that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserIntegrationSettingsFindUniqueOrThrowArgs} args - Arguments to find a UserIntegrationSettings
+     * @example
+     * // Get one UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserIntegrationSettingsFindUniqueOrThrowArgs>(args: SelectSubset<T, UserIntegrationSettingsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserIntegrationSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserIntegrationSettingsFindFirstArgs} args - Arguments to find a UserIntegrationSettings
+     * @example
+     * // Get one UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserIntegrationSettingsFindFirstArgs>(args?: SelectSubset<T, UserIntegrationSettingsFindFirstArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserIntegrationSettings that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserIntegrationSettingsFindFirstOrThrowArgs} args - Arguments to find a UserIntegrationSettings
+     * @example
+     * // Get one UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserIntegrationSettingsFindFirstOrThrowArgs>(args?: SelectSubset<T, UserIntegrationSettingsFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UserIntegrationSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserIntegrationSettingsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.findMany()
+     * 
+     * // Get first 10 UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userIntegrationSettingsWithIdOnly = await prisma.userIntegrationSettings.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UserIntegrationSettingsFindManyArgs>(args?: SelectSubset<T, UserIntegrationSettingsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UserIntegrationSettings.
+     * @param {UserIntegrationSettingsCreateArgs} args - Arguments to create a UserIntegrationSettings.
+     * @example
+     * // Create one UserIntegrationSettings
+     * const UserIntegrationSettings = await prisma.userIntegrationSettings.create({
+     *   data: {
+     *     // ... data to create a UserIntegrationSettings
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserIntegrationSettingsCreateArgs>(args: SelectSubset<T, UserIntegrationSettingsCreateArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UserIntegrationSettings.
+     * @param {UserIntegrationSettingsCreateManyArgs} args - Arguments to create many UserIntegrationSettings.
+     * @example
+     * // Create many UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserIntegrationSettingsCreateManyArgs>(args?: SelectSubset<T, UserIntegrationSettingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserIntegrationSettings and returns the data saved in the database.
+     * @param {UserIntegrationSettingsCreateManyAndReturnArgs} args - Arguments to create many UserIntegrationSettings.
+     * @example
+     * // Create many UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserIntegrationSettings and only return the `id`
+     * const userIntegrationSettingsWithIdOnly = await prisma.userIntegrationSettings.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserIntegrationSettingsCreateManyAndReturnArgs>(args?: SelectSubset<T, UserIntegrationSettingsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UserIntegrationSettings.
+     * @param {UserIntegrationSettingsDeleteArgs} args - Arguments to delete one UserIntegrationSettings.
+     * @example
+     * // Delete one UserIntegrationSettings
+     * const UserIntegrationSettings = await prisma.userIntegrationSettings.delete({
+     *   where: {
+     *     // ... filter to delete one UserIntegrationSettings
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserIntegrationSettingsDeleteArgs>(args: SelectSubset<T, UserIntegrationSettingsDeleteArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UserIntegrationSettings.
+     * @param {UserIntegrationSettingsUpdateArgs} args - Arguments to update one UserIntegrationSettings.
+     * @example
+     * // Update one UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserIntegrationSettingsUpdateArgs>(args: SelectSubset<T, UserIntegrationSettingsUpdateArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UserIntegrationSettings.
+     * @param {UserIntegrationSettingsDeleteManyArgs} args - Arguments to filter UserIntegrationSettings to delete.
+     * @example
+     * // Delete a few UserIntegrationSettings
+     * const { count } = await prisma.userIntegrationSettings.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserIntegrationSettingsDeleteManyArgs>(args?: SelectSubset<T, UserIntegrationSettingsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserIntegrationSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserIntegrationSettingsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserIntegrationSettingsUpdateManyArgs>(args: SelectSubset<T, UserIntegrationSettingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserIntegrationSettings and returns the data updated in the database.
+     * @param {UserIntegrationSettingsUpdateManyAndReturnArgs} args - Arguments to update many UserIntegrationSettings.
+     * @example
+     * // Update many UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UserIntegrationSettings and only return the `id`
+     * const userIntegrationSettingsWithIdOnly = await prisma.userIntegrationSettings.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserIntegrationSettingsUpdateManyAndReturnArgs>(args: SelectSubset<T, UserIntegrationSettingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UserIntegrationSettings.
+     * @param {UserIntegrationSettingsUpsertArgs} args - Arguments to update or create a UserIntegrationSettings.
+     * @example
+     * // Update or create a UserIntegrationSettings
+     * const userIntegrationSettings = await prisma.userIntegrationSettings.upsert({
+     *   create: {
+     *     // ... data to create a UserIntegrationSettings
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserIntegrationSettings we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserIntegrationSettingsUpsertArgs>(args: SelectSubset<T, UserIntegrationSettingsUpsertArgs<ExtArgs>>): Prisma__UserIntegrationSettingsClient<$Result.GetResult<Prisma.$UserIntegrationSettingsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UserIntegrationSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserIntegrationSettingsCountArgs} args - Arguments to filter UserIntegrationSettings to count.
+     * @example
+     * // Count the number of UserIntegrationSettings
+     * const count = await prisma.userIntegrationSettings.count({
+     *   where: {
+     *     // ... the filter for the UserIntegrationSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserIntegrationSettingsCountArgs>(
+      args?: Subset<T, UserIntegrationSettingsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserIntegrationSettingsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserIntegrationSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserIntegrationSettingsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserIntegrationSettingsAggregateArgs>(args: Subset<T, UserIntegrationSettingsAggregateArgs>): Prisma.PrismaPromise<GetUserIntegrationSettingsAggregateType<T>>
+
+    /**
+     * Group by UserIntegrationSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserIntegrationSettingsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserIntegrationSettingsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserIntegrationSettingsGroupByArgs['orderBy'] }
+        : { orderBy?: UserIntegrationSettingsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserIntegrationSettingsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserIntegrationSettingsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserIntegrationSettings model
+   */
+  readonly fields: UserIntegrationSettingsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserIntegrationSettings.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserIntegrationSettingsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserIntegrationSettings model
+   */
+  interface UserIntegrationSettingsFieldRefs {
+    readonly id: FieldRef<"UserIntegrationSettings", 'String'>
+    readonly userId: FieldRef<"UserIntegrationSettings", 'String'>
+    readonly timezone: FieldRef<"UserIntegrationSettings", 'String'>
+    readonly apiKey: FieldRef<"UserIntegrationSettings", 'String'>
+    readonly fcmData: FieldRef<"UserIntegrationSettings", 'Json'>
+    readonly createdAt: FieldRef<"UserIntegrationSettings", 'DateTime'>
+    readonly updatedAt: FieldRef<"UserIntegrationSettings", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserIntegrationSettings findUnique
+   */
+  export type UserIntegrationSettingsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which UserIntegrationSettings to fetch.
+     */
+    where: UserIntegrationSettingsWhereUniqueInput
+  }
+
+  /**
+   * UserIntegrationSettings findUniqueOrThrow
+   */
+  export type UserIntegrationSettingsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which UserIntegrationSettings to fetch.
+     */
+    where: UserIntegrationSettingsWhereUniqueInput
+  }
+
+  /**
+   * UserIntegrationSettings findFirst
+   */
+  export type UserIntegrationSettingsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which UserIntegrationSettings to fetch.
+     */
+    where?: UserIntegrationSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserIntegrationSettings to fetch.
+     */
+    orderBy?: UserIntegrationSettingsOrderByWithRelationInput | UserIntegrationSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserIntegrationSettings.
+     */
+    cursor?: UserIntegrationSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserIntegrationSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserIntegrationSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserIntegrationSettings.
+     */
+    distinct?: UserIntegrationSettingsScalarFieldEnum | UserIntegrationSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * UserIntegrationSettings findFirstOrThrow
+   */
+  export type UserIntegrationSettingsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which UserIntegrationSettings to fetch.
+     */
+    where?: UserIntegrationSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserIntegrationSettings to fetch.
+     */
+    orderBy?: UserIntegrationSettingsOrderByWithRelationInput | UserIntegrationSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserIntegrationSettings.
+     */
+    cursor?: UserIntegrationSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserIntegrationSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserIntegrationSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserIntegrationSettings.
+     */
+    distinct?: UserIntegrationSettingsScalarFieldEnum | UserIntegrationSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * UserIntegrationSettings findMany
+   */
+  export type UserIntegrationSettingsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * Filter, which UserIntegrationSettings to fetch.
+     */
+    where?: UserIntegrationSettingsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserIntegrationSettings to fetch.
+     */
+    orderBy?: UserIntegrationSettingsOrderByWithRelationInput | UserIntegrationSettingsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserIntegrationSettings.
+     */
+    cursor?: UserIntegrationSettingsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserIntegrationSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserIntegrationSettings.
+     */
+    skip?: number
+    distinct?: UserIntegrationSettingsScalarFieldEnum | UserIntegrationSettingsScalarFieldEnum[]
+  }
+
+  /**
+   * UserIntegrationSettings create
+   */
+  export type UserIntegrationSettingsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a UserIntegrationSettings.
+     */
+    data: XOR<UserIntegrationSettingsCreateInput, UserIntegrationSettingsUncheckedCreateInput>
+  }
+
+  /**
+   * UserIntegrationSettings createMany
+   */
+  export type UserIntegrationSettingsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserIntegrationSettings.
+     */
+    data: UserIntegrationSettingsCreateManyInput | UserIntegrationSettingsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserIntegrationSettings createManyAndReturn
+   */
+  export type UserIntegrationSettingsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * The data used to create many UserIntegrationSettings.
+     */
+    data: UserIntegrationSettingsCreateManyInput | UserIntegrationSettingsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserIntegrationSettings update
+   */
+  export type UserIntegrationSettingsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a UserIntegrationSettings.
+     */
+    data: XOR<UserIntegrationSettingsUpdateInput, UserIntegrationSettingsUncheckedUpdateInput>
+    /**
+     * Choose, which UserIntegrationSettings to update.
+     */
+    where: UserIntegrationSettingsWhereUniqueInput
+  }
+
+  /**
+   * UserIntegrationSettings updateMany
+   */
+  export type UserIntegrationSettingsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserIntegrationSettings.
+     */
+    data: XOR<UserIntegrationSettingsUpdateManyMutationInput, UserIntegrationSettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which UserIntegrationSettings to update
+     */
+    where?: UserIntegrationSettingsWhereInput
+    /**
+     * Limit how many UserIntegrationSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserIntegrationSettings updateManyAndReturn
+   */
+  export type UserIntegrationSettingsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * The data used to update UserIntegrationSettings.
+     */
+    data: XOR<UserIntegrationSettingsUpdateManyMutationInput, UserIntegrationSettingsUncheckedUpdateManyInput>
+    /**
+     * Filter which UserIntegrationSettings to update
+     */
+    where?: UserIntegrationSettingsWhereInput
+    /**
+     * Limit how many UserIntegrationSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserIntegrationSettings upsert
+   */
+  export type UserIntegrationSettingsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the UserIntegrationSettings to update in case it exists.
+     */
+    where: UserIntegrationSettingsWhereUniqueInput
+    /**
+     * In case the UserIntegrationSettings found by the `where` argument doesn't exist, create a new UserIntegrationSettings with this data.
+     */
+    create: XOR<UserIntegrationSettingsCreateInput, UserIntegrationSettingsUncheckedCreateInput>
+    /**
+     * In case the UserIntegrationSettings was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserIntegrationSettingsUpdateInput, UserIntegrationSettingsUncheckedUpdateInput>
+  }
+
+  /**
+   * UserIntegrationSettings delete
+   */
+  export type UserIntegrationSettingsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+    /**
+     * Filter which UserIntegrationSettings to delete.
+     */
+    where: UserIntegrationSettingsWhereUniqueInput
+  }
+
+  /**
+   * UserIntegrationSettings deleteMany
+   */
+  export type UserIntegrationSettingsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserIntegrationSettings to delete
+     */
+    where?: UserIntegrationSettingsWhereInput
+    /**
+     * Limit how many UserIntegrationSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserIntegrationSettings without action
+   */
+  export type UserIntegrationSettingsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserIntegrationSettings
+     */
+    select?: UserIntegrationSettingsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserIntegrationSettings
+     */
+    omit?: UserIntegrationSettingsOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MetaIntegration
+   */
+
+  export type AggregateMetaIntegration = {
+    _count: MetaIntegrationCountAggregateOutputType | null
+    _min: MetaIntegrationMinAggregateOutputType | null
+    _max: MetaIntegrationMaxAggregateOutputType | null
+  }
+
+  export type MetaIntegrationMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    wabaId: string | null
+    accessToken: string | null
+    businessPhoneNumberId: string | null
+    appId: string | null
+    loginType: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MetaIntegrationMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    wabaId: string | null
+    accessToken: string | null
+    businessPhoneNumberId: string | null
+    appId: string | null
+    loginType: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type MetaIntegrationCountAggregateOutputType = {
+    id: number
+    userId: number
+    organizationId: number
+    wabaId: number
+    accessToken: number
+    businessPhoneNumberId: number
+    appId: number
+    loginType: number
+    embedData: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type MetaIntegrationMinAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    wabaId?: true
+    accessToken?: true
+    businessPhoneNumberId?: true
+    appId?: true
+    loginType?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MetaIntegrationMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    wabaId?: true
+    accessToken?: true
+    businessPhoneNumberId?: true
+    appId?: true
+    loginType?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type MetaIntegrationCountAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    wabaId?: true
+    accessToken?: true
+    businessPhoneNumberId?: true
+    appId?: true
+    loginType?: true
+    embedData?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type MetaIntegrationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MetaIntegration to aggregate.
+     */
+    where?: MetaIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MetaIntegrations to fetch.
+     */
+    orderBy?: MetaIntegrationOrderByWithRelationInput | MetaIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MetaIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MetaIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MetaIntegrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MetaIntegrations
+    **/
+    _count?: true | MetaIntegrationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MetaIntegrationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MetaIntegrationMaxAggregateInputType
+  }
+
+  export type GetMetaIntegrationAggregateType<T extends MetaIntegrationAggregateArgs> = {
+        [P in keyof T & keyof AggregateMetaIntegration]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMetaIntegration[P]>
+      : GetScalarType<T[P], AggregateMetaIntegration[P]>
+  }
+
+
+
+
+  export type MetaIntegrationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MetaIntegrationWhereInput
+    orderBy?: MetaIntegrationOrderByWithAggregationInput | MetaIntegrationOrderByWithAggregationInput[]
+    by: MetaIntegrationScalarFieldEnum[] | MetaIntegrationScalarFieldEnum
+    having?: MetaIntegrationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MetaIntegrationCountAggregateInputType | true
+    _min?: MetaIntegrationMinAggregateInputType
+    _max?: MetaIntegrationMaxAggregateInputType
+  }
+
+  export type MetaIntegrationGroupByOutputType = {
+    id: string
+    userId: string
+    organizationId: string | null
+    wabaId: string | null
+    accessToken: string | null
+    businessPhoneNumberId: string | null
+    appId: string | null
+    loginType: string | null
+    embedData: JsonValue | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: MetaIntegrationCountAggregateOutputType | null
+    _min: MetaIntegrationMinAggregateOutputType | null
+    _max: MetaIntegrationMaxAggregateOutputType | null
+  }
+
+  type GetMetaIntegrationGroupByPayload<T extends MetaIntegrationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MetaIntegrationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MetaIntegrationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MetaIntegrationGroupByOutputType[P]>
+            : GetScalarType<T[P], MetaIntegrationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MetaIntegrationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    wabaId?: boolean
+    accessToken?: boolean
+    businessPhoneNumberId?: boolean
+    appId?: boolean
+    loginType?: boolean
+    embedData?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["metaIntegration"]>
+
+  export type MetaIntegrationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    wabaId?: boolean
+    accessToken?: boolean
+    businessPhoneNumberId?: boolean
+    appId?: boolean
+    loginType?: boolean
+    embedData?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["metaIntegration"]>
+
+  export type MetaIntegrationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    wabaId?: boolean
+    accessToken?: boolean
+    businessPhoneNumberId?: boolean
+    appId?: boolean
+    loginType?: boolean
+    embedData?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["metaIntegration"]>
+
+  export type MetaIntegrationSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    wabaId?: boolean
+    accessToken?: boolean
+    businessPhoneNumberId?: boolean
+    appId?: boolean
+    loginType?: boolean
+    embedData?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type MetaIntegrationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "organizationId" | "wabaId" | "accessToken" | "businessPhoneNumberId" | "appId" | "loginType" | "embedData" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["metaIntegration"]>
+
+  export type $MetaIntegrationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MetaIntegration"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      organizationId: string | null
+      wabaId: string | null
+      accessToken: string | null
+      businessPhoneNumberId: string | null
+      appId: string | null
+      loginType: string | null
+      embedData: Prisma.JsonValue | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["metaIntegration"]>
+    composites: {}
+  }
+
+  type MetaIntegrationGetPayload<S extends boolean | null | undefined | MetaIntegrationDefaultArgs> = $Result.GetResult<Prisma.$MetaIntegrationPayload, S>
+
+  type MetaIntegrationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MetaIntegrationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MetaIntegrationCountAggregateInputType | true
+    }
+
+  export interface MetaIntegrationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MetaIntegration'], meta: { name: 'MetaIntegration' } }
+    /**
+     * Find zero or one MetaIntegration that matches the filter.
+     * @param {MetaIntegrationFindUniqueArgs} args - Arguments to find a MetaIntegration
+     * @example
+     * // Get one MetaIntegration
+     * const metaIntegration = await prisma.metaIntegration.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MetaIntegrationFindUniqueArgs>(args: SelectSubset<T, MetaIntegrationFindUniqueArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MetaIntegration that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MetaIntegrationFindUniqueOrThrowArgs} args - Arguments to find a MetaIntegration
+     * @example
+     * // Get one MetaIntegration
+     * const metaIntegration = await prisma.metaIntegration.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MetaIntegrationFindUniqueOrThrowArgs>(args: SelectSubset<T, MetaIntegrationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MetaIntegration that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MetaIntegrationFindFirstArgs} args - Arguments to find a MetaIntegration
+     * @example
+     * // Get one MetaIntegration
+     * const metaIntegration = await prisma.metaIntegration.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MetaIntegrationFindFirstArgs>(args?: SelectSubset<T, MetaIntegrationFindFirstArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MetaIntegration that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MetaIntegrationFindFirstOrThrowArgs} args - Arguments to find a MetaIntegration
+     * @example
+     * // Get one MetaIntegration
+     * const metaIntegration = await prisma.metaIntegration.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MetaIntegrationFindFirstOrThrowArgs>(args?: SelectSubset<T, MetaIntegrationFindFirstOrThrowArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MetaIntegrations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MetaIntegrationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MetaIntegrations
+     * const metaIntegrations = await prisma.metaIntegration.findMany()
+     * 
+     * // Get first 10 MetaIntegrations
+     * const metaIntegrations = await prisma.metaIntegration.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const metaIntegrationWithIdOnly = await prisma.metaIntegration.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends MetaIntegrationFindManyArgs>(args?: SelectSubset<T, MetaIntegrationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MetaIntegration.
+     * @param {MetaIntegrationCreateArgs} args - Arguments to create a MetaIntegration.
+     * @example
+     * // Create one MetaIntegration
+     * const MetaIntegration = await prisma.metaIntegration.create({
+     *   data: {
+     *     // ... data to create a MetaIntegration
+     *   }
+     * })
+     * 
+     */
+    create<T extends MetaIntegrationCreateArgs>(args: SelectSubset<T, MetaIntegrationCreateArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MetaIntegrations.
+     * @param {MetaIntegrationCreateManyArgs} args - Arguments to create many MetaIntegrations.
+     * @example
+     * // Create many MetaIntegrations
+     * const metaIntegration = await prisma.metaIntegration.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MetaIntegrationCreateManyArgs>(args?: SelectSubset<T, MetaIntegrationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MetaIntegrations and returns the data saved in the database.
+     * @param {MetaIntegrationCreateManyAndReturnArgs} args - Arguments to create many MetaIntegrations.
+     * @example
+     * // Create many MetaIntegrations
+     * const metaIntegration = await prisma.metaIntegration.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MetaIntegrations and only return the `id`
+     * const metaIntegrationWithIdOnly = await prisma.metaIntegration.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MetaIntegrationCreateManyAndReturnArgs>(args?: SelectSubset<T, MetaIntegrationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MetaIntegration.
+     * @param {MetaIntegrationDeleteArgs} args - Arguments to delete one MetaIntegration.
+     * @example
+     * // Delete one MetaIntegration
+     * const MetaIntegration = await prisma.metaIntegration.delete({
+     *   where: {
+     *     // ... filter to delete one MetaIntegration
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MetaIntegrationDeleteArgs>(args: SelectSubset<T, MetaIntegrationDeleteArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MetaIntegration.
+     * @param {MetaIntegrationUpdateArgs} args - Arguments to update one MetaIntegration.
+     * @example
+     * // Update one MetaIntegration
+     * const metaIntegration = await prisma.metaIntegration.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MetaIntegrationUpdateArgs>(args: SelectSubset<T, MetaIntegrationUpdateArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MetaIntegrations.
+     * @param {MetaIntegrationDeleteManyArgs} args - Arguments to filter MetaIntegrations to delete.
+     * @example
+     * // Delete a few MetaIntegrations
+     * const { count } = await prisma.metaIntegration.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MetaIntegrationDeleteManyArgs>(args?: SelectSubset<T, MetaIntegrationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MetaIntegrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MetaIntegrationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MetaIntegrations
+     * const metaIntegration = await prisma.metaIntegration.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MetaIntegrationUpdateManyArgs>(args: SelectSubset<T, MetaIntegrationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MetaIntegrations and returns the data updated in the database.
+     * @param {MetaIntegrationUpdateManyAndReturnArgs} args - Arguments to update many MetaIntegrations.
+     * @example
+     * // Update many MetaIntegrations
+     * const metaIntegration = await prisma.metaIntegration.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MetaIntegrations and only return the `id`
+     * const metaIntegrationWithIdOnly = await prisma.metaIntegration.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MetaIntegrationUpdateManyAndReturnArgs>(args: SelectSubset<T, MetaIntegrationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MetaIntegration.
+     * @param {MetaIntegrationUpsertArgs} args - Arguments to update or create a MetaIntegration.
+     * @example
+     * // Update or create a MetaIntegration
+     * const metaIntegration = await prisma.metaIntegration.upsert({
+     *   create: {
+     *     // ... data to create a MetaIntegration
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MetaIntegration we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MetaIntegrationUpsertArgs>(args: SelectSubset<T, MetaIntegrationUpsertArgs<ExtArgs>>): Prisma__MetaIntegrationClient<$Result.GetResult<Prisma.$MetaIntegrationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MetaIntegrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MetaIntegrationCountArgs} args - Arguments to filter MetaIntegrations to count.
+     * @example
+     * // Count the number of MetaIntegrations
+     * const count = await prisma.metaIntegration.count({
+     *   where: {
+     *     // ... the filter for the MetaIntegrations we want to count
+     *   }
+     * })
+    **/
+    count<T extends MetaIntegrationCountArgs>(
+      args?: Subset<T, MetaIntegrationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MetaIntegrationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MetaIntegration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MetaIntegrationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MetaIntegrationAggregateArgs>(args: Subset<T, MetaIntegrationAggregateArgs>): Prisma.PrismaPromise<GetMetaIntegrationAggregateType<T>>
+
+    /**
+     * Group by MetaIntegration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MetaIntegrationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MetaIntegrationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MetaIntegrationGroupByArgs['orderBy'] }
+        : { orderBy?: MetaIntegrationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MetaIntegrationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMetaIntegrationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MetaIntegration model
+   */
+  readonly fields: MetaIntegrationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MetaIntegration.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MetaIntegrationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MetaIntegration model
+   */
+  interface MetaIntegrationFieldRefs {
+    readonly id: FieldRef<"MetaIntegration", 'String'>
+    readonly userId: FieldRef<"MetaIntegration", 'String'>
+    readonly organizationId: FieldRef<"MetaIntegration", 'String'>
+    readonly wabaId: FieldRef<"MetaIntegration", 'String'>
+    readonly accessToken: FieldRef<"MetaIntegration", 'String'>
+    readonly businessPhoneNumberId: FieldRef<"MetaIntegration", 'String'>
+    readonly appId: FieldRef<"MetaIntegration", 'String'>
+    readonly loginType: FieldRef<"MetaIntegration", 'String'>
+    readonly embedData: FieldRef<"MetaIntegration", 'Json'>
+    readonly isActive: FieldRef<"MetaIntegration", 'Boolean'>
+    readonly createdAt: FieldRef<"MetaIntegration", 'DateTime'>
+    readonly updatedAt: FieldRef<"MetaIntegration", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MetaIntegration findUnique
+   */
+  export type MetaIntegrationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which MetaIntegration to fetch.
+     */
+    where: MetaIntegrationWhereUniqueInput
+  }
+
+  /**
+   * MetaIntegration findUniqueOrThrow
+   */
+  export type MetaIntegrationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which MetaIntegration to fetch.
+     */
+    where: MetaIntegrationWhereUniqueInput
+  }
+
+  /**
+   * MetaIntegration findFirst
+   */
+  export type MetaIntegrationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which MetaIntegration to fetch.
+     */
+    where?: MetaIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MetaIntegrations to fetch.
+     */
+    orderBy?: MetaIntegrationOrderByWithRelationInput | MetaIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MetaIntegrations.
+     */
+    cursor?: MetaIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MetaIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MetaIntegrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MetaIntegrations.
+     */
+    distinct?: MetaIntegrationScalarFieldEnum | MetaIntegrationScalarFieldEnum[]
+  }
+
+  /**
+   * MetaIntegration findFirstOrThrow
+   */
+  export type MetaIntegrationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which MetaIntegration to fetch.
+     */
+    where?: MetaIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MetaIntegrations to fetch.
+     */
+    orderBy?: MetaIntegrationOrderByWithRelationInput | MetaIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MetaIntegrations.
+     */
+    cursor?: MetaIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MetaIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MetaIntegrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MetaIntegrations.
+     */
+    distinct?: MetaIntegrationScalarFieldEnum | MetaIntegrationScalarFieldEnum[]
+  }
+
+  /**
+   * MetaIntegration findMany
+   */
+  export type MetaIntegrationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which MetaIntegrations to fetch.
+     */
+    where?: MetaIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MetaIntegrations to fetch.
+     */
+    orderBy?: MetaIntegrationOrderByWithRelationInput | MetaIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MetaIntegrations.
+     */
+    cursor?: MetaIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MetaIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MetaIntegrations.
+     */
+    skip?: number
+    distinct?: MetaIntegrationScalarFieldEnum | MetaIntegrationScalarFieldEnum[]
+  }
+
+  /**
+   * MetaIntegration create
+   */
+  export type MetaIntegrationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * The data needed to create a MetaIntegration.
+     */
+    data: XOR<MetaIntegrationCreateInput, MetaIntegrationUncheckedCreateInput>
+  }
+
+  /**
+   * MetaIntegration createMany
+   */
+  export type MetaIntegrationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MetaIntegrations.
+     */
+    data: MetaIntegrationCreateManyInput | MetaIntegrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MetaIntegration createManyAndReturn
+   */
+  export type MetaIntegrationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * The data used to create many MetaIntegrations.
+     */
+    data: MetaIntegrationCreateManyInput | MetaIntegrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MetaIntegration update
+   */
+  export type MetaIntegrationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * The data needed to update a MetaIntegration.
+     */
+    data: XOR<MetaIntegrationUpdateInput, MetaIntegrationUncheckedUpdateInput>
+    /**
+     * Choose, which MetaIntegration to update.
+     */
+    where: MetaIntegrationWhereUniqueInput
+  }
+
+  /**
+   * MetaIntegration updateMany
+   */
+  export type MetaIntegrationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MetaIntegrations.
+     */
+    data: XOR<MetaIntegrationUpdateManyMutationInput, MetaIntegrationUncheckedUpdateManyInput>
+    /**
+     * Filter which MetaIntegrations to update
+     */
+    where?: MetaIntegrationWhereInput
+    /**
+     * Limit how many MetaIntegrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MetaIntegration updateManyAndReturn
+   */
+  export type MetaIntegrationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * The data used to update MetaIntegrations.
+     */
+    data: XOR<MetaIntegrationUpdateManyMutationInput, MetaIntegrationUncheckedUpdateManyInput>
+    /**
+     * Filter which MetaIntegrations to update
+     */
+    where?: MetaIntegrationWhereInput
+    /**
+     * Limit how many MetaIntegrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MetaIntegration upsert
+   */
+  export type MetaIntegrationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * The filter to search for the MetaIntegration to update in case it exists.
+     */
+    where: MetaIntegrationWhereUniqueInput
+    /**
+     * In case the MetaIntegration found by the `where` argument doesn't exist, create a new MetaIntegration with this data.
+     */
+    create: XOR<MetaIntegrationCreateInput, MetaIntegrationUncheckedCreateInput>
+    /**
+     * In case the MetaIntegration was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MetaIntegrationUpdateInput, MetaIntegrationUncheckedUpdateInput>
+  }
+
+  /**
+   * MetaIntegration delete
+   */
+  export type MetaIntegrationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter which MetaIntegration to delete.
+     */
+    where: MetaIntegrationWhereUniqueInput
+  }
+
+  /**
+   * MetaIntegration deleteMany
+   */
+  export type MetaIntegrationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MetaIntegrations to delete
+     */
+    where?: MetaIntegrationWhereInput
+    /**
+     * Limit how many MetaIntegrations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MetaIntegration without action
+   */
+  export type MetaIntegrationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MetaIntegration
+     */
+    select?: MetaIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MetaIntegration
+     */
+    omit?: MetaIntegrationOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model VoiceIntegration
+   */
+
+  export type AggregateVoiceIntegration = {
+    _count: VoiceIntegrationCountAggregateOutputType | null
+    _min: VoiceIntegrationMinAggregateOutputType | null
+    _max: VoiceIntegrationMaxAggregateOutputType | null
+  }
+
+  export type VoiceIntegrationMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    provider: string | null
+    apiKey: string | null
+    voiceId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VoiceIntegrationMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    provider: string | null
+    apiKey: string | null
+    voiceId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VoiceIntegrationCountAggregateOutputType = {
+    id: number
+    userId: number
+    organizationId: number
+    provider: number
+    apiKey: number
+    voiceId: number
+    settings: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type VoiceIntegrationMinAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    provider?: true
+    apiKey?: true
+    voiceId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VoiceIntegrationMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    provider?: true
+    apiKey?: true
+    voiceId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VoiceIntegrationCountAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    provider?: true
+    apiKey?: true
+    voiceId?: true
+    settings?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type VoiceIntegrationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VoiceIntegration to aggregate.
+     */
+    where?: VoiceIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VoiceIntegrations to fetch.
+     */
+    orderBy?: VoiceIntegrationOrderByWithRelationInput | VoiceIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VoiceIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VoiceIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VoiceIntegrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VoiceIntegrations
+    **/
+    _count?: true | VoiceIntegrationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VoiceIntegrationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VoiceIntegrationMaxAggregateInputType
+  }
+
+  export type GetVoiceIntegrationAggregateType<T extends VoiceIntegrationAggregateArgs> = {
+        [P in keyof T & keyof AggregateVoiceIntegration]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVoiceIntegration[P]>
+      : GetScalarType<T[P], AggregateVoiceIntegration[P]>
+  }
+
+
+
+
+  export type VoiceIntegrationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VoiceIntegrationWhereInput
+    orderBy?: VoiceIntegrationOrderByWithAggregationInput | VoiceIntegrationOrderByWithAggregationInput[]
+    by: VoiceIntegrationScalarFieldEnum[] | VoiceIntegrationScalarFieldEnum
+    having?: VoiceIntegrationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VoiceIntegrationCountAggregateInputType | true
+    _min?: VoiceIntegrationMinAggregateInputType
+    _max?: VoiceIntegrationMaxAggregateInputType
+  }
+
+  export type VoiceIntegrationGroupByOutputType = {
+    id: string
+    userId: string
+    organizationId: string | null
+    provider: string
+    apiKey: string | null
+    voiceId: string | null
+    settings: JsonValue | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: VoiceIntegrationCountAggregateOutputType | null
+    _min: VoiceIntegrationMinAggregateOutputType | null
+    _max: VoiceIntegrationMaxAggregateOutputType | null
+  }
+
+  type GetVoiceIntegrationGroupByPayload<T extends VoiceIntegrationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VoiceIntegrationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VoiceIntegrationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VoiceIntegrationGroupByOutputType[P]>
+            : GetScalarType<T[P], VoiceIntegrationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VoiceIntegrationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    provider?: boolean
+    apiKey?: boolean
+    voiceId?: boolean
+    settings?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["voiceIntegration"]>
+
+  export type VoiceIntegrationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    provider?: boolean
+    apiKey?: boolean
+    voiceId?: boolean
+    settings?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["voiceIntegration"]>
+
+  export type VoiceIntegrationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    provider?: boolean
+    apiKey?: boolean
+    voiceId?: boolean
+    settings?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["voiceIntegration"]>
+
+  export type VoiceIntegrationSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    provider?: boolean
+    apiKey?: boolean
+    voiceId?: boolean
+    settings?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type VoiceIntegrationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "organizationId" | "provider" | "apiKey" | "voiceId" | "settings" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["voiceIntegration"]>
+
+  export type $VoiceIntegrationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VoiceIntegration"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      organizationId: string | null
+      provider: string
+      apiKey: string | null
+      voiceId: string | null
+      settings: Prisma.JsonValue | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["voiceIntegration"]>
+    composites: {}
+  }
+
+  type VoiceIntegrationGetPayload<S extends boolean | null | undefined | VoiceIntegrationDefaultArgs> = $Result.GetResult<Prisma.$VoiceIntegrationPayload, S>
+
+  type VoiceIntegrationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VoiceIntegrationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VoiceIntegrationCountAggregateInputType | true
+    }
+
+  export interface VoiceIntegrationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VoiceIntegration'], meta: { name: 'VoiceIntegration' } }
+    /**
+     * Find zero or one VoiceIntegration that matches the filter.
+     * @param {VoiceIntegrationFindUniqueArgs} args - Arguments to find a VoiceIntegration
+     * @example
+     * // Get one VoiceIntegration
+     * const voiceIntegration = await prisma.voiceIntegration.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VoiceIntegrationFindUniqueArgs>(args: SelectSubset<T, VoiceIntegrationFindUniqueArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one VoiceIntegration that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VoiceIntegrationFindUniqueOrThrowArgs} args - Arguments to find a VoiceIntegration
+     * @example
+     * // Get one VoiceIntegration
+     * const voiceIntegration = await prisma.voiceIntegration.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VoiceIntegrationFindUniqueOrThrowArgs>(args: SelectSubset<T, VoiceIntegrationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VoiceIntegration that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VoiceIntegrationFindFirstArgs} args - Arguments to find a VoiceIntegration
+     * @example
+     * // Get one VoiceIntegration
+     * const voiceIntegration = await prisma.voiceIntegration.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VoiceIntegrationFindFirstArgs>(args?: SelectSubset<T, VoiceIntegrationFindFirstArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VoiceIntegration that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VoiceIntegrationFindFirstOrThrowArgs} args - Arguments to find a VoiceIntegration
+     * @example
+     * // Get one VoiceIntegration
+     * const voiceIntegration = await prisma.voiceIntegration.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VoiceIntegrationFindFirstOrThrowArgs>(args?: SelectSubset<T, VoiceIntegrationFindFirstOrThrowArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more VoiceIntegrations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VoiceIntegrationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VoiceIntegrations
+     * const voiceIntegrations = await prisma.voiceIntegration.findMany()
+     * 
+     * // Get first 10 VoiceIntegrations
+     * const voiceIntegrations = await prisma.voiceIntegration.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const voiceIntegrationWithIdOnly = await prisma.voiceIntegration.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VoiceIntegrationFindManyArgs>(args?: SelectSubset<T, VoiceIntegrationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a VoiceIntegration.
+     * @param {VoiceIntegrationCreateArgs} args - Arguments to create a VoiceIntegration.
+     * @example
+     * // Create one VoiceIntegration
+     * const VoiceIntegration = await prisma.voiceIntegration.create({
+     *   data: {
+     *     // ... data to create a VoiceIntegration
+     *   }
+     * })
+     * 
+     */
+    create<T extends VoiceIntegrationCreateArgs>(args: SelectSubset<T, VoiceIntegrationCreateArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many VoiceIntegrations.
+     * @param {VoiceIntegrationCreateManyArgs} args - Arguments to create many VoiceIntegrations.
+     * @example
+     * // Create many VoiceIntegrations
+     * const voiceIntegration = await prisma.voiceIntegration.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VoiceIntegrationCreateManyArgs>(args?: SelectSubset<T, VoiceIntegrationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VoiceIntegrations and returns the data saved in the database.
+     * @param {VoiceIntegrationCreateManyAndReturnArgs} args - Arguments to create many VoiceIntegrations.
+     * @example
+     * // Create many VoiceIntegrations
+     * const voiceIntegration = await prisma.voiceIntegration.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VoiceIntegrations and only return the `id`
+     * const voiceIntegrationWithIdOnly = await prisma.voiceIntegration.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VoiceIntegrationCreateManyAndReturnArgs>(args?: SelectSubset<T, VoiceIntegrationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a VoiceIntegration.
+     * @param {VoiceIntegrationDeleteArgs} args - Arguments to delete one VoiceIntegration.
+     * @example
+     * // Delete one VoiceIntegration
+     * const VoiceIntegration = await prisma.voiceIntegration.delete({
+     *   where: {
+     *     // ... filter to delete one VoiceIntegration
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VoiceIntegrationDeleteArgs>(args: SelectSubset<T, VoiceIntegrationDeleteArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one VoiceIntegration.
+     * @param {VoiceIntegrationUpdateArgs} args - Arguments to update one VoiceIntegration.
+     * @example
+     * // Update one VoiceIntegration
+     * const voiceIntegration = await prisma.voiceIntegration.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VoiceIntegrationUpdateArgs>(args: SelectSubset<T, VoiceIntegrationUpdateArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more VoiceIntegrations.
+     * @param {VoiceIntegrationDeleteManyArgs} args - Arguments to filter VoiceIntegrations to delete.
+     * @example
+     * // Delete a few VoiceIntegrations
+     * const { count } = await prisma.voiceIntegration.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VoiceIntegrationDeleteManyArgs>(args?: SelectSubset<T, VoiceIntegrationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VoiceIntegrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VoiceIntegrationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VoiceIntegrations
+     * const voiceIntegration = await prisma.voiceIntegration.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VoiceIntegrationUpdateManyArgs>(args: SelectSubset<T, VoiceIntegrationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VoiceIntegrations and returns the data updated in the database.
+     * @param {VoiceIntegrationUpdateManyAndReturnArgs} args - Arguments to update many VoiceIntegrations.
+     * @example
+     * // Update many VoiceIntegrations
+     * const voiceIntegration = await prisma.voiceIntegration.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more VoiceIntegrations and only return the `id`
+     * const voiceIntegrationWithIdOnly = await prisma.voiceIntegration.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VoiceIntegrationUpdateManyAndReturnArgs>(args: SelectSubset<T, VoiceIntegrationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one VoiceIntegration.
+     * @param {VoiceIntegrationUpsertArgs} args - Arguments to update or create a VoiceIntegration.
+     * @example
+     * // Update or create a VoiceIntegration
+     * const voiceIntegration = await prisma.voiceIntegration.upsert({
+     *   create: {
+     *     // ... data to create a VoiceIntegration
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VoiceIntegration we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VoiceIntegrationUpsertArgs>(args: SelectSubset<T, VoiceIntegrationUpsertArgs<ExtArgs>>): Prisma__VoiceIntegrationClient<$Result.GetResult<Prisma.$VoiceIntegrationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of VoiceIntegrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VoiceIntegrationCountArgs} args - Arguments to filter VoiceIntegrations to count.
+     * @example
+     * // Count the number of VoiceIntegrations
+     * const count = await prisma.voiceIntegration.count({
+     *   where: {
+     *     // ... the filter for the VoiceIntegrations we want to count
+     *   }
+     * })
+    **/
+    count<T extends VoiceIntegrationCountArgs>(
+      args?: Subset<T, VoiceIntegrationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VoiceIntegrationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VoiceIntegration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VoiceIntegrationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VoiceIntegrationAggregateArgs>(args: Subset<T, VoiceIntegrationAggregateArgs>): Prisma.PrismaPromise<GetVoiceIntegrationAggregateType<T>>
+
+    /**
+     * Group by VoiceIntegration.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VoiceIntegrationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VoiceIntegrationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VoiceIntegrationGroupByArgs['orderBy'] }
+        : { orderBy?: VoiceIntegrationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VoiceIntegrationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVoiceIntegrationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VoiceIntegration model
+   */
+  readonly fields: VoiceIntegrationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VoiceIntegration.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VoiceIntegrationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VoiceIntegration model
+   */
+  interface VoiceIntegrationFieldRefs {
+    readonly id: FieldRef<"VoiceIntegration", 'String'>
+    readonly userId: FieldRef<"VoiceIntegration", 'String'>
+    readonly organizationId: FieldRef<"VoiceIntegration", 'String'>
+    readonly provider: FieldRef<"VoiceIntegration", 'String'>
+    readonly apiKey: FieldRef<"VoiceIntegration", 'String'>
+    readonly voiceId: FieldRef<"VoiceIntegration", 'String'>
+    readonly settings: FieldRef<"VoiceIntegration", 'Json'>
+    readonly isActive: FieldRef<"VoiceIntegration", 'Boolean'>
+    readonly createdAt: FieldRef<"VoiceIntegration", 'DateTime'>
+    readonly updatedAt: FieldRef<"VoiceIntegration", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VoiceIntegration findUnique
+   */
+  export type VoiceIntegrationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which VoiceIntegration to fetch.
+     */
+    where: VoiceIntegrationWhereUniqueInput
+  }
+
+  /**
+   * VoiceIntegration findUniqueOrThrow
+   */
+  export type VoiceIntegrationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which VoiceIntegration to fetch.
+     */
+    where: VoiceIntegrationWhereUniqueInput
+  }
+
+  /**
+   * VoiceIntegration findFirst
+   */
+  export type VoiceIntegrationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which VoiceIntegration to fetch.
+     */
+    where?: VoiceIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VoiceIntegrations to fetch.
+     */
+    orderBy?: VoiceIntegrationOrderByWithRelationInput | VoiceIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VoiceIntegrations.
+     */
+    cursor?: VoiceIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VoiceIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VoiceIntegrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VoiceIntegrations.
+     */
+    distinct?: VoiceIntegrationScalarFieldEnum | VoiceIntegrationScalarFieldEnum[]
+  }
+
+  /**
+   * VoiceIntegration findFirstOrThrow
+   */
+  export type VoiceIntegrationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which VoiceIntegration to fetch.
+     */
+    where?: VoiceIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VoiceIntegrations to fetch.
+     */
+    orderBy?: VoiceIntegrationOrderByWithRelationInput | VoiceIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VoiceIntegrations.
+     */
+    cursor?: VoiceIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VoiceIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VoiceIntegrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VoiceIntegrations.
+     */
+    distinct?: VoiceIntegrationScalarFieldEnum | VoiceIntegrationScalarFieldEnum[]
+  }
+
+  /**
+   * VoiceIntegration findMany
+   */
+  export type VoiceIntegrationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter, which VoiceIntegrations to fetch.
+     */
+    where?: VoiceIntegrationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VoiceIntegrations to fetch.
+     */
+    orderBy?: VoiceIntegrationOrderByWithRelationInput | VoiceIntegrationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VoiceIntegrations.
+     */
+    cursor?: VoiceIntegrationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VoiceIntegrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VoiceIntegrations.
+     */
+    skip?: number
+    distinct?: VoiceIntegrationScalarFieldEnum | VoiceIntegrationScalarFieldEnum[]
+  }
+
+  /**
+   * VoiceIntegration create
+   */
+  export type VoiceIntegrationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * The data needed to create a VoiceIntegration.
+     */
+    data: XOR<VoiceIntegrationCreateInput, VoiceIntegrationUncheckedCreateInput>
+  }
+
+  /**
+   * VoiceIntegration createMany
+   */
+  export type VoiceIntegrationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VoiceIntegrations.
+     */
+    data: VoiceIntegrationCreateManyInput | VoiceIntegrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VoiceIntegration createManyAndReturn
+   */
+  export type VoiceIntegrationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * The data used to create many VoiceIntegrations.
+     */
+    data: VoiceIntegrationCreateManyInput | VoiceIntegrationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VoiceIntegration update
+   */
+  export type VoiceIntegrationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * The data needed to update a VoiceIntegration.
+     */
+    data: XOR<VoiceIntegrationUpdateInput, VoiceIntegrationUncheckedUpdateInput>
+    /**
+     * Choose, which VoiceIntegration to update.
+     */
+    where: VoiceIntegrationWhereUniqueInput
+  }
+
+  /**
+   * VoiceIntegration updateMany
+   */
+  export type VoiceIntegrationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VoiceIntegrations.
+     */
+    data: XOR<VoiceIntegrationUpdateManyMutationInput, VoiceIntegrationUncheckedUpdateManyInput>
+    /**
+     * Filter which VoiceIntegrations to update
+     */
+    where?: VoiceIntegrationWhereInput
+    /**
+     * Limit how many VoiceIntegrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VoiceIntegration updateManyAndReturn
+   */
+  export type VoiceIntegrationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * The data used to update VoiceIntegrations.
+     */
+    data: XOR<VoiceIntegrationUpdateManyMutationInput, VoiceIntegrationUncheckedUpdateManyInput>
+    /**
+     * Filter which VoiceIntegrations to update
+     */
+    where?: VoiceIntegrationWhereInput
+    /**
+     * Limit how many VoiceIntegrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VoiceIntegration upsert
+   */
+  export type VoiceIntegrationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * The filter to search for the VoiceIntegration to update in case it exists.
+     */
+    where: VoiceIntegrationWhereUniqueInput
+    /**
+     * In case the VoiceIntegration found by the `where` argument doesn't exist, create a new VoiceIntegration with this data.
+     */
+    create: XOR<VoiceIntegrationCreateInput, VoiceIntegrationUncheckedCreateInput>
+    /**
+     * In case the VoiceIntegration was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VoiceIntegrationUpdateInput, VoiceIntegrationUncheckedUpdateInput>
+  }
+
+  /**
+   * VoiceIntegration delete
+   */
+  export type VoiceIntegrationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+    /**
+     * Filter which VoiceIntegration to delete.
+     */
+    where: VoiceIntegrationWhereUniqueInput
+  }
+
+  /**
+   * VoiceIntegration deleteMany
+   */
+  export type VoiceIntegrationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VoiceIntegrations to delete
+     */
+    where?: VoiceIntegrationWhereInput
+    /**
+     * Limit how many VoiceIntegrations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * VoiceIntegration without action
+   */
+  export type VoiceIntegrationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VoiceIntegration
+     */
+    select?: VoiceIntegrationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VoiceIntegration
+     */
+    omit?: VoiceIntegrationOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model WhatsAppInstance
+   */
+
+  export type AggregateWhatsAppInstance = {
+    _count: WhatsAppInstanceCountAggregateOutputType | null
+    _min: WhatsAppInstanceMinAggregateOutputType | null
+    _max: WhatsAppInstanceMaxAggregateOutputType | null
+  }
+
+  export type WhatsAppInstanceMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    name: string | null
+    instanceId: string | null
+    status: string | null
+    qr: string | null
+    phone: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WhatsAppInstanceMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    name: string | null
+    instanceId: string | null
+    status: string | null
+    qr: string | null
+    phone: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WhatsAppInstanceCountAggregateOutputType = {
+    id: number
+    userId: number
+    organizationId: number
+    name: number
+    instanceId: number
+    status: number
+    qr: number
+    phone: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type WhatsAppInstanceMinAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    instanceId?: true
+    status?: true
+    qr?: true
+    phone?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WhatsAppInstanceMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    instanceId?: true
+    status?: true
+    qr?: true
+    phone?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WhatsAppInstanceCountAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    instanceId?: true
+    status?: true
+    qr?: true
+    phone?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type WhatsAppInstanceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WhatsAppInstance to aggregate.
+     */
+    where?: WhatsAppInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppInstances to fetch.
+     */
+    orderBy?: WhatsAppInstanceOrderByWithRelationInput | WhatsAppInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: WhatsAppInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppInstances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned WhatsAppInstances
+    **/
+    _count?: true | WhatsAppInstanceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: WhatsAppInstanceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: WhatsAppInstanceMaxAggregateInputType
+  }
+
+  export type GetWhatsAppInstanceAggregateType<T extends WhatsAppInstanceAggregateArgs> = {
+        [P in keyof T & keyof AggregateWhatsAppInstance]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateWhatsAppInstance[P]>
+      : GetScalarType<T[P], AggregateWhatsAppInstance[P]>
+  }
+
+
+
+
+  export type WhatsAppInstanceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WhatsAppInstanceWhereInput
+    orderBy?: WhatsAppInstanceOrderByWithAggregationInput | WhatsAppInstanceOrderByWithAggregationInput[]
+    by: WhatsAppInstanceScalarFieldEnum[] | WhatsAppInstanceScalarFieldEnum
+    having?: WhatsAppInstanceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: WhatsAppInstanceCountAggregateInputType | true
+    _min?: WhatsAppInstanceMinAggregateInputType
+    _max?: WhatsAppInstanceMaxAggregateInputType
+  }
+
+  export type WhatsAppInstanceGroupByOutputType = {
+    id: string
+    userId: string
+    organizationId: string | null
+    name: string | null
+    instanceId: string
+    status: string
+    qr: string | null
+    phone: string | null
+    metadata: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: WhatsAppInstanceCountAggregateOutputType | null
+    _min: WhatsAppInstanceMinAggregateOutputType | null
+    _max: WhatsAppInstanceMaxAggregateOutputType | null
+  }
+
+  type GetWhatsAppInstanceGroupByPayload<T extends WhatsAppInstanceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<WhatsAppInstanceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof WhatsAppInstanceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], WhatsAppInstanceGroupByOutputType[P]>
+            : GetScalarType<T[P], WhatsAppInstanceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type WhatsAppInstanceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    instanceId?: boolean
+    status?: boolean
+    qr?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["whatsAppInstance"]>
+
+  export type WhatsAppInstanceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    instanceId?: boolean
+    status?: boolean
+    qr?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["whatsAppInstance"]>
+
+  export type WhatsAppInstanceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    instanceId?: boolean
+    status?: boolean
+    qr?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["whatsAppInstance"]>
+
+  export type WhatsAppInstanceSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    instanceId?: boolean
+    status?: boolean
+    qr?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type WhatsAppInstanceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "organizationId" | "name" | "instanceId" | "status" | "qr" | "phone" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["whatsAppInstance"]>
+
+  export type $WhatsAppInstancePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "WhatsAppInstance"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      organizationId: string | null
+      name: string | null
+      instanceId: string
+      status: string
+      qr: string | null
+      phone: string | null
+      metadata: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["whatsAppInstance"]>
+    composites: {}
+  }
+
+  type WhatsAppInstanceGetPayload<S extends boolean | null | undefined | WhatsAppInstanceDefaultArgs> = $Result.GetResult<Prisma.$WhatsAppInstancePayload, S>
+
+  type WhatsAppInstanceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<WhatsAppInstanceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: WhatsAppInstanceCountAggregateInputType | true
+    }
+
+  export interface WhatsAppInstanceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['WhatsAppInstance'], meta: { name: 'WhatsAppInstance' } }
+    /**
+     * Find zero or one WhatsAppInstance that matches the filter.
+     * @param {WhatsAppInstanceFindUniqueArgs} args - Arguments to find a WhatsAppInstance
+     * @example
+     * // Get one WhatsAppInstance
+     * const whatsAppInstance = await prisma.whatsAppInstance.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends WhatsAppInstanceFindUniqueArgs>(args: SelectSubset<T, WhatsAppInstanceFindUniqueArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one WhatsAppInstance that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {WhatsAppInstanceFindUniqueOrThrowArgs} args - Arguments to find a WhatsAppInstance
+     * @example
+     * // Get one WhatsAppInstance
+     * const whatsAppInstance = await prisma.whatsAppInstance.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends WhatsAppInstanceFindUniqueOrThrowArgs>(args: SelectSubset<T, WhatsAppInstanceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WhatsAppInstance that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppInstanceFindFirstArgs} args - Arguments to find a WhatsAppInstance
+     * @example
+     * // Get one WhatsAppInstance
+     * const whatsAppInstance = await prisma.whatsAppInstance.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends WhatsAppInstanceFindFirstArgs>(args?: SelectSubset<T, WhatsAppInstanceFindFirstArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WhatsAppInstance that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppInstanceFindFirstOrThrowArgs} args - Arguments to find a WhatsAppInstance
+     * @example
+     * // Get one WhatsAppInstance
+     * const whatsAppInstance = await prisma.whatsAppInstance.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends WhatsAppInstanceFindFirstOrThrowArgs>(args?: SelectSubset<T, WhatsAppInstanceFindFirstOrThrowArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more WhatsAppInstances that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppInstanceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all WhatsAppInstances
+     * const whatsAppInstances = await prisma.whatsAppInstance.findMany()
+     * 
+     * // Get first 10 WhatsAppInstances
+     * const whatsAppInstances = await prisma.whatsAppInstance.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const whatsAppInstanceWithIdOnly = await prisma.whatsAppInstance.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends WhatsAppInstanceFindManyArgs>(args?: SelectSubset<T, WhatsAppInstanceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a WhatsAppInstance.
+     * @param {WhatsAppInstanceCreateArgs} args - Arguments to create a WhatsAppInstance.
+     * @example
+     * // Create one WhatsAppInstance
+     * const WhatsAppInstance = await prisma.whatsAppInstance.create({
+     *   data: {
+     *     // ... data to create a WhatsAppInstance
+     *   }
+     * })
+     * 
+     */
+    create<T extends WhatsAppInstanceCreateArgs>(args: SelectSubset<T, WhatsAppInstanceCreateArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many WhatsAppInstances.
+     * @param {WhatsAppInstanceCreateManyArgs} args - Arguments to create many WhatsAppInstances.
+     * @example
+     * // Create many WhatsAppInstances
+     * const whatsAppInstance = await prisma.whatsAppInstance.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends WhatsAppInstanceCreateManyArgs>(args?: SelectSubset<T, WhatsAppInstanceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many WhatsAppInstances and returns the data saved in the database.
+     * @param {WhatsAppInstanceCreateManyAndReturnArgs} args - Arguments to create many WhatsAppInstances.
+     * @example
+     * // Create many WhatsAppInstances
+     * const whatsAppInstance = await prisma.whatsAppInstance.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many WhatsAppInstances and only return the `id`
+     * const whatsAppInstanceWithIdOnly = await prisma.whatsAppInstance.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends WhatsAppInstanceCreateManyAndReturnArgs>(args?: SelectSubset<T, WhatsAppInstanceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a WhatsAppInstance.
+     * @param {WhatsAppInstanceDeleteArgs} args - Arguments to delete one WhatsAppInstance.
+     * @example
+     * // Delete one WhatsAppInstance
+     * const WhatsAppInstance = await prisma.whatsAppInstance.delete({
+     *   where: {
+     *     // ... filter to delete one WhatsAppInstance
+     *   }
+     * })
+     * 
+     */
+    delete<T extends WhatsAppInstanceDeleteArgs>(args: SelectSubset<T, WhatsAppInstanceDeleteArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one WhatsAppInstance.
+     * @param {WhatsAppInstanceUpdateArgs} args - Arguments to update one WhatsAppInstance.
+     * @example
+     * // Update one WhatsAppInstance
+     * const whatsAppInstance = await prisma.whatsAppInstance.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends WhatsAppInstanceUpdateArgs>(args: SelectSubset<T, WhatsAppInstanceUpdateArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more WhatsAppInstances.
+     * @param {WhatsAppInstanceDeleteManyArgs} args - Arguments to filter WhatsAppInstances to delete.
+     * @example
+     * // Delete a few WhatsAppInstances
+     * const { count } = await prisma.whatsAppInstance.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends WhatsAppInstanceDeleteManyArgs>(args?: SelectSubset<T, WhatsAppInstanceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WhatsAppInstances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppInstanceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many WhatsAppInstances
+     * const whatsAppInstance = await prisma.whatsAppInstance.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends WhatsAppInstanceUpdateManyArgs>(args: SelectSubset<T, WhatsAppInstanceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WhatsAppInstances and returns the data updated in the database.
+     * @param {WhatsAppInstanceUpdateManyAndReturnArgs} args - Arguments to update many WhatsAppInstances.
+     * @example
+     * // Update many WhatsAppInstances
+     * const whatsAppInstance = await prisma.whatsAppInstance.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WhatsAppInstances and only return the `id`
+     * const whatsAppInstanceWithIdOnly = await prisma.whatsAppInstance.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WhatsAppInstanceUpdateManyAndReturnArgs>(args: SelectSubset<T, WhatsAppInstanceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one WhatsAppInstance.
+     * @param {WhatsAppInstanceUpsertArgs} args - Arguments to update or create a WhatsAppInstance.
+     * @example
+     * // Update or create a WhatsAppInstance
+     * const whatsAppInstance = await prisma.whatsAppInstance.upsert({
+     *   create: {
+     *     // ... data to create a WhatsAppInstance
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the WhatsAppInstance we want to update
+     *   }
+     * })
+     */
+    upsert<T extends WhatsAppInstanceUpsertArgs>(args: SelectSubset<T, WhatsAppInstanceUpsertArgs<ExtArgs>>): Prisma__WhatsAppInstanceClient<$Result.GetResult<Prisma.$WhatsAppInstancePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of WhatsAppInstances.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppInstanceCountArgs} args - Arguments to filter WhatsAppInstances to count.
+     * @example
+     * // Count the number of WhatsAppInstances
+     * const count = await prisma.whatsAppInstance.count({
+     *   where: {
+     *     // ... the filter for the WhatsAppInstances we want to count
+     *   }
+     * })
+    **/
+    count<T extends WhatsAppInstanceCountArgs>(
+      args?: Subset<T, WhatsAppInstanceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], WhatsAppInstanceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a WhatsAppInstance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppInstanceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends WhatsAppInstanceAggregateArgs>(args: Subset<T, WhatsAppInstanceAggregateArgs>): Prisma.PrismaPromise<GetWhatsAppInstanceAggregateType<T>>
+
+    /**
+     * Group by WhatsAppInstance.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppInstanceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends WhatsAppInstanceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: WhatsAppInstanceGroupByArgs['orderBy'] }
+        : { orderBy?: WhatsAppInstanceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, WhatsAppInstanceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetWhatsAppInstanceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the WhatsAppInstance model
+   */
+  readonly fields: WhatsAppInstanceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for WhatsAppInstance.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__WhatsAppInstanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the WhatsAppInstance model
+   */
+  interface WhatsAppInstanceFieldRefs {
+    readonly id: FieldRef<"WhatsAppInstance", 'String'>
+    readonly userId: FieldRef<"WhatsAppInstance", 'String'>
+    readonly organizationId: FieldRef<"WhatsAppInstance", 'String'>
+    readonly name: FieldRef<"WhatsAppInstance", 'String'>
+    readonly instanceId: FieldRef<"WhatsAppInstance", 'String'>
+    readonly status: FieldRef<"WhatsAppInstance", 'String'>
+    readonly qr: FieldRef<"WhatsAppInstance", 'String'>
+    readonly phone: FieldRef<"WhatsAppInstance", 'String'>
+    readonly metadata: FieldRef<"WhatsAppInstance", 'Json'>
+    readonly createdAt: FieldRef<"WhatsAppInstance", 'DateTime'>
+    readonly updatedAt: FieldRef<"WhatsAppInstance", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * WhatsAppInstance findUnique
+   */
+  export type WhatsAppInstanceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppInstance to fetch.
+     */
+    where: WhatsAppInstanceWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppInstance findUniqueOrThrow
+   */
+  export type WhatsAppInstanceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppInstance to fetch.
+     */
+    where: WhatsAppInstanceWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppInstance findFirst
+   */
+  export type WhatsAppInstanceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppInstance to fetch.
+     */
+    where?: WhatsAppInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppInstances to fetch.
+     */
+    orderBy?: WhatsAppInstanceOrderByWithRelationInput | WhatsAppInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WhatsAppInstances.
+     */
+    cursor?: WhatsAppInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppInstances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WhatsAppInstances.
+     */
+    distinct?: WhatsAppInstanceScalarFieldEnum | WhatsAppInstanceScalarFieldEnum[]
+  }
+
+  /**
+   * WhatsAppInstance findFirstOrThrow
+   */
+  export type WhatsAppInstanceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppInstance to fetch.
+     */
+    where?: WhatsAppInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppInstances to fetch.
+     */
+    orderBy?: WhatsAppInstanceOrderByWithRelationInput | WhatsAppInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WhatsAppInstances.
+     */
+    cursor?: WhatsAppInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppInstances.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WhatsAppInstances.
+     */
+    distinct?: WhatsAppInstanceScalarFieldEnum | WhatsAppInstanceScalarFieldEnum[]
+  }
+
+  /**
+   * WhatsAppInstance findMany
+   */
+  export type WhatsAppInstanceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppInstances to fetch.
+     */
+    where?: WhatsAppInstanceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppInstances to fetch.
+     */
+    orderBy?: WhatsAppInstanceOrderByWithRelationInput | WhatsAppInstanceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing WhatsAppInstances.
+     */
+    cursor?: WhatsAppInstanceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppInstances from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppInstances.
+     */
+    skip?: number
+    distinct?: WhatsAppInstanceScalarFieldEnum | WhatsAppInstanceScalarFieldEnum[]
+  }
+
+  /**
+   * WhatsAppInstance create
+   */
+  export type WhatsAppInstanceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * The data needed to create a WhatsAppInstance.
+     */
+    data: XOR<WhatsAppInstanceCreateInput, WhatsAppInstanceUncheckedCreateInput>
+  }
+
+  /**
+   * WhatsAppInstance createMany
+   */
+  export type WhatsAppInstanceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many WhatsAppInstances.
+     */
+    data: WhatsAppInstanceCreateManyInput | WhatsAppInstanceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WhatsAppInstance createManyAndReturn
+   */
+  export type WhatsAppInstanceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * The data used to create many WhatsAppInstances.
+     */
+    data: WhatsAppInstanceCreateManyInput | WhatsAppInstanceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WhatsAppInstance update
+   */
+  export type WhatsAppInstanceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * The data needed to update a WhatsAppInstance.
+     */
+    data: XOR<WhatsAppInstanceUpdateInput, WhatsAppInstanceUncheckedUpdateInput>
+    /**
+     * Choose, which WhatsAppInstance to update.
+     */
+    where: WhatsAppInstanceWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppInstance updateMany
+   */
+  export type WhatsAppInstanceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update WhatsAppInstances.
+     */
+    data: XOR<WhatsAppInstanceUpdateManyMutationInput, WhatsAppInstanceUncheckedUpdateManyInput>
+    /**
+     * Filter which WhatsAppInstances to update
+     */
+    where?: WhatsAppInstanceWhereInput
+    /**
+     * Limit how many WhatsAppInstances to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WhatsAppInstance updateManyAndReturn
+   */
+  export type WhatsAppInstanceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * The data used to update WhatsAppInstances.
+     */
+    data: XOR<WhatsAppInstanceUpdateManyMutationInput, WhatsAppInstanceUncheckedUpdateManyInput>
+    /**
+     * Filter which WhatsAppInstances to update
+     */
+    where?: WhatsAppInstanceWhereInput
+    /**
+     * Limit how many WhatsAppInstances to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WhatsAppInstance upsert
+   */
+  export type WhatsAppInstanceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * The filter to search for the WhatsAppInstance to update in case it exists.
+     */
+    where: WhatsAppInstanceWhereUniqueInput
+    /**
+     * In case the WhatsAppInstance found by the `where` argument doesn't exist, create a new WhatsAppInstance with this data.
+     */
+    create: XOR<WhatsAppInstanceCreateInput, WhatsAppInstanceUncheckedCreateInput>
+    /**
+     * In case the WhatsAppInstance was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<WhatsAppInstanceUpdateInput, WhatsAppInstanceUncheckedUpdateInput>
+  }
+
+  /**
+   * WhatsAppInstance delete
+   */
+  export type WhatsAppInstanceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+    /**
+     * Filter which WhatsAppInstance to delete.
+     */
+    where: WhatsAppInstanceWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppInstance deleteMany
+   */
+  export type WhatsAppInstanceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WhatsAppInstances to delete
+     */
+    where?: WhatsAppInstanceWhereInput
+    /**
+     * Limit how many WhatsAppInstances to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * WhatsAppInstance without action
+   */
+  export type WhatsAppInstanceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppInstance
+     */
+    select?: WhatsAppInstanceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppInstance
+     */
+    omit?: WhatsAppInstanceOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model TelegramSession
+   */
+
+  export type AggregateTelegramSession = {
+    _count: TelegramSessionCountAggregateOutputType | null
+    _min: TelegramSessionMinAggregateOutputType | null
+    _max: TelegramSessionMaxAggregateOutputType | null
+  }
+
+  export type TelegramSessionMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    name: string | null
+    sessionId: string | null
+    status: string | null
+    phone: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TelegramSessionMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    name: string | null
+    sessionId: string | null
+    status: string | null
+    phone: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TelegramSessionCountAggregateOutputType = {
+    id: number
+    userId: number
+    organizationId: number
+    name: number
+    sessionId: number
+    status: number
+    phone: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TelegramSessionMinAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    sessionId?: true
+    status?: true
+    phone?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TelegramSessionMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    sessionId?: true
+    status?: true
+    phone?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TelegramSessionCountAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    sessionId?: true
+    status?: true
+    phone?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TelegramSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TelegramSession to aggregate.
+     */
+    where?: TelegramSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramSessions to fetch.
+     */
+    orderBy?: TelegramSessionOrderByWithRelationInput | TelegramSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TelegramSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TelegramSessions
+    **/
+    _count?: true | TelegramSessionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TelegramSessionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TelegramSessionMaxAggregateInputType
+  }
+
+  export type GetTelegramSessionAggregateType<T extends TelegramSessionAggregateArgs> = {
+        [P in keyof T & keyof AggregateTelegramSession]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTelegramSession[P]>
+      : GetScalarType<T[P], AggregateTelegramSession[P]>
+  }
+
+
+
+
+  export type TelegramSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TelegramSessionWhereInput
+    orderBy?: TelegramSessionOrderByWithAggregationInput | TelegramSessionOrderByWithAggregationInput[]
+    by: TelegramSessionScalarFieldEnum[] | TelegramSessionScalarFieldEnum
+    having?: TelegramSessionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TelegramSessionCountAggregateInputType | true
+    _min?: TelegramSessionMinAggregateInputType
+    _max?: TelegramSessionMaxAggregateInputType
+  }
+
+  export type TelegramSessionGroupByOutputType = {
+    id: string
+    userId: string
+    organizationId: string | null
+    name: string | null
+    sessionId: string
+    status: string
+    phone: string | null
+    metadata: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: TelegramSessionCountAggregateOutputType | null
+    _min: TelegramSessionMinAggregateOutputType | null
+    _max: TelegramSessionMaxAggregateOutputType | null
+  }
+
+  type GetTelegramSessionGroupByPayload<T extends TelegramSessionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TelegramSessionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TelegramSessionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TelegramSessionGroupByOutputType[P]>
+            : GetScalarType<T[P], TelegramSessionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TelegramSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    sessionId?: boolean
+    status?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["telegramSession"]>
+
+  export type TelegramSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    sessionId?: boolean
+    status?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["telegramSession"]>
+
+  export type TelegramSessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    sessionId?: boolean
+    status?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["telegramSession"]>
+
+  export type TelegramSessionSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    sessionId?: boolean
+    status?: boolean
+    phone?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TelegramSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "organizationId" | "name" | "sessionId" | "status" | "phone" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["telegramSession"]>
+
+  export type $TelegramSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TelegramSession"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      organizationId: string | null
+      name: string | null
+      sessionId: string
+      status: string
+      phone: string | null
+      metadata: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["telegramSession"]>
+    composites: {}
+  }
+
+  type TelegramSessionGetPayload<S extends boolean | null | undefined | TelegramSessionDefaultArgs> = $Result.GetResult<Prisma.$TelegramSessionPayload, S>
+
+  type TelegramSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TelegramSessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TelegramSessionCountAggregateInputType | true
+    }
+
+  export interface TelegramSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TelegramSession'], meta: { name: 'TelegramSession' } }
+    /**
+     * Find zero or one TelegramSession that matches the filter.
+     * @param {TelegramSessionFindUniqueArgs} args - Arguments to find a TelegramSession
+     * @example
+     * // Get one TelegramSession
+     * const telegramSession = await prisma.telegramSession.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TelegramSessionFindUniqueArgs>(args: SelectSubset<T, TelegramSessionFindUniqueArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TelegramSession that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TelegramSessionFindUniqueOrThrowArgs} args - Arguments to find a TelegramSession
+     * @example
+     * // Get one TelegramSession
+     * const telegramSession = await prisma.telegramSession.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TelegramSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, TelegramSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TelegramSession that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramSessionFindFirstArgs} args - Arguments to find a TelegramSession
+     * @example
+     * // Get one TelegramSession
+     * const telegramSession = await prisma.telegramSession.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TelegramSessionFindFirstArgs>(args?: SelectSubset<T, TelegramSessionFindFirstArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TelegramSession that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramSessionFindFirstOrThrowArgs} args - Arguments to find a TelegramSession
+     * @example
+     * // Get one TelegramSession
+     * const telegramSession = await prisma.telegramSession.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TelegramSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, TelegramSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TelegramSessions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramSessionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TelegramSessions
+     * const telegramSessions = await prisma.telegramSession.findMany()
+     * 
+     * // Get first 10 TelegramSessions
+     * const telegramSessions = await prisma.telegramSession.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const telegramSessionWithIdOnly = await prisma.telegramSession.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TelegramSessionFindManyArgs>(args?: SelectSubset<T, TelegramSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TelegramSession.
+     * @param {TelegramSessionCreateArgs} args - Arguments to create a TelegramSession.
+     * @example
+     * // Create one TelegramSession
+     * const TelegramSession = await prisma.telegramSession.create({
+     *   data: {
+     *     // ... data to create a TelegramSession
+     *   }
+     * })
+     * 
+     */
+    create<T extends TelegramSessionCreateArgs>(args: SelectSubset<T, TelegramSessionCreateArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TelegramSessions.
+     * @param {TelegramSessionCreateManyArgs} args - Arguments to create many TelegramSessions.
+     * @example
+     * // Create many TelegramSessions
+     * const telegramSession = await prisma.telegramSession.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TelegramSessionCreateManyArgs>(args?: SelectSubset<T, TelegramSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TelegramSessions and returns the data saved in the database.
+     * @param {TelegramSessionCreateManyAndReturnArgs} args - Arguments to create many TelegramSessions.
+     * @example
+     * // Create many TelegramSessions
+     * const telegramSession = await prisma.telegramSession.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TelegramSessions and only return the `id`
+     * const telegramSessionWithIdOnly = await prisma.telegramSession.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TelegramSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, TelegramSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TelegramSession.
+     * @param {TelegramSessionDeleteArgs} args - Arguments to delete one TelegramSession.
+     * @example
+     * // Delete one TelegramSession
+     * const TelegramSession = await prisma.telegramSession.delete({
+     *   where: {
+     *     // ... filter to delete one TelegramSession
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TelegramSessionDeleteArgs>(args: SelectSubset<T, TelegramSessionDeleteArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TelegramSession.
+     * @param {TelegramSessionUpdateArgs} args - Arguments to update one TelegramSession.
+     * @example
+     * // Update one TelegramSession
+     * const telegramSession = await prisma.telegramSession.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TelegramSessionUpdateArgs>(args: SelectSubset<T, TelegramSessionUpdateArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TelegramSessions.
+     * @param {TelegramSessionDeleteManyArgs} args - Arguments to filter TelegramSessions to delete.
+     * @example
+     * // Delete a few TelegramSessions
+     * const { count } = await prisma.telegramSession.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TelegramSessionDeleteManyArgs>(args?: SelectSubset<T, TelegramSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TelegramSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramSessionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TelegramSessions
+     * const telegramSession = await prisma.telegramSession.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TelegramSessionUpdateManyArgs>(args: SelectSubset<T, TelegramSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TelegramSessions and returns the data updated in the database.
+     * @param {TelegramSessionUpdateManyAndReturnArgs} args - Arguments to update many TelegramSessions.
+     * @example
+     * // Update many TelegramSessions
+     * const telegramSession = await prisma.telegramSession.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TelegramSessions and only return the `id`
+     * const telegramSessionWithIdOnly = await prisma.telegramSession.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TelegramSessionUpdateManyAndReturnArgs>(args: SelectSubset<T, TelegramSessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TelegramSession.
+     * @param {TelegramSessionUpsertArgs} args - Arguments to update or create a TelegramSession.
+     * @example
+     * // Update or create a TelegramSession
+     * const telegramSession = await prisma.telegramSession.upsert({
+     *   create: {
+     *     // ... data to create a TelegramSession
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TelegramSession we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TelegramSessionUpsertArgs>(args: SelectSubset<T, TelegramSessionUpsertArgs<ExtArgs>>): Prisma__TelegramSessionClient<$Result.GetResult<Prisma.$TelegramSessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TelegramSessions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramSessionCountArgs} args - Arguments to filter TelegramSessions to count.
+     * @example
+     * // Count the number of TelegramSessions
+     * const count = await prisma.telegramSession.count({
+     *   where: {
+     *     // ... the filter for the TelegramSessions we want to count
+     *   }
+     * })
+    **/
+    count<T extends TelegramSessionCountArgs>(
+      args?: Subset<T, TelegramSessionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TelegramSessionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TelegramSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TelegramSessionAggregateArgs>(args: Subset<T, TelegramSessionAggregateArgs>): Prisma.PrismaPromise<GetTelegramSessionAggregateType<T>>
+
+    /**
+     * Group by TelegramSession.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TelegramSessionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TelegramSessionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TelegramSessionGroupByArgs['orderBy'] }
+        : { orderBy?: TelegramSessionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TelegramSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTelegramSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TelegramSession model
+   */
+  readonly fields: TelegramSessionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TelegramSession.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TelegramSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TelegramSession model
+   */
+  interface TelegramSessionFieldRefs {
+    readonly id: FieldRef<"TelegramSession", 'String'>
+    readonly userId: FieldRef<"TelegramSession", 'String'>
+    readonly organizationId: FieldRef<"TelegramSession", 'String'>
+    readonly name: FieldRef<"TelegramSession", 'String'>
+    readonly sessionId: FieldRef<"TelegramSession", 'String'>
+    readonly status: FieldRef<"TelegramSession", 'String'>
+    readonly phone: FieldRef<"TelegramSession", 'String'>
+    readonly metadata: FieldRef<"TelegramSession", 'Json'>
+    readonly createdAt: FieldRef<"TelegramSession", 'DateTime'>
+    readonly updatedAt: FieldRef<"TelegramSession", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TelegramSession findUnique
+   */
+  export type TelegramSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TelegramSession to fetch.
+     */
+    where: TelegramSessionWhereUniqueInput
+  }
+
+  /**
+   * TelegramSession findUniqueOrThrow
+   */
+  export type TelegramSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TelegramSession to fetch.
+     */
+    where: TelegramSessionWhereUniqueInput
+  }
+
+  /**
+   * TelegramSession findFirst
+   */
+  export type TelegramSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TelegramSession to fetch.
+     */
+    where?: TelegramSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramSessions to fetch.
+     */
+    orderBy?: TelegramSessionOrderByWithRelationInput | TelegramSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TelegramSessions.
+     */
+    cursor?: TelegramSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TelegramSessions.
+     */
+    distinct?: TelegramSessionScalarFieldEnum | TelegramSessionScalarFieldEnum[]
+  }
+
+  /**
+   * TelegramSession findFirstOrThrow
+   */
+  export type TelegramSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TelegramSession to fetch.
+     */
+    where?: TelegramSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramSessions to fetch.
+     */
+    orderBy?: TelegramSessionOrderByWithRelationInput | TelegramSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TelegramSessions.
+     */
+    cursor?: TelegramSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramSessions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TelegramSessions.
+     */
+    distinct?: TelegramSessionScalarFieldEnum | TelegramSessionScalarFieldEnum[]
+  }
+
+  /**
+   * TelegramSession findMany
+   */
+  export type TelegramSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * Filter, which TelegramSessions to fetch.
+     */
+    where?: TelegramSessionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TelegramSessions to fetch.
+     */
+    orderBy?: TelegramSessionOrderByWithRelationInput | TelegramSessionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TelegramSessions.
+     */
+    cursor?: TelegramSessionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TelegramSessions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TelegramSessions.
+     */
+    skip?: number
+    distinct?: TelegramSessionScalarFieldEnum | TelegramSessionScalarFieldEnum[]
+  }
+
+  /**
+   * TelegramSession create
+   */
+  export type TelegramSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a TelegramSession.
+     */
+    data: XOR<TelegramSessionCreateInput, TelegramSessionUncheckedCreateInput>
+  }
+
+  /**
+   * TelegramSession createMany
+   */
+  export type TelegramSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TelegramSessions.
+     */
+    data: TelegramSessionCreateManyInput | TelegramSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TelegramSession createManyAndReturn
+   */
+  export type TelegramSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * The data used to create many TelegramSessions.
+     */
+    data: TelegramSessionCreateManyInput | TelegramSessionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TelegramSession update
+   */
+  export type TelegramSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a TelegramSession.
+     */
+    data: XOR<TelegramSessionUpdateInput, TelegramSessionUncheckedUpdateInput>
+    /**
+     * Choose, which TelegramSession to update.
+     */
+    where: TelegramSessionWhereUniqueInput
+  }
+
+  /**
+   * TelegramSession updateMany
+   */
+  export type TelegramSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TelegramSessions.
+     */
+    data: XOR<TelegramSessionUpdateManyMutationInput, TelegramSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which TelegramSessions to update
+     */
+    where?: TelegramSessionWhereInput
+    /**
+     * Limit how many TelegramSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TelegramSession updateManyAndReturn
+   */
+  export type TelegramSessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * The data used to update TelegramSessions.
+     */
+    data: XOR<TelegramSessionUpdateManyMutationInput, TelegramSessionUncheckedUpdateManyInput>
+    /**
+     * Filter which TelegramSessions to update
+     */
+    where?: TelegramSessionWhereInput
+    /**
+     * Limit how many TelegramSessions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TelegramSession upsert
+   */
+  export type TelegramSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the TelegramSession to update in case it exists.
+     */
+    where: TelegramSessionWhereUniqueInput
+    /**
+     * In case the TelegramSession found by the `where` argument doesn't exist, create a new TelegramSession with this data.
+     */
+    create: XOR<TelegramSessionCreateInput, TelegramSessionUncheckedCreateInput>
+    /**
+     * In case the TelegramSession was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TelegramSessionUpdateInput, TelegramSessionUncheckedUpdateInput>
+  }
+
+  /**
+   * TelegramSession delete
+   */
+  export type TelegramSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+    /**
+     * Filter which TelegramSession to delete.
+     */
+    where: TelegramSessionWhereUniqueInput
+  }
+
+  /**
+   * TelegramSession deleteMany
+   */
+  export type TelegramSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TelegramSessions to delete
+     */
+    where?: TelegramSessionWhereInput
+    /**
+     * Limit how many TelegramSessions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TelegramSession without action
+   */
+  export type TelegramSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TelegramSession
+     */
+    select?: TelegramSessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TelegramSession
+     */
+    omit?: TelegramSessionOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -10144,6 +15879,86 @@ export namespace Prisma {
   };
 
   export type IntegrationActivityScalarFieldEnum = (typeof IntegrationActivityScalarFieldEnum)[keyof typeof IntegrationActivityScalarFieldEnum]
+
+
+  export const UserIntegrationSettingsScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    timezone: 'timezone',
+    apiKey: 'apiKey',
+    fcmData: 'fcmData',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type UserIntegrationSettingsScalarFieldEnum = (typeof UserIntegrationSettingsScalarFieldEnum)[keyof typeof UserIntegrationSettingsScalarFieldEnum]
+
+
+  export const MetaIntegrationScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    organizationId: 'organizationId',
+    wabaId: 'wabaId',
+    accessToken: 'accessToken',
+    businessPhoneNumberId: 'businessPhoneNumberId',
+    appId: 'appId',
+    loginType: 'loginType',
+    embedData: 'embedData',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type MetaIntegrationScalarFieldEnum = (typeof MetaIntegrationScalarFieldEnum)[keyof typeof MetaIntegrationScalarFieldEnum]
+
+
+  export const VoiceIntegrationScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    organizationId: 'organizationId',
+    provider: 'provider',
+    apiKey: 'apiKey',
+    voiceId: 'voiceId',
+    settings: 'settings',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type VoiceIntegrationScalarFieldEnum = (typeof VoiceIntegrationScalarFieldEnum)[keyof typeof VoiceIntegrationScalarFieldEnum]
+
+
+  export const WhatsAppInstanceScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    organizationId: 'organizationId',
+    name: 'name',
+    instanceId: 'instanceId',
+    status: 'status',
+    qr: 'qr',
+    phone: 'phone',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type WhatsAppInstanceScalarFieldEnum = (typeof WhatsAppInstanceScalarFieldEnum)[keyof typeof WhatsAppInstanceScalarFieldEnum]
+
+
+  export const TelegramSessionScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    organizationId: 'organizationId',
+    name: 'name',
+    sessionId: 'sessionId',
+    status: 'status',
+    phone: 'phone',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TelegramSessionScalarFieldEnum = (typeof TelegramSessionScalarFieldEnum)[keyof typeof TelegramSessionScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -10891,6 +16706,391 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"IntegrationActivity"> | Date | string
   }
 
+  export type UserIntegrationSettingsWhereInput = {
+    AND?: UserIntegrationSettingsWhereInput | UserIntegrationSettingsWhereInput[]
+    OR?: UserIntegrationSettingsWhereInput[]
+    NOT?: UserIntegrationSettingsWhereInput | UserIntegrationSettingsWhereInput[]
+    id?: UuidFilter<"UserIntegrationSettings"> | string
+    userId?: UuidFilter<"UserIntegrationSettings"> | string
+    timezone?: StringNullableFilter<"UserIntegrationSettings"> | string | null
+    apiKey?: StringNullableFilter<"UserIntegrationSettings"> | string | null
+    fcmData?: JsonNullableFilter<"UserIntegrationSettings">
+    createdAt?: DateTimeFilter<"UserIntegrationSettings"> | Date | string
+    updatedAt?: DateTimeFilter<"UserIntegrationSettings"> | Date | string
+  }
+
+  export type UserIntegrationSettingsOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    timezone?: SortOrderInput | SortOrder
+    apiKey?: SortOrderInput | SortOrder
+    fcmData?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserIntegrationSettingsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId?: string
+    apiKey?: string
+    AND?: UserIntegrationSettingsWhereInput | UserIntegrationSettingsWhereInput[]
+    OR?: UserIntegrationSettingsWhereInput[]
+    NOT?: UserIntegrationSettingsWhereInput | UserIntegrationSettingsWhereInput[]
+    timezone?: StringNullableFilter<"UserIntegrationSettings"> | string | null
+    fcmData?: JsonNullableFilter<"UserIntegrationSettings">
+    createdAt?: DateTimeFilter<"UserIntegrationSettings"> | Date | string
+    updatedAt?: DateTimeFilter<"UserIntegrationSettings"> | Date | string
+  }, "id" | "userId" | "apiKey">
+
+  export type UserIntegrationSettingsOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    timezone?: SortOrderInput | SortOrder
+    apiKey?: SortOrderInput | SortOrder
+    fcmData?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: UserIntegrationSettingsCountOrderByAggregateInput
+    _max?: UserIntegrationSettingsMaxOrderByAggregateInput
+    _min?: UserIntegrationSettingsMinOrderByAggregateInput
+  }
+
+  export type UserIntegrationSettingsScalarWhereWithAggregatesInput = {
+    AND?: UserIntegrationSettingsScalarWhereWithAggregatesInput | UserIntegrationSettingsScalarWhereWithAggregatesInput[]
+    OR?: UserIntegrationSettingsScalarWhereWithAggregatesInput[]
+    NOT?: UserIntegrationSettingsScalarWhereWithAggregatesInput | UserIntegrationSettingsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"UserIntegrationSettings"> | string
+    userId?: UuidWithAggregatesFilter<"UserIntegrationSettings"> | string
+    timezone?: StringNullableWithAggregatesFilter<"UserIntegrationSettings"> | string | null
+    apiKey?: StringNullableWithAggregatesFilter<"UserIntegrationSettings"> | string | null
+    fcmData?: JsonNullableWithAggregatesFilter<"UserIntegrationSettings">
+    createdAt?: DateTimeWithAggregatesFilter<"UserIntegrationSettings"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"UserIntegrationSettings"> | Date | string
+  }
+
+  export type MetaIntegrationWhereInput = {
+    AND?: MetaIntegrationWhereInput | MetaIntegrationWhereInput[]
+    OR?: MetaIntegrationWhereInput[]
+    NOT?: MetaIntegrationWhereInput | MetaIntegrationWhereInput[]
+    id?: UuidFilter<"MetaIntegration"> | string
+    userId?: UuidFilter<"MetaIntegration"> | string
+    organizationId?: UuidNullableFilter<"MetaIntegration"> | string | null
+    wabaId?: StringNullableFilter<"MetaIntegration"> | string | null
+    accessToken?: StringNullableFilter<"MetaIntegration"> | string | null
+    businessPhoneNumberId?: StringNullableFilter<"MetaIntegration"> | string | null
+    appId?: StringNullableFilter<"MetaIntegration"> | string | null
+    loginType?: StringNullableFilter<"MetaIntegration"> | string | null
+    embedData?: JsonNullableFilter<"MetaIntegration">
+    isActive?: BoolFilter<"MetaIntegration"> | boolean
+    createdAt?: DateTimeFilter<"MetaIntegration"> | Date | string
+    updatedAt?: DateTimeFilter<"MetaIntegration"> | Date | string
+  }
+
+  export type MetaIntegrationOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    wabaId?: SortOrderInput | SortOrder
+    accessToken?: SortOrderInput | SortOrder
+    businessPhoneNumberId?: SortOrderInput | SortOrder
+    appId?: SortOrderInput | SortOrder
+    loginType?: SortOrderInput | SortOrder
+    embedData?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MetaIntegrationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId?: string
+    AND?: MetaIntegrationWhereInput | MetaIntegrationWhereInput[]
+    OR?: MetaIntegrationWhereInput[]
+    NOT?: MetaIntegrationWhereInput | MetaIntegrationWhereInput[]
+    organizationId?: UuidNullableFilter<"MetaIntegration"> | string | null
+    wabaId?: StringNullableFilter<"MetaIntegration"> | string | null
+    accessToken?: StringNullableFilter<"MetaIntegration"> | string | null
+    businessPhoneNumberId?: StringNullableFilter<"MetaIntegration"> | string | null
+    appId?: StringNullableFilter<"MetaIntegration"> | string | null
+    loginType?: StringNullableFilter<"MetaIntegration"> | string | null
+    embedData?: JsonNullableFilter<"MetaIntegration">
+    isActive?: BoolFilter<"MetaIntegration"> | boolean
+    createdAt?: DateTimeFilter<"MetaIntegration"> | Date | string
+    updatedAt?: DateTimeFilter<"MetaIntegration"> | Date | string
+  }, "id" | "userId">
+
+  export type MetaIntegrationOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    wabaId?: SortOrderInput | SortOrder
+    accessToken?: SortOrderInput | SortOrder
+    businessPhoneNumberId?: SortOrderInput | SortOrder
+    appId?: SortOrderInput | SortOrder
+    loginType?: SortOrderInput | SortOrder
+    embedData?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: MetaIntegrationCountOrderByAggregateInput
+    _max?: MetaIntegrationMaxOrderByAggregateInput
+    _min?: MetaIntegrationMinOrderByAggregateInput
+  }
+
+  export type MetaIntegrationScalarWhereWithAggregatesInput = {
+    AND?: MetaIntegrationScalarWhereWithAggregatesInput | MetaIntegrationScalarWhereWithAggregatesInput[]
+    OR?: MetaIntegrationScalarWhereWithAggregatesInput[]
+    NOT?: MetaIntegrationScalarWhereWithAggregatesInput | MetaIntegrationScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"MetaIntegration"> | string
+    userId?: UuidWithAggregatesFilter<"MetaIntegration"> | string
+    organizationId?: UuidNullableWithAggregatesFilter<"MetaIntegration"> | string | null
+    wabaId?: StringNullableWithAggregatesFilter<"MetaIntegration"> | string | null
+    accessToken?: StringNullableWithAggregatesFilter<"MetaIntegration"> | string | null
+    businessPhoneNumberId?: StringNullableWithAggregatesFilter<"MetaIntegration"> | string | null
+    appId?: StringNullableWithAggregatesFilter<"MetaIntegration"> | string | null
+    loginType?: StringNullableWithAggregatesFilter<"MetaIntegration"> | string | null
+    embedData?: JsonNullableWithAggregatesFilter<"MetaIntegration">
+    isActive?: BoolWithAggregatesFilter<"MetaIntegration"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"MetaIntegration"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"MetaIntegration"> | Date | string
+  }
+
+  export type VoiceIntegrationWhereInput = {
+    AND?: VoiceIntegrationWhereInput | VoiceIntegrationWhereInput[]
+    OR?: VoiceIntegrationWhereInput[]
+    NOT?: VoiceIntegrationWhereInput | VoiceIntegrationWhereInput[]
+    id?: UuidFilter<"VoiceIntegration"> | string
+    userId?: UuidFilter<"VoiceIntegration"> | string
+    organizationId?: UuidNullableFilter<"VoiceIntegration"> | string | null
+    provider?: StringFilter<"VoiceIntegration"> | string
+    apiKey?: StringNullableFilter<"VoiceIntegration"> | string | null
+    voiceId?: StringNullableFilter<"VoiceIntegration"> | string | null
+    settings?: JsonNullableFilter<"VoiceIntegration">
+    isActive?: BoolFilter<"VoiceIntegration"> | boolean
+    createdAt?: DateTimeFilter<"VoiceIntegration"> | Date | string
+    updatedAt?: DateTimeFilter<"VoiceIntegration"> | Date | string
+  }
+
+  export type VoiceIntegrationOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    provider?: SortOrder
+    apiKey?: SortOrderInput | SortOrder
+    voiceId?: SortOrderInput | SortOrder
+    settings?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VoiceIntegrationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId?: string
+    AND?: VoiceIntegrationWhereInput | VoiceIntegrationWhereInput[]
+    OR?: VoiceIntegrationWhereInput[]
+    NOT?: VoiceIntegrationWhereInput | VoiceIntegrationWhereInput[]
+    organizationId?: UuidNullableFilter<"VoiceIntegration"> | string | null
+    provider?: StringFilter<"VoiceIntegration"> | string
+    apiKey?: StringNullableFilter<"VoiceIntegration"> | string | null
+    voiceId?: StringNullableFilter<"VoiceIntegration"> | string | null
+    settings?: JsonNullableFilter<"VoiceIntegration">
+    isActive?: BoolFilter<"VoiceIntegration"> | boolean
+    createdAt?: DateTimeFilter<"VoiceIntegration"> | Date | string
+    updatedAt?: DateTimeFilter<"VoiceIntegration"> | Date | string
+  }, "id" | "userId">
+
+  export type VoiceIntegrationOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    provider?: SortOrder
+    apiKey?: SortOrderInput | SortOrder
+    voiceId?: SortOrderInput | SortOrder
+    settings?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: VoiceIntegrationCountOrderByAggregateInput
+    _max?: VoiceIntegrationMaxOrderByAggregateInput
+    _min?: VoiceIntegrationMinOrderByAggregateInput
+  }
+
+  export type VoiceIntegrationScalarWhereWithAggregatesInput = {
+    AND?: VoiceIntegrationScalarWhereWithAggregatesInput | VoiceIntegrationScalarWhereWithAggregatesInput[]
+    OR?: VoiceIntegrationScalarWhereWithAggregatesInput[]
+    NOT?: VoiceIntegrationScalarWhereWithAggregatesInput | VoiceIntegrationScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"VoiceIntegration"> | string
+    userId?: UuidWithAggregatesFilter<"VoiceIntegration"> | string
+    organizationId?: UuidNullableWithAggregatesFilter<"VoiceIntegration"> | string | null
+    provider?: StringWithAggregatesFilter<"VoiceIntegration"> | string
+    apiKey?: StringNullableWithAggregatesFilter<"VoiceIntegration"> | string | null
+    voiceId?: StringNullableWithAggregatesFilter<"VoiceIntegration"> | string | null
+    settings?: JsonNullableWithAggregatesFilter<"VoiceIntegration">
+    isActive?: BoolWithAggregatesFilter<"VoiceIntegration"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"VoiceIntegration"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"VoiceIntegration"> | Date | string
+  }
+
+  export type WhatsAppInstanceWhereInput = {
+    AND?: WhatsAppInstanceWhereInput | WhatsAppInstanceWhereInput[]
+    OR?: WhatsAppInstanceWhereInput[]
+    NOT?: WhatsAppInstanceWhereInput | WhatsAppInstanceWhereInput[]
+    id?: UuidFilter<"WhatsAppInstance"> | string
+    userId?: UuidFilter<"WhatsAppInstance"> | string
+    organizationId?: UuidNullableFilter<"WhatsAppInstance"> | string | null
+    name?: StringNullableFilter<"WhatsAppInstance"> | string | null
+    instanceId?: StringFilter<"WhatsAppInstance"> | string
+    status?: StringFilter<"WhatsAppInstance"> | string
+    qr?: StringNullableFilter<"WhatsAppInstance"> | string | null
+    phone?: StringNullableFilter<"WhatsAppInstance"> | string | null
+    metadata?: JsonNullableFilter<"WhatsAppInstance">
+    createdAt?: DateTimeFilter<"WhatsAppInstance"> | Date | string
+    updatedAt?: DateTimeFilter<"WhatsAppInstance"> | Date | string
+  }
+
+  export type WhatsAppInstanceOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    instanceId?: SortOrder
+    status?: SortOrder
+    qr?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WhatsAppInstanceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    instanceId?: string
+    AND?: WhatsAppInstanceWhereInput | WhatsAppInstanceWhereInput[]
+    OR?: WhatsAppInstanceWhereInput[]
+    NOT?: WhatsAppInstanceWhereInput | WhatsAppInstanceWhereInput[]
+    userId?: UuidFilter<"WhatsAppInstance"> | string
+    organizationId?: UuidNullableFilter<"WhatsAppInstance"> | string | null
+    name?: StringNullableFilter<"WhatsAppInstance"> | string | null
+    status?: StringFilter<"WhatsAppInstance"> | string
+    qr?: StringNullableFilter<"WhatsAppInstance"> | string | null
+    phone?: StringNullableFilter<"WhatsAppInstance"> | string | null
+    metadata?: JsonNullableFilter<"WhatsAppInstance">
+    createdAt?: DateTimeFilter<"WhatsAppInstance"> | Date | string
+    updatedAt?: DateTimeFilter<"WhatsAppInstance"> | Date | string
+  }, "id" | "instanceId">
+
+  export type WhatsAppInstanceOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    instanceId?: SortOrder
+    status?: SortOrder
+    qr?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: WhatsAppInstanceCountOrderByAggregateInput
+    _max?: WhatsAppInstanceMaxOrderByAggregateInput
+    _min?: WhatsAppInstanceMinOrderByAggregateInput
+  }
+
+  export type WhatsAppInstanceScalarWhereWithAggregatesInput = {
+    AND?: WhatsAppInstanceScalarWhereWithAggregatesInput | WhatsAppInstanceScalarWhereWithAggregatesInput[]
+    OR?: WhatsAppInstanceScalarWhereWithAggregatesInput[]
+    NOT?: WhatsAppInstanceScalarWhereWithAggregatesInput | WhatsAppInstanceScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"WhatsAppInstance"> | string
+    userId?: UuidWithAggregatesFilter<"WhatsAppInstance"> | string
+    organizationId?: UuidNullableWithAggregatesFilter<"WhatsAppInstance"> | string | null
+    name?: StringNullableWithAggregatesFilter<"WhatsAppInstance"> | string | null
+    instanceId?: StringWithAggregatesFilter<"WhatsAppInstance"> | string
+    status?: StringWithAggregatesFilter<"WhatsAppInstance"> | string
+    qr?: StringNullableWithAggregatesFilter<"WhatsAppInstance"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"WhatsAppInstance"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"WhatsAppInstance">
+    createdAt?: DateTimeWithAggregatesFilter<"WhatsAppInstance"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"WhatsAppInstance"> | Date | string
+  }
+
+  export type TelegramSessionWhereInput = {
+    AND?: TelegramSessionWhereInput | TelegramSessionWhereInput[]
+    OR?: TelegramSessionWhereInput[]
+    NOT?: TelegramSessionWhereInput | TelegramSessionWhereInput[]
+    id?: UuidFilter<"TelegramSession"> | string
+    userId?: UuidFilter<"TelegramSession"> | string
+    organizationId?: UuidNullableFilter<"TelegramSession"> | string | null
+    name?: StringNullableFilter<"TelegramSession"> | string | null
+    sessionId?: StringFilter<"TelegramSession"> | string
+    status?: StringFilter<"TelegramSession"> | string
+    phone?: StringNullableFilter<"TelegramSession"> | string | null
+    metadata?: JsonNullableFilter<"TelegramSession">
+    createdAt?: DateTimeFilter<"TelegramSession"> | Date | string
+    updatedAt?: DateTimeFilter<"TelegramSession"> | Date | string
+  }
+
+  export type TelegramSessionOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    sessionId?: SortOrder
+    status?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TelegramSessionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    sessionId?: string
+    AND?: TelegramSessionWhereInput | TelegramSessionWhereInput[]
+    OR?: TelegramSessionWhereInput[]
+    NOT?: TelegramSessionWhereInput | TelegramSessionWhereInput[]
+    userId?: UuidFilter<"TelegramSession"> | string
+    organizationId?: UuidNullableFilter<"TelegramSession"> | string | null
+    name?: StringNullableFilter<"TelegramSession"> | string | null
+    status?: StringFilter<"TelegramSession"> | string
+    phone?: StringNullableFilter<"TelegramSession"> | string | null
+    metadata?: JsonNullableFilter<"TelegramSession">
+    createdAt?: DateTimeFilter<"TelegramSession"> | Date | string
+    updatedAt?: DateTimeFilter<"TelegramSession"> | Date | string
+  }, "id" | "sessionId">
+
+  export type TelegramSessionOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    name?: SortOrderInput | SortOrder
+    sessionId?: SortOrder
+    status?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TelegramSessionCountOrderByAggregateInput
+    _max?: TelegramSessionMaxOrderByAggregateInput
+    _min?: TelegramSessionMinOrderByAggregateInput
+  }
+
+  export type TelegramSessionScalarWhereWithAggregatesInput = {
+    AND?: TelegramSessionScalarWhereWithAggregatesInput | TelegramSessionScalarWhereWithAggregatesInput[]
+    OR?: TelegramSessionScalarWhereWithAggregatesInput[]
+    NOT?: TelegramSessionScalarWhereWithAggregatesInput | TelegramSessionScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"TelegramSession"> | string
+    userId?: UuidWithAggregatesFilter<"TelegramSession"> | string
+    organizationId?: UuidNullableWithAggregatesFilter<"TelegramSession"> | string | null
+    name?: StringNullableWithAggregatesFilter<"TelegramSession"> | string | null
+    sessionId?: StringWithAggregatesFilter<"TelegramSession"> | string
+    status?: StringWithAggregatesFilter<"TelegramSession"> | string
+    phone?: StringNullableWithAggregatesFilter<"TelegramSession"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"TelegramSession">
+    createdAt?: DateTimeWithAggregatesFilter<"TelegramSession"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TelegramSession"> | Date | string
+  }
+
   export type IntegrationConnectionCreateInput = {
     id?: string
     userId: string
@@ -11619,6 +17819,461 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserIntegrationSettingsCreateInput = {
+    id?: string
+    userId: string
+    timezone?: string | null
+    apiKey?: string | null
+    fcmData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserIntegrationSettingsUncheckedCreateInput = {
+    id?: string
+    userId: string
+    timezone?: string | null
+    apiKey?: string | null
+    fcmData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserIntegrationSettingsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fcmData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserIntegrationSettingsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fcmData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserIntegrationSettingsCreateManyInput = {
+    id?: string
+    userId: string
+    timezone?: string | null
+    apiKey?: string | null
+    fcmData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserIntegrationSettingsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fcmData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserIntegrationSettingsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    timezone?: NullableStringFieldUpdateOperationsInput | string | null
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    fcmData?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MetaIntegrationCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    wabaId?: string | null
+    accessToken?: string | null
+    businessPhoneNumberId?: string | null
+    appId?: string | null
+    loginType?: string | null
+    embedData?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MetaIntegrationUncheckedCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    wabaId?: string | null
+    accessToken?: string | null
+    businessPhoneNumberId?: string | null
+    appId?: string | null
+    loginType?: string | null
+    embedData?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MetaIntegrationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    wabaId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    businessPhoneNumberId?: NullableStringFieldUpdateOperationsInput | string | null
+    appId?: NullableStringFieldUpdateOperationsInput | string | null
+    loginType?: NullableStringFieldUpdateOperationsInput | string | null
+    embedData?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MetaIntegrationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    wabaId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    businessPhoneNumberId?: NullableStringFieldUpdateOperationsInput | string | null
+    appId?: NullableStringFieldUpdateOperationsInput | string | null
+    loginType?: NullableStringFieldUpdateOperationsInput | string | null
+    embedData?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MetaIntegrationCreateManyInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    wabaId?: string | null
+    accessToken?: string | null
+    businessPhoneNumberId?: string | null
+    appId?: string | null
+    loginType?: string | null
+    embedData?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MetaIntegrationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    wabaId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    businessPhoneNumberId?: NullableStringFieldUpdateOperationsInput | string | null
+    appId?: NullableStringFieldUpdateOperationsInput | string | null
+    loginType?: NullableStringFieldUpdateOperationsInput | string | null
+    embedData?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MetaIntegrationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    wabaId?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    businessPhoneNumberId?: NullableStringFieldUpdateOperationsInput | string | null
+    appId?: NullableStringFieldUpdateOperationsInput | string | null
+    loginType?: NullableStringFieldUpdateOperationsInput | string | null
+    embedData?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoiceIntegrationCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    provider?: string
+    apiKey?: string | null
+    voiceId?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VoiceIntegrationUncheckedCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    provider?: string
+    apiKey?: string | null
+    voiceId?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VoiceIntegrationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    voiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoiceIntegrationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    voiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoiceIntegrationCreateManyInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    provider?: string
+    apiKey?: string | null
+    voiceId?: string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VoiceIntegrationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    voiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoiceIntegrationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: StringFieldUpdateOperationsInput | string
+    apiKey?: NullableStringFieldUpdateOperationsInput | string | null
+    voiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    settings?: NullableJsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppInstanceCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name?: string | null
+    instanceId: string
+    status?: string
+    qr?: string | null
+    phone?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WhatsAppInstanceUncheckedCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name?: string | null
+    instanceId: string
+    status?: string
+    qr?: string | null
+    phone?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WhatsAppInstanceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    instanceId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    qr?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppInstanceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    instanceId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    qr?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppInstanceCreateManyInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name?: string | null
+    instanceId: string
+    status?: string
+    qr?: string | null
+    phone?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WhatsAppInstanceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    instanceId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    qr?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppInstanceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    instanceId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    qr?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TelegramSessionCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name?: string | null
+    sessionId: string
+    status?: string
+    phone?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TelegramSessionUncheckedCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name?: string | null
+    sessionId: string
+    status?: string
+    phone?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TelegramSessionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TelegramSessionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TelegramSessionCreateManyInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name?: string | null
+    sessionId: string
+    status?: string
+    phone?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TelegramSessionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TelegramSessionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    sessionId?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -12202,6 +18857,191 @@ export namespace Prisma {
     action?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
+  }
+
+  export type UserIntegrationSettingsCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    timezone?: SortOrder
+    apiKey?: SortOrder
+    fcmData?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserIntegrationSettingsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    timezone?: SortOrder
+    apiKey?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserIntegrationSettingsMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    timezone?: SortOrder
+    apiKey?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MetaIntegrationCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    wabaId?: SortOrder
+    accessToken?: SortOrder
+    businessPhoneNumberId?: SortOrder
+    appId?: SortOrder
+    loginType?: SortOrder
+    embedData?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MetaIntegrationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    wabaId?: SortOrder
+    accessToken?: SortOrder
+    businessPhoneNumberId?: SortOrder
+    appId?: SortOrder
+    loginType?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type MetaIntegrationMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    wabaId?: SortOrder
+    accessToken?: SortOrder
+    businessPhoneNumberId?: SortOrder
+    appId?: SortOrder
+    loginType?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VoiceIntegrationCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    provider?: SortOrder
+    apiKey?: SortOrder
+    voiceId?: SortOrder
+    settings?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VoiceIntegrationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    provider?: SortOrder
+    apiKey?: SortOrder
+    voiceId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VoiceIntegrationMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    provider?: SortOrder
+    apiKey?: SortOrder
+    voiceId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WhatsAppInstanceCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    instanceId?: SortOrder
+    status?: SortOrder
+    qr?: SortOrder
+    phone?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WhatsAppInstanceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    instanceId?: SortOrder
+    status?: SortOrder
+    qr?: SortOrder
+    phone?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WhatsAppInstanceMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    instanceId?: SortOrder
+    status?: SortOrder
+    qr?: SortOrder
+    phone?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TelegramSessionCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    sessionId?: SortOrder
+    status?: SortOrder
+    phone?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TelegramSessionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    sessionId?: SortOrder
+    status?: SortOrder
+    phone?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TelegramSessionMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    sessionId?: SortOrder
+    status?: SortOrder
+    phone?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {

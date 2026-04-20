@@ -51,6 +51,7 @@ model Workflow {
   @@index([userId])
   @@index([organizationId])
   @@index([workspaceId])
+  @@map("workflows")
 }
 
 model WorkflowNode {
@@ -134,6 +135,7 @@ model WorkflowActivityLog {
   @@index([workflowId])
   @@index([contactId])
   @@index([organizationId])
+  @@map("workflow_activity_logs")
 }
 
 model WorkflowExecutionHistory {
@@ -151,4 +153,39 @@ model WorkflowExecutionHistory {
   @@index([workflowId])
   @@index([contactId])
   @@index([organizationId])
+  @@map("workflow_execution_histories")
+}
+
+model OmniChatbot {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  name            String
+  provider        String // whatsapp | telegram | all
+  isActive        Boolean  @default(true) @map("is_active")
+  aiEnabled       Boolean  @default(false) @map("ai_enabled")
+  aiPrompt        String?  @map("ai_prompt") @db.Text
+  welcomeMessage  String?  @map("welcome_message") @db.Text
+  fallbackMessage String?  @map("fallback_message") @db.Text
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@map("omni_chatbots")
+}
+
+model OmniKeywordTrigger {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  keyword        String
+  matchType      String   @default("exact") // exact | contains | regex
+  workflowId     String?  @map("workflow_id") @db.Uuid
+  replyMessage   String?  @map("reply_message") @db.Text
+  isActive       Boolean  @default(true) @map("is_active")
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@map("omni_keyword_triggers")
 }

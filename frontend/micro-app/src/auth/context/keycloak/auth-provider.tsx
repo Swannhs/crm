@@ -52,7 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const fetchMembership = useCallback(async (accessToken?: string | null) => {
     if (typeof window === 'undefined' || !accessToken) return null;
 
-    const response = await fetch(`${window.location.origin}/org/v1/memberships/me`, {
+    const response = await fetch(`${CONFIG.site.serverUrl}/org/v1/memberships/me`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

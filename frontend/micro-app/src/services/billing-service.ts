@@ -51,6 +51,7 @@ function normalizeInvoice(invoice: any, index: number = 0): IInvoice {
     no: invoice?.no ?? invoice?.invoiceNumber ?? invoice?.invoice_number ?? formatInvoiceNumber(invoice?.id, index),
     customerName:
       invoice?.customerName ??
+      invoice?.metadata?.customerName ??
       invoice?.billTo ??
       invoice?.contactName ??
       invoice?.contact?.name ??
@@ -60,7 +61,13 @@ function normalizeInvoice(invoice: any, index: number = 0): IInvoice {
     paidAmount: paid,
     status: invoice?.status ?? 'pending',
     deliveryStatus: invoice?.deliveryStatus ?? invoice?.delivery_status ?? 'pending',
-    dueDate: invoice?.dueDate ?? invoice?.due_date ?? invoice?.createdAt ?? invoice?.created_at ?? '',
+    dueDate:
+      invoice?.dueDate ??
+      invoice?.metadata?.dueDate ??
+      invoice?.due_date ??
+      invoice?.createdAt ??
+      invoice?.created_at ??
+      '',
     createdAt: invoice?.createdAt ?? invoice?.created_at ?? invoice?.dueDate ?? invoice?.due_date ?? '',
   };
 }
@@ -95,6 +102,11 @@ export const billingService = {
   updateInvoice: async (id: string, data: any) => {
     const response = await axios.put(`/api/invoice/update/${id}`, data);
     return response.data?.data ?? response.data;
+  },
+
+  deleteInvoice: async (id: string) => {
+    const response = await axios.delete(`/api/invoice/${id}`);
+    return response.data;
   },
 
   getPayments: async () => {

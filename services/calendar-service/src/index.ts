@@ -4,7 +4,8 @@ import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ 
   serviceName: "calendar-service", 
-  jsonLimit: "2mb" 
+  jsonLimit: "2mb",
+  enableCors: false
 });
 
 const calendarController = new CalendarController();
@@ -32,6 +33,11 @@ app.get("/v1/events",
 app.post("/v1/events", 
   identityMiddleware, 
   (req, res) => eventController.create(req as any, res)
+);
+
+app.get("/v1/event-categories",
+  identityMiddleware,
+  (req, res) => eventController.categories(req as any, res)
 );
 
 // Health

@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         {getInitColorSchemeScript}
 
         <AuthProvider>

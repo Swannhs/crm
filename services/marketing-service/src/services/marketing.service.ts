@@ -1,5 +1,6 @@
-import { CampaignRepository, AutomationRepository, SubscriberRepository, OptinFormRepository } from '../repositories/marketing.repository.js';
+import { CampaignRepository, AutomationRepository, SubscriberRepository, OptinFormRepository, OmniBroadcastRepository, OmniBroadcastLogRepository } from '../repositories/marketing.repository.js';
 import { randomUUID } from "node:crypto";
+import type { OmniBroadcastInput, OmniBroadcastLogInput } from '../types/index.js';
 
 export class CampaignService {
   private repo = new CampaignRepository();
@@ -126,5 +127,38 @@ export class OptinFormService {
 
   async deleteForm(id: string, orgId: string) {
     return this.repo.softDelete(id, orgId);
+  }
+}
+
+export class OmniBroadcastService {
+  private repo = new OmniBroadcastRepository();
+  private logRepo = new OmniBroadcastLogRepository();
+
+  async getBroadcasts(orgId: string, filters: any) {
+    const page = parseInt(filters.page || '1');
+    const limit = parseInt(filters.limit || '20');
+    const where: any = { orgId };
+    if (filters.provider) where.provider = filters.provider;
+    if (filters.status) where.status = filters.status;
+    return this.repo.findMany(where, (page - 1) * limit, limit);
+  }
+
+  async getBroadcast(id: string, orgId: string) {
+    return this.repo.findUnique(id, orgId);
+  }
+
+  async createBroadcast(orgId: string, userId: string, data: OmniBroadcastInput) {
+    return this.repo.create({
+      ...data,
+      orgId,
+      createdBy: userId,
+      status: 'pending'
+    });
+  }
+
+  async getLogs(broadcastId: string, filters: any) {
+    const page = parseInt(filters.page || '1');
+    const limit = parseInt(filters.limit || '50');
+    return this.logRepo.findByBroadcastId(broadcastId, (page - 1) * limit, limit);
   }
 }

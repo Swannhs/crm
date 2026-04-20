@@ -116,6 +116,13 @@ export const paths = {
     settings: `${ROOTS.DASHBOARD}/settings`,
     settingsTab: (tab: string) => `${ROOTS.DASHBOARD}/settings/${tab}`,
     community: `${ROOTS.DASHBOARD}/community`,
+    // Omnichannel
+    omni: {
+      root: `${ROOTS.DASHBOARD}/omni`,
+      chat: `${ROOTS.DASHBOARD}/omni/chat`,
+      automation: `${ROOTS.DASHBOARD}/omni/automation`,
+      marketing: `${ROOTS.DASHBOARD}/omni/marketing`,
+    },
   },
   public: {
     login: '/login',

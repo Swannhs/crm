@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { CampaignService, AutomationService, SubscriberService, OptinFormService } from '../services/marketing.service.js';
+import { CampaignService, AutomationService, SubscriberService, OptinFormService, OmniBroadcastService } from '../services/marketing.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
 export class CampaignController {
@@ -145,5 +145,43 @@ export class OptinFormController {
       await this.svc.deleteForm(req.params.id, req.identity.orgId);
       return res.json({ message: 'Deleted' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+}
+
+export class OmniBroadcastController {
+  private svc = new OmniBroadcastService();
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const result = await this.svc.getBroadcasts(req.identity.orgId, req.query);
+      return res.json({ success: true, data: result.data, total: result.total });
+    } catch (err: any) { return res.status(500).json({ success: false, message: err.message }); }
+  }
+
+  async get(req: AuthenticatedRequest, res: Response) {
+    try {
+      const broadcast = await this.svc.getBroadcast(req.params.id, req.identity.orgId);
+      if (!broadcast) return res.status(404).json({ success: false, message: 'Not found' });
+      return res.json({ success: true, data: broadcast });
+    } catch (err: any) { return res.status(500).json({ success: false, message: err.message }); }
+  }
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { orgId, userId } = req.identity;
+      const { name, provider, message } = req.body;
+      if (!name || !provider || !message) {
+        return res.status(400).json({ success: false, message: 'name, provider and message required' });
+      }
+      const broadcast = await this.svc.createBroadcast(orgId, userId, req.body);
+      return res.status(201).json({ success: true, data: broadcast });
+    } catch (err: any) { return res.status(500).json({ success: false, message: err.message }); }
+  }
+
+  async getLogs(req: AuthenticatedRequest, res: Response) {
+    try {
+      const result = await this.svc.getLogs(req.params.id, req.query);
+      return res.json({ success: true, data: result.data, total: result.total });
+    } catch (err: any) { return res.status(500).json({ success: false, message: err.message }); }
   }
 }

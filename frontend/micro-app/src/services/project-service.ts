@@ -13,7 +13,11 @@ export async function getProject(id: string) {
 }
 
 export async function createProject(data: any) {
-  const response = await axiosInstance.post('/api/projects/v1/projects', data);
+  const payload = {
+    ...data,
+    name: data.name ?? data.title,
+  };
+  const response = await axiosInstance.post('/api/projects/v1/projects', payload);
   return response.data;
 }
 

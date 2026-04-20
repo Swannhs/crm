@@ -273,6 +273,8 @@ services:
       - "8010:8010"
     depends_on:
       - crm-db
+    volumes:
+      - ../../services/crm-service:/app
 
   organization-service:
     container_name: ms-organization-service
