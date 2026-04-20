@@ -64,6 +64,17 @@ export class WorkflowRepository {
     });
   }
 
+  async findActiveByOrganizationId(organizationId: string) {
+    return db.workflow.findMany({
+      where: {
+        organizationId,
+        isDeleted: false,
+        status: "Active",
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
   async update(id: string, data: Partial<WorkflowInput>) {
     return db.workflow.update({ where: { id }, data });
   }

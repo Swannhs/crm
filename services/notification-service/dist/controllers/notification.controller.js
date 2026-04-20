@@ -31,9 +31,29 @@ export class NotificationController {
             return res.status(500).json({ message: err.message });
         }
     }
+    async archive(req, res) {
+        try {
+            const { orgId, userId } = req.identity;
+            await this.svc.archive(orgId, userId, req.body.ids);
+            return res.json({ message: 'Archived notifications' });
+        }
+        catch (err) {
+            return res.status(500).json({ message: err.message });
+        }
+    }
+    async unarchive(req, res) {
+        try {
+            const { orgId, userId } = req.identity;
+            await this.svc.unarchive(orgId, userId, req.body.ids);
+            return res.json({ message: 'Unarchived notifications' });
+        }
+        catch (err) {
+            return res.status(500).json({ message: err.message });
+        }
+    }
     async markSeen(req, res) {
         try {
-            await this.svc.markAsSeen(req.params.notificationId, req.params.userId);
+            await this.svc.markAsSeen(String(req.params.notificationId), String(req.params.userId));
             return res.json({ message: 'Marked as seen' });
         }
         catch (err) {
@@ -42,12 +62,15 @@ export class NotificationController {
     }
     async unseenCount(req, res) {
         try {
-            const count = await this.svc.getUnseenCount(req.identity.orgId, req.params.groupId, req.params.userId);
+            const count = await this.svc.getUnseenCount(req.identity.orgId, String(req.params.groupId), String(req.params.userId));
             return res.json({ data: { count } });
         }
         catch (err) {
             return res.status(500).json({ message: err.message });
         }
+    }
+    async handleDomainEvent(routingKey, payload) {
+        return this.svc.createFromDomainEvent(routingKey, payload);
     }
 }
 export class NotificationSettingController {
@@ -103,7 +126,7 @@ export class EmailMessageController {
     }
     async markSent(req, res) {
         try {
-            await this.svc.markAsSent(req.params.id, req.identity.orgId);
+            await this.svc.markAsSent(String(req.params.id), req.identity.orgId);
             return res.json({ message: 'Marked as sent' });
         }
         catch (err) {

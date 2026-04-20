@@ -33,12 +33,25 @@ services:
     depends_on:
       - keycloak-db
 
-  rabbitmq:
-    image: rabbitmq:3.13-management-alpine
-    container_name: ms-rabbitmq
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: ms-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "9092:9092"
 
   redis:
     image: redis:7-alpine
@@ -211,11 +224,7 @@ services:
       - mongo_data:/data/db
 
   monolith:
-    image: node:16-alpine
     container_name: ms-monolith
-    working_dir: /app
-    volumes:
-      - ../../../server:/app
     environment:
       PORT: 5000
       MONGO_URI: mongodb://mongo:27017/mymanager
@@ -241,15 +250,12 @@ services:
       S3_SECRET: local-dev-secret
       S3_BUCKET: local-dev-bucket
       SENDGRID_API_KEY: SG.local-dev
-    command: sh -c "yarn install && node index.js"
     depends_on:
       - mongo
     ports:
       - "5000:5000"
 
   crm-service:
-    build:
-      context: ../../services/crm-service
     container_name: ms-crm-service
     environment:
       APP_ENV: local
@@ -269,189 +275,119 @@ services:
       - crm-db
 
   organization-service:
-    image: node:24-alpine
     container_name: ms-organization-service
-    working_dir: /repo/services/organization-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7010
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://organization:organization@organization-db:5432/organization
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - organization-db
     ports:
       - "7010:7010"
 
   billing-service:
-    image: node:24-alpine
     container_name: ms-billing-service
-    working_dir: /repo/services/billing-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7020
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://billing:billing@billing-db:5432/billing
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - billing-db
     ports:
       - "7020:7020"
 
   booking-service:
-    image: node:24-alpine
     container_name: ms-booking-service
-    working_dir: /repo/services/booking-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7040
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://booking:booking@booking-db:5432/booking
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - booking-db
     ports:
       - "7040:7040"
 
   api-router-service:
-    image: node:24-alpine
     container_name: ms-api-router-service
-    working_dir: /repo/services/api-router-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7001
-    command: npx --no-install tsx watch src/index.ts
     ports:
       - "7001:7001"
 
   community-service:
-    image: node:24-alpine
     container_name: ms-community-service
-    working_dir: /repo/services/community-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7050
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://community:community@community-db:5432/community
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - community-db
     ports:
       - "7050:7050"
 
   commerce-service:
-    image: node:24-alpine
     container_name: ms-commerce-service
-    working_dir: /repo/services/commerce-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7060
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://commerce:commerce@commerce-db:5432/commerce
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - commerce-db
     ports:
       - "7060:7060"
 
   documents-service:
-    image: node:24-alpine
     container_name: ms-documents-service
-    working_dir: /repo/services/documents-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7080
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://documents:documents@documents-db:5432/documents
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - documents-db
     ports:
       - "7080:7080"
 
   payments-service:
-    image: node:24-alpine
     container_name: ms-payments-service
-    working_dir: /repo/services/payments-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7090
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://payments:payments@payments-db:5432/payments
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - payments-db
     ports:
       - "7090:7090"
 
   notification-service:
-    image: node:24-alpine
     container_name: ms-notification-service
-    restart: unless-stopped
-    working_dir: /repo/services/notification-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 8000
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://notification:notification@notification-db:5432/notification
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
+    depends_on:
+      - kafka
+      - notification-db
     ports:
       - "8000:8000"
-    depends_on:
-      - rabbitmq
-      - notification-db
 
   employees-service:
-    image: node:24-alpine
     container_name: ms-employees-service
-    working_dir: /repo/services/employees-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7070
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://employees:employees@employees-db:5432/employees
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - employees-db
     ports:
       - "7070:7070"
-
-  realtime-service:
-    image: node:24-alpine
-    container_name: ms-realtime-service
-    working_dir: /repo/services/realtime-service
-    volumes:
-      - ../../:/repo
-    environment:
-      PORT: 7030
-      RABBITMQ_URL: amqp://rabbitmq:5672
-      REDIS_URL: redis://redis:6379
-      DB_URL: postgres://realtime:realtime@realtime-db:5432/realtime
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
-    depends_on:
-      - rabbitmq
-      - redis
-      - realtime-db
-    ports:
-      - "7030:7030"
 
   realtime-db:
     image: postgres:17-alpine
@@ -465,53 +401,52 @@ services:
     volumes:
       - realtime_db_data:/var/lib/postgresql/data
 
+  realtime-service:
+    container_name: ms-realtime-service
+    environment:
+      PORT: 7030
+      KAFKA_BROKERS: kafka:9092
+      REDIS_URL: redis://redis:6379
+      DB_URL: postgres://realtime:realtime@realtime-db:5432/realtime
+    depends_on:
+      - kafka
+      - redis
+      - realtime-db
+    ports:
+      - "7030:7030"
+
   marketing-service:
-    image: node:24-alpine
     container_name: ms-marketing-service
-    working_dir: /repo/services/marketing-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 8030
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://marketing:marketing@marketing-db:5432/marketing
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - marketing-db
     ports:
       - "8030:8030"
 
   projects-service:
-    image: node:24-alpine
     container_name: ms-projects-service
-    working_dir: /repo/services/projects-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 8040
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://projects:projects@projects-db:5432/projects
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - projects-db
     ports:
       - "8040:8040"
 
   calendar-service:
-    image: node:24-alpine
     container_name: ms-calendar-service
-    working_dir: /repo/services/calendar-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 8050
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://calendar:calendar@calendar-db:5432/calendar
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - calendar-db
     ports:
       - "8050:8050"
@@ -529,18 +464,13 @@ services:
       - pos_db_data:/var/lib/postgresql/data
 
   pos-service:
-    image: node:24-alpine
     container_name: ms-pos-service
-    working_dir: /repo/services/pos-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7100
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://pos:pos@pos-db:5432/pos
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - pos-db
     ports:
       - "7100:7100"
@@ -558,18 +488,13 @@ services:
       - automation_db_data:/var/lib/postgresql/data
 
   automation-service:
-    image: node:24-alpine
     container_name: ms-automation-service
-    working_dir: /repo/services/automation-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7110
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://automation:automation@automation-db:5432/automation
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - automation-db
     ports:
       - "7110:7110"
@@ -587,18 +512,13 @@ services:
       - device_db_data:/var/lib/postgresql/data
 
   device-service:
-    image: node:24-alpine
     container_name: ms-device-service
-    working_dir: /repo/services/device-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7120
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://device:device@device-db:5432/device
-    command: sh -c "corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn exec tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - device-db
     ports:
       - "7120:7120"
@@ -616,18 +536,13 @@ services:
       - file_db_data:/var/lib/postgresql/data
 
   file-service:
-    image: node:24-alpine
     container_name: ms-file-service
-    working_dir: /repo/services/file-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7130
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://file:file@file-db:5432/file
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - file-db
     ports:
       - "7130:7130"
@@ -645,18 +560,13 @@ services:
       - integrations_db_data:/var/lib/postgresql/data
 
   integrations-service:
-    image: node:24-alpine
     container_name: ms-integrations-service
-    working_dir: /repo/services/integrations-service
-    volumes:
-      - ../../:/repo
     environment:
       PORT: 7140
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://integrations:integrations@integrations-db:5432/integrations
-    command: sh -c "npx --no-install prisma generate && npx --no-install tsx watch src/index.ts"
     depends_on:
-      - rabbitmq
+      - kafka
       - integrations-db
     ports:
       - "7140:7140"
@@ -683,16 +593,7 @@ services:
       - realtime-service
 
   frontend:
-    image: node:24-alpine
     container_name: ms-frontend
-    working_dir: /repo/frontend/micro-app
-    volumes:
-      - ../../:/repo
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8081/api
-      - PORT=3034
-      - WATCHPACK_POLLING=true
-    command: npx --no-install next dev -p 3034
     ports:
       - "3034:3034"
     depends_on:

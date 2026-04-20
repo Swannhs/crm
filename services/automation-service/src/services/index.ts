@@ -63,6 +63,10 @@ export class WorkflowService {
     return this.workflowRepo.findByUserId(userId, organizationId);
   }
 
+  async getActiveWorkflowsForOrganization(organizationId: string) {
+    return this.workflowRepo.findActiveByOrganizationId(organizationId);
+  }
+
   async getById(id: string) {
     return this.workflowRepo.findById(id);
   }

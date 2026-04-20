@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "billing.payment.recorded",
+  "type": "object",
+  "required": [
+    "event_name",
+    "occurred_at",
+    "org_id",
+    "actor_user_id",
+    "payment_id",
+    "invoice_id",
+    "amount_cents",
+    "currency"
+  ],
+  "properties": {
+    "event_name": {
+      "const": "billing.payment.recorded"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "org_id": {
+      "type": "string"
+    },
+    "actor_user_id": {
+      "type": "string"
+    },
+    "payment_id": {
+      "type": "string"
+    },
+    "invoice_id": {
+      "type": "string"
+    },
+    "amount_cents": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "currency": {
+      "type": "string"
+    },
+    "contact_id": {
+      "type": ["string", "null"]
+    },
+    "transaction_id": {
+      "type": ["string", "null"]
+    }
+  },
+  "additionalProperties": true
+}

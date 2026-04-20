@@ -35,3 +35,33 @@ To set up your local server:
 ---
 
 **NOTE:** When copying folders remember to also copy hidden files like .env. This is important because .env files often contain environment variables that are crucial for the application to run correctly.
+
+---
+
+## 4.Docker
+
+The micro-app now supports Docker in both development and production-style modes.
+
+### Development container
+
+This is what the base microservices compose stack uses:
+
+```sh
+cd microservices
+yarn compose:dev
+```
+
+Frontend behavior in dev mode:
+- source is bind-mounted into the container
+- `next dev` runs on port `3034`
+- dependencies live in a Docker volume at `/app/node_modules`
+
+### Production-style container
+
+The frontend now has explicit Dockerfiles for each mode:
+- `Dockerfile.dev`: local Docker development with `next dev`
+- `Dockerfile.prod`: production build with `next build` + `next start`
+
+Used by:
+- `yarn compose:web-test`
+- `yarn compose:prod`

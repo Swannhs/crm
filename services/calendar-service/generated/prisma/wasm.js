@@ -220,7 +220,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/repo/services/calendar-service/generated/prisma",
+      "value": "/workspace/services/calendar-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -234,7 +234,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/repo/services/calendar-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/calendar-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -247,6 +247,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {

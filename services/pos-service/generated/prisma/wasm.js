@@ -203,7 +203,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/repo/services/pos-service/generated/prisma",
+      "value": "/workspace/services/pos-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -217,7 +217,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/repo/services/pos-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/pos-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

@@ -5,6 +5,7 @@ import {
   WorkflowWorkspaceController,
   WorkflowActionController 
 } from "./controllers/index.js";
+import { startBillingPaymentRecordedConsumer } from "./kafka/billing.consumer.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ serviceName: "automation-service", jsonLimit: "1mb" });
@@ -64,3 +65,7 @@ app.get("/health", (_req, res) => res.json({ status: "ok", service: "automation-
 
 const port = Number(process.env.PORT || 7110);
 app.listen(port, "0.0.0.0", () => logger.info({ port }, "automation-service listening"));
+
+startBillingPaymentRecordedConsumer(logger).catch((err) => {
+  logger.error({ err }, "Failed to start Kafka billing payment consumer");
+});

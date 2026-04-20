@@ -9,14 +9,14 @@
     "build": "tsc",
     "start": "node dist/index.js"
   },
-  "devDependencies": {},
+  "dependencies": {
+    "@mymanager/node-service-kit": "0.1.0"
+  },
+  "devDependencies": {
     "tsx": "^4.19.0",
     "typescript": "^5.0.0",
     "ts-node": "^10.9.0",
     "@types/node": "^20.0.0",
-    "@types/express": "^5.0.0",
-
-  "dependencies": {
-    "@mymanager/node-service-kit": "0.1.0"
+    "@types/express": "^5.0.0"
   }
 }

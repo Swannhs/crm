@@ -1,6 +1,6 @@
-import { publishJson } from '@mymanager/node-service-kit';
+import { publishKafkaJson } from '@mymanager/node-service-kit';
 import type { Invoice, Payment } from '../generated/prisma/index.js';
-import { getChannel } from '../amqp.js';
+import { getProducer } from '../kafka.js';
 import { NotFoundError, ValidationError } from '../errors.js';
 import { InvoiceRepository } from '../repositories/invoice.repository.js';
 import { PaymentRepository } from '../repositories/payment.repository.js';
@@ -136,17 +136,23 @@ export class BillingService {
       });
 
       try {
-        const url = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-        const channel = await getChannel({ url, logger });
-        publishJson(channel, 'domain-events', 'billing.payment.recorded', {
-          paymentId: payment.id,
-          invoiceId,
-          orgId,
-          userId,
+        const brokers = process.env.KAFKA_BROKERS || 'localhost:9092';
+        const producer = await getProducer({ brokers, logger });
+        await publishKafkaJson(producer, 'billing.payment.recorded', {
+          event_name: 'billing.payment.recorded',
+          occurred_at: new Date().toISOString(),
+          payment_id: payment.id,
+          invoice_id: invoiceId,
+          org_id: orgId,
+          actor_user_id: userId,
           amountCents: amount,
-        });
+          amount_cents: amount,
+          currency: optionalString(data.currency) ?? invoice.currency,
+          contact_id: invoice.contactId,
+          transaction_id: optionalString(data.transaction_id),
+        }, payment.id);
       } catch (err) {
-        logger?.error?.({ err, invoiceId, orgId }, 'Failed to publish billing payment event');
+        logger?.error?.({ err, invoiceId, orgId }, 'Failed to publish Kafka billing payment event');
       }
 
       return payment;

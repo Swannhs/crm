@@ -6,9 +6,6 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-change-me}
     restart: unless-stopped
 
-  rabbitmq:
-    restart: unless-stopped
-
   redis:
     restart: unless-stopped
 
@@ -16,6 +13,10 @@ services:
     restart: unless-stopped
 
   monolith:
+    image: node:16-alpine
+    working_dir: /app
+    volumes:
+      - ../../../server:/app
     environment:
       NODE_ENV: production
       PORT: ${MONOLITH_PORT:-5000}
@@ -23,150 +24,251 @@ services:
     restart: unless-stopped
 
   crm-service:
+    build:
+      context: ../../services/crm-service
+      dockerfile: docker/Dockerfile.prod
     restart: unless-stopped
 
   organization-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: organization-service
+        SERVICE_PORT: 7010
     environment:
       NODE_ENV: production
       PORT: ${ORGANIZATION_SERVICE_PORT:-7010}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   billing-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: billing-service
+        SERVICE_PORT: 7020
     environment:
       NODE_ENV: production
       PORT: ${BILLING_SERVICE_PORT:-7020}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   booking-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: booking-service
+        SERVICE_PORT: 7040
     environment:
       NODE_ENV: production
       PORT: ${BOOKING_SERVICE_PORT:-7040}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   api-router-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: api-router-service
+        SERVICE_PORT: 7001
     environment:
       NODE_ENV: production
       PORT: ${API_ROUTER_SERVICE_PORT:-7001}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec tsx src/index.ts"
     restart: unless-stopped
 
   community-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: community-service
+        SERVICE_PORT: 7050
     environment:
       NODE_ENV: production
       PORT: ${COMMUNITY_SERVICE_PORT:-7050}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   commerce-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: commerce-service
+        SERVICE_PORT: 7060
     environment:
       NODE_ENV: production
       PORT: ${COMMERCE_SERVICE_PORT:-7060}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   documents-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: documents-service
+        SERVICE_PORT: 7080
     environment:
       NODE_ENV: production
       PORT: ${DOCUMENTS_SERVICE_PORT:-7080}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   payments-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: payments-service
+        SERVICE_PORT: 7090
     environment:
       NODE_ENV: production
       PORT: ${PAYMENTS_SERVICE_PORT:-7090}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   notification-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: notification-service
+        SERVICE_PORT: 8000
     environment:
       NODE_ENV: production
       PORT: ${NOTIFICATION_SERVICE_PORT:-8000}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   employees-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: employees-service
+        SERVICE_PORT: 7070
     environment:
       NODE_ENV: production
       PORT: ${EMPLOYEES_SERVICE_PORT:-7070}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   realtime-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: realtime-service
+        SERVICE_PORT: 7030
     environment:
       NODE_ENV: production
       PORT: ${REALTIME_SERVICE_PORT:-7030}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   marketing-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: marketing-service
+        SERVICE_PORT: 8030
     environment:
       NODE_ENV: production
       PORT: ${MARKETING_SERVICE_PORT:-8030}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   projects-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: projects-service
+        SERVICE_PORT: 8040
     environment:
       NODE_ENV: production
       PORT: ${PROJECTS_SERVICE_PORT:-8040}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   calendar-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: calendar-service
+        SERVICE_PORT: 8050
     environment:
       NODE_ENV: production
       PORT: ${CALENDAR_SERVICE_PORT:-8050}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   pos-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: pos-service
+        SERVICE_PORT: 7100
     environment:
       NODE_ENV: production
       PORT: ${POS_SERVICE_PORT:-7100}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   automation-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: automation-service
+        SERVICE_PORT: 7110
     environment:
       NODE_ENV: production
       PORT: ${AUTOMATION_SERVICE_PORT:-7110}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   device-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: device-service
+        SERVICE_PORT: 7120
     environment:
       NODE_ENV: production
       PORT: ${DEVICE_SERVICE_PORT:-7120}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   file-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: file-service
+        SERVICE_PORT: 7130
     environment:
       NODE_ENV: production
       PORT: ${FILE_SERVICE_PORT:-7130}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   integrations-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: integrations-service
+        SERVICE_PORT: 7140
     environment:
       NODE_ENV: production
       PORT: ${INTEGRATIONS_SERVICE_PORT:-7140}
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn exec prisma generate && corepack yarn exec prisma db push --skip-generate && corepack yarn build && corepack yarn start"
     restart: unless-stopped
 
   krakend:
     restart: unless-stopped
 
   frontend:
+    build:
+      context: ../../frontend/micro-app
+      dockerfile: docker/Dockerfile.prod
+    volumes: []
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_APP_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8081/api}
       PORT: ${FRONTEND_PORT:-3034}
       WATCHPACK_POLLING: "false"
-    command: sh -c "corepack yarn install --frozen-lockfile && corepack yarn build && corepack yarn start"
     restart: unless-stopped

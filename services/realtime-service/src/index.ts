@@ -1,6 +1,6 @@
 import http from "node:http";
 import { Server as SocketIOServer } from "socket.io";
-import { createServiceApp, connectAmqpWithRetry, ensureTopicExchange } from "@mymanager/node-service-kit";
+import { createServiceApp, startKafkaConsumer } from "@mymanager/node-service-kit";
 import { 
   LiveChatChannelController, 
   LiveChatMessageController, 
@@ -9,8 +9,6 @@ import {
   LiveChatStatisticsController
 } from "./controllers/index.js";
 import { identityMiddleware } from "./middleware/identity.js";
-
-const url = process.env.RABBITMQ_URL || "amqp://localhost:5672";
 
 const { app, logger } = createServiceApp({ serviceName: "realtime-service", jsonLimit: "10mb" });
 const auth = identityMiddleware;
@@ -74,26 +72,17 @@ io.on("connection", (socket) => {
 });
 
 async function startConsumer() {
-  const conn = await connectAmqpWithRetry(url, logger);
-  const ch = await conn.createChannel();
-  await ensureTopicExchange(ch, "domain-events");
-  const { queue } = await ch.assertQueue("realtime-service", { durable: true });
-  await ch.bindQueue(queue, "domain-events", "#");
-
-  await ch.consume(queue, (msg: any) => {
-    if (!msg) return;
-    const routingKey = msg.fields.routingKey;
-    let data: any = null;
-    try {
-      data = JSON.parse(msg.content.toString("utf8"));
-    } catch {
-      data = { raw: msg.content.toString("utf8") };
-    }
-    io.emit("domain-event", { routingKey, data });
-    ch.ack(msg);
+  const brokers = process.env.KAFKA_BROKERS || "localhost:9092";
+  await startKafkaConsumer({
+    clientId: "realtime-service",
+    brokers,
+    groupId: "realtime-service.domain-events",
+    topics: ["billing.payment.recorded"],
+    logger,
+    onMessage: async ({ topic, payload }) => {
+      io.emit("domain-event", { routingKey: topic, data: payload });
+    },
   });
-
-  logger.info({ queue }, "realtime-service consuming domain-events");
 }
 
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "realtime-service" }));

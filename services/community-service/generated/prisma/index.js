@@ -298,7 +298,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/repo/services/community-service/generated/prisma",
+      "value": "/workspace/services/community-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -312,7 +312,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/repo/services/community-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/community-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

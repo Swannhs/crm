@@ -231,7 +231,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/repo/services/device-service/generated/prisma",
+      "value": "/workspace/services/device-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -253,7 +253,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/repo/services/device-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/device-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -266,6 +266,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {

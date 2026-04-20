@@ -1,0 +1,15 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3034
+
+COPY package.json ./
+
+RUN corepack enable
+
+EXPOSE 3034
+
+CMD ["sh", "-c", "corepack yarn install && corepack yarn dev"]

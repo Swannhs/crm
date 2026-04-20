@@ -173,7 +173,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/repo/services/organization-service/generated-local/prisma",
+      "value": "/workspace/services/organization-service/generated-local/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -187,7 +187,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/repo/services/organization-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/organization-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -200,6 +200,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
