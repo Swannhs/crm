@@ -3,6 +3,26 @@ import axios from 'src/utils/axios';
 // ----------------------------------------------------------------------
 
 export const posService = {
+  getOrderById: async (id: string) => {
+    const response = await axios.get(`/api/product-new/order/byId/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  approveJoinCheckRequest: async (data: { orderId: string; requesterPhone: string }) => {
+    const response = await axios.post('/api/product-new/order/join-check-approve', data);
+    return response.data?.data ?? response.data;
+  },
+
+  getDeliveryStatus: async (id: string) => {
+    const response = await axios.get(`/api/product-new/order/deliver/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  getOrderShipping: async (orderId: string) => {
+    const response = await axios.get(`/api/product-new/order/${orderId}/shipping`);
+    return response.data?.data ?? response.data;
+  },
+
   getSettings: async (shopId: string) => {
     const response = await axios.get('/api/pos/settings', { params: { shopId } });
     return response.data?.data ?? response.data;

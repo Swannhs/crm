@@ -44,6 +44,7 @@ export class DealRepository {
   async findByOrg(orgId: string, filters?: {
     stage?: string;
     ownerId?: string;
+    contactId?: string;
     search?: string;
     limit?: number;
     offset?: number;
@@ -52,6 +53,7 @@ export class DealRepository {
     
     if (filters?.stage) where.stage = filters.stage;
     if (filters?.ownerId) where.ownerId = filters.ownerId;
+    if (filters?.contactId) where.contactId = filters.contactId;
     if (filters?.search) {
       where.OR = [
         { name: { contains: filters.search, mode: 'insensitive' } },

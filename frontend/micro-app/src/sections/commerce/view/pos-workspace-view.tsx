@@ -27,6 +27,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { posService } from 'src/services/pos-service';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
+import { PosPublicFlowView } from 'src/sections/commerce/view/pos-public-flow-view';
 import { Form, RHFTextField } from 'src/components/hook-form';
 import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
@@ -889,6 +890,19 @@ export function PosWorkspaceView({
         </Box>
         {nonTableContent}
       </DashboardContent>
+    );
+  }
+
+  if (mode === 'table-join-approve' || mode === 'table-register' || mode === 'table-side' || mode === 'deliver') {
+    return (
+      <PosPublicFlowView
+        mode={mode}
+        orderId={orderId}
+        roomId={roomId}
+        table={table}
+        type={type}
+        deliveryId={deliveryId}
+      />
     );
   }
 

@@ -222,6 +222,17 @@ services:
       - ../../:/workspace
       - workspace_node_modules:/workspace/node_modules
 
+  scoring-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.dev
+      args:
+        SERVICE_NAME: scoring-service
+        SERVICE_PORT: 7160
+    volumes:
+      - ../../:/workspace
+      - workspace_node_modules:/workspace/node_modules
+
   frontend:
     build:
       context: ../../frontend/micro-app

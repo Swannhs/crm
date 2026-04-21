@@ -573,6 +573,32 @@ services:
     ports:
       - "7140:7140"
 
+  scoring-db:
+    image: postgres:17-alpine
+    container_name: ms-scoring-db
+    environment:
+      POSTGRES_DB: scoring
+      POSTGRES_USER: scoring
+      POSTGRES_PASSWORD: scoring
+    ports:
+      - "5453:5432"
+    volumes:
+      - scoring_db_data:/var/lib/postgresql/data
+
+  scoring-service:
+    container_name: ms-scoring-service
+    environment:
+      PORT: 7160
+      DATABASE_URL: postgres://scoring:scoring@scoring-db:5432/scoring
+      CORS_ORIGINS: http://localhost:3034,http://localhost:3000
+      CRM_SERVICE_URL: http://crm-service:8010
+      DEAL_SERVICE_URL: http://deal-service:7150
+    depends_on:
+      - scoring-db
+      - crm-service
+    ports:
+      - "7160:7160"
+
   nginx:
     image: nginx:alpine
     container_name: ms-nginx
@@ -617,4 +643,5 @@ volumes:
   file_db_data:
   integrations_db_data:
   realtime_db_data:
+  scoring_db_data:
   mongo_data:

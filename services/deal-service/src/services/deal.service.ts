@@ -9,6 +9,7 @@ export class DealService {
   async getDeals(orgId: string, filters?: {
     stage?: string;
     ownerId?: string;
+    contactId?: string;
     search?: string;
     limit?: number;
     offset?: number;

@@ -10,12 +10,13 @@ router.use(requireIdentityContext());
 // GET /deals - List all deals with optional filters
 router.get('/', async (req, res, next) => {
   try {
-    const { stage, ownerId, search, limit, offset } = req.query;
+    const { stage, ownerId, contactId, search, limit, offset } = req.query;
     const orgId = req.orgId!;
 
     const result = await dealService.getDeals(orgId, {
       stage: stage as string,
       ownerId: ownerId as string,
+      contactId: contactId as string,
       search: search as string,
       limit: limit ? parseInt(limit as string) : undefined,
       offset: offset ? parseInt(offset as string) : undefined

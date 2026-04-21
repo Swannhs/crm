@@ -257,6 +257,18 @@ services:
       PORT: ${INTEGRATIONS_SERVICE_PORT:-7140}
     restart: unless-stopped
 
+  scoring-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: scoring-service
+        SERVICE_PORT: 7160
+    environment:
+      NODE_ENV: production
+      PORT: ${SCORING_SERVICE_PORT:-7160}
+    restart: unless-stopped
+
   krakend:
     restart: unless-stopped
 

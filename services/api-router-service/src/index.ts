@@ -169,6 +169,75 @@ async function handleApiCompat(req: Request, res: Response) {
       return notImplemented(res, { module, method: req.method, path: rest, hint: "booking-types (scaffold)" });
     }
 
+    if (module === "scoring") {
+      if (req.method === "GET" && (rest === "/models" || rest === "/hot-leads")) {
+        const query = new URLSearchParams(req.query as Record<string, string>).toString();
+        const targetPath = rest === "/models"
+          ? "/api/v1/scoring/models"
+          : `/api/v1/scoring/leads/hot${query ? `?${query}` : ""}`;
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+      }
+
+      if (req.method === "POST" && rest === "/models") {
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: "/api/v1/scoring/models" });
+      }
+
+      if (req.method === "POST" && rest === "/calculate") {
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: "/api/v1/scoring/calculate" });
+      }
+
+      if (req.method === "POST" && rest === "/sync") {
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: "/api/v1/scoring/sync" });
+      }
+
+      if (req.method === "POST" && rest.startsWith("/sync/contacts/")) {
+        const contactId = rest.split("/").pop();
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: `/api/v1/scoring/sync/contacts/${contactId}` });
+      }
+
+      if (req.method === "GET" && rest.startsWith("/contacts/") && rest.endsWith("/score")) {
+        const contactId = rest.split("/")[2];
+        const query = new URLSearchParams(req.query as Record<string, string>).toString();
+        const targetPath = query
+          ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
+          : `/api/v1/scoring/contacts/${contactId}/score`;
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: GET /models, POST /models, POST /calculate, POST /sync, POST /sync/contacts/:contactId, GET /contacts/:contactId/score, GET /hot-leads"
+      });
+    }
+
+    if (module === "lead") {
+      if (req.method === "GET" && rest === "/hot") {
+        const query = new URLSearchParams(req.query as Record<string, string>).toString();
+        const targetPath = query
+          ? `/api/v1/scoring/leads/hot?${query}`
+          : "/api/v1/scoring/leads/hot";
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+      }
+
+      if (req.method === "GET" && rest.startsWith("/score/")) {
+        const contactId = rest.split("/").pop();
+        const query = new URLSearchParams(req.query as Record<string, string>).toString();
+        const targetPath = query
+          ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
+          : `/api/v1/scoring/contacts/${contactId}/score`;
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: GET /hot, GET /score/:contactId"
+      });
+    }
+
     // Fallback: proxy to legacy monolith
     const path = `/api/${module}${rest}`;
     logger.info({ module, path }, "Proxying unmigrated route to legacy monolith");
