@@ -2,13 +2,23 @@ import { z as zod } from 'zod';
 
 export const PRODUCT_FORM_SCHEMA = zod.object({
   name: zod.string().min(1, 'Product name is required'),
+  sku: zod.string().optional(),
+  barcode: zod.string().optional(),
+  categoryId: zod.string().optional(),
+  categoryName: zod.string().optional(),
   description: zod.string().optional(),
   priceCents: zod.coerce.number().min(0, 'Price must be zero or greater'),
+  compareAtPriceCents: zod.coerce.number().min(0).default(0),
+  costCents: zod.coerce.number().min(0).default(0),
+  lowStockThreshold: zod.coerce.number().min(0).default(5),
+  tagsText: zod.string().optional(),
+  photos: zod.array(zod.string()).default([]),
   status: zod.enum(['draft', 'active', 'archived']).default('active'),
   variants: zod
     .array(
       zod.object({
         name: zod.string().min(1, 'Variant name is required'),
+        sku: zod.string().optional(),
         priceCents: zod.coerce.number().min(0),
         stock: zod.coerce.number().min(0),
       })
@@ -34,12 +44,23 @@ export const PRODUCT_FORM_SCHEMA = zod.object({
 export const CATEGORY_FORM_SCHEMA = zod.object({
   name: zod.string().min(1, 'Category name is required'),
   description: zod.string().optional(),
+  isActive: zod
+    .union([zod.boolean(), zod.string()])
+    .transform((value) => value === false || value === 'false' ? false : true)
+    .default(true),
 });
 
 export const COUPON_FORM_SCHEMA = zod.object({
   code: zod.string().min(1, 'Coupon code is required'),
   type: zod.enum(['percent', 'fixed']),
   value: zod.coerce.number().min(0),
+  minOrderCents: zod.coerce.number().min(0).default(0),
+  maxUsage: zod.union([zod.coerce.number().min(1), zod.literal(''), zod.undefined()]).optional(),
+  expiresAt: zod.string().optional(),
+  isActive: zod
+    .union([zod.boolean(), zod.string()])
+    .transform((value) => value === false || value === 'false' ? false : true)
+    .default(true),
 });
 
 export const SETTINGS_FORM_SCHEMA = zod.object({
@@ -122,8 +143,30 @@ export type CommerceDashboardModule =
   | 'categories'
   | 'coupons'
   | 'orders'
+  | 'customers'
   | 'tables'
   | 'settings';
+
+export const COMMERCE_DASHBOARD_MODULES: CommerceDashboardModule[] = [
+  'dashboard',
+  'products',
+  'categories',
+  'coupons',
+  'orders',
+  'customers',
+  'tables',
+  'settings',
+];
+
+export type CustomerSummary = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  orderCount: number;
+  totalSpentCents: number;
+  lastOrderAt: string;
+};
 
 export type CommerceWorkspaceProps = {
   mode?: CommerceWorkspaceMode;
@@ -133,9 +176,27 @@ export type CommerceWorkspaceProps = {
   productId?: string;
   cartId?: string;
   orderId?: string;
-  incomeId?: string;
   receiptId?: string;
+  section?: string;
   type?: string;
+};
+
+export const DEFAULT_PRODUCT_FORM_VALUES: ProductFormValues = {
+  name: '',
+  sku: '',
+  barcode: '',
+  categoryId: '',
+  categoryName: '',
+  description: '',
+  priceCents: 0,
+  compareAtPriceCents: 0,
+  costCents: 0,
+  lowStockThreshold: 5,
+  tagsText: '',
+  photos: [],
+  status: 'active',
+  variants: [],
+  modifierGroups: [],
 };
 
 export const DEFAULT_SETTINGS: SettingsFormValues = {

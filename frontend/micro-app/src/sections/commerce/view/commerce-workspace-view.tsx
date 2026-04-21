@@ -19,14 +19,22 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { useAuthContext } from 'src/auth/hooks';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { showToast } from 'src/components/toast';
-import { commerceService, type ICommerceProduct } from 'src/services/commerce-service';
+import {
+  commerceService,
+  type ICommerceCategory,
+  type ICommerceCoupon,
+  type ICommerceImageAsset,
+  type ICommerceProduct,
+} from 'src/services/commerce-service';
 import { publicCommerceService } from 'src/services/public-commerce-service';
 
 import {
+  COMMERCE_DASHBOARD_MODULES,
   CHECKOUT_FORM_SCHEMA,
   CATEGORY_FORM_SCHEMA,
   COUPON_FORM_SCHEMA,
   DEFAULT_SETTINGS,
+  DEFAULT_PRODUCT_FORM_VALUES,
   PRODUCT_FORM_SCHEMA,
   SETTINGS_FORM_SCHEMA,
   resolveInitialModule,
@@ -60,8 +68,11 @@ import {
   CommerceCheckoutPanel,
   CommerceCouponDialog,
   CommerceCouponsTable,
+  CommerceCustomersTable,
   CommerceDashboardModules,
   CommerceOrderCard,
+  CommerceProductDetailDialog,
+  CommerceOrderDetailDialog,
   CommerceOrdersTable,
   CommerceProductDetail,
   CommerceProductFormCard,
@@ -82,6 +93,7 @@ export function CommerceWorkspaceView({
   cartId,
   orderId,
   receiptId,
+  section,
   type,
 }: CommerceWorkspaceProps) {
   const router = useRouter();
@@ -105,43 +117,56 @@ export function CommerceWorkspaceView({
     (user as any)?.org_id || (user as any)?.orgId || (user as any)?.organizationId || '';
   const resolvedShopKey = shopId || shopPath || resolvedOrgId || 'shop';
   const checkoutRouteKey = shopPath || shopId || resolvedShopKey;
+  const currentModule: CommerceDashboardModule =
+    section && COMMERCE_DASHBOARD_MODULES.includes(section as CommerceDashboardModule)
+      ? (section as CommerceDashboardModule)
+      : resolveInitialModule(mode);
 
   const [activeTab, setActiveTab] = useState<'general' | 'variants' | 'modifiers'>('general');
-  const [currentModule, setCurrentModule] = useState<CommerceDashboardModule>(resolveInitialModule(mode));
   const [search, setSearch] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('all');
+  const [categorySearch, setCategorySearch] = useState('');
+  const [couponSearch, setCouponSearch] = useState('');
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [selectedVariantId, setSelectedVariantId] = useState('');
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingCouponId, setEditingCouponId] = useState<string | null>(null);
   const [detailQuantity, setDetailQuantity] = useState(1);
   const [appliedCouponCode, setAppliedCouponCode] = useState('');
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
   const [localOrders, setLocalOrders] = useState<LocalOrder[]>([]);
   const [tableLayouts, setTableLayouts] = useState<Array<{ id: string; name: string; seats: number; status: 'available' | 'occupied' | 'reserved' }>>([]);
 
+  const productQueryKey = ['commerce-products', mode, resolvedShopKey];
+  const categoryQueryKey = ['commerce-categories', resolvedShopKey];
+  const couponQueryKey = ['commerce-coupons', resolvedShopKey];
+
   const categoryDialog = useBoolean();
   const couponDialog = useBoolean();
   const tableDialog = useBoolean();
+  const orderDialog = useBoolean();
+  const productDialog = useBoolean();
+
+  const handleModuleChange = (newModule: CommerceDashboardModule) => {
+    router.push(paths.dashboard.shopSection(newModule));
+  };
 
   const productMethods = useForm<ProductFormValues>({
     resolver: zodResolver(PRODUCT_FORM_SCHEMA),
-    defaultValues: {
-      name: '',
-      description: '',
-      priceCents: 0,
-      status: 'active',
-      variants: [],
-      modifierGroups: [],
-    },
+    defaultValues: DEFAULT_PRODUCT_FORM_VALUES,
   });
 
   const categoryMethods = useForm<CategoryFormValues>({
     resolver: zodResolver(CATEGORY_FORM_SCHEMA),
-    defaultValues: { name: '', description: '' },
+    defaultValues: { name: '', description: '', isActive: true },
   });
 
   const couponMethods = useForm<CouponFormValues>({
     resolver: zodResolver(COUPON_FORM_SCHEMA),
-    defaultValues: { code: '', type: 'percent', value: 0 },
+    defaultValues: { code: '', type: 'percent', value: 0, minOrderCents: 0, maxUsage: '', expiresAt: '', isActive: true },
   });
 
   const settingsMethods = useForm<SettingsFormValues>({
@@ -180,10 +205,6 @@ export function CommerceWorkspaceView({
   });
 
   useEffect(() => {
-    setCurrentModule(resolveInitialModule(mode));
-  }, [mode]);
-
-  useEffect(() => {
     setCartItems(readStorage<CartLine[]>(cartStorageKey(resolvedShopKey), []));
     setLocalOrders(readStorage<LocalOrder[]>(orderStorageKey(resolvedShopKey), []));
     settingsMethods.reset(readStorage<SettingsFormValues>(settingsStorageKey(resolvedShopKey), DEFAULT_SETTINGS));
@@ -217,68 +238,154 @@ export function CommerceWorkspaceView({
   });
 
   const categoriesQuery = useQuery({
-    queryKey: ['commerce-categories', resolvedOrgId],
+    queryKey: categoryQueryKey,
     enabled: authenticated && !isStorefrontMode,
     queryFn: () => commerceService.getCategories(),
   });
 
   const couponsQuery = useQuery({
-    queryKey: ['commerce-coupons', resolvedOrgId],
+    queryKey: couponQueryKey,
     enabled: authenticated && !isStorefrontMode,
     queryFn: () => commerceService.getCoupons(),
   });
 
   const createProductMutation = useMutation({
-    mutationFn: (values: ProductFormValues) =>
-      commerceService.createProduct({
-        name: values.name,
-        description: values.description,
-        price_cents: values.priceCents,
-        status: values.status,
-        variants: values.variants,
-        modifierGroups: values.modifierGroups,
-      }),
-    onSuccess: async () => {
-      productMethods.reset({
-        name: '',
-        description: '',
-        priceCents: 0,
-        status: 'active',
-        variants: [],
-        modifierGroups: [],
-      });
+    mutationFn: (values: ProductFormValues) => commerceService.createProduct(resolvedShopKey, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      productMethods.reset(DEFAULT_PRODUCT_FORM_VALUES);
+      setEditingId(null);
+      productDialog.onFalse();
       showToast({ message: 'Product created successfully.', severity: 'success' });
-      await queryClient.invalidateQueries({ queryKey: ['commerce-products'] });
+    },
+    onError: (err) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
+  });
+
+  const updateProductMutation = useMutation({
+    mutationFn: (values: ProductFormValues) => commerceService.updateProduct(resolvedShopKey, editingId!, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      setEditingId(null);
+      productMethods.reset(DEFAULT_PRODUCT_FORM_VALUES);
+      productDialog.onFalse();
+      showToast({ message: 'Product updated.', severity: 'success' });
+    },
+  });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: (id: string) => commerceService.deleteProduct(resolvedShopKey, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      showToast({ message: 'Product deleted.', severity: 'success' });
     },
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: (values: CategoryFormValues) => commerceService.createCategory(values),
-    onSuccess: async () => {
-      categoryMethods.reset({ name: '', description: '' });
+    mutationFn: (values: CategoryFormValues) => commerceService.createCategory(resolvedShopKey, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoryQueryKey });
       categoryDialog.onFalse();
-      showToast({ message: 'Category created successfully.', severity: 'success' });
-      await queryClient.invalidateQueries({ queryKey: ['commerce-categories'] });
+      categoryMethods.reset({ name: '', description: '', isActive: true });
+      showToast({ message: 'Category added.', severity: 'success' });
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: (values: CategoryFormValues) =>
+      commerceService.updateCategory(resolvedShopKey, editingCategoryId!, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoryQueryKey });
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      setEditingCategoryId(null);
+      categoryDialog.onFalse();
+      categoryMethods.reset({ name: '', description: '', isActive: true });
+      showToast({ message: 'Category updated.', severity: 'success' });
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: string) => commerceService.deleteCategory(resolvedShopKey, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoryQueryKey });
+      showToast({ message: 'Category removed.', severity: 'success' });
     },
   });
 
   const createCouponMutation = useMutation({
-    mutationFn: (values: CouponFormValues) => commerceService.createCoupon(values),
-    onSuccess: async () => {
-      couponMethods.reset({ code: '', type: 'percent', value: 0 });
+    mutationFn: (values: CouponFormValues) => commerceService.createCoupon(resolvedShopKey, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: couponQueryKey });
+      setEditingCouponId(null);
       couponDialog.onFalse();
-      showToast({ message: 'Coupon created successfully.', severity: 'success' });
-      await queryClient.invalidateQueries({ queryKey: ['commerce-coupons'] });
+      couponMethods.reset({ code: '', type: 'percent', value: 0, minOrderCents: 0, maxUsage: '', expiresAt: '', isActive: true });
+      showToast({ message: 'Coupon created.', severity: 'success' });
+    },
+  });
+
+  const updateCouponMutation = useMutation({
+    mutationFn: (values: CouponFormValues) => commerceService.updateCoupon(resolvedShopKey, editingCouponId!, values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: couponQueryKey });
+      setEditingCouponId(null);
+      couponDialog.onFalse();
+      couponMethods.reset({ code: '', type: 'percent', value: 0, minOrderCents: 0, maxUsage: '', expiresAt: '', isActive: true });
+      showToast({ message: 'Coupon updated.', severity: 'success' });
+    },
+  });
+
+  const deleteCouponMutation = useMutation({
+    mutationFn: (id: string) => commerceService.deleteCoupon(resolvedShopKey, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: couponQueryKey });
+      showToast({ message: 'Coupon deleted.', severity: 'success' });
     },
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: (payload: any) => commerceService.createOrder(payload),
+    mutationFn: (payload: any) => commerceService.createOrder(resolvedShopKey, payload),
+  });
+
+  const uploadProductImageMutation = useMutation({
+    mutationFn: async (files: File[]) => Promise.all(files.map((file) => commerceService.uploadProductImage(file))),
+    onSuccess: (uploadedImages: ICommerceImageAsset[]) => {
+      const currentImages = productMethods.getValues('photos') || [];
+      const nextUrls = [...new Set([...currentImages, ...uploadedImages.map((item) => item.url).filter(Boolean)])];
+      productMethods.setValue('photos', nextUrls, { shouldDirty: true, shouldTouch: true });
+      showToast({
+        message:
+          uploadedImages.length === 1
+            ? 'Product image uploaded.'
+            : `${uploadedImages.length} product images uploaded.`,
+        severity: 'success',
+      });
+    },
   });
 
   const products = useMemo<ICommerceProduct[]>(
     () => (Array.isArray(productsQuery.data) ? productsQuery.data : []),
     [productsQuery.data]
+  );
+
+  const categories = useMemo<ICommerceCategory[]>(
+    () => (Array.isArray(categoriesQuery.data) ? categoriesQuery.data : []),
+    [categoriesQuery.data]
+  );
+
+  const catalogCategories = useMemo(
+    () =>
+      categories.map((category) => {
+        const matchingProducts = products.filter((product) => {
+          if (product.categoryId) return product.categoryId === category.id;
+          return product.categoryName?.toLowerCase() === category.name.toLowerCase();
+        });
+
+        return {
+          ...category,
+          productCount: matchingProducts.length,
+          activeProductCount: matchingProducts.filter((product) => product.status === 'active').length,
+        };
+      }),
+    [categories, products]
   );
 
   const orders = useMemo<LocalOrder[]>(
@@ -293,14 +400,56 @@ export function CommerceWorkspaceView({
   }, [localOrders, orders]);
 
   const filteredProducts = useMemo(() => {
-    if (!search.trim()) return products;
+    const query = search.trim().toLowerCase();
 
-    const query = search.toLowerCase();
     return products.filter((product) => {
       const description = product.description?.toLowerCase() || '';
-      return product.name.toLowerCase().includes(query) || description.includes(query);
+      const sku = product.sku?.toLowerCase() || '';
+      const categoryName = product.categoryName?.toLowerCase() || '';
+      const tags = product.tags?.join(' ').toLowerCase() || '';
+      const matchesQuery =
+        !query ||
+        product.name.toLowerCase().includes(query) ||
+        description.includes(query) ||
+        sku.includes(query) ||
+        categoryName.includes(query) ||
+        tags.includes(query);
+
+      const matchesCategory =
+        productCategoryFilter === 'all' ||
+        product.categoryId === productCategoryFilter ||
+        (!product.categoryId &&
+          catalogCategories.find((category) => category.id === productCategoryFilter)?.name.toLowerCase() ===
+            categoryName);
+
+      return matchesQuery && matchesCategory;
     });
-  }, [products, search]);
+  }, [catalogCategories, productCategoryFilter, products, search]);
+
+  const filteredCategories = useMemo(() => {
+    const query = categorySearch.trim().toLowerCase();
+    if (!query) return catalogCategories;
+
+    return catalogCategories.filter((category) => {
+      const description = category.description?.toLowerCase() || '';
+      return category.name.toLowerCase().includes(query) || description.includes(query);
+    });
+  }, [catalogCategories, categorySearch]);
+
+  const filteredCoupons = useMemo(() => {
+    const coupons = Array.isArray(couponsQuery.data) ? (couponsQuery.data as ICommerceCoupon[]) : [];
+    const query = couponSearch.trim().toLowerCase();
+    if (!query) return coupons;
+
+    return coupons.filter((coupon) => {
+      const status = coupon.isActive ? 'active' : 'inactive';
+      return (
+        coupon.code.toLowerCase().includes(query) ||
+        coupon.type.toLowerCase().includes(query) ||
+        status.includes(query)
+      );
+    });
+  }, [couponSearch, couponsQuery.data]);
 
   const selectedProduct = useMemo(
     () =>
@@ -324,13 +473,45 @@ export function CommerceWorkspaceView({
   );
 
   const activeCoupon = useMemo(() => {
-    const coupons = Array.isArray(couponsQuery.data) ? couponsQuery.data : [];
-    return coupons.find(
-      (coupon: any) =>
-        coupon.code?.toLowerCase() === appliedCouponCode.trim().toLowerCase() &&
-        coupon.isActive !== false
-    );
-  }, [appliedCouponCode, couponsQuery.data]);
+    const coupons = Array.isArray(couponsQuery.data) ? (couponsQuery.data as ICommerceCoupon[]) : [];
+    const coupon = coupons.find((item) => item.code?.toLowerCase() === appliedCouponCode.trim().toLowerCase());
+
+    if (!coupon || !coupon.isActive) return null;
+    if (coupon.expiresAt && new Date(coupon.expiresAt).getTime() < Date.now()) return null;
+    if (coupon.minOrderCents > cartSubtotalCents) return null;
+    if (typeof coupon.maxUsage === 'number' && coupon.usedCount >= coupon.maxUsage) return null;
+
+    return coupon;
+  }, [appliedCouponCode, cartSubtotalCents, couponsQuery.data]);
+
+  const couponFeedback = useMemo(() => {
+    if (!appliedCouponCode.trim()) return undefined;
+
+    const coupons = Array.isArray(couponsQuery.data) ? (couponsQuery.data as ICommerceCoupon[]) : [];
+    const coupon = coupons.find((item) => item.code?.toLowerCase() === appliedCouponCode.trim().toLowerCase());
+
+    if (!coupon) return { severity: 'warning' as const, message: 'Coupon not found.' };
+    if (!coupon.isActive) return { severity: 'warning' as const, message: `${coupon.code} is currently inactive.` };
+    if (coupon.expiresAt && new Date(coupon.expiresAt).getTime() < Date.now()) {
+      return { severity: 'warning' as const, message: `${coupon.code} has expired.` };
+    }
+    if (coupon.minOrderCents > cartSubtotalCents) {
+      return {
+        severity: 'info' as const,
+        message: `${coupon.code} requires a minimum order of $${(coupon.minOrderCents / 100).toFixed(2)}.`,
+      };
+    }
+    if (typeof coupon.maxUsage === 'number' && coupon.usedCount >= coupon.maxUsage) {
+      return { severity: 'warning' as const, message: `${coupon.code} has reached its usage limit.` };
+    }
+    return {
+      severity: 'success' as const,
+      message:
+        coupon.type === 'percent'
+          ? `${coupon.value}% discount is active.`
+          : `${coupon.code} applies $${((coupon.value || 0) / 100).toFixed(2)} off.`,
+    };
+  }, [appliedCouponCode, cartSubtotalCents, couponsQuery.data]);
 
   const discountCents = useMemo(() => {
     if (!activeCoupon) return 0;
@@ -357,7 +538,8 @@ export function CommerceWorkspaceView({
       const matchesSearch =
         !orderSearch.trim() ||
         item.id.toLowerCase().includes(orderSearch.toLowerCase()) ||
-        item.items.some((line) => line.productName.toLowerCase().includes(orderSearch.toLowerCase()));
+        item.items.some((line) => line.productName.toLowerCase().includes(orderSearch.toLowerCase())) ||
+        (item.shippingAddress as any)?.customerName?.toLowerCase().includes(orderSearch.toLowerCase());
 
       const matchesStatus =
         orderStatusFilter === 'all' ||
@@ -367,6 +549,60 @@ export function CommerceWorkspaceView({
       return matchesSearch && matchesStatus;
     });
   }, [mergedOrders, orderSearch, orderStatusFilter]);
+
+  const customers = useMemo(() => {
+    const customerMap = new Map<string, any>();
+    
+    mergedOrders.forEach((order) => {
+      const email = (order.shippingAddress as any)?.email;
+      if (!email) return;
+
+      const existing = customerMap.get(email);
+      if (existing) {
+        existing.orderCount += 1;
+        existing.totalSpentCents += order.totalAmountCents;
+        if (order.createdAt > existing.lastOrderAt) {
+          existing.lastOrderAt = order.createdAt;
+        }
+      } else {
+        customerMap.set(email, {
+          id: order.id, // using first order id as surrogate
+          name: (order.shippingAddress as any)?.customerName || 'Anonymous',
+          email,
+          phone: (order.shippingAddress as any)?.phone,
+          orderCount: 1,
+          totalSpentCents: order.totalAmountCents,
+          lastOrderAt: order.createdAt,
+        });
+      }
+    });
+
+    return Array.from(customerMap.values()).sort((a, b) => b.totalSpentCents - a.totalSpentCents);
+  }, [mergedOrders]);
+
+  const topProducts = useMemo(() => {
+    const statsMap = new Map<string, { name: string; quantity: number; revenue: number }>();
+    
+    mergedOrders.forEach((order) => {
+      if (order.status === 'cancelled') return;
+      
+      order.items.forEach((item) => {
+        const existing = statsMap.get(item.productId);
+        if (existing) {
+          existing.quantity += item.quantity;
+          existing.revenue += item.unitPriceCents * item.quantity;
+        } else {
+          statsMap.set(item.productId, {
+            name: item.productName,
+            quantity: item.quantity,
+            revenue: item.unitPriceCents * item.quantity,
+          });
+        }
+      });
+    });
+
+    return Array.from(statsMap.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+  }, [mergedOrders]);
 
   const storefrontCheckoutHref = paths.public.shopCheckout(checkoutRouteKey, cartId || 'active');
   const selectedVariantPriceCents =
@@ -440,6 +676,115 @@ export function CommerceWorkspaceView({
     persistCart(cartItems.map((item) => (item.id === lineId ? { ...item, quantity } : item)));
   };
 
+  const handleProductEdit = (product: ICommerceProduct) => {
+    const matchedCategoryId =
+      product.categoryId ||
+      categories.find((category) => category.name.toLowerCase() === (product.categoryName || '').toLowerCase())?.id ||
+      '';
+
+    setEditingId(product.id);
+    productMethods.reset({
+      name: product.name,
+      sku: product.sku || '',
+      barcode: product.barcode || '',
+      categoryId: matchedCategoryId,
+      categoryName: product.categoryName || '',
+      description: product.description || '',
+      priceCents: getBasePrice(product),
+      compareAtPriceCents: product.compareAtPriceCents || 0,
+      costCents: product.costCents || 0,
+      lowStockThreshold: product.lowStockThreshold || 5,
+      tagsText: product.tags?.join(', ') || '',
+      photos: product.photos || [],
+      status: (product.status as any) || 'active',
+      variants: product.variants?.map(v => ({ name: v.name, sku: v.sku || '', priceCents: v.priceCents, stock: v.stock })) || [],
+      modifierGroups: product.modifierGroups?.map(g => ({
+        name: g.name,
+        minSelected: g.minSelected,
+        maxSelected: g.maxSelected,
+        modifiers: g.modifiers.map(m => ({ name: m.name, priceCents: m.priceCents }))
+      })) || [],
+    });
+    setActiveTab('general');
+    productDialog.onTrue();
+  };
+
+  const openCreateProductDialog = () => {
+    setEditingId(null);
+    productMethods.reset(DEFAULT_PRODUCT_FORM_VALUES);
+    setActiveTab('general');
+    productDialog.onTrue();
+  };
+
+  const closeProductDialog = () => {
+    setEditingId(null);
+    productMethods.reset(DEFAULT_PRODUCT_FORM_VALUES);
+    setActiveTab('general');
+    productDialog.onFalse();
+  };
+
+  const handleCreateCategory = () => {
+    setEditingCategoryId(null);
+    categoryMethods.reset({ name: '', description: '', isActive: true });
+    categoryDialog.onTrue();
+  };
+
+  const handleCreateCoupon = () => {
+    setEditingCouponId(null);
+    couponMethods.reset({ code: '', type: 'percent', value: 0, minOrderCents: 0, maxUsage: '', expiresAt: '', isActive: true });
+    couponDialog.onTrue();
+  };
+
+  const handleCouponEdit = (coupon: ICommerceCoupon) => {
+    setEditingCouponId(coupon.id);
+    couponMethods.reset({
+      code: coupon.code,
+      type: coupon.type,
+      value: coupon.value,
+      minOrderCents: coupon.minOrderCents || 0,
+      maxUsage: coupon.maxUsage ?? '',
+      expiresAt: coupon.expiresAt ? new Date(coupon.expiresAt).toISOString().slice(0, 16) : '',
+      isActive: coupon.isActive,
+    });
+    couponDialog.onTrue();
+  };
+
+  const handleCouponToggle = (coupon: ICommerceCoupon) => {
+    updateCouponMutation.mutate({
+      code: coupon.code,
+      type: coupon.type,
+      value: coupon.value,
+      minOrderCents: coupon.minOrderCents || 0,
+      maxUsage: coupon.maxUsage ?? '',
+      expiresAt: coupon.expiresAt ? new Date(coupon.expiresAt).toISOString().slice(0, 16) : '',
+      isActive: !coupon.isActive,
+    });
+  };
+
+  const handleCategoryEdit = (category: ICommerceCategory) => {
+    setEditingCategoryId(category.id);
+    categoryMethods.reset({
+      name: category.name,
+      description: category.description || '',
+      isActive: category.isActive !== false,
+    });
+    categoryDialog.onTrue();
+  };
+
+  const handleCategoryDelete = (categoryId: string) => {
+    const category = catalogCategories.find((item) => item.id === categoryId);
+
+    if (category?.productCount) {
+      showToast({
+        message: `${category.name} is assigned to ${category.productCount} product${category.productCount > 1 ? 's' : ''}. Reassign those products before deleting it.`,
+        severity: 'warning',
+      });
+      return;
+    }
+
+    deleteCategoryMutation.mutate(categoryId);
+  };
+
   const clearCart = () => persistCart([]);
 
   const saveSettings = (values: SettingsFormValues) => {
@@ -494,6 +839,11 @@ export function CommerceWorkspaceView({
     showToast({ message: 'Order marked completed.', severity: 'success' });
   };
 
+  const openOrderDetail = (id: string) => {
+    setSelectedOrderId(id);
+    orderDialog.onTrue();
+  };
+
   const handleCheckout = async (values: CheckoutFormValues) => {
     if (cartItems.length === 0) {
       showToast({ message: 'Add products to the cart before checking out.', severity: 'warning' });
@@ -530,6 +880,8 @@ export function CommerceWorkspaceView({
       try {
         const createdOrder = await createOrderMutation.mutateAsync({
           contact_id: contactId,
+          coupon_code: activeCoupon?.code || null,
+          discount_cents: discountCents,
           items: cartItems.map((item) => ({
             product_id: item.productId,
             product_name: item.variantName ? `${item.name} (${item.variantName})` : item.name,
@@ -602,16 +954,8 @@ export function CommerceWorkspaceView({
       appliedCouponCode={appliedCouponCode}
       onCouponChange={setAppliedCouponCode}
       activeCouponCode={activeCoupon?.code}
-      couponMessage={
-        appliedCouponCode.trim()
-          ? activeCoupon
-            ? activeCoupon.type === 'percent'
-              ? `${activeCoupon.value}% discount is active.`
-              : `${activeCoupon.code} applies $${((activeCoupon.value || 0) / 100).toFixed(2)} off.`
-            : 'Coupon not found or inactive.'
-          : undefined
-      }
-      couponSeverity={appliedCouponCode.trim() ? (activeCoupon ? 'success' : 'warning') : undefined}
+      couponMessage={couponFeedback?.message}
+      couponSeverity={couponFeedback?.severity}
       cartSubtotalCents={cartSubtotalCents}
       discountCents={discountCents}
       taxAmountCents={taxAmountCents}
@@ -644,7 +988,7 @@ export function CommerceWorkspaceView({
 
         {!isStorefrontMode && (
           <Stack direction="row" spacing={1.5}>
-            <Button color="inherit" onClick={() => setCurrentModule('settings')}>
+            <Button color="inherit" onClick={() => handleModuleChange('settings')}>
               Settings
             </Button>
             <Button component={Link} href={paths.public.onlineShop(resolvedShopKey, contactId)} variant="contained">
@@ -724,41 +1068,49 @@ export function CommerceWorkspaceView({
       ) : (
         <CommerceDashboardModules
           currentModule={currentModule}
-          onModuleChange={setCurrentModule}
-          summaryCards={<CommerceSummaryCards products={products} orders={mergedOrders} cartItems={cartItems} />}
+          onModuleChange={handleModuleChange}
+          summaryCards={
+            <CommerceSummaryCards
+              products={products}
+              orders={mergedOrders}
+              cartItems={cartItems}
+              topProducts={topProducts}
+            />
+          }
           productsTable={
             <CommerceProductsTable
               filteredProducts={filteredProducts}
+              categories={catalogCategories}
               resolvedShopKey={resolvedShopKey}
               search={search}
+              categoryFilter={productCategoryFilter}
+              onCreate={openCreateProductDialog}
               onSearchChange={setSearch}
+              onCategoryFilterChange={setProductCategoryFilter}
+              onEdit={handleProductEdit}
+              onDelete={(id) => deleteProductMutation.mutate(id)}
             />
           }
-          productForm={
-            <CommerceProductFormCard
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              productMethods={productMethods}
-              variantFields={variantFields}
-              appendVariant={appendVariant}
-              removeVariant={removeVariant}
-              modifierGroupFields={modifierGroupFields}
-              appendModifierGroup={appendModifierGroup}
-              removeModifierGroup={removeModifierGroup}
-              onSubmit={handleSubmit((values) => createProductMutation.mutate(values))}
-              isPending={createProductMutation.isPending}
-            />
-          }
+          productForm={null}
           categoriesTable={
             <CommerceCategoriesTable
-              categories={Array.isArray(categoriesQuery.data) ? categoriesQuery.data : []}
-              onCreate={categoryDialog.onTrue}
+              categories={filteredCategories}
+              search={categorySearch}
+              onSearchChange={setCategorySearch}
+              onCreate={handleCreateCategory}
+              onEdit={handleCategoryEdit}
+              onDelete={handleCategoryDelete}
             />
           }
           couponsTable={
             <CommerceCouponsTable
-              coupons={Array.isArray(couponsQuery.data) ? couponsQuery.data : []}
-              onCreate={couponDialog.onTrue}
+              coupons={filteredCoupons}
+              search={couponSearch}
+              onCreate={handleCreateCoupon}
+              onSearchChange={setCouponSearch}
+              onEdit={handleCouponEdit}
+              onToggleActive={handleCouponToggle}
+              onDelete={(id) => deleteCouponMutation.mutate(id)}
             />
           }
           ordersTable={
@@ -768,12 +1120,14 @@ export function CommerceWorkspaceView({
               statusFilter={orderStatusFilter}
               onSearchChange={setOrderSearch}
               onStatusFilterChange={setOrderStatusFilter}
+              onView={(id) => { setSelectedOrderId(id); orderDialog.onTrue(); }}
               onPay={(nextOrderId) => router.push(paths.public.orderPayment(nextOrderId))}
               onReceipt={(nextOrderId) => router.push(paths.public.onlineShopReceipt(nextOrderId, 'order'))}
               onMarkProcessing={markOrderProcessing}
               onMarkCompleted={markOrderCompleted}
             />
           }
+          customersTable={<CommerceCustomersTable customers={customers} />}
           tablesPanel={
             <CommerceTablesPanel
               tables={tableLayouts}
@@ -798,21 +1152,78 @@ export function CommerceWorkspaceView({
 
       <CommerceCategoryDialog
         open={categoryDialog.value}
-        onClose={categoryDialog.onFalse}
+        onClose={() => {
+          setEditingCategoryId(null);
+          categoryMethods.reset({ name: '', description: '', isActive: true });
+          categoryDialog.onFalse();
+        }}
         methods={categoryMethods}
-        onSubmit={categoryMethods.handleSubmit((values) => createCategoryMutation.mutate(values))}
-        isPending={createCategoryMutation.isPending}
+        editingId={editingCategoryId}
+        onSubmit={categoryMethods.handleSubmit((values) =>
+          editingCategoryId ? updateCategoryMutation.mutate(values) : createCategoryMutation.mutate(values)
+        )}
+        isPending={createCategoryMutation.isPending || updateCategoryMutation.isPending}
       />
+
+      {currentModule === 'products' && (
+        <CommerceProductDetailDialog
+          open={productDialog.value}
+          onClose={closeProductDialog}
+          title={editingId ? 'Edit product' : 'Create product'}
+          content={
+            <CommerceProductFormCard
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              productMethods={productMethods}
+              variantFields={variantFields}
+              appendVariant={appendVariant}
+              removeVariant={removeVariant}
+              modifierGroupFields={modifierGroupFields}
+              appendModifierGroup={appendModifierGroup}
+              removeModifierGroup={removeModifierGroup}
+              categories={catalogCategories}
+              editingId={editingId}
+              onCreateCategory={handleCreateCategory}
+              onUploadImages={(files) => uploadProductImageMutation.mutate(files)}
+              isUploadingImages={uploadProductImageMutation.isPending}
+              onCancelEdit={closeProductDialog}
+              modal
+              onSubmit={productMethods.handleSubmit((values) =>
+                editingId ? updateProductMutation.mutate(values) : createProductMutation.mutate(values)
+              )}
+              isPending={createProductMutation.isPending || updateProductMutation.isPending}
+            />
+          }
+        />
+      )}
 
       <CommerceCouponDialog
         open={couponDialog.value}
-        onClose={couponDialog.onFalse}
+        onClose={() => {
+          setEditingCouponId(null);
+          couponMethods.reset({ code: '', type: 'percent', value: 0, minOrderCents: 0, maxUsage: '', expiresAt: '', isActive: true });
+          couponDialog.onFalse();
+        }}
         methods={couponMethods}
-        onSubmit={couponMethods.handleSubmit((values) => createCouponMutation.mutate(values))}
-        isPending={createCouponMutation.isPending}
+        editingId={editingCouponId}
+        onSubmit={couponMethods.handleSubmit((values) =>
+          editingCouponId ? updateCouponMutation.mutate(values) : createCouponMutation.mutate(values)
+        )}
+        isPending={createCouponMutation.isPending || updateCouponMutation.isPending}
       />
 
       <CommerceTableGuideDialog open={tableDialog.value} onClose={tableDialog.onFalse} />
+
+      <CommerceOrderDetailDialog
+        open={orderDialog.value}
+        onClose={orderDialog.onFalse}
+        order={mergedOrders.find((o) => o.id === selectedOrderId)}
+        onStatusUpdate={(id, status, pStatus) => {
+          updateOrderState(id, { status, paymentStatus: pStatus || 'paid' });
+          showToast({ message: 'Order status updated.', severity: 'success' });
+        }}
+        onReceipt={(id) => router.push(paths.public.onlineShopReceipt(id, 'order'))}
+      />
     </DashboardContent>
   );
 }

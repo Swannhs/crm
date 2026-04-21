@@ -5,9 +5,17 @@ import axios from 'src/utils/axios';
 export type ICommerceProduct = {
   id: string;
   name: string;
+  sku?: string;
+  barcode?: string;
+  categoryId?: string;
+  categoryName?: string;
   description?: string | null;
   priceCents: number;
+  compareAtPriceCents?: number;
+  costCents?: number;
+  lowStockThreshold?: number;
   photos?: string[];
+  tags?: string[];
   status?: string;
   variants?: Array<{
     id: string;
@@ -35,6 +43,141 @@ export type ICommerceProduct = {
   }>;
 };
 
+export type ICommerceCategory = {
+  id: string;
+  name: string;
+  description?: string | null;
+  slug?: string | null;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type ICommerceImageAsset = {
+  id: string;
+  name: string;
+  url: string;
+  thumbnail?: string | null;
+  mimeType?: string | null;
+  size?: number | null;
+  category?: string | null;
+  tags?: string[];
+  createdAt?: string;
+};
+
+export type ICommerceCoupon = {
+  id: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  minOrderCents: number;
+  maxUsage?: number | null;
+  usedCount: number;
+  expiresAt?: string | null;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+const normalizeProduct = (item: any): ICommerceProduct => ({
+  id: String(item?.id || ''),
+  name: String(item?.name || 'Untitled product'),
+  sku: item?.sku ? String(item.sku) : undefined,
+  barcode: item?.barcode ? String(item.barcode) : undefined,
+  categoryId: item?.categoryId ? String(item.categoryId) : undefined,
+  categoryName: item?.categoryName ? String(item.categoryName) : undefined,
+  description: item?.description ? String(item.description) : null,
+  priceCents: Number(item?.priceCents ?? item?.price_cents ?? 0),
+  compareAtPriceCents: Number(item?.compareAtPriceCents ?? item?.compare_at_price_cents ?? 0),
+  costCents: Number(item?.costCents ?? item?.cost_cents ?? 0),
+  lowStockThreshold: Number(item?.lowStockThreshold ?? item?.low_stock_threshold ?? 0),
+  photos: Array.isArray(item?.photos) ? item.photos.map((photo: unknown) => String(photo)) : [],
+  tags: Array.isArray(item?.tags) ? item.tags.map((tag: unknown) => String(tag)) : [],
+  status: item?.status ? String(item.status) : 'draft',
+  variants: Array.isArray(item?.variants)
+    ? item.variants.map((variant: any) => ({
+        id: String(variant?.id || `${item?.id || 'product'}-variant`),
+        name: String(variant?.name || 'Variant'),
+        sku: variant?.sku ? String(variant.sku) : undefined,
+        priceCents: Number(variant?.priceCents ?? variant?.price_cents ?? 0),
+        stock: Number(variant?.stock ?? 0),
+        options: variant?.options ?? {},
+      }))
+    : [],
+  attributes: Array.isArray(item?.attributes)
+    ? item.attributes.map((attribute: any) => ({
+        id: String(attribute?.id || `${item?.id || 'product'}-attribute`),
+        name: String(attribute?.name || ''),
+        values: Array.isArray(attribute?.values)
+          ? attribute.values.map((value: unknown) => String(value))
+          : [],
+      }))
+    : [],
+  modifierGroups: Array.isArray(item?.modifierGroups)
+    ? item.modifierGroups.map((group: any) => ({
+        id: String(group?.id || `${item?.id || 'product'}-modifier-group`),
+        name: String(group?.name || ''),
+        minSelected: Number(group?.minSelected ?? group?.min_selected ?? 0),
+        maxSelected:
+          group?.maxSelected === null || group?.maxSelected === undefined
+            ? undefined
+            : Number(group.maxSelected),
+        modifiers: Array.isArray(group?.modifiers)
+          ? group.modifiers.map((modifier: any) => ({
+              id: String(modifier?.id || `${group?.id || 'group'}-modifier`),
+              name: String(modifier?.name || ''),
+              priceCents: Number(modifier?.priceCents ?? modifier?.price_cents ?? 0),
+            }))
+          : [],
+      }))
+    : [],
+});
+
+const normalizeCategory = (item: any): ICommerceCategory => ({
+  id: String(item?.id || ''),
+  name: String(item?.name || 'Untitled category'),
+  description: item?.description ? String(item.description) : null,
+  slug: item?.slug ? String(item.slug) : null,
+  isActive: item?.isActive !== false,
+  createdAt: item?.createdAt ? String(item.createdAt) : undefined,
+  updatedAt: item?.updatedAt ? String(item.updatedAt) : undefined,
+});
+
+const normalizeImageAsset = (item: any): ICommerceImageAsset => ({
+  id: String(item?.id || ''),
+  name: String(item?.name || 'Untitled image'),
+  url: String(item?.url || ''),
+  thumbnail: item?.thumbnail ? String(item.thumbnail) : null,
+  mimeType: item?.mimeType ? String(item.mimeType) : null,
+  size: item?.size === undefined || item?.size === null ? null : Number(item.size),
+  category: item?.category ? String(item.category) : null,
+  tags: Array.isArray(item?.tags) ? item.tags.map((tag: unknown) => String(tag)) : [],
+  createdAt: item?.createdAt ? String(item.createdAt) : undefined,
+});
+
+const normalizeCoupon = (item: any): ICommerceCoupon => ({
+  id: String(item?.id || ''),
+  code: String(item?.code || ''),
+  type: item?.type === 'fixed' ? 'fixed' : 'percent',
+  value: Number(item?.value ?? 0),
+  minOrderCents: Number(item?.minOrderCents ?? item?.min_order_cents ?? 0),
+  maxUsage:
+    item?.maxUsage === undefined || item?.maxUsage === null ? null : Number(item.maxUsage),
+  usedCount: Number(item?.usedCount ?? item?.used_count ?? 0),
+  expiresAt: item?.expiresAt ? String(item.expiresAt) : null,
+  isActive: item?.isActive !== false,
+  createdAt: item?.createdAt ? String(item.createdAt) : undefined,
+  updatedAt: item?.updatedAt ? String(item.updatedAt) : undefined,
+});
+
+const fileToDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error(`Unable to read ${file.name}`));
+    reader.readAsDataURL(file);
+  });
+
 export type ICommerceOrder = {
   id: string;
   totalAmountCents: number;
@@ -49,54 +192,158 @@ export type ICommerceOrder = {
 };
 
 export const commerceService = {
-  getProducts: async () => {
-    const response = await axios.get('/api/shop/products');
-    return response.data?.data ?? response.data ?? [];
+  getProducts: async (orgId?: string) => {
+    const response = await axios.get('/api/shop/products', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
+    const rows = response.data?.data ?? response.data ?? [];
+    return Array.isArray(rows) ? rows.map(normalizeProduct) : [];
   },
 
-  createProduct: async (data: any) => {
+  createProduct: async (orgId: string, data: any) => {
     const payload = {
       ...data,
-      price_cents: data.price_cents ?? data.priceCents ?? 0,
+      category_id: data.categoryId || undefined,
+      price_cents: data.priceCents ?? data.price_cents ?? 0,
+      compare_at_price_cents: data.compareAtPriceCents ?? 0,
+      cost_cents: data.costCents ?? 0,
+      low_stock_threshold: data.lowStockThreshold ?? 5,
+      photos: Array.isArray(data.photos) ? data.photos : [],
+      tags: typeof data.tagsText === 'string'
+        ? data.tagsText.split(',').map((item: string) => item.trim()).filter(Boolean)
+        : data.tags ?? [],
       variants: data.variants ?? [],
-      attributes: data.attributes ?? [],
       modifierGroups: data.modifierGroups ?? [],
       status: data.status ?? 'active',
     };
-
     delete payload.priceCents;
+    delete payload.categoryId;
+    delete payload.compareAtPriceCents;
+    delete payload.costCents;
+    delete payload.lowStockThreshold;
+    delete payload.tagsText;
 
-    const response = await axios.post('/api/shop/products', payload);
+    const response = await axios.post('/api/shop/products', payload, { headers: { 'X-Org-Id': orgId } });
+    return normalizeProduct(response.data?.data ?? response.data);
+  },
+
+  updateProduct: async (orgId: string, id: string, data: any) => {
+    const payload = {
+      ...data,
+      category_id: data.categoryId || undefined,
+      price_cents: data.priceCents ?? data.price_cents ?? 0,
+      compare_at_price_cents: data.compareAtPriceCents ?? 0,
+      cost_cents: data.costCents ?? 0,
+      low_stock_threshold: data.lowStockThreshold ?? 5,
+      photos: Array.isArray(data.photos) ? data.photos : [],
+      tags: typeof data.tagsText === 'string'
+        ? data.tagsText.split(',').map((item: string) => item.trim()).filter(Boolean)
+        : data.tags ?? [],
+    };
+    delete payload.priceCents;
+    delete payload.categoryId;
+    delete payload.compareAtPriceCents;
+    delete payload.costCents;
+    delete payload.lowStockThreshold;
+    delete payload.tagsText;
+    const response = await axios.patch(`/api/shop/products/${id}`, payload, { headers: { 'X-Org-Id': orgId } });
+    return normalizeProduct(response.data?.data ?? response.data);
+  },
+
+  deleteProduct: async (orgId: string, id: string) => {
+    const response = await axios.delete(`/api/shop/products/${id}`, { headers: { 'X-Org-Id': orgId } });
     return response.data?.data ?? response.data;
   },
 
-  getOrders: async () => {
-    const response = await axios.get('/api/shop/orders');
+  getOrders: async (orgId?: string) => {
+    const response = await axios.get('/api/shop/orders', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
     return response.data?.data ?? response.data ?? [];
   },
 
-  createOrder: async (data: any) => {
-    const response = await axios.post('/api/shop/orders', data);
+  createOrder: async (orgId: string, data: any) => {
+    const response = await axios.post('/api/shop/orders', data, { headers: { 'X-Org-Id': orgId } });
     return response.data?.data ?? response.data;
   },
 
-  getCategories: async () => {
-    const response = await axios.get('/api/shop/categories');
-    return response.data?.data ?? response.data ?? [];
+  getCategories: async (orgId?: string) => {
+    const response = await axios.get('/api/shop/categories', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
+    const rows = response.data?.data ?? response.data ?? [];
+    return Array.isArray(rows) ? rows.map(normalizeCategory) : [];
   },
 
-  createCategory: async (data: any) => {
-    const response = await axios.post('/api/shop/categories', data);
+  createCategory: async (orgId: string, data: any) => {
+    const response = await axios.post('/api/shop/categories', data, { headers: { 'X-Org-Id': orgId } });
+    return normalizeCategory(response.data?.data ?? response.data);
+  },
+
+  updateCategory: async (orgId: string, id: string, data: any) => {
+    const response = await axios.patch(`/api/shop/categories/${id}`, data, { headers: { 'X-Org-Id': orgId } });
+    return normalizeCategory(response.data?.data ?? response.data);
+  },
+
+  deleteCategory: async (orgId: string, id: string) => {
+    const response = await axios.delete(`/api/shop/categories/${id}`, { headers: { 'X-Org-Id': orgId } });
     return response.data?.data ?? response.data;
   },
 
-  getCoupons: async () => {
-    const response = await axios.get('/api/shop/coupons');
-    return response.data?.data ?? response.data ?? [];
+  getCoupons: async (orgId?: string) => {
+    const response = await axios.get('/api/shop/coupons', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
+    const rows = response.data?.data ?? response.data ?? [];
+    return Array.isArray(rows) ? rows.map(normalizeCoupon) : [];
   },
 
-  createCoupon: async (data: any) => {
-    const response = await axios.post('/api/shop/coupons', data);
+  createCoupon: async (orgId: string, data: any) => {
+    const payload = {
+      ...data,
+      code: String(data.code || '').trim().toUpperCase(),
+      maxUsage: data.maxUsage === '' || data.maxUsage === undefined ? null : Number(data.maxUsage),
+      minOrderCents: Number(data.minOrderCents ?? 0),
+      value: Number(data.value ?? 0),
+      expiresAt: data.expiresAt || null,
+      isActive: data.isActive !== false,
+    };
+    const response = await axios.post('/api/shop/coupons', payload, { headers: { 'X-Org-Id': orgId } });
+    return normalizeCoupon(response.data?.data ?? response.data);
+  },
+
+  updateCoupon: async (orgId: string, id: string, data: any) => {
+    const payload = {
+      ...data,
+      code: String(data.code || '').trim().toUpperCase(),
+      maxUsage: data.maxUsage === '' || data.maxUsage === undefined ? null : Number(data.maxUsage),
+      minOrderCents: Number(data.minOrderCents ?? 0),
+      value: Number(data.value ?? 0),
+      expiresAt: data.expiresAt || null,
+      isActive: data.isActive !== false,
+    };
+    const response = await axios.patch(`/api/shop/coupons/${id}`, payload, { headers: { 'X-Org-Id': orgId } });
+    return normalizeCoupon(response.data?.data ?? response.data);
+  },
+
+  deleteCoupon: async (orgId: string, id: string) => {
+    const response = await axios.delete(`/api/shop/coupons/${id}`, { headers: { 'X-Org-Id': orgId } });
     return response.data?.data ?? response.data;
+  },
+
+  getProductImages: async () => {
+    const response = await axios.get('/api/image-library');
+    const rows = response.data?.data ?? response.data ?? [];
+    return Array.isArray(rows)
+      ? rows
+          .map(normalizeImageAsset)
+          .filter((item) => item.category === 'commerce-product' || item.tags?.includes('shop-product'))
+      : [];
+  },
+
+  uploadProductImage: async (file: File) => {
+    const dataUrl = await fileToDataUrl(file);
+    const response = await axios.post('/api/image-library', {
+      name: file.name,
+      url: dataUrl,
+      thumbnail: dataUrl,
+      mimeType: file.type || 'image/*',
+      size: file.size,
+      category: 'commerce-product',
+      tags: ['shop-product'],
+    });
+    return normalizeImageAsset(response.data?.data ?? response.data);
   },
 };

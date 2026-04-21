@@ -35,9 +35,8 @@ app.get("/v1/public/products/:id",
   (req, res) => {
     const orgId = req.header('X-Org-Id');
     if (!orgId) return res.status(400).json({ message: 'Missing X-Org-Id header' });
-    const { id } = req.params;
-    // Assuming we'll add a findOne method or use list with filters
-    return productController.list(req as any, res); // Placeholder: should be findOne
+    (req as any).identity = { orgId };
+    return productController.getById(req as any, res);
   }
 );
 
@@ -51,6 +50,21 @@ app.get("/v1/products",
 app.post("/v1/products", 
   identityMiddleware, 
   (req, res) => productController.create(req as any, res)
+);
+
+app.get("/v1/products/:id",
+  identityMiddleware,
+  (req, res) => productController.getById(req as any, res)
+);
+
+app.patch("/v1/products/:id",
+  identityMiddleware,
+  (req, res) => productController.update(req as any, res)
+);
+
+app.delete("/v1/products/:id",
+  identityMiddleware,
+  (req, res) => productController.delete(req as any, res)
 );
 
 // Orders
@@ -75,6 +89,16 @@ app.post("/v1/categories",
   (req, res) => categoryController.create(req, res)
 );
 
+app.patch("/v1/categories/:id",
+  identityMiddleware,
+  (req, res) => categoryController.update(req, res)
+);
+
+app.delete("/v1/categories/:id",
+  identityMiddleware,
+  (req, res) => categoryController.delete(req, res)
+);
+
 // Coupons
 app.get("/v1/coupons", 
   identityMiddleware, 
@@ -84,6 +108,16 @@ app.get("/v1/coupons",
 app.post("/v1/coupons", 
   identityMiddleware, 
   (req, res) => couponController.create(req, res)
+);
+
+app.patch("/v1/coupons/:id",
+  identityMiddleware,
+  (req, res) => couponController.update(req, res)
+);
+
+app.delete("/v1/coupons/:id",
+  identityMiddleware,
+  (req, res) => couponController.delete(req, res)
 );
 
 // Health

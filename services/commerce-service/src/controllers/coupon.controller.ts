@@ -27,4 +27,28 @@ export class CouponController {
       return res.status(500).json({ message: err.message });
     }
   }
+
+  async update(req: Request, res: Response) {
+    try {
+      const orgId = req.header('X-Org-Id');
+      if (!orgId) return res.status(400).json({ message: 'Missing X-Org-Id header' });
+
+      const coupon = await this.couponRepo.update(req.params.id, orgId, { ...req.body, orgId });
+      return res.json({ data: coupon });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const orgId = req.header('X-Org-Id');
+      if (!orgId) return res.status(400).json({ message: 'Missing X-Org-Id header' });
+
+      await this.couponRepo.delete(req.params.id, orgId);
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 }

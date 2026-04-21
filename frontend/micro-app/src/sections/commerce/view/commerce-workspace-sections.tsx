@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import Alert from '@mui/material/Alert';
+import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -33,7 +34,7 @@ import { Form, RHFTextField } from 'src/components/hook-form';
 import { fCurrency } from 'src/utils/format-number';
 import { Iconify } from 'src/components/iconify';
 
-import type { ICommerceProduct } from 'src/services/commerce-service';
+import type { ICommerceCoupon, ICommerceProduct } from 'src/services/commerce-service';
 
 import type { CartLine, CommerceDashboardModule, LocalOrder, ProductFormValues } from './commerce-workspace.types';
 import {
@@ -53,75 +54,114 @@ type SummaryCardsProps = {
   cartItems: CartLine[];
 };
 
-export function CommerceSummaryCards({ products, orders, cartItems }: SummaryCardsProps) {
+export function CommerceSummaryCards({ products, orders, cartItems, topProducts }: SummaryCardsProps & { topProducts?: any[] }) {
   return (
-    <Grid container spacing={3}>
-      {[
-        {
-          label: 'Products',
-          value: products.length,
-          icon: 'solar:box-bold-duotone',
-          helper: `${products.filter((product) => product.status === 'active').length} active listings`,
-        },
-        {
-          label: 'Orders',
-          value: orders.length,
-          icon: 'solar:cart-large-bold-duotone',
-          helper: `${orders.filter((item) => item.paymentStatus === 'paid').length} paid`,
-        },
-        {
-          label: 'Revenue',
-          value: fCurrency(orders.reduce((sum, item) => sum + (item.totalAmountCents || 0), 0) / 100),
-          icon: 'solar:wad-of-money-bold-duotone',
-          helper: `${cartItems.length} items currently in cart`,
-        },
-      ].map((item) => (
-        <Grid item xs={12} md={4} key={item.label}>
-          <Card sx={{ p: 3 }}>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Box
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 2,
-                  bgcolor: 'background.neutral',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Iconify icon={item.icon} width={28} />
-              </Box>
-              <Box>
-                <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-                  {item.label}
-                </Typography>
-                <Typography variant="h4">{item.value}</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {item.helper}
-                </Typography>
-              </Box>
-            </Stack>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+    <Stack spacing={3}>
+      <Grid container spacing={3}>
+        {[
+          {
+            label: 'Products',
+            value: products.length,
+            icon: 'solar:box-bold-duotone',
+            helper: `${products.filter((product) => product.status === 'active').length} active listings`,
+          },
+          {
+            label: 'Orders',
+            value: orders.length,
+            icon: 'solar:cart-large-bold-duotone',
+            helper: `${orders.filter((item) => item.paymentStatus === 'paid').length} paid`,
+          },
+          {
+            label: 'Revenue',
+            value: fCurrency(orders.reduce((sum, item) => sum + (item.totalAmountCents || 0), 0) / 100),
+            icon: 'solar:wad-of-money-bold-duotone',
+            helper: `${cartItems.length} items currently in cart`,
+          },
+        ].map((item) => (
+          <Grid item xs={12} md={4} key={item.label}>
+            <Card sx={{ p: 3 }}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 2,
+                    bgcolor: 'background.neutral',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Iconify icon={item.icon} width={28} />
+                </Box>
+                <Box>
+                  <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                    {item.label}
+                  </Typography>
+                  <Typography variant="h4">{item.value}</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {item.helper}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {topProducts && topProducts.length > 0 && (
+        <Card sx={{ p: 3 }}>
+           <Typography variant="h6" sx={{ mb: 2 }}>Top Selling Products</Typography>
+           <Stack spacing={2}>
+              {topProducts.map((p, index) => (
+                 <Stack key={p.name} direction="row" alignItems="center" spacing={2}>
+                    <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: 'background.neutral', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 'bold' }}>
+                       {index + 1}
+                    </Box>
+                    <Typography variant="body2" sx={{ flexGrow: 1 }}>{p.name}</Typography>
+                    <Typography variant="subtitle2">{fCurrency(p.revenue / 100)}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>({p.quantity} sold)</Typography>
+                 </Stack>
+              ))}
+           </Stack>
+        </Card>
+      )}
+    </Stack>
   );
 }
 
 type ProductsTableProps = {
   filteredProducts: ICommerceProduct[];
+  categories: Array<{ id: string; name: string; productCount?: number }>;
   resolvedShopKey: string;
   search: string;
+  categoryFilter: string;
+  onCreate: () => void;
   onSearchChange: (value: string) => void;
+  onCategoryFilterChange: (value: string) => void;
+  onEdit: (product: ICommerceProduct) => void;
+  onDelete: (id: string) => void;
 };
 
 export function CommerceProductsTable({
   filteredProducts,
+  categories,
   resolvedShopKey,
   search,
+  categoryFilter,
+  onCreate,
   onSearchChange,
+  onCategoryFilterChange,
+  onEdit,
+  onDelete,
 }: ProductsTableProps) {
+  const activeProducts = filteredProducts.filter((product) => product.status === 'active').length;
+  const lowStockProducts = filteredProducts.filter((product) => {
+    const inventory = product.variants?.length ? getInventoryTotal(product) : 0;
+    const threshold = product.lowStockThreshold || 5;
+    return product.variants?.length ? inventory > 0 && inventory <= threshold : false;
+  }).length;
+
   return (
     <Card sx={{ overflow: 'hidden' }}>
       <Stack
@@ -136,30 +176,85 @@ export function CommerceProductsTable({
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Create and review the products sold through your shop.
           </Typography>
+          <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap' }} useFlexGap>
+            <Chip size="small" label={`${filteredProducts.length} shown`} variant="soft" color="default" />
+            <Chip size="small" label={`${activeProducts} active`} variant="soft" color="success" />
+            <Chip size="small" label={`${lowStockProducts} low stock`} variant="soft" color={lowStockProducts ? 'warning' : 'default'} />
+          </Stack>
         </Box>
-        <TextField
-          size="small"
-          placeholder="Search products"
-          value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Iconify icon="solar:magnifer-bold-duotone" width={18} />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ minWidth: { md: 280 } }}
-        />
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+          <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={onCreate}>
+            New product
+          </Button>
+          <TextField
+            size="small"
+            placeholder="Search products"
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="solar:magnifer-bold-duotone" width={18} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: { md: 280 } }}
+          />
+          <TextField
+            select
+            size="small"
+            label="Category"
+            value={categoryFilter}
+            onChange={(event) => onCategoryFilterChange(event.target.value)}
+            sx={{ minWidth: { md: 220 } }}
+          >
+            <MenuItem value="all">All categories</MenuItem>
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+                {typeof category.productCount === 'number' ? ` (${category.productCount})` : ''}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Stack>
       </Stack>
       <Divider />
+      <Box
+        sx={{
+          px: 3,
+          py: 2,
+          bgcolor: 'background.neutral',
+          borderBottom: (theme) => `1px dashed ${theme.palette.divider}`,
+        }}
+      >
+        <Grid container spacing={2}>
+          {[
+            { label: 'Visible products', value: filteredProducts.length, helper: 'Results in the current view' },
+            { label: 'Active listings', value: activeProducts, helper: 'Products ready for sale' },
+            { label: 'Low stock alerts', value: lowStockProducts, helper: 'Tracked variants below threshold' },
+          ].map((item) => (
+            <Grid key={item.label} item xs={12} md={4}>
+              <Stack spacing={0.25}>
+                <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                  {item.label}
+                </Typography>
+                <Typography variant="h5">{item.value}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  {item.helper}
+                </Typography>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Product</TableCell>
+              <TableCell>Catalog</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Price</TableCell>
+              <TableCell>Pricing</TableCell>
               <TableCell>Inventory</TableCell>
               <TableCell align="right">Action</TableCell>
             </TableRow>
@@ -175,11 +270,66 @@ export function CommerceProductsTable({
               return (
                 <TableRow key={product.id} hover>
                   <TableCell>
-                    <Stack spacing={0.5}>
-                      <Typography variant="subtitle2">{product.name}</Typography>
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        {product.description || 'No description provided yet.'}
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar
+                        src={product.photos?.[0]}
+                        variant="rounded"
+                        sx={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 2,
+                          bgcolor: 'background.neutral',
+                        }}
+                      >
+                        <Iconify icon="solar:box-bold-duotone" width={24} />
+                      </Avatar>
+                      <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+                        <Typography variant="subtitle2" noWrap>
+                          {product.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {product.description || 'No description provided yet.'}
+                        </Typography>
+                        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+                          <Chip size="small" label={product.sku || 'No SKU'} variant="soft" color="default" />
+                          {product.photos?.length ? (
+                            <Chip size="small" label={`${product.photos.length} image${product.photos.length > 1 ? 's' : ''}`} variant="soft" color="info" />
+                          ) : null}
+                        </Stack>
+                      </Stack>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Stack spacing={0.75}>
+                      <Typography variant="body2">
+                        SKU: <strong>{product.sku || 'Not set'}</strong>
                       </Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Category: {product.categoryName || 'Uncategorized'}
+                      </Typography>
+                      {product.tags?.length ? (
+                        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                          {product.tags.slice(0, 2).map((tag) => (
+                            <Chip key={tag} size="small" label={tag} variant="outlined" />
+                          ))}
+                          {product.tags.length > 2 && (
+                            <Chip size="small" label={`+${product.tags.length - 2}`} variant="outlined" />
+                          )}
+                        </Stack>
+                      ) : (
+                        <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+                          No tags yet
+                        </Typography>
+                      )}
                     </Stack>
                   </TableCell>
                   <TableCell>
@@ -190,7 +340,21 @@ export function CommerceProductsTable({
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell>{fCurrency(getBasePrice(product) / 100)}</TableCell>
+                  <TableCell>
+                    <Stack spacing={0.5}>
+                      <Typography variant="subtitle2">{fCurrency(getBasePrice(product) / 100)}</Typography>
+                      {(product.compareAtPriceCents || 0) > getBasePrice(product) && (
+                        <Typography variant="caption" sx={{ color: 'text.secondary', textDecoration: 'line-through' }}>
+                          {fCurrency((product.compareAtPriceCents || 0) / 100)}
+                        </Typography>
+                      )}
+                      {(product.costCents || 0) > 0 && (
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          Cost: {fCurrency((product.costCents || 0) / 100)}
+                        </Typography>
+                      )}
+                    </Stack>
+                  </TableCell>
                   <TableCell>
                     <Stack spacing={1}>
                       <Chip
@@ -208,21 +372,33 @@ export function CommerceProductsTable({
                     </Stack>
                   </TableCell>
                   <TableCell align="right">
-                    <Button
-                      size="small"
-                      color="inherit"
-                      component={Link}
-                      href={paths.public.onlineShopProductDetail(resolvedShopKey, product.id)}
-                    >
-                      Preview
-                    </Button>
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Button
+                        size="small"
+                        color="inherit"
+                        component={Link}
+                        href={getProductHref(resolvedShopKey, product.id)}
+                      >
+                        Preview
+                      </Button>
+                      <Button
+                        size="small"
+                        color="inherit"
+                        onClick={() => onEdit(product)}
+                      >
+                        Edit
+                      </Button>
+                      <IconButton size="small" color="error" onClick={() => onDelete(product.id)}>
+                         <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+                      </IconButton>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               );
             })}
             {filteredProducts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} sx={{ py: 8, textAlign: 'center' }}>
+                <TableCell colSpan={6} sx={{ py: 8, textAlign: 'center' }}>
                   <Typography variant="subtitle1">No products found.</Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Create your first product or adjust the search query.
@@ -247,8 +423,15 @@ type ProductFormCardProps = {
   modifierGroupFields: Array<{ id: string }>;
   appendModifierGroup: (value: ProductFormValues['modifierGroups'][number]) => void;
   removeModifierGroup: (index: number) => void;
+  categories: Array<{ id: string; name: string }>;
+  onUploadImages: (files: File[]) => void;
+  isUploadingImages: boolean;
   onSubmit: () => void;
   isPending: boolean;
+  editingId?: string | null;
+  onCreateCategory: () => void;
+  onCancelEdit?: () => void;
+  modal?: boolean;
 };
 
 export function CommerceProductFormCard({
@@ -261,21 +444,67 @@ export function CommerceProductFormCard({
   modifierGroupFields,
   appendModifierGroup,
   removeModifierGroup,
+  categories,
+  onUploadImages,
+  isUploadingImages,
   onSubmit,
   isPending,
+  editingId,
+  onCreateCategory,
+  onCancelEdit,
+  modal = false,
 }: ProductFormCardProps) {
+  const isEditing = Boolean(editingId);
+  const currentPhotoUrls = Array.isArray(productMethods.watch('photos'))
+    ? productMethods.watch('photos')
+    : [];
+
+  const removePhoto = (indexToRemove: number) => {
+    const nextUrls = currentPhotoUrls.filter((_: string, index: number) => index !== indexToRemove);
+    productMethods.setValue('photos', nextUrls, { shouldDirty: true, shouldTouch: true });
+  };
   return (
-    <Card sx={{ position: 'sticky', top: 88 }}>
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6">Create Product</Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Products created here immediately show up in the storefront list.
-        </Typography>
+    <Card
+      sx={{
+        position: modal ? 'static' : 'sticky',
+        top: modal ? 0 : 88,
+        overflow: 'hidden',
+        border: (theme) => `1px solid ${theme.palette.divider}`,
+        boxShadow: modal ? 'none' : undefined,
+      }}
+    >
+      <Box
+        sx={{
+          px: 3,
+          py: 2.5,
+          bgcolor: 'background.neutral',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
+          <Box>
+            <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+              Product Editor
+            </Typography>
+            <Typography variant="h6">{isEditing ? 'Edit Product' : 'Create Product'}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+              {isEditing
+                ? `Modifying product ID: ${editingId}`
+                : 'Build the product details, images, pricing, and options from one place.'}
+            </Typography>
+          </Box>
+          <Chip
+            size="small"
+            label={isEditing ? 'Editing' : 'Drafting'}
+            color={isEditing ? 'warning' : 'default'}
+            variant="soft"
+          />
+        </Stack>
       </Box>
       <Divider />
       <Form methods={productMethods} onSubmit={onSubmit}>
         <Stack spacing={3} sx={{ p: 3 }}>
-          <Tabs value={activeTab} onChange={(_event, value) => onTabChange(value)}>
+          <Tabs value={activeTab} onChange={(_event, value) => onTabChange(value)} variant="fullWidth">
             <Tab value="general" label="General" />
             <Tab value="variants" label="Variants" />
             <Tab value="modifiers" label="Modifiers" />
@@ -283,16 +512,158 @@ export function CommerceProductFormCard({
 
           {activeTab === 'general' && (
             <Stack spacing={2}>
-              <RHFTextField name="name" label="Product name" />
-              <RHFTextField name="description" label="Description" multiline rows={4} />
-              <RHFTextField
-                name="priceCents"
-                label="Base price (cents)"
-                type="number"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: 'background.neutral',
                 }}
-              />
+              >
+                <Typography variant="subtitle2">Core details</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Start with the identity of the product shoppers will see first.
+                </Typography>
+              </Box>
+              <RHFTextField name="name" label="Product name" />
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <RHFTextField name="sku" label="SKU" />
+                <RHFTextField name="barcode" label="Barcode" />
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+                <Box sx={{ flexGrow: 1 }}>
+                  <RHFTextField name="categoryId" label="Category" select helperText="Assign the product to an existing category.">
+                    <MenuItem value="">Uncategorized</MenuItem>
+                    {categories.map((category) => (
+                      <MenuItem key={category.id} value={category.id}>
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                  </RHFTextField>
+                </Box>
+                <Button variant="outlined" color="inherit" onClick={onCreateCategory} sx={{ mt: { sm: 0.5 } }}>
+                  New category
+                </Button>
+              </Stack>
+              <RHFTextField name="description" label="Description" multiline rows={4} />
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: 'background.neutral',
+                }}
+              >
+                <Typography variant="subtitle2">Pricing and stock</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Set the commercial numbers that drive storefront pricing and alerts.
+                </Typography>
+              </Box>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <RHFTextField
+                  name="priceCents"
+                  label="Base price (cents)"
+                  type="number"
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  }}
+                />
+                <RHFTextField
+                  name="compareAtPriceCents"
+                  label="Compare at price (cents)"
+                  type="number"
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  }}
+                />
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <RHFTextField
+                  name="costCents"
+                  label="Cost per item (cents)"
+                  type="number"
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  }}
+                />
+                <RHFTextField name="lowStockThreshold" label="Low stock threshold" type="number" />
+              </Stack>
+              <RHFTextField name="tagsText" label="Tags" placeholder="summer, bestseller, new" />
+              <Stack spacing={1.5}>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={1.5}
+                  alignItems={{ xs: 'stretch', sm: 'center' }}
+                  justifyContent="space-between"
+                >
+                  <Box>
+                    <Typography variant="subtitle2">Product images</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      Upload one or more images and they will be attached to this product.
+                    </Typography>
+                  </Box>
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    startIcon={
+                      isUploadingImages ? (
+                        <CircularProgress size={16} color="inherit" />
+                      ) : (
+                        <Iconify icon="solar:camera-add-bold-duotone" />
+                      )
+                    }
+                    disabled={isUploadingImages}
+                  >
+                    Upload images
+                    <input
+                      hidden
+                      multiple
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => {
+                        const files = Array.from(event.target.files || []);
+                        if (files.length) {
+                          onUploadImages(files);
+                        }
+                        event.currentTarget.value = '';
+                      }}
+                    />
+                  </Button>
+                </Stack>
+
+                {currentPhotoUrls.length > 0 ? (
+                  <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+                    {currentPhotoUrls.map((photoUrl: string, index: number) => (
+                      <Card
+                        key={`${photoUrl}-${index}`}
+                        variant="outlined"
+                        sx={{ width: 120, overflow: 'hidden', position: 'relative' }}
+                      >
+                        <Box
+                          component="img"
+                          src={photoUrl}
+                          alt={`Product image ${index + 1}`}
+                          sx={{
+                            width: 1,
+                            height: 96,
+                            objectFit: 'cover',
+                            display: 'block',
+                            bgcolor: 'background.neutral',
+                          }}
+                        />
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1 }}>
+                          <Typography variant="caption" noWrap sx={{ maxWidth: 72 }}>
+                            Image {index + 1}
+                          </Typography>
+                          <IconButton size="small" color="error" onClick={() => removePhoto(index)}>
+                            <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                          </IconButton>
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Stack>
+                ) : (
+                  <Alert severity="info">No product images uploaded yet.</Alert>
+                )}
+              </Stack>
               <RHFTextField name="status" label="Status" select>
                 <MenuItem value="draft">Draft</MenuItem>
                 <MenuItem value="active">Active</MenuItem>
@@ -306,14 +677,17 @@ export function CommerceProductFormCard({
               <Button
                 variant="outlined"
                 startIcon={<Iconify icon="mingcute:add-line" />}
-                onClick={() => appendVariant({ name: '', priceCents: 0, stock: 0 })}
+                onClick={() => appendVariant({ name: '', sku: '', priceCents: 0, stock: 0 })}
               >
                 Add variant
               </Button>
               {variantFields.map((field, index) => (
                 <Card key={field.id} variant="outlined" sx={{ p: 2 }}>
                   <Stack spacing={2}>
-                    <RHFTextField name={`variants.${index}.name`} label="Variant name" />
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                      <RHFTextField name={`variants.${index}.name`} label="Variant name" />
+                      <RHFTextField name={`variants.${index}.sku`} label="Variant SKU" />
+                    </Stack>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                       <RHFTextField name={`variants.${index}.priceCents`} label="Price (cents)" type="number" />
                       <RHFTextField name={`variants.${index}.stock`} label="Stock" type="number" />
@@ -413,9 +787,16 @@ export function CommerceProductFormCard({
             </Stack>
           )}
 
-          <Button type="submit" variant="contained" disabled={isPending}>
-            {isPending ? <CircularProgress size={20} color="inherit" /> : 'Save product'}
-          </Button>
+          <Stack direction="row" spacing={2}>
+            <Button type="submit" variant="contained" disabled={isPending} size="large" sx={{ flexGrow: 1 }}>
+              {isPending ? <CircularProgress size={20} color="inherit" /> : isEditing ? 'Update product' : 'Save product'}
+            </Button>
+            {(isEditing || modal) && (
+              <Button variant="outlined" color="inherit" size="large" onClick={onCancelEdit}>
+                Cancel
+              </Button>
+            )}
+          </Stack>
         </Stack>
       </Form>
     </Card>
@@ -428,6 +809,7 @@ type OrdersTableProps = {
   statusFilter: string;
   onSearchChange: (value: string) => void;
   onStatusFilterChange: (value: string) => void;
+  onView: (orderId: string) => void;
   onPay: (orderId: string) => void;
   onReceipt: (orderId: string) => void;
   onMarkProcessing: (orderId: string) => void;
@@ -440,6 +822,7 @@ export function CommerceOrdersTable({
   statusFilter,
   onSearchChange,
   onStatusFilterChange,
+  onView,
   onPay,
   onReceipt,
   onMarkProcessing,
@@ -528,22 +911,22 @@ export function CommerceOrdersTable({
                 <TableCell>{fCurrency(item.totalAmountCents / 100)}</TableCell>
                 <TableCell align="right">
                   <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button size="small" variant="soft" onClick={() => onView(item.id)}>
+                      View
+                    </Button>
                     {item.paymentStatus !== 'paid' ? (
-                      <Button size="small" onClick={() => onPay(item.id)}>
+                      <Button size="small" variant="soft" color="primary" onClick={() => onPay(item.id)}>
                         Pay
                       </Button>
                     ) : item.status === 'processing' ? (
-                      <Button size="small" color="success" onClick={() => onMarkCompleted(item.id)}>
+                      <Button size="small" variant="soft" color="success" onClick={() => onMarkCompleted(item.id)}>
                         Complete
                       </Button>
                     ) : item.status !== 'completed' ? (
-                      <Button size="small" color="inherit" onClick={() => onMarkProcessing(item.id)}>
+                      <Button size="small" variant="soft" color="info" onClick={() => onMarkProcessing(item.id)}>
                         Process
                       </Button>
                     ) : null}
-                    <Button size="small" color="inherit" onClick={() => onReceipt(item.id)}>
-                      Receipt
-                    </Button>
                   </Stack>
                 </TableCell>
               </TableRow>
@@ -567,23 +950,60 @@ export function CommerceOrdersTable({
 
 export function CommerceCategoriesTable({
   categories,
+  search,
+  onSearchChange,
   onCreate,
+  onEdit,
+  onDelete,
 }: {
-  categories: any[];
+  categories: Array<{
+    id: string;
+    name: string;
+    description?: string | null;
+    isActive?: boolean;
+    productCount?: number;
+    activeProductCount?: number;
+  }>;
+  search: string;
+  onSearchChange: (value: string) => void;
   onCreate: () => void;
+  onEdit: (category: any) => void;
+  onDelete: (id: string) => void;
 }) {
   return (
     <Card sx={{ overflow: 'hidden' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 3 }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', md: 'center' }}
+        spacing={2}
+        sx={{ p: 3 }}
+      >
         <Box>
           <Typography variant="h5">Categories</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Organize products into clear storefront sections.
           </Typography>
         </Box>
-        <Button variant="contained" onClick={onCreate}>
-          New category
-        </Button>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+          <TextField
+            size="small"
+            placeholder="Search categories"
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="solar:magnifer-bold-duotone" width={18} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: { md: 260 } }}
+          />
+          <Button variant="contained" onClick={onCreate}>
+            New category
+          </Button>
+        </Stack>
       </Stack>
       <Divider />
       <TableContainer>
@@ -592,14 +1012,31 @@ export function CommerceCategoriesTable({
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Description</TableCell>
+              <TableCell>Products</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell align="right">Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {categories.map((category: any) => (
+            {categories.map((category) => (
               <TableRow key={category.id}>
-                <TableCell>{category.name}</TableCell>
+                <TableCell>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle2">{category.name}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {category.activeProductCount || 0} active listing{category.activeProductCount === 1 ? '' : 's'}
+                    </Typography>
+                  </Stack>
+                </TableCell>
                 <TableCell>{category.description || 'No description'}</TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    label={`${category.productCount || 0} linked`}
+                    color={(category.productCount || 0) > 0 ? 'info' : 'default'}
+                    variant="outlined"
+                  />
+                </TableCell>
                 <TableCell>
                   <Chip
                     size="small"
@@ -608,11 +1045,21 @@ export function CommerceCategoriesTable({
                     variant="outlined"
                   />
                 </TableCell>
+                <TableCell align="right">
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button size="small" color="inherit" onClick={() => onEdit(category)}>
+                      Edit
+                    </Button>
+                    <IconButton color="error" onClick={() => onDelete(category.id)}>
+                      <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+                    </IconButton>
+                  </Stack>
+                </TableCell>
               </TableRow>
             ))}
             {categories.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} sx={{ py: 8, textAlign: 'center' }}>
+                <TableCell colSpan={5} sx={{ py: 8, textAlign: 'center' }}>
                   <Typography variant="subtitle1">No categories yet.</Typography>
                 </TableCell>
               </TableRow>
@@ -626,53 +1073,238 @@ export function CommerceCategoriesTable({
 
 export function CommerceCouponsTable({
   coupons,
+  search,
   onCreate,
+  onSearchChange,
+  onEdit,
+  onToggleActive,
+  onDelete,
 }: {
-  coupons: any[];
+  coupons: ICommerceCoupon[];
+  search: string;
   onCreate: () => void;
+  onSearchChange: (value: string) => void;
+  onEdit: (coupon: ICommerceCoupon) => void;
+  onToggleActive: (coupon: ICommerceCoupon) => void;
+  onDelete: (id: string) => void;
 }) {
+  const activeCoupons = coupons.filter((coupon) => coupon.isActive).length;
+  const scheduledCoupons = coupons.filter((coupon) => Boolean(coupon.expiresAt)).length;
+  const exhaustedCoupons = coupons.filter(
+    (coupon) => typeof coupon.maxUsage === 'number' && coupon.usedCount >= coupon.maxUsage
+  ).length;
+
   return (
     <Card sx={{ overflow: 'hidden' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 3 }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', md: 'center' }}
+        spacing={2}
+        sx={{ p: 3 }}
+      >
         <Box>
           <Typography variant="h5">Coupons</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Create promotions that shoppers can apply during checkout.
           </Typography>
         </Box>
-        <Button variant="contained" onClick={onCreate}>
-          New coupon
-        </Button>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+          <TextField
+            size="small"
+            placeholder="Search coupons"
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="solar:magnifer-bold-duotone" width={18} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: { md: 260 } }}
+          />
+          <Button variant="contained" onClick={onCreate}>
+            New coupon
+          </Button>
+        </Stack>
       </Stack>
       <Divider />
+      <Box
+        sx={{
+          px: 3,
+          py: 2,
+          bgcolor: 'background.neutral',
+          borderBottom: (theme) => `1px dashed ${theme.palette.divider}`,
+        }}
+      >
+        <Grid container spacing={2}>
+          {[
+            { label: 'Visible coupons', value: coupons.length, helper: 'Coupons in the current search' },
+            { label: 'Active offers', value: activeCoupons, helper: 'Coupons currently available' },
+            { label: 'Scheduled or expiring', value: scheduledCoupons, helper: 'Coupons with an expiry date' },
+            { label: 'Usage capped', value: exhaustedCoupons, helper: 'Coupons at max usage' },
+          ].map((item) => (
+            <Grid key={item.label} item xs={12} sm={6} md={3}>
+              <Stack spacing={0.25}>
+                <Typography variant="overline" sx={{ color: 'text.secondary' }}>
+                  {item.label}
+                </Typography>
+                <Typography variant="h5">{item.value}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  {item.helper}
+                </Typography>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Code</TableCell>
+              <TableCell>Rules</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Value</TableCell>
+              <TableCell>Status</TableCell>
               <TableCell>Usage</TableCell>
+              <TableCell align="right">Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {coupons.map((coupon: any) => (
+            {coupons.map((coupon) => (
               <TableRow key={coupon.id}>
-                <TableCell>{coupon.code}</TableCell>
-                <TableCell>{coupon.type}</TableCell>
+                <TableCell>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle2">{coupon.code}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {coupon.expiresAt
+                        ? `Expires ${new Date(coupon.expiresAt).toLocaleDateString()}`
+                        : 'No expiry date'}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>
+                  <Stack spacing={0.5}>
+                    <Typography variant="body2">
+                      Minimum order:{' '}
+                      <strong>{coupon.minOrderCents > 0 ? fCurrency(coupon.minOrderCents / 100) : 'None'}</strong>
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {coupon.maxUsage ? `Max ${coupon.maxUsage} uses` : 'Unlimited uses'}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    color={coupon.type === 'percent' ? 'info' : 'warning'}
+                    label={coupon.type === 'percent' ? 'Percent' : 'Fixed amount'}
+                  />
+                </TableCell>
                 <TableCell>
                   {coupon.type === 'percent' ? `${coupon.value}%` : fCurrency((coupon.value || 0) / 100)}
+                </TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    <Chip
+                      size="small"
+                      label={coupon.isActive ? 'Active' : 'Inactive'}
+                      color={coupon.isActive ? 'success' : 'default'}
+                      variant="outlined"
+                    />
+                    {coupon.expiresAt && new Date(coupon.expiresAt).getTime() < Date.now() ? (
+                      <Chip size="small" label="Expired" color="error" variant="outlined" />
+                    ) : null}
+                  </Stack>
                 </TableCell>
                 <TableCell>
                   {coupon.usedCount || 0}
                   {coupon.maxUsage ? ` / ${coupon.maxUsage}` : ''}
                 </TableCell>
+                <TableCell align="right">
+                  <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                    <Button
+                      size="small"
+                      color="inherit"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(coupon.code);
+                      }}
+                    >
+                      Copy
+                    </Button>
+                    <Button size="small" color="inherit" onClick={() => onEdit(coupon)}>
+                      Edit
+                    </Button>
+                    <Button size="small" color="inherit" onClick={() => onToggleActive(coupon)}>
+                      {coupon.isActive ? 'Pause' : 'Activate'}
+                    </Button>
+                    <IconButton color="error" onClick={() => onDelete(coupon.id)}>
+                      <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+                    </IconButton>
+                  </Stack>
+                </TableCell>
               </TableRow>
             ))}
             {coupons.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} sx={{ py: 8, textAlign: 'center' }}>
+                <TableCell colSpan={7} sx={{ py: 8, textAlign: 'center' }}>
                   <Typography variant="subtitle1">No coupons created.</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    Build discounts with expiry dates, order minimums, and usage controls.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Card>
+  );
+}
+
+export function CommerceCustomersTable({ customers }: { customers: any[] }) {
+  return (
+    <Card sx={{ overflow: 'hidden' }}>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h5">Customers</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          Monitor your shopper community and their order history.
+        </Typography>
+      </Box>
+      <Divider />
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Customer</TableCell>
+              <TableCell>Orders</TableCell>
+              <TableCell>Total Spent</TableCell>
+              <TableCell>Last Order</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {customers.map((c) => (
+              <TableRow key={c.email} hover>
+                <TableCell>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle2">{c.name}</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {c.email}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>{c.orderCount}</TableCell>
+                <TableCell>{fCurrency(c.totalSpentCents / 100)}</TableCell>
+                <TableCell>{new Date(c.lastOrderAt).toLocaleDateString()}</TableCell>
+              </TableRow>
+            ))}
+            {customers.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} sx={{ py: 8, textAlign: 'center' }}>
+                  <Typography variant="subtitle1">No customers yet.</Typography>
                 </TableCell>
               </TableRow>
             )}
@@ -1464,6 +2096,7 @@ type DashboardModulesProps = {
   categoriesTable: React.ReactNode;
   couponsTable: React.ReactNode;
   ordersTable: React.ReactNode;
+  customersTable: React.ReactNode;
   tablesPanel: React.ReactNode;
   settingsPanel: React.ReactNode;
 };
@@ -1477,6 +2110,7 @@ export function CommerceDashboardModules({
   categoriesTable,
   couponsTable,
   ordersTable,
+  customersTable,
   tablesPanel,
   settingsPanel,
 }: DashboardModulesProps) {
@@ -1488,26 +2122,19 @@ export function CommerceDashboardModules({
         <Tab value="categories" label="Categories" />
         <Tab value="coupons" label="Coupons" />
         <Tab value="orders" label="Orders" />
+        <Tab value="customers" label="Customers" />
         <Tab value="tables" label="Tables" />
         <Tab value="settings" label="Settings" />
       </Tabs>
 
       {currentModule === 'dashboard' && summaryCards}
 
-      {currentModule === 'products' && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={7}>
-            {productsTable}
-          </Grid>
-          <Grid item xs={12} md={5}>
-            {productForm}
-          </Grid>
-        </Grid>
-      )}
+      {currentModule === 'products' && productsTable}
 
       {currentModule === 'categories' && categoriesTable}
       {currentModule === 'coupons' && couponsTable}
       {currentModule === 'orders' && ordersTable}
+      {currentModule === 'customers' && customersTable}
       {currentModule === 'tables' && tablesPanel}
       {currentModule === 'settings' && settingsPanel}
     </Stack>
@@ -1518,23 +2145,31 @@ export function CommerceCategoryDialog({
   open,
   onClose,
   methods,
+  editingId,
   onSubmit,
   isPending,
 }: {
   open: boolean;
   onClose: () => void;
   methods: any;
+  editingId?: string | null;
   onSubmit: () => void;
   isPending: boolean;
 }) {
+  const isEditing = Boolean(editingId);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>New category</DialogTitle>
+      <DialogTitle>{isEditing ? 'Edit category' : 'New category'}</DialogTitle>
       <Form methods={methods} onSubmit={onSubmit}>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <RHFTextField name="name" label="Category name" />
             <RHFTextField name="description" label="Description" multiline rows={3} />
+            <RHFTextField name="isActive" label="Status" select>
+              <MenuItem value="true">Active</MenuItem>
+              <MenuItem value="false">Inactive</MenuItem>
+            </RHFTextField>
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -1542,10 +2177,29 @@ export function CommerceCategoryDialog({
             Cancel
           </Button>
           <Button type="submit" variant="contained" disabled={isPending}>
-            {isPending ? <CircularProgress size={20} color="inherit" /> : 'Create'}
+            {isPending ? <CircularProgress size={20} color="inherit" /> : isEditing ? 'Save changes' : 'Create'}
           </Button>
         </DialogActions>
       </Form>
+    </Dialog>
+  );
+}
+
+export function CommerceProductDetailDialog({
+  open,
+  onClose,
+  title,
+  content,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  content: React.ReactNode;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent sx={{ p: { xs: 1.5, md: 2 } }}>{content}</DialogContent>
     </Dialog>
   );
 }
@@ -1554,27 +2208,53 @@ export function CommerceCouponDialog({
   open,
   onClose,
   methods,
+  editingId,
   onSubmit,
   isPending,
 }: {
   open: boolean;
   onClose: () => void;
   methods: any;
+  editingId?: string | null;
   onSubmit: () => void;
   isPending: boolean;
 }) {
+  const isEditing = Boolean(editingId);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>New coupon</DialogTitle>
+      <DialogTitle>{isEditing ? 'Edit coupon' : 'New coupon'}</DialogTitle>
       <Form methods={methods} onSubmit={onSubmit}>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
-            <RHFTextField name="code" label="Coupon code" />
+            <RHFTextField name="code" label="Coupon code" placeholder="WELCOME10" />
             <RHFTextField name="type" label="Discount type" select>
               <MenuItem value="percent">Percent</MenuItem>
               <MenuItem value="fixed">Fixed</MenuItem>
             </RHFTextField>
-            <RHFTextField name="value" label="Value" type="number" />
+            <RHFTextField
+              name="value"
+              label="Value"
+              type="number"
+              helperText="Percent coupons use whole numbers like 10. Fixed coupons use cents."
+            />
+            <RHFTextField name="minOrderCents" label="Minimum order (cents)" type="number" />
+            <RHFTextField
+              name="maxUsage"
+              label="Maximum redemptions"
+              type="number"
+              helperText="Leave blank for unlimited usage."
+            />
+            <RHFTextField
+              name="expiresAt"
+              label="Expires at"
+              type="datetime-local"
+              InputLabelProps={{ shrink: true }}
+            />
+            <RHFTextField name="isActive" label="Status" select>
+              <MenuItem value="true">Active</MenuItem>
+              <MenuItem value="false">Inactive</MenuItem>
+            </RHFTextField>
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -1582,10 +2262,76 @@ export function CommerceCouponDialog({
             Cancel
           </Button>
           <Button type="submit" variant="contained" disabled={isPending}>
-            {isPending ? <CircularProgress size={20} color="inherit" /> : 'Create'}
+            {isPending ? <CircularProgress size={20} color="inherit" /> : isEditing ? 'Save changes' : 'Create'}
           </Button>
         </DialogActions>
       </Form>
+    </Dialog>
+  );
+}
+
+export function CommerceOrderDetailDialog({
+  open,
+  onClose,
+  order,
+  onStatusUpdate,
+  onReceipt,
+}: {
+  open: boolean;
+  onClose: () => void;
+  order?: any;
+  onStatusUpdate: (id: string, status: string, paymentStatus?: string) => void;
+  onReceipt: (id: string) => void;
+}) {
+  if (!order) return null;
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+         Order Detail #{order.id.slice(0, 8)}
+         <Chip label={order.status.toUpperCase()} color={orderStatusColor(order.status)} size="small" />
+      </DialogTitle>
+      <DialogContent dividers>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" sx={{ mb: 1.5 }}>Customer Information</Typography>
+            <Stack spacing={1}>
+              <Typography variant="subtitle2">Name: <Box component="span" sx={{ fontWeight: 'normal' }}>{(order.shippingAddress as any)?.customerName}</Box></Typography>
+              <Typography variant="subtitle2">Email: <Box component="span" sx={{ fontWeight: 'normal' }}>{(order.shippingAddress as any)?.email}</Box></Typography>
+              <Typography variant="subtitle2">Phone: <Box component="span" sx={{ fontWeight: 'normal' }}>{(order.shippingAddress as any)?.phone || 'N/A'}</Box></Typography>
+              <Typography variant="subtitle2">Address: <Box component="span" sx={{ fontWeight: 'normal' }}>{`${(order.shippingAddress as any)?.line1}, ${(order.shippingAddress as any)?.city}, ${(order.shippingAddress as any)?.postalCode}`}</Box></Typography>
+            </Stack>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Typography variant="h6" sx={{ mb: 1.5 }}>Order Summary</Typography>
+            <Stack spacing={1.5}>
+              {order.items.map((item: any) => (
+                <Stack key={item.id} direction="row" justifyContent="space-between">
+                  <Typography variant="body2">{item.productName} x {item.quantity}</Typography>
+                  <Typography variant="subtitle2">{fCurrency((item.unitPriceCents * item.quantity) / 100)}</Typography>
+                </Stack>
+              ))}
+              <Divider />
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="subtitle1">Total</Typography>
+                <Typography variant="h6" color="primary">{fCurrency(order.totalAmountCents / 100)}</Typography>
+              </Stack>
+            </Stack>
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions sx={{ p: 2.5 }}>
+        <Button onClick={onClose} color="inherit">Close</Button>
+        <Button onClick={() => onReceipt(order.id)} startIcon={<Iconify icon="solar:printer-bold" />}>Print Receipt</Button>
+        <Box sx={{ flexGrow: 1 }} />
+        {order.paymentStatus !== 'paid' ? (
+          <Button variant="contained" color="success" onClick={() => onStatusUpdate(order.id, 'processing', 'paid')}>Mark Paid & Process</Button>
+        ) : order.status === 'processing' ? (
+          <Button variant="contained" color="success" onClick={() => onStatusUpdate(order.id, 'completed')}>Mark Completed</Button>
+        ) : order.status !== 'completed' ? (
+          <Button variant="contained" color="info" onClick={() => onStatusUpdate(order.id, 'processing')}>Start Processing</Button>
+        ) : null}
+      </DialogActions>
     </Dialog>
   );
 }
