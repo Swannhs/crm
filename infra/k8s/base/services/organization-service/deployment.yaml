@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: organization-service
+  labels:
+    app.kubernetes.io/name: organization-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: organization-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: organization-service
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/mymanager/organization-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7010
+              name: http
+          env:
+            - name: PORT
+              value: "7010"
+            - name: KAFKA_BROKERS
+              value: kafka:9092
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: organization-service-secret
+                  key: DB_URL
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

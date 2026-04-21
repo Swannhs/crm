@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - nginx.yaml
+
+configMapGenerator:
+  - name: nginx-gateway-config
+    files:
+      - nginx.conf=nginx.conf
+      - cors.conf=cors.conf
+
+generatorOptions:
+  disableNameSuffixHash: true
