@@ -59,7 +59,7 @@ export function ChannelListView() {
       });
 
       if (selectedProvider === 'whatsapp') {
-        const qrData = await omniChannelService.getWhatsAppQR(instance.id);
+        const qrData = await omniChannelService.getWhatsAppQR(instance.instanceId);
         setQrCode(qrData.qr);
       } else {
         handleCloseConnect();
@@ -75,7 +75,14 @@ export function ChannelListView() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      await omniChannelService.deleteInstance(deleteId);
+      const target = (instances || []).find((item: any) => item.id === deleteId);
+      if (!target) return;
+
+      if (target.provider === 'telegram') {
+        await omniChannelService.deleteTelegramSession(target.instanceId);
+      } else {
+        await omniChannelService.deleteInstance(target.instanceId);
+      }
       refetch();
       setDeleteId(null);
     } catch (error) {
@@ -133,7 +140,7 @@ export function ChannelListView() {
                       {row.provider}
                     </Label>
                   </TableCell>
-                  <TableCell>{row.phoneNumber || 'N/A'}</TableCell>
+                  <TableCell>{row.phone || row.phoneNumber || row.instanceId || 'N/A'}</TableCell>
                   <TableCell>
                     <Label variant="filled" color={getStatusColor(row.status)} sx={{ textTransform: 'capitalize' }}>
                       {row.status || 'UNKNOWN'}

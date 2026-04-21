@@ -27,7 +27,10 @@ import { Label } from 'src/components/label';
 export function OmniIntegrationView() {
   const queryClient = useQueryClient();
   const [openAdd, setOpenAdd] = useState(false);
-  const [newInstance, setNewInstance] = useState({ name: '', provider: 'whatsapp' as const });
+  const [newInstance, setNewInstance] = useState<{ name: string; provider: 'whatsapp' | 'telegram' }>({
+    name: '',
+    provider: 'whatsapp',
+  });
   
   const [openQR, setOpenQR] = useState(false);
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
@@ -113,7 +116,7 @@ export function OmniIntegrationView() {
                     variant="soft" 
                     color="primary"
                     startIcon={<Iconify icon="lucide:qr-code" />}
-                    onClick={() => handleOpenQR(instance.id)}
+                    onClick={() => handleOpenQR(instance.instanceId)}
                   >
                     Scan QR
                   </Button>

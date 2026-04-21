@@ -16,6 +16,7 @@ import { identityMiddleware } from "./middleware/identity.js";
 const { app, logger } = createServiceApp({ serviceName: "realtime-service", jsonLimit: "10mb" });
 const auth = identityMiddleware;
 const cast = (req: any) => req as any;
+const route = (handler: (req: any, res: any) => unknown) => (req: any, res: any) => handler(cast(req), res);
 
 const channelCtrl = new LiveChatChannelController();
 const messageCtrl = new LiveChatMessageController();
@@ -43,6 +44,16 @@ app.get("/v1/livechat/widget-setting/pub", (req, res) => widgetCtrl.getPublicSet
 app.post("/v1/livechat/widget-setting/send-code", auth, (req, res) => widgetCtrl.sendCode(cast(req), res));
 
 app.get("/v1/livechat/statistics", auth, (req, res) => statsCtrl.getStatistics(cast(req), res));
+
+// --- Omni ---
+app.get("/v1/omni/conversations", auth, route(omniConvCtrl.getConversations.bind(omniConvCtrl)));
+app.get("/v1/omni/conversations/:conversationId", auth, route(omniConvCtrl.getConversationById.bind(omniConvCtrl)));
+app.post("/v1/omni/conversations/:conversationId/assign", auth, route(omniConvCtrl.assignAgent.bind(omniConvCtrl)));
+app.patch("/v1/omni/conversations/:conversationId", auth, route(omniConvCtrl.updateConversation.bind(omniConvCtrl)));
+app.get("/v1/omni/conversations/:conversationId/history", auth, route(omniMsgCtrl.getHistory.bind(omniMsgCtrl)));
+app.post("/v1/omni/messages", auth, route(omniMsgCtrl.addMessage.bind(omniMsgCtrl)));
+app.post("/v1/omni/ai/translate", auth, route(omniAICtrl.translate.bind(omniAICtrl)));
+app.post("/v1/omni/ai/suggest-reply", auth, route(omniAICtrl.suggestReply.bind(omniAICtrl)));
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {

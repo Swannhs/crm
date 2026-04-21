@@ -237,6 +237,12 @@ export class MetaIntegrationRepository {
     return db.metaIntegration.findUnique({ where: { userId } });
   }
 
+  async findByBusinessPhoneNumberId(businessPhoneNumberId: string) {
+    return db.metaIntegration.findFirst({
+      where: { businessPhoneNumberId }
+    });
+  }
+
   async upsert(userId: string, organizationId: string | undefined, data: MetaIntegrationInput) {
     const existing = await this.findByUserId(userId);
     if (existing) {
@@ -305,6 +311,13 @@ export class TelegramSessionRepository {
 
   async findByUserId(userId: string) {
     return db.telegramSession.findMany({ where: { userId } });
+  }
+
+  async findFirstActiveByOrganizationId(organizationId: string) {
+    return db.telegramSession.findFirst({
+      where: { organizationId, status: { not: 'deleted' } },
+      orderBy: { updatedAt: 'desc' }
+    });
   }
 
   async findByOrganizationId(organizationId: string) {

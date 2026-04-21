@@ -88,6 +88,9 @@ app.delete("/v1/omni/triggers/:id", writeAccess, route(triggerCtrl.delete.bind(t
 app.post("/v1/omni/broadcasts", writeAccess, route(broadcastCtrl.create.bind(broadcastCtrl)));
 app.get("/v1/omni/broadcasts", readAccess, route(broadcastCtrl.list.bind(broadcastCtrl)));
 app.get("/v1/omni/broadcasts/:id", readAccess, route(broadcastCtrl.get.bind(broadcastCtrl)));
+app.post("/v1/omni/broadcast", writeAccess, route(broadcastCtrl.create.bind(broadcastCtrl)));
+app.get("/v1/omni/broadcast", readAccess, route(broadcastCtrl.list.bind(broadcastCtrl)));
+app.get("/v1/omni/broadcast/:id", readAccess, route(broadcastCtrl.get.bind(broadcastCtrl)));
 
 // --- Omni Webhook ---
 const webhookCtrl = new OmniWebhookController();

@@ -47,6 +47,7 @@ const webhookCtrl = new WebhookController();
 app.get("/v1/webhook/whatsapp", (req, res) => webhookCtrl.verifyMeta(req, res));
 app.post("/v1/webhook/whatsapp", (req, res) => webhookCtrl.handleMeta(req, res));
 app.post("/v1/webhook/telegram", (req, res) => webhookCtrl.handleTelegram(req, res));
+app.post("/v1/webhook/telegram/:sessionId", (req, res) => webhookCtrl.handleTelegram(req, res));
 
 // --- Generic Integration ---
 app.post("/v1/integrations/connect", auth, (req, res) => integrationCtrl.connect(cast(req), res));
@@ -103,6 +104,30 @@ app.get("/v1/integrations/uber-eats/orders", auth, (req, res) => uberEatsCtrl.ge
 app.post("/v1/integrations/easypost/connect", auth, (req, res) => easyPostCtrl.connect(cast(req), res));
 app.post("/v1/integrations/easypost/shipment", auth, (req, res) => easyPostCtrl.createShipment(cast(req), res));
 app.post("/v1/integrations/easypost/rates", auth, (req, res) => easyPostCtrl.getRates(cast(req), res));
+
+// --- User Integration Settings ---
+app.get("/v1/integrations/settings", auth, (req, res) => settingsCtrl.getSettings(cast(req), res));
+app.put("/v1/integrations/settings", auth, (req, res) => settingsCtrl.updateSettings(cast(req), res));
+
+// --- Meta Integration ---
+app.get("/v1/integrations/meta", auth, (req, res) => metaCtrl.getIntegration(cast(req), res));
+app.put("/v1/integrations/meta", auth, (req, res) => metaCtrl.updateIntegration(cast(req), res));
+
+// --- Voice Integration ---
+app.get("/v1/integrations/voice", auth, (req, res) => voiceCtrl.getIntegration(cast(req), res));
+app.put("/v1/integrations/voice", auth, (req, res) => voiceCtrl.updateIntegration(cast(req), res));
+
+// --- WhatsApp ---
+app.get("/v1/integrations/whatsapp/instances", auth, (req, res) => whatsappCtrl.getInstances(cast(req), res));
+app.post("/v1/integrations/whatsapp/instances", auth, (req, res) => whatsappCtrl.createInstance(cast(req), res));
+app.delete("/v1/integrations/whatsapp/instances/:instanceId", auth, (req, res) => whatsappCtrl.deleteInstance(cast(req), res));
+app.get("/v1/integrations/whatsapp/qr/:instanceId", auth, (req, res) => whatsappCtrl.getQr(cast(req), res));
+app.get("/v1/integrations/whatsapp/status/:instanceId", auth, (req, res) => whatsappCtrl.getStatus(cast(req), res));
+
+// --- Telegram ---
+app.get("/v1/integrations/telegram/sessions", auth, (req, res) => telegramCtrl.getSessions(cast(req), res));
+app.post("/v1/integrations/telegram/sessions", auth, (req, res) => telegramCtrl.createSession(cast(req), res));
+app.delete("/v1/integrations/telegram/sessions/:sessionId", auth, (req, res) => telegramCtrl.deleteSession(cast(req), res));
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "integrations-service" }));

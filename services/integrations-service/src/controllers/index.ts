@@ -465,6 +465,36 @@ export class WhatsAppController {
       return res.status(500).json({ success: false, message: err.message });
     }
   }
+
+  async getQr(req: AuthenticatedRequest, res: Response) {
+    try {
+      const instanceId = getRouteParam(req.params.instanceId);
+      const instance = await this.svc.getInstance(instanceId);
+      if (!instance) return res.status(404).json({ success: false, message: 'Instance not found' });
+      return res.json({ success: true, data: { qr: instance.qr, status: instance.status } });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getStatus(req: AuthenticatedRequest, res: Response) {
+    try {
+      const instanceId = getRouteParam(req.params.instanceId);
+      const instance = await this.svc.getInstance(instanceId);
+      if (!instance) return res.status(404).json({ success: false, message: 'Instance not found' });
+      return res.json({
+        success: true,
+        data: {
+          instanceId: instance.instanceId,
+          status: instance.status,
+          phone: instance.phone,
+          updatedAt: instance.updatedAt,
+        },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
 }
 
 export class TelegramController {
@@ -550,7 +580,7 @@ export class WebhookController {
 
   async handleTelegram(req: any, res: Response) {
     try {
-      await this.svc.handleTelegramWebhook(req.body, req.logger);
+      await this.svc.handleTelegramWebhook(req.body, req.logger, req.params?.sessionId);
       return res.json({ success: true });
     } catch (err: any) {
       return res.json({ success: true });

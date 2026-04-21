@@ -367,6 +367,10 @@ export class MetaIntegrationService {
   async getOrganizationIntegrations(organizationId: string) {
     return this.repo.findByOrganizationId(organizationId);
   }
+
+  async findByBusinessPhoneNumberId(businessPhoneNumberId: string) {
+    return this.repo.findByBusinessPhoneNumberId(businessPhoneNumberId);
+  }
 }
 
 export class VoiceIntegrationService {
@@ -388,6 +392,9 @@ export class VoiceIntegrationService {
 import { emitOmniMessageReceived } from '../kafka/omni.producer.js';
 
 export class WebhookService {
+  private metaIntegrationService = new MetaIntegrationService();
+  private telegramService = new TelegramService();
+
   async verifyMetaWebhook(mode: string, token: string, challenge: string) {
     const verifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN || 'mymanager_token';
     if (mode === 'subscribe' && token === verifyToken) {
@@ -404,23 +411,35 @@ export class WebhookService {
           if (change.value.messages) {
             for (const message of change.value.messages) {
               const contact = change.value.contacts?.[0];
+              const businessPhoneNumberId = change.value.metadata?.phone_number_id;
+              const integration = businessPhoneNumberId
+                ? await this.metaIntegrationService.findByBusinessPhoneNumberId(businessPhoneNumberId)
+                : null;
+              const organizationId = integration?.organizationId;
+
+              if (!organizationId) {
+                logger.warn?.(
+                  { businessPhoneNumberId, messageId: message.id },
+                  "Skipping WhatsApp webhook event because organization could not be resolved"
+                );
+                continue;
+              }
+
               const event: OmniMessageReceivedEvent = {
                 provider: 'whatsapp',
-                instanceId: change.value.metadata.phone_number_id,
+                instanceId: businessPhoneNumberId,
                 contactMobile: message.from,
                 contactName: contact?.profile?.name,
                 content: message.text?.body || '',
                 type: message.type,
                 timestamp: parseInt(message.timestamp),
-                organizationId: 'PENDING_LOOKUP', // Needs lookup by phone_number_id
+                organizationId,
                 metadata: {
                   messageId: message.id,
                   raw: body
                 }
               };
-              
-              // Here we would look up the organizationId by businessPhoneNumberId
-              // For now, we emit with a placeholder or handle lookup in controller
+
               await emitOmniMessageReceived(event, logger);
             }
           }
@@ -430,17 +449,30 @@ export class WebhookService {
     return { success: true };
   }
 
-  async handleTelegramWebhook(body: any, logger: any) {
+  async handleTelegramWebhook(body: any, logger: any, sessionId?: string) {
     if (body.message) {
+      const session = sessionId
+        ? await this.telegramService.getSessionById(sessionId)
+        : null;
+      const organizationId = session?.organizationId;
+
+      if (!organizationId) {
+        logger.warn?.(
+          { sessionId, messageId: body.message.message_id },
+          "Skipping Telegram webhook event because organization could not be resolved"
+        );
+        return { success: false, skipped: true };
+      }
+
       const event: OmniMessageReceivedEvent = {
         provider: 'telegram',
-        instanceId: 'PENDING_LOOKUP', // Lookup by bot token/id
+        instanceId: session?.sessionId || sessionId || 'telegram-session',
         contactMobile: body.message.from.id.toString(),
         contactName: `${body.message.from.first_name || ''} ${body.message.from.last_name || ''}`.trim(),
         content: body.message.text || '',
         type: 'text',
         timestamp: body.message.date,
-        organizationId: 'PENDING_LOOKUP',
+        organizationId,
         metadata: {
           messageId: body.message.message_id.toString(),
           raw: body
@@ -457,6 +489,10 @@ export class WhatsAppService {
 
   async getInstances(userId: string) {
     return this.repo.findByUserId(userId);
+  }
+
+  async getInstance(instanceId: string) {
+    return this.repo.findByInstanceId(instanceId);
   }
 
   async createInstance(userId: string, organizationId: string | undefined, name?: string) {
@@ -478,6 +514,10 @@ export class TelegramService {
 
   async getSessions(userId: string) {
     return this.repo.findByUserId(userId);
+  }
+
+  async getSessionById(sessionId: string) {
+    return this.repo.findBySessionId(sessionId);
   }
 
   async createSession(userId: string, organizationId: string | undefined, name?: string) {

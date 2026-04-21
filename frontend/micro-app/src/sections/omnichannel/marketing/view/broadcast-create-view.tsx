@@ -1,197 +1,486 @@
 'use client';
 
-import * as Yup from 'yup';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useState, useCallback } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
+import List from '@mui/material/List';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
 import LoadingButton from '@mui/lab/LoadingButton';
 import MenuItem from '@mui/material/MenuItem';
-import Alert from '@mui/material/Alert';
-import Divider from '@mui/material/Divider';
+import InputAdornment from '@mui/material/InputAdornment';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+import { contactService } from 'src/services/contact-service';
 import { omniChannelService, omniMarketingService } from 'src/services/omni-service';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useQuery } from '@tanstack/react-query';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
+type FormValues = {
+  name: string;
+  provider: string;
+  instanceId: string;
+  content: string;
+  scheduledAt: string;
+};
+
+type SelectedRecipient = {
+  contactId: string;
+  fullName: string;
+  phone: string;
+  email?: string;
+};
+
+const defaultValues: FormValues = {
+  name: '',
+  provider: 'whatsapp',
+  instanceId: '',
+  content: 'Hello {{name}}, this is a message from MyManager.',
+  scheduledAt: '',
+};
+
 export function BroadcastCreateView() {
   const router = useRouter();
+
   const [error, setError] = useState<string | null>(null);
+  const [contactSearch, setContactSearch] = useState('');
+  const [selectedRecipients, setSelectedRecipients] = useState<SelectedRecipient[]>([]);
 
-  const { data: instances } = useQuery({
-    queryKey: ['omni-instances'],
-    queryFn: () => omniChannelService.getInstances(),
-  });
-
-  const BroadcastSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    provider: Yup.string().required('Provider is required'),
-    instanceId: Yup.string().required('Instance is required'),
-    content: Yup.string().required('Message content is required'),
-  });
-
-  const defaultValues = {
-    name: '',
-    provider: 'whatsapp',
-    instanceId: '',
-    content: 'Hello {{name}}, this is a message from MyManager.',
-  };
-
-  const methods = useForm({
-    resolver: yupResolver(BroadcastSchema),
+  const methods = useForm<FormValues>({
     defaultValues,
   });
 
   const {
-    reset,
     watch,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = methods;
 
   const values = watch();
 
+  const { data: instances = [] } = useQuery({
+    queryKey: ['omni-instances'],
+    queryFn: () => omniChannelService.getInstances(),
+  });
+
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
+    queryKey: ['broadcast-contacts', contactSearch],
+    queryFn: () => contactService.getContacts({ search: contactSearch }),
+  });
+
+  const filteredInstances = useMemo(
+    () => instances.filter((instance: any) => instance.provider === values.provider),
+    [instances, values.provider]
+  );
+
+  const availableContacts = useMemo(
+    () =>
+      contacts.filter((contact: any) => {
+        if (!contact.phone) {
+          return false;
+        }
+
+        return !selectedRecipients.some((recipient) => recipient.contactId === (contact.id || contact._id));
+      }),
+    [contacts, selectedRecipients]
+  );
+
+  const addRecipient = (contact: any) => {
+    const normalizedRecipient = {
+      contactId: contact.id || contact._id,
+      fullName: contact.fullName || 'Unnamed contact',
+      phone: contact.phone,
+      email: contact.email || '',
+    };
+
+    setSelectedRecipients((current) => [...current, normalizedRecipient]);
+  };
+
+  const removeRecipient = (contactId: string) => {
+    setSelectedRecipients((current) => current.filter((recipient) => recipient.contactId !== contactId));
+  };
+
+  const addAllVisibleRecipients = () => {
+    setSelectedRecipients((current) => {
+      const existingIds = new Set(current.map((recipient) => recipient.contactId));
+      const nextRecipients = availableContacts
+        .filter((contact: any) => !existingIds.has(contact.id || contact._id))
+        .map((contact: any) => ({
+          contactId: contact.id || contact._id,
+          fullName: contact.fullName || 'Unnamed contact',
+          phone: contact.phone,
+          email: contact.email || '',
+        }));
+
+      return [...current, ...nextRecipients];
+    });
+  };
+
+  const clearRecipients = () => {
+    setSelectedRecipients([]);
+  };
+
+  const createMutation = useMutation({
+    mutationFn: omniMarketingService.createBroadcast,
+    onSuccess: () => {
+      router.push(paths.dashboard.omni.marketing);
+    },
+    onError: (mutationError: any) => {
+      setError(mutationError?.response?.data?.message || mutationError?.message || 'Failed to create broadcast.');
+    },
+  });
+
   const onSubmit = handleSubmit(async (data) => {
-    try {
-      // Mock recipients for now - in production this would come from a contact selector
-      const recipients = [
-        { contactId: 'mock-1', mobile: '1234567890', variables: { name: 'John Doe' } },
-        { contactId: 'mock-2', mobile: '0987654321', variables: { name: 'Jane Smith' } },
-      ];
-
-      await omniMarketingService.createBroadcast({
-        ...data,
-        type: 'text',
-        recipients,
-      });
-
-      router.push(paths.dashboard.omnichannel.broadcast_list);
-    } catch (err: any) {
-      setError(err.message);
+    if (selectedRecipients.length === 0) {
+      setError('Select at least one recipient before launching the campaign.');
+      return;
     }
+
+    setError(null);
+
+    await createMutation.mutateAsync({
+      name: data.name,
+      provider: data.provider,
+      instanceId: data.instanceId,
+      content: data.content,
+      type: 'text',
+      scheduledAt: data.scheduledAt ? new Date(data.scheduledAt).toISOString() : undefined,
+      metadata: {
+        audienceSource: 'crm_contacts',
+        contactSearch: contactSearch || null,
+      },
+      recipients: selectedRecipients.map((recipient) => ({
+        contactId: recipient.contactId,
+        mobile: recipient.phone,
+        variables: {
+          name: recipient.fullName,
+          phone: recipient.phone,
+          email: recipient.email || '',
+        },
+      })),
+    });
   });
 
   const handleAddVariable = (variable: string) => {
-    const current = values.content;
-    setValue('content', `${current}{{${variable}}}`);
+    const current = values.content || '';
+    const suffix = current.endsWith(' ') || current.length === 0 ? '' : ' ';
+    setValue('content', `${current}${suffix}{{${variable}}}`);
   };
 
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: 3 }}>Create New Broadcast</Typography>
+      <Typography variant="h4" sx={{ mb: 3 }}>
+        Create New Broadcast
+      </Typography>
 
-      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+      {error ? (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
 
       <form onSubmit={onSubmit}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Card sx={{ p: 3 }}>
-              <Stack spacing={3}>
-                <TextField 
-                  name="name" 
-                  label="Campaign Name" 
-                  fullWidth 
-                  {...methods.register('name')} 
-                  error={!!methods.formState.errors.name}
-                  helperText={methods.formState.errors.name?.message}
-                />
-
-                <Stack direction="row" spacing={2}>
+            <Stack spacing={3}>
+              <Card sx={{ p: 3 }}>
+                <Stack spacing={3}>
                   <TextField
-                    select
+                    label="Campaign Name"
                     fullWidth
-                    name="provider"
-                    label="Provider"
-                    {...methods.register('provider')}
-                  >
-                    <MenuItem value="whatsapp">WhatsApp</MenuItem>
-                    <MenuItem value="telegram">Telegram</MenuItem>
-                  </TextField>
+                    {...methods.register('name', {
+                      required: 'Name is required',
+                    })}
+                    error={!!errors.name}
+                    helperText={errors.name?.message || ''}
+                  />
+
+                  <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                    <TextField
+                      select
+                      fullWidth
+                      label="Provider"
+                      {...methods.register('provider', {
+                        required: 'Provider is required',
+                      })}
+                    >
+                      <MenuItem value="whatsapp">WhatsApp</MenuItem>
+                      <MenuItem value="telegram">Telegram</MenuItem>
+                    </TextField>
+
+                    <TextField
+                      select
+                      fullWidth
+                      label="Account / Instance"
+                      {...methods.register('instanceId', {
+                        required: 'Instance is required',
+                      })}
+                      error={!!errors.instanceId}
+                      helperText={errors.instanceId?.message || ''}
+                    >
+                      {filteredInstances.map((instance: any) => (
+                        <MenuItem
+                          key={instance.id || instance.instanceId}
+                          value={instance.instanceId || instance.id}
+                        >
+                          {instance.name || instance.instanceId} ({instance.phoneNumber || instance.phone || 'Connected'})
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Stack>
 
                   <TextField
-                    select
                     fullWidth
-                    name="instanceId"
-                    label="Select Account/Instance"
-                    {...methods.register('instanceId')}
-                    error={!!methods.formState.errors.instanceId}
-                    helperText={methods.formState.errors.instanceId?.message}
-                  >
-                    {(instances || []).filter((i: any) => i.provider === values.provider).map((instance: any) => (
-                      <MenuItem key={instance.id} value={instance.id}>
-                        {instance.name} ({instance.phoneNumber || 'Telegram Bot'})
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    type="datetime-local"
+                    label="Schedule Send"
+                    InputLabelProps={{ shrink: true }}
+                    {...methods.register('scheduledAt')}
+                    helperText="Leave empty to start processing immediately."
+                  />
+
+                  <Divider />
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Message Content
+                    </Typography>
+
+                    <Stack direction="row" spacing={1} sx={{ mb: 1.5, flexWrap: 'wrap' }}>
+                      <Button size="small" variant="outlined" onClick={() => handleAddVariable('name')}>
+                        + Name
+                      </Button>
+                      <Button size="small" variant="outlined" onClick={() => handleAddVariable('phone')}>
+                        + Phone
+                      </Button>
+                      <Button size="small" variant="outlined" onClick={() => handleAddVariable('email')}>
+                        + Email
+                      </Button>
+                    </Stack>
+
+                    <TextField
+                      multiline
+                      rows={6}
+                      fullWidth
+                      placeholder="Type your broadcast message here... Use {{variable}} for personalization."
+                      {...methods.register('content', {
+                        required: 'Message content is required',
+                      })}
+                      error={!!errors.content}
+                      helperText={errors.content?.message || ''}
+                    />
+                  </Box>
+                </Stack>
+              </Card>
+
+              <Card sx={{ p: 3 }}>
+                <Stack
+                  direction={{ xs: 'column', md: 'row' }}
+                  spacing={2}
+                  alignItems={{ xs: 'stretch', md: 'center' }}
+                  justifyContent="space-between"
+                  sx={{ mb: 2 }}
+                >
+                  <Box>
+                    <Typography variant="h6">Audience Selection</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Select CRM contacts with valid phone numbers for this campaign.
+                    </Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={1}>
+                    <Button variant="outlined" onClick={addAllVisibleRecipients} disabled={availableContacts.length === 0}>
+                      Add Visible
+                    </Button>
+                    <Button variant="text" color="inherit" onClick={clearRecipients} disabled={selectedRecipients.length === 0}>
+                      Clear
+                    </Button>
+                  </Stack>
                 </Stack>
 
-                <Divider />
+                <TextField
+                  fullWidth
+                  value={contactSearch}
+                  onChange={(event) => setContactSearch(event.target.value)}
+                  placeholder="Search contacts by name, email, or phone..."
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: contactsLoading ? <CircularProgress size={18} /> : null,
+                  }}
+                />
 
-                <Box>
-                   <Typography variant="subtitle2" sx={{ mb: 1 }}>Message Content</Typography>
-                   <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                      <Button size="small" variant="soft" onClick={() => handleAddVariable('name')}>+ Name</Button>
-                      <Button size="small" variant="soft" onClick={() => handleAddVariable('phone')}>+ Phone</Button>
-                      <Button size="small" variant="soft" onClick={() => handleAddVariable('custom')}>+ Custom Var</Button>
-                   </Stack>
-                   <TextField
-                    multiline
-                    rows={6}
-                    fullWidth
-                    placeholder="Type your broadcast message here... Use {{variable}} for personalization."
-                    {...methods.register('content')}
-                    error={!!methods.formState.errors.content}
-                    helperText={methods.formState.errors.content?.message}
-                  />
-                </Box>
-              </Stack>
-            </Card>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Available Contacts
+                    </Typography>
+                    <List disablePadding sx={{ border: (theme) => `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
+                      {availableContacts.slice(0, 12).map((contact: any) => (
+                        <ListItem
+                          key={contact.id || contact._id}
+                          secondaryAction={
+                            <Button size="small" variant="contained" onClick={() => addRecipient(contact)}>
+                              Add
+                            </Button>
+                          }
+                          sx={{ py: 1.5 }}
+                        >
+                          <Box sx={{ minWidth: 0, pr: 10 }}>
+                            <Typography variant="subtitle2" noWrap>
+                              {contact.fullName}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              {contact.phone}
+                              {contact.email ? ` | ${contact.email}` : ''}
+                            </Typography>
+                          </Box>
+                        </ListItem>
+                      ))}
+
+                      {!contactsLoading && availableContacts.length === 0 ? (
+                        <ListItem sx={{ py: 3 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            No more eligible contacts found for the current search.
+                          </Typography>
+                        </ListItem>
+                      ) : null}
+                    </List>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Selected Recipients
+                    </Typography>
+                    <List disablePadding sx={{ border: (theme) => `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
+                      {selectedRecipients.map((recipient) => (
+                        <ListItem
+                          key={recipient.contactId}
+                          secondaryAction={
+                            <IconButton edge="end" onClick={() => removeRecipient(recipient.contactId)}>
+                              <Iconify icon="solar:trash-bin-trash-bold" />
+                            </IconButton>
+                          }
+                          sx={{ py: 1.5 }}
+                        >
+                          <Box sx={{ minWidth: 0, pr: 8 }}>
+                            <Typography variant="subtitle2" noWrap>
+                              {recipient.fullName}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              {recipient.phone}
+                              {recipient.email ? ` | ${recipient.email}` : ''}
+                            </Typography>
+                          </Box>
+                        </ListItem>
+                      ))}
+
+                      {selectedRecipients.length === 0 ? (
+                        <ListItem sx={{ py: 3 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            No recipients selected yet.
+                          </Typography>
+                        </ListItem>
+                      ) : null}
+                    </List>
+                  </Grid>
+                </Grid>
+              </Card>
+            </Stack>
           </Grid>
 
           <Grid item xs={12} md={4}>
-             <Card sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Summary</Typography>
-                <Stack spacing={2}>
-                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary">Provider:</Typography>
-                      <Typography variant="subtitle2" sx={{ textTransform: 'capitalize' }}>{values.provider}</Typography>
-                   </Box>
-                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary">Estimated Recipients:</Typography>
-                      <Typography variant="subtitle2">2 (Simulation)</Typography>
-                   </Box>
-                   
-                   <Divider sx={{ borderStyle: 'dashed' }} />
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Campaign Summary
+              </Typography>
 
-                   <Alert severity="info">
-                      Messages will be sent using the selected {values.provider} account. Ensure your account is connected and has no rate limits.
-                   </Alert>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Provider
+                  </Typography>
+                  <Typography variant="subtitle2" sx={{ textTransform: 'capitalize' }}>
+                    {values.provider}
+                  </Typography>
+                </Box>
 
-                   <LoadingButton
-                    fullWidth
-                    size="large"
-                    type="submit"
-                    variant="contained"
-                    loading={isSubmitting}
-                    sx={{ mt: 2 }}
-                  >
-                    Launch Campaign
-                  </LoadingButton>
-                </Stack>
-             </Card>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Selected Account
+                  </Typography>
+                  <Typography variant="subtitle2">
+                    {filteredInstances.find((instance: any) => (instance.instanceId || instance.id) === values.instanceId)
+                      ?.name || 'Not selected'}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Recipients
+                  </Typography>
+                  <Typography variant="subtitle2">{selectedRecipients.length}</Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Personalization
+                  </Typography>
+                  <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="flex-end">
+                    {['name', 'phone', 'email']
+                      .filter((key) => values.content?.includes(`{{${key}}}`))
+                      .map((key) => (
+                        <Chip key={key} label={key} size="small" variant="outlined" />
+                      ))}
+                  </Stack>
+                </Box>
+
+                <Divider sx={{ borderStyle: 'dashed' }} />
+
+                <Alert severity={selectedRecipients.length > 0 ? 'success' : 'info'}>
+                  {selectedRecipients.length > 0
+                    ? `This campaign will target ${selectedRecipients.length} CRM contact${selectedRecipients.length > 1 ? 's' : ''}.`
+                    : 'Add recipients to make this broadcast ready to launch.'}
+                </Alert>
+
+                <Alert severity="info">
+                  {values.scheduledAt
+                    ? 'The campaign will stay scheduled until the selected send time.'
+                    : 'The campaign will begin processing immediately after creation.'}
+                </Alert>
+
+                <LoadingButton
+                  fullWidth
+                  size="large"
+                  type="submit"
+                  variant="contained"
+                  loading={isSubmitting || createMutation.isPending}
+                  sx={{ mt: 2 }}
+                >
+                  Launch Campaign
+                </LoadingButton>
+              </Stack>
+            </Card>
           </Grid>
         </Grid>
       </form>

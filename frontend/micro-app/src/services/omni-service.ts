@@ -5,12 +5,30 @@ import axiosInstance from 'src/utils/axios';
 // Channels & Instances
 export const omniChannelService = {
   getInstances: async () => {
-    const response = await axiosInstance.get('/api/integrations/v1/voice/integrations');
-    return response.data?.data || [];
+    const [whatsAppResponse, telegramResponse] = await Promise.all([
+      axiosInstance.get('/api/integrations/v1/whatsapp/instances'),
+      axiosInstance.get('/api/integrations/v1/telegram/sessions'),
+    ]);
+
+    const whatsAppInstances = (whatsAppResponse.data?.data || []).map((instance: any) => ({
+      ...instance,
+      provider: 'whatsapp',
+    }));
+    const telegramSessions = (telegramResponse.data?.data || []).map((session: any) => ({
+      ...session,
+      provider: 'telegram',
+      instanceId: session.sessionId,
+    }));
+
+    return [...whatsAppInstances, ...telegramSessions];
   },
   
   createInstance: async (data: { provider: 'whatsapp' | 'telegram', name: string }) => {
-    const response = await axiosInstance.post('/api/integrations/v1/voice/integrations', data);
+    const endpoint =
+      data.provider === 'whatsapp'
+        ? '/api/integrations/v1/whatsapp/instances'
+        : '/api/integrations/v1/telegram/sessions';
+    const response = await axiosInstance.post(endpoint, data);
     return response.data?.data;
   },
 
@@ -25,7 +43,12 @@ export const omniChannelService = {
   },
 
   deleteInstance: async (instanceId: string) => {
-    const response = await axiosInstance.delete(`/api/integrations/v1/voice/integrations/${instanceId}`);
+    const response = await axiosInstance.delete(`/api/integrations/v1/whatsapp/instances/${instanceId}`);
+    return response.data;
+  },
+
+  deleteTelegramSession: async (sessionId: string) => {
+    const response = await axiosInstance.delete(`/api/integrations/v1/telegram/sessions/${sessionId}`);
     return response.data;
   }
 };
@@ -35,6 +58,11 @@ export const omniChatService = {
   getConversations: async () => {
     const response = await axiosInstance.get('/api/realtime/v1/omni/conversations');
     return response.data?.data || [];
+  },
+
+  getConversationById: async (conversationId: string) => {
+    const response = await axiosInstance.get(`/api/realtime/v1/omni/conversations/${conversationId}`);
+    return response.data?.data || null;
   },
 
   getMessages: async (conversationId: string) => {
@@ -49,6 +77,11 @@ export const omniChatService = {
 
   assignAgent: async (conversationId: string, agentId: string) => {
     const response = await axiosInstance.post(`/api/realtime/v1/omni/conversations/${conversationId}/assign`, { agentId });
+    return response.data?.data;
+  },
+
+  updateConversation: async (conversationId: string, data: { status?: string; subject?: string; assignedAgentId?: string }) => {
+    const response = await axiosInstance.patch(`/api/realtime/v1/omni/conversations/${conversationId}`, data);
     return response.data?.data;
   },
 
@@ -120,6 +153,8 @@ export const omniMarketingService = {
     instanceId: string, 
     content: string, 
     type: string, 
+    scheduledAt?: string,
+    metadata?: any,
     recipients: Array<{ contactId: string, mobile: string, variables?: any }> 
   }) => {
     const response = await axiosInstance.post('/api/automation/v1/omni/broadcast', data);
