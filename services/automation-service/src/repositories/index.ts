@@ -6,7 +6,9 @@ import type {
   WorkflowWorkspaceInput, 
   WorkflowStartActionInput,
   OmniChatbotInput,
-  OmniKeywordTriggerInput
+  OmniKeywordTriggerInput,
+  OmniBroadcastInput,
+  OmniBroadcastRecipientInput
 } from '../types/index.js';
 
 export class AutomationRepository {
@@ -50,7 +52,7 @@ export class AutomationRepository {
 }
 
 export class WorkflowRepository {
-  async create(data: WorkflowInput) {
+  async create(data: WorkflowInput & { userId: string; organizationId: string }) {
     return db.workflow.create({ data });
   }
 
@@ -97,7 +99,7 @@ export class WorkflowRepository {
 }
 
 export class WorkflowNodeRepository {
-  async create(data: WorkflowNodeInput) {
+  async create(data: WorkflowNodeInput & { userId: string; organizationId: string }) {
     return db.workflowNode.create({ data });
   }
 
@@ -129,7 +131,7 @@ export class WorkflowNodeRepository {
 }
 
 export class WorkflowWorkspaceRepository {
-  async create(data: WorkflowWorkspaceInput) {
+  async create(data: WorkflowWorkspaceInput & { userId: string; organizationId: string }) {
     return db.workflowWorkspace.create({ data });
   }
 
@@ -154,7 +156,7 @@ export class WorkflowWorkspaceRepository {
 }
 
 export class WorkflowStartActionRepository {
-  async create(data: WorkflowStartActionInput) {
+  async create(data: WorkflowStartActionInput & { userId: string; organizationId: string }) {
     return db.workflowStartAction.create({ data });
   }
 

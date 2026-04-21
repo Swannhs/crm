@@ -18,6 +18,10 @@ import {
 } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
+function getRouteParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] || '' : value || '';
+}
+
 export class IntegrationController {
   private connSvc = new IntegrationConnectionService();
 
@@ -152,7 +156,7 @@ export class ZoomController {
 
   async deleteMeeting(req: AuthenticatedRequest, res: Response) {
     try {
-      const meetingId = req.params.meetingId;
+      const meetingId = getRouteParam(req.params.meetingId);
       await this.svc.deleteMeeting(meetingId);
       return res.json({ success: true, message: 'Meeting deleted' });
     } catch (err: any) {
@@ -454,7 +458,7 @@ export class WhatsAppController {
 
   async deleteInstance(req: AuthenticatedRequest, res: Response) {
     try {
-      const { instanceId } = req.params;
+      const instanceId = getRouteParam(req.params.instanceId);
       await this.svc.deleteInstance(instanceId);
       return res.json({ success: true, message: 'Instance deleted' });
     } catch (err: any) {
@@ -487,7 +491,7 @@ export class TelegramController {
 
   async deleteSession(req: AuthenticatedRequest, res: Response) {
     try {
-      const { sessionId } = req.params;
+      const sessionId = getRouteParam(req.params.sessionId);
       await this.svc.deleteSession(sessionId);
       return res.json({ success: true, message: 'Session deleted' });
     } catch (err: any) {

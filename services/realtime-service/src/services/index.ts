@@ -214,6 +214,10 @@ export class OmniMessageService {
   private repo = new OmniMessageRepository();
   private convRepo = new OmniConversationRepository();
 
+  async getConversationById(id: string) {
+    return this.convRepo.findById(id);
+  }
+
   async addMessage(data: OmniMessageInput) {
     const message = await this.repo.create(data);
     

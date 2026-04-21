@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { 
   AutomationService, 
   WorkflowService, 
@@ -10,6 +10,10 @@ import {
   OmniWebhookService
 } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
+
+function getRouteParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] || '' : value || '';
+}
 
 export class AutomationController {
   private svc = new AutomationService();
@@ -240,13 +244,13 @@ export class WorkflowController {
   }
 
   async getWorkflowsByPipelineStageId(req: AuthenticatedRequest, res: Response) {
-    const stageId = req.params.stageId;
+    const stageId = getRouteParam(req.params.stageId);
     return res.json({ success: true, data: [] });
   }
 
   async useTemplate(req: AuthenticatedRequest, res: Response) {
     try {
-      const templateId = req.params.id;
+      const templateId = getRouteParam(req.params.id);
       return res.status(201).json({ success: true, data: { id: templateId, status: "cloned" } });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -289,7 +293,7 @@ export class WorkflowWorkspaceController {
 
   async getById(req: AuthenticatedRequest, res: Response) {
     try {
-      const id = req.params.id;
+      const id = getRouteParam(req.params.id);
       const workspace = await this.svc.getById(id);
       if (!workspace) return res.status(404).json({ success: false, message: 'Workspace not found' });
       return res.json({ success: true, data: workspace });
@@ -353,7 +357,7 @@ export class WorkflowActionController {
 
   async getStartActionById(req: AuthenticatedRequest, res: Response) {
     try {
-      const id = req.params.id;
+      const id = getRouteParam(req.params.id);
       const action = await this.svc.getById(id);
       if (!action) return res.status(404).json({ success: false, message: 'Action not found' });
       return res.json({ success: true, data: action });
@@ -364,7 +368,7 @@ export class WorkflowActionController {
 
   async updateStartAction(req: AuthenticatedRequest, res: Response) {
     try {
-      const id = req.params.id;
+      const id = getRouteParam(req.params.id);
       const action = await this.svc.update(id, req.body);
       return res.json({ success: true, data: action });
     } catch (err: any) {
@@ -374,7 +378,7 @@ export class WorkflowActionController {
 
   async deleteStartAction(req: AuthenticatedRequest, res: Response) {
     try {
-      const id = req.params.id;
+      const id = getRouteParam(req.params.id);
       await this.svc.delete(id);
       return res.json({ success: true, message: 'Action deleted' });
     } catch (err: any) {
@@ -406,7 +410,7 @@ export class OmniChatbotController {
 
   async get(req: AuthenticatedRequest, res: Response) {
     try {
-      const chatbot = await this.svc.getById(req.params.id);
+      const chatbot = await this.svc.getById(getRouteParam(req.params.id));
       if (!chatbot) return res.status(404).json({ success: false, message: 'Chatbot not found' });
       return res.json({ success: true, data: chatbot });
     } catch (err: any) {
@@ -416,7 +420,7 @@ export class OmniChatbotController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      const chatbot = await this.svc.update(req.params.id, req.body);
+      const chatbot = await this.svc.update(getRouteParam(req.params.id), req.body);
       return res.json({ success: true, data: chatbot });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -425,7 +429,7 @@ export class OmniChatbotController {
 
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.delete(req.params.id);
+      await this.svc.delete(getRouteParam(req.params.id));
       return res.json({ success: true, message: 'Chatbot deleted' });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -456,7 +460,7 @@ export class OmniKeywordTriggerController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      const trigger = await this.svc.update(req.params.id, req.body);
+      const trigger = await this.svc.update(getRouteParam(req.params.id), req.body);
       return res.json({ success: true, data: trigger });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -465,7 +469,7 @@ export class OmniKeywordTriggerController {
 
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.delete(req.params.id);
+      await this.svc.delete(getRouteParam(req.params.id));
       return res.json({ success: true, message: 'Trigger deleted' });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -507,7 +511,7 @@ export class OmniBroadcastController {
 
   async get(req: AuthenticatedRequest, res: Response) {
     try {
-      const broadcast = await this.svc.getBroadcastById(req.params.id);
+      const broadcast = await this.svc.getBroadcastById(getRouteParam(req.params.id));
       if (!broadcast) return res.status(404).json({ success: false, message: 'Broadcast not found' });
       return res.json({ success: true, data: broadcast });
     } catch (err: any) {
@@ -539,7 +543,7 @@ export class OmniWebhookController {
 
   async getLogs(req: AuthenticatedRequest, res: Response) {
     try {
-      const logs = await this.service.getLogs(req.params.id);
+      const logs = await this.service.getLogs(getRouteParam(req.params.id));
       return res.json({ success: true, data: logs });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -549,7 +553,7 @@ export class OmniWebhookController {
   // Public endpoint for receiving webhooks
   async receive(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const id = getRouteParam((req as any).params?.id);
       const result = await this.service.handleWebhook(id, req.body, req.headers, req.app.get('logger') || console);
       return res.status(result.status).json(result);
     } catch (err: any) {

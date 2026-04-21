@@ -14,7 +14,7 @@ type BillingPaymentRecordedEvent = {
   transaction_id?: string | null;
 };
 
-export async function startBillingPaymentRecordedConsumer(logger) {
+export async function startBillingPaymentRecordedConsumer(logger: any) {
   const brokers = process.env.KAFKA_BROKERS || "localhost:9092";
   const workflowService = new WorkflowService();
 

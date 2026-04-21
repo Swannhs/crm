@@ -1,8 +1,12 @@
 import { connectKafkaProducerWithRetry, publishJson } from "@mymanager/node-service-kit";
 
 let producer: any = null;
+const fallbackLogger = {
+  info: (...args: any[]) => console.info(...args),
+  error: (...args: any[]) => console.error(...args),
+};
 
-export async function startOmniProducer(logger: any) {
+export async function startOmniProducer(logger: any = fallbackLogger) {
   if (producer) return producer;
 
   producer = await connectKafkaProducerWithRetry({
@@ -14,7 +18,7 @@ export async function startOmniProducer(logger: any) {
   return producer;
 }
 
-export async function emitOmniMessageSend(event: any, logger: any) {
+export async function emitOmniMessageSend(event: any, logger: any = fallbackLogger) {
   try {
     const prod = await startOmniProducer(logger);
     await publishJson(prod, "omni.message.send", event, event.organizationId);

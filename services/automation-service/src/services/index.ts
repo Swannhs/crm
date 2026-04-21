@@ -63,7 +63,7 @@ export class WorkflowService {
   private nodeRepo = new WorkflowNodeRepository();
   private logRepo = new WorkflowActivityLogRepository();
 
-  async create(data: WorkflowInput) {
+  async create(data: WorkflowInput & { userId: string; organizationId: string }) {
     return this.workflowRepo.create(data);
   }
 
@@ -96,7 +96,7 @@ export class WorkflowService {
     return this.workflowRepo.launch(id);
   }
 
-  async createNode(data: WorkflowNodeInput) {
+  async createNode(data: WorkflowNodeInput & { userId: string; organizationId: string }) {
     return this.nodeRepo.create(data);
   }
 
@@ -132,7 +132,7 @@ export class WorkflowService {
 export class WorkflowWorkspaceService {
   private repo = new WorkflowWorkspaceRepository();
 
-  async create(data: WorkflowWorkspaceInput) {
+  async create(data: WorkflowWorkspaceInput & { userId: string; organizationId: string }) {
     return this.repo.create(data);
   }
 
@@ -156,7 +156,7 @@ export class WorkflowWorkspaceService {
 export class WorkflowStartActionService {
   private repo = new WorkflowStartActionRepository();
 
-  async create(data: WorkflowStartActionInput) {
+  async create(data: WorkflowStartActionInput & { userId: string; organizationId: string }) {
     return this.repo.create(data);
   }
 
@@ -241,7 +241,8 @@ export class OmniKeywordTriggerService {
   }
 
   async findMatchingTrigger(keyword: string, organizationId: string) {
-    return this.repo.findByKeyword(keyword, organizationId);
+    const matches = await this.repo.findByKeyword(keyword, organizationId);
+    return matches[0] || null;
   }
 
   async executeTrigger(trigger: any, event: OmniMessageReceivedEvent, logger: any) {
@@ -252,7 +253,7 @@ export class OmniKeywordTriggerService {
       provider: event.provider,
       instanceId: event.instanceId,
       to: event.contactMobile,
-      content: trigger.response,
+      content: trigger.replyMessage,
       type: 'text',
       organizationId: event.organizationId
     }, logger);
@@ -315,7 +316,7 @@ export class OmniBroadcastService {
           to: recipient.mobile,
           content,
           type: broadcast.type,
-          metadata: { ...broadcast.metadata, recipientId: recipient.id, broadcastId: broadcast.id },
+          metadata: { ...(broadcast.metadata && typeof broadcast.metadata === 'object' ? broadcast.metadata : {}), recipientId: recipient.id, broadcastId: broadcast.id },
           organizationId: broadcast.organizationId
         }, console);
 
@@ -365,10 +366,12 @@ export class OmniWebhookService {
         if (mobile) {
            // Simulate an event to trigger the bot
            await this.chatbotService.processMessage({
-              provider: 'all',
+              provider: 'whatsapp',
               instanceId: 'webhook-trigger',
               contactMobile: mobile,
               content: '/start', // Default start command
+              type: 'text',
+              timestamp: Date.now(),
               organizationId: webhook.organizationId
            }, logger);
         }

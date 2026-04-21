@@ -25,7 +25,8 @@ import type {
   MetaIntegrationInput,
   VoiceIntegrationInput,
   WhatsAppInstanceInput,
-  TelegramSessionInput
+  TelegramSessionInput,
+  OmniMessageReceivedEvent
 } from '../types/index.js';
 
 export class IntegrationConnectionService {
@@ -490,53 +491,5 @@ export class TelegramService {
 
   async deleteSession(sessionId: string) {
     return this.repo.delete(sessionId);
-  }
-}
-
-export class UserIntegrationSettingsService {
-  private repo = new UserIntegrationSettingsRepository();
-
-  async getSettings(userId: string) {
-    return this.repo.findByUserId(userId);
-  }
-
-  async updateSettings(userId: string, data: UserIntegrationSettingsInput) {
-    return this.repo.upsert(userId, data);
-  }
-
-  async validateApiKey(apiKey: string) {
-    return this.repo.findByApiKey(apiKey);
-  }
-}
-
-export class MetaIntegrationService {
-  private repo = new MetaIntegrationRepository();
-
-  async getIntegration(userId: string) {
-    return this.repo.findByUserId(userId);
-  }
-
-  async updateIntegration(userId: string, organizationId: string | undefined, data: MetaIntegrationInput) {
-    return this.repo.upsert(userId, organizationId, data);
-  }
-
-  async getOrganizationIntegrations(organizationId: string) {
-    return this.repo.findByOrganizationId(organizationId);
-  }
-}
-
-export class VoiceIntegrationService {
-  private repo = new VoiceIntegrationRepository();
-
-  async getIntegration(userId: string) {
-    return this.repo.findByUserId(userId);
-  }
-
-  async updateIntegration(userId: string, organizationId: string | undefined, data: VoiceIntegrationInput) {
-    return this.repo.upsert(userId, organizationId, data);
-  }
-
-  async getOrganizationIntegrations(organizationId: string) {
-    return this.repo.findByOrganizationId(organizationId);
   }
 }

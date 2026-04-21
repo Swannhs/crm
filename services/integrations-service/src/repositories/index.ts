@@ -7,7 +7,12 @@ import type {
   ShopifyStoreInput,
   UberEatsConfigInput,
   EasyPostConfigInput,
-  IntegrationActivityInput 
+  IntegrationActivityInput,
+  UserIntegrationSettingsInput,
+  MetaIntegrationInput,
+  VoiceIntegrationInput,
+  WhatsAppInstanceInput,
+  TelegramSessionInput
 } from '../types/index.js';
 
 export class IntegrationConnectionRepository {

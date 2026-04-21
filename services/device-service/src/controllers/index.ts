@@ -2,6 +2,10 @@ import { Response } from 'express';
 import { DeviceService, HardwareProductService, HardwareBundleService, HardwareCategoryService, SunmiService, UnifiService } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
+function getRouteParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] || '' : value || '';
+}
+
 export class DeviceController {
   private svc = new DeviceService();
 
@@ -28,7 +32,7 @@ export class DeviceController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      const id = req.params.id;
+      const id = getRouteParam(req.params.id);
       const device = await this.svc.update(id, req.body);
       return res.json({ success: true, data: device });
     } catch (err: any) {
@@ -38,7 +42,7 @@ export class DeviceController {
 
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
-      const id = req.params.id;
+      const id = getRouteParam(req.params.id);
       await this.svc.delete(id);
       return res.json({ success: true, message: 'Device deleted' });
     } catch (err: any) {
@@ -83,7 +87,7 @@ export class HardwareController {
 
   async getProductById(req: AuthenticatedRequest, res: Response) {
     try {
-      const product = await this.productSvc.getById(req.params.id);
+      const product = await this.productSvc.getById(getRouteParam(req.params.id));
       if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
       return res.json({ success: true, data: product });
     } catch (err: any) {
@@ -93,7 +97,7 @@ export class HardwareController {
 
   async updateProduct(req: AuthenticatedRequest, res: Response) {
     try {
-      const product = await this.productSvc.update(req.params.id, req.body);
+      const product = await this.productSvc.update(getRouteParam(req.params.id), req.body);
       return res.json({ success: true, data: product });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -102,7 +106,7 @@ export class HardwareController {
 
   async deleteProduct(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.productSvc.delete(req.params.id);
+      await this.productSvc.delete(getRouteParam(req.params.id));
       return res.json({ success: true, message: 'Product deleted' });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -139,7 +143,7 @@ export class HardwareController {
 
   async getBundleById(req: AuthenticatedRequest, res: Response) {
     try {
-      const bundle = await this.bundleSvc.getById(req.params.id);
+      const bundle = await this.bundleSvc.getById(getRouteParam(req.params.id));
       if (!bundle) return res.status(404).json({ success: false, message: 'Bundle not found' });
       return res.json({ success: true, data: bundle });
     } catch (err: any) {
@@ -149,7 +153,7 @@ export class HardwareController {
 
   async updateBundle(req: AuthenticatedRequest, res: Response) {
     try {
-      const bundle = await this.bundleSvc.update(req.params.id, req.body);
+      const bundle = await this.bundleSvc.update(getRouteParam(req.params.id), req.body);
       return res.json({ success: true, data: bundle });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -158,7 +162,7 @@ export class HardwareController {
 
   async deleteBundle(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.bundleSvc.delete(req.params.id);
+      await this.bundleSvc.delete(getRouteParam(req.params.id));
       return res.json({ success: true, message: 'Bundle deleted' });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -185,7 +189,7 @@ export class HardwareController {
 
   async deleteCategory(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.categorySvc.delete(req.params.id);
+      await this.categorySvc.delete(getRouteParam(req.params.id));
       return res.json({ success: true, message: 'Category deleted' });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });

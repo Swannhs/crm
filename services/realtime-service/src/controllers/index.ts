@@ -10,13 +10,16 @@ import {
   OmniMessageService
 } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
+function getRouteParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] || '' : value || '';
+}
 
 export class LiveChatChannelController {
   private svc = new LiveChatChannelService();
 
   async getChannelsByAdminId(req: AuthenticatedRequest, res: Response) {
     try {
-      const adminId = req.params.adminId;
+      const adminId = getRouteParam(req.params.adminId);
       const channels = await this.svc.getChannelsByAdminId(adminId);
       return res.json({ success: true, data: channels });
     } catch (err: any) {
@@ -26,7 +29,7 @@ export class LiveChatChannelController {
 
   async getChannelById(req: AuthenticatedRequest, res: Response) {
     try {
-      const channelId = req.params.channelId;
+      const channelId = getRouteParam(req.params.channelId);
       const channel = await this.svc.getChannelById(channelId);
       if (!channel) return res.status(404).json({ success: false, message: 'Channel not found' });
       return res.json({ success: true, data: channel });
@@ -37,7 +40,7 @@ export class LiveChatChannelController {
 
   async deleteChannel(req: AuthenticatedRequest, res: Response) {
     try {
-      const { channelId, contactId } = req.params;
+      const channelId = getRouteParam(req.params.channelId);
       await this.svc.deleteChannel(channelId);
       return res.json({ success: true, message: 'Channel deleted' });
     } catch (err: any) {
@@ -53,7 +56,7 @@ export class LiveChatMessageController {
 
   async getChatHistory(req: AuthenticatedRequest, res: Response) {
     try {
-      const channelId = req.params.channelId;
+      const channelId = getRouteParam(req.params.channelId);
       const history = await this.svc.getChatHistory(channelId);
       return res.json({ success: true, data: history });
     } catch (err: any) {
@@ -221,7 +224,7 @@ export class OmniConversationController {
 
   async getConversationById(req: AuthenticatedRequest, res: Response) {
     try {
-      const { conversationId } = req.params;
+      const conversationId = getRouteParam(req.params.conversationId);
       const conversation = await this.svc.getConversationById(conversationId);
       if (!conversation) return res.status(404).json({ success: false, message: 'Conversation not found' });
       return res.json({ success: true, data: conversation });
@@ -232,7 +235,7 @@ export class OmniConversationController {
 
   async assignAgent(req: AuthenticatedRequest, res: Response) {
     try {
-      const { conversationId } = req.params;
+      const conversationId = getRouteParam(req.params.conversationId);
       const { agentId } = req.body;
       const conversation = await this.svc.assignAgent(conversationId, agentId || req.identity.userId);
       return res.json({ success: true, data: conversation });
@@ -243,7 +246,7 @@ export class OmniConversationController {
 
   async updateConversation(req: AuthenticatedRequest, res: Response) {
     try {
-      const { conversationId } = req.params;
+      const conversationId = getRouteParam(req.params.conversationId);
       const conversation = await this.svc.updateConversation(conversationId, req.body);
       return res.json({ success: true, data: conversation });
     } catch (err: any) {
@@ -262,7 +265,7 @@ export class OmniMessageController {
 
   async getHistory(req: AuthenticatedRequest, res: Response) {
     try {
-      const { conversationId } = req.params;
+      const conversationId = getRouteParam(req.params.conversationId);
       const history = await this.svc.getConversationHistory(conversationId);
       return res.json({ success: true, data: history });
     } catch (err: any) {
@@ -295,7 +298,7 @@ export class OmniMessageController {
         type: message.type,
         metadata: message.metadata,
         organizationId: req.identity.orgId
-      }, req.logger);
+      });
 
       return res.status(201).json({ success: true, data: message });
     } catch (err: any) {

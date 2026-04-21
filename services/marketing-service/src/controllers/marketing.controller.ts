@@ -2,6 +2,10 @@ import { Response } from 'express';
 import { CampaignService, AutomationService, SubscriberService, OptinFormService, OmniBroadcastService } from '../services/marketing.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
+function getRouteParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] || '' : value || '';
+}
+
 export class CampaignController {
   private svc = new CampaignService();
 
@@ -14,7 +18,7 @@ export class CampaignController {
 
   async get(req: AuthenticatedRequest, res: Response) {
     try {
-      const campaign = await this.svc.getCampaign(req.params.id, req.identity.orgId);
+      const campaign = await this.svc.getCampaign(getRouteParam(req.params.id), req.identity.orgId);
       return res.json({ data: campaign });
     } catch (err: any) {
       if (err.message === 'Not found') return res.status(404).json({ message: err.message });
@@ -33,21 +37,21 @@ export class CampaignController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.updateCampaign(req.params.id, req.identity.orgId, req.body);
+      await this.svc.updateCampaign(getRouteParam(req.params.id), req.identity.orgId, req.body);
       return res.json({ message: 'Updated' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
 
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.deleteCampaign(req.params.id, req.identity.orgId);
+      await this.svc.deleteCampaign(getRouteParam(req.params.id), req.identity.orgId);
       return res.json({ message: 'Deleted' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
 
   async send(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.sendCampaign(req.params.id, req.identity.orgId);
+      await this.svc.sendCampaign(getRouteParam(req.params.id), req.identity.orgId);
       return res.json({ message: 'Campaign marked as sent' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
@@ -74,14 +78,14 @@ export class AutomationController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.updateAutomation(req.params.id, req.identity.orgId, req.body);
+      await this.svc.updateAutomation(getRouteParam(req.params.id), req.identity.orgId, req.body);
       return res.json({ message: 'Updated' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
 
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.deleteAutomation(req.params.id, req.identity.orgId);
+      await this.svc.deleteAutomation(getRouteParam(req.params.id), req.identity.orgId);
       return res.json({ message: 'Deleted' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
@@ -108,7 +112,7 @@ export class SubscriberController {
 
   async unsubscribe(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.unsubscribe(req.params.id);
+      await this.svc.unsubscribe(getRouteParam(req.params.id));
       return res.json({ message: 'Unsubscribed' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
@@ -135,14 +139,14 @@ export class OptinFormController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.updateForm(req.params.id, req.identity.orgId, req.body);
+      await this.svc.updateForm(getRouteParam(req.params.id), req.identity.orgId, req.body);
       return res.json({ message: 'Updated' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
 
   async delete(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.deleteForm(req.params.id, req.identity.orgId);
+      await this.svc.deleteForm(getRouteParam(req.params.id), req.identity.orgId);
       return res.json({ message: 'Deleted' });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
@@ -160,7 +164,7 @@ export class OmniBroadcastController {
 
   async get(req: AuthenticatedRequest, res: Response) {
     try {
-      const broadcast = await this.svc.getBroadcast(req.params.id, req.identity.orgId);
+      const broadcast = await this.svc.getBroadcast(getRouteParam(req.params.id), req.identity.orgId);
       if (!broadcast) return res.status(404).json({ success: false, message: 'Not found' });
       return res.json({ success: true, data: broadcast });
     } catch (err: any) { return res.status(500).json({ success: false, message: err.message }); }
@@ -180,7 +184,7 @@ export class OmniBroadcastController {
 
   async getLogs(req: AuthenticatedRequest, res: Response) {
     try {
-      const result = await this.svc.getLogs(req.params.id, req.query);
+      const result = await this.svc.getLogs(getRouteParam(req.params.id), req.query);
       return res.json({ success: true, data: result.data, total: result.total });
     } catch (err: any) { return res.status(500).json({ success: false, message: err.message }); }
   }

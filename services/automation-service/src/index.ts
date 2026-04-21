@@ -18,6 +18,7 @@ const auth = [identityMiddleware, createRoleContextMiddleware()];
 const readAccess = [...auth, requireOrgRoles(['org_staff', 'org_manager', 'org_admin', 'org_owner'])];
 const writeAccess = [...auth, requireOrgRoles(['org_manager', 'org_admin', 'org_owner'])];
 const cast = (req: any) => req as any;
+const route = (handler: (req: any, res: any) => unknown) => (req: any, res: any) => handler(cast(req), res);
 
 const automationCtrl = new AutomationController();
 const workflowCtrl = new WorkflowController();
@@ -28,71 +29,71 @@ const triggerCtrl = new OmniKeywordTriggerController();
 const broadcastCtrl = new OmniBroadcastController();
 
 // --- Automation ---
-app.post("/v1/automation", writeAccess, (req, res) => automationCtrl.create(cast(req), res));
-app.get("/v1/automation", readAccess, (req, res) => automationCtrl.getAll(cast(req), res));
-app.post("/v1/automation/changeStatus", writeAccess, (req, res) => automationCtrl.changeStatus(cast(req), res));
-app.post("/v1/automation/delete", writeAccess, (req, res) => automationCtrl.delete(cast(req), res));
-app.get("/v1/automation/getAutomationsByIds", readAccess, (req, res) => automationCtrl.getByIds(cast(req), res));
-app.post("/v1/automation/deleteAutomationsByIds", writeAccess, (req, res) => automationCtrl.deleteByIds(cast(req), res));
-app.post("/v1/automation/setVideoWatch", (req, res) => automationCtrl.setVideoWatch(cast(req), res));
+app.post("/v1/automation", writeAccess, route(automationCtrl.create.bind(automationCtrl)));
+app.get("/v1/automation", readAccess, route(automationCtrl.getAll.bind(automationCtrl)));
+app.post("/v1/automation/changeStatus", writeAccess, route(automationCtrl.changeStatus.bind(automationCtrl)));
+app.post("/v1/automation/delete", writeAccess, route(automationCtrl.delete.bind(automationCtrl)));
+app.get("/v1/automation/getAutomationsByIds", readAccess, route(automationCtrl.getByIds.bind(automationCtrl)));
+app.post("/v1/automation/deleteAutomationsByIds", writeAccess, route(automationCtrl.deleteByIds.bind(automationCtrl)));
+app.post("/v1/automation/setVideoWatch", route(automationCtrl.setVideoWatch.bind(automationCtrl)));
 
 // --- Workflow ---
-app.post("/v1/workflow/create", writeAccess, (req, res) => workflowCtrl.create(cast(req), res));
-app.get("/v1/workflow", readAccess, (req, res) => workflowCtrl.getAll(cast(req), res));
-app.get("/v1/workflow/getById", readAccess, (req, res) => workflowCtrl.getById(cast(req), res));
-app.put("/v1/workflow/update", writeAccess, (req, res) => workflowCtrl.update(cast(req), res));
-app.put("/v1/workflow/delete", writeAccess, (req, res) => workflowCtrl.delete(cast(req), res));
-app.put("/v1/workflow/launch-workflow", writeAccess, (req, res) => workflowCtrl.launch(cast(req), res));
-app.get("/v1/workflow/trigger-names", readAccess, (req, res) => workflowCtrl.getTriggerNames(cast(req), res));
-app.get("/v1/workflow/trigger-names-categories", readAccess, (req, res) => workflowCtrl.getTriggerNamesCategories(cast(req), res));
-app.get("/v1/workflow/getConditionRootValues", readAccess, (req, res) => workflowCtrl.getConditionsRootValue(cast(req), res));
-app.get("/v1/workflow/nodes", readAccess, (req, res) => workflowCtrl.getNodes(cast(req), res));
-app.post("/v1/workflow/nodes", writeAccess, (req, res) => workflowCtrl.createNode(cast(req), res));
-app.put("/v1/workflow/nodes", writeAccess, (req, res) => workflowCtrl.updateNode(cast(req), res));
-app.get("/v1/workflow/workflow-activity", readAccess, (req, res) => workflowCtrl.getActivityLogs(cast(req), res));
-app.get("/v1/workflow/workflow-activity/count", readAccess, (req, res) => workflowCtrl.getActivityLogsCount(cast(req), res));
-app.get("/v1/workflow/getWorkflowsByPipelineStageId/:stageId", readAccess, (req, res) => workflowCtrl.getWorkflowsByPipelineStageId(cast(req), res));
-app.post("/v1/workflow/use-template/:id", writeAccess, (req, res) => workflowCtrl.useTemplate(cast(req), res));
-app.get("/v1/workflow/get-all-templates", readAccess, (req, res) => workflowCtrl.getAllTemplates(cast(req), res));
-app.get("/v1/workflow/hasEmailOrSmsNodeInTemplate/:id", readAccess, (req, res) => workflowCtrl.hasEmailOrSmsNodeInTemplate(cast(req), res));
+app.post("/v1/workflow/create", writeAccess, route(workflowCtrl.create.bind(workflowCtrl)));
+app.get("/v1/workflow", readAccess, route(workflowCtrl.getAll.bind(workflowCtrl)));
+app.get("/v1/workflow/getById", readAccess, route(workflowCtrl.getById.bind(workflowCtrl)));
+app.put("/v1/workflow/update", writeAccess, route(workflowCtrl.update.bind(workflowCtrl)));
+app.put("/v1/workflow/delete", writeAccess, route(workflowCtrl.delete.bind(workflowCtrl)));
+app.put("/v1/workflow/launch-workflow", writeAccess, route(workflowCtrl.launch.bind(workflowCtrl)));
+app.get("/v1/workflow/trigger-names", readAccess, route(workflowCtrl.getTriggerNames.bind(workflowCtrl)));
+app.get("/v1/workflow/trigger-names-categories", readAccess, route(workflowCtrl.getTriggerNamesCategories.bind(workflowCtrl)));
+app.get("/v1/workflow/getConditionRootValues", readAccess, route(workflowCtrl.getConditionsRootValue.bind(workflowCtrl)));
+app.get("/v1/workflow/nodes", readAccess, route(workflowCtrl.getNodes.bind(workflowCtrl)));
+app.post("/v1/workflow/nodes", writeAccess, route(workflowCtrl.createNode.bind(workflowCtrl)));
+app.put("/v1/workflow/nodes", writeAccess, route(workflowCtrl.updateNode.bind(workflowCtrl)));
+app.get("/v1/workflow/workflow-activity", readAccess, route(workflowCtrl.getActivityLogs.bind(workflowCtrl)));
+app.get("/v1/workflow/workflow-activity/count", readAccess, route(workflowCtrl.getActivityLogsCount.bind(workflowCtrl)));
+app.get("/v1/workflow/getWorkflowsByPipelineStageId/:stageId", readAccess, route(workflowCtrl.getWorkflowsByPipelineStageId.bind(workflowCtrl)));
+app.post("/v1/workflow/use-template/:id", writeAccess, route(workflowCtrl.useTemplate.bind(workflowCtrl)));
+app.get("/v1/workflow/get-all-templates", readAccess, route(workflowCtrl.getAllTemplates.bind(workflowCtrl)));
+app.get("/v1/workflow/hasEmailOrSmsNodeInTemplate/:id", readAccess, route(workflowCtrl.hasEmailOrSmsNodeInTemplate.bind(workflowCtrl)));
 
 // --- Workflow Workspace ---
-app.post("/v1/workflow-workspace", writeAccess, (req, res) => workflowWorkspaceCtrl.create(cast(req), res));
-app.get("/v1/workflow-workspace", readAccess, (req, res) => workflowWorkspaceCtrl.getAll(cast(req), res));
-app.get("/v1/workflow-workspace/:id", readAccess, (req, res) => workflowWorkspaceCtrl.getById(cast(req), res));
-app.put("/v1/workflow-workspace", writeAccess, (req, res) => workflowWorkspaceCtrl.update(cast(req), res));
-app.delete("/v1/workflow-workspace", writeAccess, (req, res) => workflowWorkspaceCtrl.delete(cast(req), res));
+app.post("/v1/workflow-workspace", writeAccess, route(workflowWorkspaceCtrl.create.bind(workflowWorkspaceCtrl)));
+app.get("/v1/workflow-workspace", readAccess, route(workflowWorkspaceCtrl.getAll.bind(workflowWorkspaceCtrl)));
+app.get("/v1/workflow-workspace/:id", readAccess, route(workflowWorkspaceCtrl.getById.bind(workflowWorkspaceCtrl)));
+app.put("/v1/workflow-workspace", writeAccess, route(workflowWorkspaceCtrl.update.bind(workflowWorkspaceCtrl)));
+app.delete("/v1/workflow-workspace", writeAccess, route(workflowWorkspaceCtrl.delete.bind(workflowWorkspaceCtrl)));
 
 // --- Workflow Action ---
-app.post("/v1/workflow-action/start-action", writeAccess, (req, res) => workflowActionCtrl.createStartAction(cast(req), res));
-app.get("/v1/workflow-action/start-action", readAccess, (req, res) => workflowActionCtrl.getStartActionList(cast(req), res));
-app.get("/v1/workflow-action/start-action/getById/:id", readAccess, (req, res) => workflowActionCtrl.getStartActionById(cast(req), res));
-app.put("/v1/workflow-action/start-action/:id", writeAccess, (req, res) => workflowActionCtrl.updateStartAction(cast(req), res));
-app.delete("/v1/workflow-action/start-action/:id", writeAccess, (req, res) => workflowActionCtrl.deleteStartAction(cast(req), res));
+app.post("/v1/workflow-action/start-action", writeAccess, route(workflowActionCtrl.createStartAction.bind(workflowActionCtrl)));
+app.get("/v1/workflow-action/start-action", readAccess, route(workflowActionCtrl.getStartActionList.bind(workflowActionCtrl)));
+app.get("/v1/workflow-action/start-action/getById/:id", readAccess, route(workflowActionCtrl.getStartActionById.bind(workflowActionCtrl)));
+app.put("/v1/workflow-action/start-action/:id", writeAccess, route(workflowActionCtrl.updateStartAction.bind(workflowActionCtrl)));
+app.delete("/v1/workflow-action/start-action/:id", writeAccess, route(workflowActionCtrl.deleteStartAction.bind(workflowActionCtrl)));
 
 // --- Omni Chatbot ---
-app.post("/v1/omni/chatbots", writeAccess, (req, res) => chatbotCtrl.create(cast(req), res));
-app.get("/v1/omni/chatbots", readAccess, (req, res) => chatbotCtrl.list(cast(req), res));
-app.get("/v1/omni/chatbots/:id", readAccess, (req, res) => chatbotCtrl.get(cast(req), res));
-app.put("/v1/omni/chatbots/:id", writeAccess, (req, res) => chatbotCtrl.update(cast(req), res));
-app.delete("/v1/omni/chatbots/:id", writeAccess, (req, res) => chatbotCtrl.delete(cast(req), res));
+app.post("/v1/omni/chatbots", writeAccess, route(chatbotCtrl.create.bind(chatbotCtrl)));
+app.get("/v1/omni/chatbots", readAccess, route(chatbotCtrl.list.bind(chatbotCtrl)));
+app.get("/v1/omni/chatbots/:id", readAccess, route(chatbotCtrl.get.bind(chatbotCtrl)));
+app.put("/v1/omni/chatbots/:id", writeAccess, route(chatbotCtrl.update.bind(chatbotCtrl)));
+app.delete("/v1/omni/chatbots/:id", writeAccess, route(chatbotCtrl.delete.bind(chatbotCtrl)));
 
 // --- Omni Keyword Trigger ---
-app.post("/v1/omni/triggers", writeAccess, (req, res) => triggerCtrl.create(cast(req), res));
-app.get("/v1/omni/triggers", readAccess, (req, res) => triggerCtrl.list(cast(req), res));
-app.put("/v1/omni/triggers/:id", writeAccess, (req, res) => triggerCtrl.update(cast(req), res));
-app.delete("/v1/omni/triggers/:id", writeAccess, (req, res) => triggerCtrl.delete(cast(req), res));
+app.post("/v1/omni/triggers", writeAccess, route(triggerCtrl.create.bind(triggerCtrl)));
+app.get("/v1/omni/triggers", readAccess, route(triggerCtrl.list.bind(triggerCtrl)));
+app.put("/v1/omni/triggers/:id", writeAccess, route(triggerCtrl.update.bind(triggerCtrl)));
+app.delete("/v1/omni/triggers/:id", writeAccess, route(triggerCtrl.delete.bind(triggerCtrl)));
 
 // --- Omni Broadcast ---
-app.post("/v1/omni/broadcasts", writeAccess, (req, res) => broadcastCtrl.create(cast(req), res));
-app.get("/v1/omni/broadcasts", readAccess, (req, res) => broadcastCtrl.list(cast(req), res));
-app.get("/v1/omni/broadcasts/:id", readAccess, (req, res) => broadcastCtrl.get(cast(req), res));
+app.post("/v1/omni/broadcasts", writeAccess, route(broadcastCtrl.create.bind(broadcastCtrl)));
+app.get("/v1/omni/broadcasts", readAccess, route(broadcastCtrl.list.bind(broadcastCtrl)));
+app.get("/v1/omni/broadcasts/:id", readAccess, route(broadcastCtrl.get.bind(broadcastCtrl)));
 
 // --- Omni Webhook ---
 const webhookCtrl = new OmniWebhookController();
-app.post("/v1/omni/webhooks", writeAccess, (req, res) => webhookCtrl.create(cast(req), res));
-app.get("/v1/omni/webhooks", readAccess, (req, res) => webhookCtrl.getAll(cast(req), res));
-app.get("/v1/omni/webhooks/:id/logs", readAccess, (req, res) => webhookCtrl.getLogs(cast(req), res));
+app.post("/v1/omni/webhooks", writeAccess, route(webhookCtrl.create.bind(webhookCtrl)));
+app.get("/v1/omni/webhooks", readAccess, route(webhookCtrl.getAll.bind(webhookCtrl)));
+app.get("/v1/omni/webhooks/:id/logs", readAccess, route(webhookCtrl.getLogs.bind(webhookCtrl)));
 app.post("/v1/public/webhook/receive/:id", (req, res) => webhookCtrl.receive(req, res));
 
 // --- Health ---
@@ -108,5 +109,3 @@ startBillingPaymentRecordedConsumer(logger).catch((err) => {
 startOmniMessageConsumer(logger).catch((err) => {
   logger.error({ err }, "Failed to start Kafka omni message consumer");
 });
-
-import { startOmniMessageConsumer } from './kafka/omni.consumer.js';

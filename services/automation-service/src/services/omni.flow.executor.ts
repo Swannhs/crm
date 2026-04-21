@@ -21,12 +21,12 @@ export class OmniFlowExecutor {
     if (!state || state.isCompleted) {
       // Start new flow session
       const startNode = flow.nodes.find(n => n.type === 'start') || flow.nodes[0];
-      currentNodeId = startNode.id;
+      currentNodeId = startNode?.id || 'start';
       state = await this.stateRepo.createOrUpdate({
         organizationId,
         contactMobile,
         chatbotId: chatbot.id,
-        currentNodeId,
+        currentNodeId: currentNodeId || 'start',
         stateData: {},
         isCompleted: false
       });
@@ -82,12 +82,14 @@ export class OmniFlowExecutor {
     return null;
   }
 
-  private async processNode(chatbot: any, node: any, state: any, event: OmniMessageReceivedEvent, logger: any) {
+  private async processNode(chatbot: any, node: any, state: any, event: OmniMessageReceivedEvent, logger: any): Promise<void> {
     logger.info({ nodeId: node.id, type: node.type }, "Processing chatbot node");
 
     // Update state to current node
     await this.stateRepo.createOrUpdate({
-      ...state,
+      organizationId: event.organizationId,
+      contactMobile: event.contactMobile,
+      chatbotId: chatbot.id,
       currentNodeId: node.id
     });
 

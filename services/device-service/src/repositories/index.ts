@@ -23,7 +23,13 @@ export class DeviceRepository {
   }
 
   async authenticateByCode(code: string) {
-    return db.device.findFirst({ where: { metadata: { contains: code } } });
+    const devices = await db.device.findMany({ where: { isActive: true } });
+    return (
+      devices.find((device) => {
+        const metadataText = JSON.stringify(device.metadata ?? {});
+        return metadataText.includes(code);
+      }) || null
+    );
   }
 }
 
