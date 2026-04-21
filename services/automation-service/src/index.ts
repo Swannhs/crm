@@ -6,7 +6,8 @@ import {
   WorkflowActionController,
   OmniChatbotController,
   OmniKeywordTriggerController,
-  OmniBroadcastController
+  OmniBroadcastController,
+  OmniWebhookController
 } from "./controllers/index.js";
 import { startBillingPaymentRecordedConsumer } from "./kafka/billing.consumer.js";
 import { startOmniMessageConsumer } from './kafka/omni.consumer.js';
@@ -70,22 +71,22 @@ app.put("/v1/workflow-action/start-action/:id", writeAccess, (req, res) => workf
 app.delete("/v1/workflow-action/start-action/:id", writeAccess, (req, res) => workflowActionCtrl.deleteStartAction(cast(req), res));
 
 // --- Omni Chatbot ---
-app.post("/v1/omni/chatbot", writeAccess, (req, res) => chatbotCtrl.create(cast(req), res));
-app.get("/v1/omni/chatbot", readAccess, (req, res) => chatbotCtrl.list(cast(req), res));
-app.get("/v1/omni/chatbot/:id", readAccess, (req, res) => chatbotCtrl.get(cast(req), res));
-app.put("/v1/omni/chatbot/:id", writeAccess, (req, res) => chatbotCtrl.update(cast(req), res));
-app.delete("/v1/omni/chatbot/:id", writeAccess, (req, res) => chatbotCtrl.delete(cast(req), res));
+app.post("/v1/omni/chatbots", writeAccess, (req, res) => chatbotCtrl.create(cast(req), res));
+app.get("/v1/omni/chatbots", readAccess, (req, res) => chatbotCtrl.list(cast(req), res));
+app.get("/v1/omni/chatbots/:id", readAccess, (req, res) => chatbotCtrl.get(cast(req), res));
+app.put("/v1/omni/chatbots/:id", writeAccess, (req, res) => chatbotCtrl.update(cast(req), res));
+app.delete("/v1/omni/chatbots/:id", writeAccess, (req, res) => chatbotCtrl.delete(cast(req), res));
 
 // --- Omni Keyword Trigger ---
-app.post("/v1/omni/trigger", writeAccess, (req, res) => triggerCtrl.create(cast(req), res));
-app.get("/v1/omni/trigger", readAccess, (req, res) => triggerCtrl.list(cast(req), res));
-app.put("/v1/omni/trigger/:id", writeAccess, (req, res) => triggerCtrl.update(cast(req), res));
-app.delete("/v1/omni/trigger/:id", writeAccess, (req, res) => triggerCtrl.delete(cast(req), res));
+app.post("/v1/omni/triggers", writeAccess, (req, res) => triggerCtrl.create(cast(req), res));
+app.get("/v1/omni/triggers", readAccess, (req, res) => triggerCtrl.list(cast(req), res));
+app.put("/v1/omni/triggers/:id", writeAccess, (req, res) => triggerCtrl.update(cast(req), res));
+app.delete("/v1/omni/triggers/:id", writeAccess, (req, res) => triggerCtrl.delete(cast(req), res));
 
 // --- Omni Broadcast ---
-app.post("/v1/omni/broadcast", writeAccess, (req, res) => broadcastCtrl.create(cast(req), res));
-app.get("/v1/omni/broadcast", readAccess, (req, res) => broadcastCtrl.list(cast(req), res));
-app.get("/v1/omni/broadcast/:id", readAccess, (req, res) => broadcastCtrl.get(cast(req), res));
+app.post("/v1/omni/broadcasts", writeAccess, (req, res) => broadcastCtrl.create(cast(req), res));
+app.get("/v1/omni/broadcasts", readAccess, (req, res) => broadcastCtrl.list(cast(req), res));
+app.get("/v1/omni/broadcasts/:id", readAccess, (req, res) => broadcastCtrl.get(cast(req), res));
 
 // --- Omni Webhook ---
 const webhookCtrl = new OmniWebhookController();

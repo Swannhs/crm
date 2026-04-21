@@ -14,6 +14,8 @@ export type IInvoice = {
   deliveryStatus: string;
   dueDate: string;
   createdAt: string;
+  billTo?: string;
+  contactName?: string;
 };
 
 function toNumber(value: unknown): number {

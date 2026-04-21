@@ -26,6 +26,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 import { Label } from 'src/components/label';
 import { Scrollbar } from 'src/components/scrollbar';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ export function ChannelListView() {
   const [instanceName, setInstanceName] = useState('');
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: instances, isLoading, refetch } = useQuery({
     queryKey: ['omni-instances'],
@@ -60,7 +62,6 @@ export function ChannelListView() {
         const qrData = await omniChannelService.getWhatsAppQR(instance.id);
         setQrCode(qrData.qr);
       } else {
-        // Telegram logic - maybe show token input?
         handleCloseConnect();
         refetch();
       }
@@ -68,6 +69,17 @@ export function ChannelListView() {
       console.error(error);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await omniChannelService.deleteInstance(deleteId);
+      refetch();
+      setDeleteId(null);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -131,7 +143,12 @@ export function ChannelListView() {
                     {new Date(row.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell align="right">
-                     <Button size="small" color="error" startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
+                     <Button 
+                        size="small" 
+                        color="error" 
+                        startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                        onClick={() => setDeleteId(row.id)}
+                      >
                         Delete
                      </Button>
                   </TableCell>
@@ -178,7 +195,7 @@ export function ChannelListView() {
                 sx={{ width: 250, height: 250, mx: 'auto', borderRadius: 2, border: '1px solid', borderColor: 'divider' }} 
               />
               <Typography variant="caption" display="block" sx={{ mt: 2, color: 'text.secondary' }}>
-                Open WhatsApp > Menu or Settings > Linked Devices
+                Open WhatsApp &gt; Menu or Settings &gt; Linked Devices
               </Typography>
             </Box>
           )}
@@ -192,6 +209,18 @@ export function ChannelListView() {
           )}
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        title="Delete Channel"
+        content="Are you sure you want to delete this messaging channel? This action cannot be undone."
+        action={
+          <Button variant="contained" color="error" onClick={handleDelete}>
+            Delete
+          </Button>
+        }
+      />
     </DashboardContent>
   );
 }

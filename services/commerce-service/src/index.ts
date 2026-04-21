@@ -1,5 +1,8 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
 import { ProductController, OrderController } from "./controllers/commerce.controller.js";
+import { AuthController } from "./controllers/auth.controller.js";
+import { CategoryController } from "./controllers/category.controller.js";
+import { CouponController } from "./controllers/coupon.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
 const { app, logger } = createServiceApp({ 
@@ -9,9 +12,36 @@ const { app, logger } = createServiceApp({
 
 const productController = new ProductController();
 const orderController = new OrderController();
+const authController = new AuthController();
+const categoryController = new CategoryController();
+const couponController = new CouponController();
 
 // --- Routes ---
 
+// Public Shop Routes
+app.post("/v1/public/auth/signup", (req, res) => authController.signup(req, res));
+app.post("/v1/public/auth/login", (req, res) => authController.login(req, res));
+
+app.get("/v1/public/products", 
+  (req, res) => {
+    const orgId = req.header('X-Org-Id');
+    if (!orgId) return res.status(400).json({ message: 'Missing X-Org-Id header' });
+    (req as any).identity = { orgId };
+    return productController.list(req as any, res);
+  }
+);
+
+app.get("/v1/public/products/:id", 
+  (req, res) => {
+    const orgId = req.header('X-Org-Id');
+    if (!orgId) return res.status(400).json({ message: 'Missing X-Org-Id header' });
+    const { id } = req.params;
+    // Assuming we'll add a findOne method or use list with filters
+    return productController.list(req as any, res); // Placeholder: should be findOne
+  }
+);
+
+// Private Routes (Admin)
 // Products
 app.get("/v1/products", 
   identityMiddleware, 
@@ -32,6 +62,28 @@ app.get("/v1/orders",
 app.post("/v1/orders", 
   identityMiddleware, 
   (req, res) => orderController.create(req as any, res)
+);
+
+// Categories
+app.get("/v1/categories", 
+  identityMiddleware, 
+  (req, res) => categoryController.getAll(req, res)
+);
+
+app.post("/v1/categories", 
+  identityMiddleware, 
+  (req, res) => categoryController.create(req, res)
+);
+
+// Coupons
+app.get("/v1/coupons", 
+  identityMiddleware, 
+  (req, res) => couponController.getAll(req, res)
+);
+
+app.post("/v1/coupons", 
+  identityMiddleware, 
+  (req, res) => couponController.create(req, res)
 );
 
 // Health

@@ -276,7 +276,7 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>Outstanding</Typography>
                       <Typography variant="subtitle2" sx={{ color: 'error.main' }}>{fCurrency(revenueQuery.data?.outstanding || 0)}</Typography>
                     </Box>
-                    <Divider borderstyle="dashed" />
+                    <Divider sx={{ borderStyle: 'dashed' }} />
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>Invoice Count</Typography>
                       <Typography variant="subtitle2">{revenueQuery.data?.invoiceCount || 0}</Typography>

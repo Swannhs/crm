@@ -24,6 +24,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 import { Label } from 'src/components/label';
 import { Scrollbar } from 'src/components/scrollbar';
+import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +39,7 @@ export function WebhookListView() {
   const handleCopyUrl = (id: string) => {
     const url = `${window.location.origin}/api/automation/v1/public/webhook/receive/${id}`;
     navigator.clipboard.writeText(url);
-    alert('Webhook URL copied to clipboard!');
+    showToast({ message: 'Webhook URL copied to clipboard!', severity: 'success' });
   };
 
   if (isLoading) {

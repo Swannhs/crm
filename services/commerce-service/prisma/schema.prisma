@@ -19,14 +19,93 @@ model Product {
   metadata     Json        @default("{}")
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
-  orderItems   OrderItem[]
+  
+  // Relations
+  orderItems     OrderItem[]
+  variants       ProductVariant[]
+  modifierGroups ProductModifierGroup[]
+  attributes     ProductAttribute[]
 
   @@map("products")
+}
+
+model ProductVariant {
+  id           String   @id @default(uuid()) @db.Uuid
+  productId    String   @map("product_id") @db.Uuid
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name         String
+  sku          String?
+  priceCents   Int      @map("price_cents")
+  stock        Int      @default(0)
+  options      Json     @default("{}") // e.g. {"color": "red", "size": "XL"}
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("product_variants")
+}
+
+model ProductAttribute {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String   // e.g. "Color", "Size"
+  values    String[] // e.g. ["Red", "Blue"]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("product_attributes")
+}
+
+model ProductModifierGroup {
+  id          String            @id @default(uuid()) @db.Uuid
+  productId   String            @map("product_id") @db.Uuid
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String            // e.g. "Add-ons", "Pizza Toppings"
+  minSelected Int               @default(0) @map("min_selected")
+  maxSelected Int?              @map("max_selected")
+  modifiers   ProductModifier[]
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@map("product_modifier_groups")
+}
+
+model ProductModifier {
+  id              String               @id @default(uuid()) @db.Uuid
+  modifierGroupId String               @map("modifier_group_id") @db.Uuid
+  group           ProductModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+  name            String
+  priceCents      Int                  @default(0) @map("price_cents")
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+
+  @@map("product_modifiers")
+}
+
+model Customer {
+  id           String   @id @default(uuid()) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  contactId    String   @unique @map("contact_id") @db.Uuid // Links to CRM Contact
+  email        String
+  passwordHash String   @map("password_hash")
+  points       Int      @default(0)
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  orders       Order[]
+  carts        Cart[]
+
+  @@unique([orgId, email])
+  @@index([orgId])
+  @@map("customers")
 }
 
 model Order {
   id                String      @id @default(uuid()) @db.Uuid
   orgId             String      @map("org_id") @db.Uuid
+  customerId        String?     @map("customer_id") @db.Uuid
+  customer          Customer?   @relation(fields: [customerId], references: [id])
   contactId         String?     @map("contact_id") @db.Uuid
   userId            String?     @map("user_id")
   totalAmountCents  Int         @map("total_amount_cents")
@@ -97,6 +176,8 @@ model Coupon {
 model Cart {
   id          String     @id @default(uuid()) @db.Uuid
   orgId       String     @map("org_id") @db.Uuid
+  customerId  String?    @map("customer_id") @db.Uuid
+  customer    Customer?  @relation(fields: [customerId], references: [id])
   userId      String?    @map("user_id")
   contactId   String?    @map("contact_id") @db.Uuid
   sessionId   String?    @map("session_id")

@@ -9,6 +9,30 @@ export type ICommerceProduct = {
   priceCents: number;
   photos?: string[];
   status?: string;
+  variants?: Array<{
+    id: string;
+    name: string;
+    sku?: string;
+    priceCents: number;
+    stock: number;
+    options: any;
+  }>;
+  attributes?: Array<{
+    id: string;
+    name: string;
+    values: string[];
+  }>;
+  modifierGroups?: Array<{
+    id: string;
+    name: string;
+    minSelected: number;
+    maxSelected?: number;
+    modifiers: Array<{
+      id: string;
+      name: string;
+      priceCents: number;
+    }>;
+  }>;
 };
 
 export type ICommerceOrder = {
@@ -31,7 +55,18 @@ export const commerceService = {
   },
 
   createProduct: async (data: any) => {
-    const response = await axios.post('/api/shop/products', data);
+    const payload = {
+      ...data,
+      price_cents: data.price_cents ?? data.priceCents ?? 0,
+      variants: data.variants ?? [],
+      attributes: data.attributes ?? [],
+      modifierGroups: data.modifierGroups ?? [],
+      status: data.status ?? 'active',
+    };
+
+    delete payload.priceCents;
+
+    const response = await axios.post('/api/shop/products', payload);
     return response.data?.data ?? response.data;
   },
 
@@ -42,6 +77,26 @@ export const commerceService = {
 
   createOrder: async (data: any) => {
     const response = await axios.post('/api/shop/orders', data);
+    return response.data?.data ?? response.data;
+  },
+
+  getCategories: async () => {
+    const response = await axios.get('/api/shop/categories');
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  createCategory: async (data: any) => {
+    const response = await axios.post('/api/shop/categories', data);
+    return response.data?.data ?? response.data;
+  },
+
+  getCoupons: async () => {
+    const response = await axios.get('/api/shop/coupons');
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  createCoupon: async (data: any) => {
+    const response = await axios.post('/api/shop/coupons', data);
     return response.data?.data ?? response.data;
   },
 };

@@ -1,6 +1,7 @@
 import { paths } from 'src/routes/paths';
 
 import axios from 'src/utils/axios';
+import { showToast } from 'src/components/toast';
 
 import { STORAGE_KEY } from './constant';
 
@@ -57,7 +58,7 @@ export function tokenExpired(exp: number): void {
 
   setTimeout(() => {
     try {
-      alert('Token expired!');
+      showToast({ message: 'Token expired! Please sign in again.', severity: 'error' });
       sessionStorage.removeItem(STORAGE_KEY);
       window.location.href = paths.auth.jwt.signIn;
     } catch (error) {

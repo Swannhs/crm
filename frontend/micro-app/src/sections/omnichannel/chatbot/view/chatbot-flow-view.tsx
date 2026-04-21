@@ -19,6 +19,7 @@ import { useParams, useRouter } from 'src/routes/hooks';
 import { omniAutomationService } from 'src/services/omni-service';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
+import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
 
@@ -67,7 +68,7 @@ export function ChatbotFlowView() {
       await omniAutomationService.updateChatbot(id, {
         flowData: { nodes, edges }
       });
-      alert('Flow saved successfully!');
+      showToast({ message: 'Flow saved successfully!', severity: 'success' });
     } catch (error) {
       console.error(error);
     } finally {

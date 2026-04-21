@@ -7,7 +7,8 @@ import {
   WorkflowActivityLogRepository,
   OmniChatbotRepository,
   OmniKeywordTriggerRepository,
-  OmniBroadcastRepository
+  OmniBroadcastRepository,
+  OmniWebhookRepository
 } from '../repositories/index.js';
 import type { 
   AutomationInput, 

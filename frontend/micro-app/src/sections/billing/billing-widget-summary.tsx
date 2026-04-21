@@ -1,15 +1,23 @@
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useTheme, alpha } from '@mui/material/styles';
+import { useTheme, alpha, SxProps, Theme } from '@mui/material/styles';
 
 import { fCurrency } from 'src/utils/format-number';
-
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export function BillingWidgetSummary({ title, total, icon, color = 'primary', sx, ...other }) {
+type Props = {
+  title: string;
+  total: number;
+  icon: string;
+  color?: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error';
+  sx?: SxProps<Theme>;
+  [key: string]: any;
+};
+
+export function BillingWidgetSummary({ title, total, icon, color = 'primary', sx, ...other }: Props) {
   const theme = useTheme();
 
   return (

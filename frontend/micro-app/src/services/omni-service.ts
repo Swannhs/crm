@@ -22,6 +22,11 @@ export const omniChannelService = {
   getInstanceStatus: async (instanceId: string) => {
     const response = await axiosInstance.get(`/api/integrations/v1/whatsapp/status/${instanceId}`);
     return response.data?.data;
+  },
+
+  deleteInstance: async (instanceId: string) => {
+    const response = await axiosInstance.delete(`/api/integrations/v1/voice/integrations/${instanceId}`);
+    return response.data;
   }
 };
 

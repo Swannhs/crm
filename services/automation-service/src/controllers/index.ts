@@ -6,7 +6,8 @@ import {
   WorkflowStartActionService,
   OmniChatbotService,
   OmniKeywordTriggerService,
-  OmniBroadcastService
+  OmniBroadcastService,
+  OmniWebhookService
 } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 

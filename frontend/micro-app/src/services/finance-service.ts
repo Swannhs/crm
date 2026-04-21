@@ -12,7 +12,15 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
-export async function getRevenueStats() {
+export type RevenueStats = {
+  totalRevenue: number;
+  paid: number;
+  outstanding: number;
+  byStatus: any[];
+  invoiceCount: number;
+};
+
+export async function getRevenueStats(): Promise<RevenueStats> {
   try {
     const response = await axiosInstance.get('/api/invoice/statistics/income');
     
@@ -30,7 +38,7 @@ export async function getRevenueStats() {
     }
 
   if (!Array.isArray(stats)) {
-    return { totalRevenue: 0, paid: 0, outstanding: 0, byStatus: [] };
+    return { totalRevenue: 0, paid: 0, outstanding: 0, byStatus: [], invoiceCount: 0 };
   }
 
   const totalRevenue = stats.reduce((sum: number, item: any) => sum + toNumber(item?._sum?.total_cents), 0) / 100;
@@ -43,6 +51,7 @@ export async function getRevenueStats() {
       paid,
       outstanding: Math.max(totalRevenue - paid, 0),
       byStatus: stats,
+      invoiceCount: stats.reduce((sum: number, item: any) => sum + toNumber(item?._count?.status || item?._count?._all || 0), 0),
     };
   } catch (error) {
     console.error('[FinanceService] Failed to fetch revenue stats:', error);
