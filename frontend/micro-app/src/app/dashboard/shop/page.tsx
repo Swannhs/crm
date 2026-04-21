@@ -1,9 +1,11 @@
-import { CommerceWorkspaceView } from 'src/sections/commerce/view/commerce-workspace-view';
+import { redirect } from 'next/navigation';
+
+import { paths } from 'src/routes/paths';
 
 export const metadata = {
   title: 'Dashboard: Shop',
 };
 
 export default function Page() {
-  return <CommerceWorkspaceView mode="dashboard-shop" />;
+  redirect(paths.dashboard.shopSection('dashboard'));
 }

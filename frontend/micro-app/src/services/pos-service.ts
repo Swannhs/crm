@@ -39,6 +39,11 @@ export const posService = {
     return response.data?.data ?? response.data;
   },
 
+  deleteTable: async (id: string) => {
+    const response = await axios.delete('/api/pos/tables', { data: { id } });
+    return response.data?.data ?? response.data;
+  },
+
   increaseSeat: async (id: string) => {
     const response = await axios.put('/api/pos/tables/increase-seat', { id });
     return response.data?.data ?? response.data;
@@ -54,6 +59,25 @@ export const posService = {
     return response.data?.data ?? response.data ?? [];
   },
 
+  updateTableState: async (shopId: string, tableNo: string, orderState: string) => {
+    const response = await axios.patch(`/api/pos/table-mode/update-table-state/${tableNo}`, {
+      shopId,
+      tableNo,
+      orderState,
+    });
+    return response.data?.data ?? response.data;
+  },
+
+  updateTableGuestSeats: async (shopId: string, tableNo: string, guestCount: number, seats: any[]) => {
+    const response = await axios.patch(`/api/pos/table-mode/update-guest-seats/${tableNo}`, {
+      shopId,
+      tableNo,
+      guestCount,
+      seats,
+    });
+    return response.data?.data ?? response.data;
+  },
+
   getTableOrders: async (shopId: string) => {
     const response = await axios.get('/api/pos/table-orders', { params: { shopId } });
     return response.data?.data ?? response.data ?? [];
@@ -61,6 +85,16 @@ export const posService = {
 
   createTableOrder: async (data: any) => {
     const response = await axios.post('/api/pos/table-orders', data);
+    return response.data?.data ?? response.data;
+  },
+
+  updateTableOrder: async (data: any) => {
+    const response = await axios.put('/api/pos/table-orders', data);
+    return response.data?.data ?? response.data;
+  },
+
+  deleteTableOrder: async (id: string) => {
+    const response = await axios.delete('/api/pos/table-orders', { data: { id } });
     return response.data?.data ?? response.data;
   },
 };

@@ -5408,6 +5408,407 @@
       ]
     },
     {
+      "endpoint": "/api/shop/products/{id}",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/products/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/products/{id}",
+      "method": "PATCH",
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/products/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/products/{id}",
+      "method": "DELETE",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/products/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/categories",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/categories"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/categories",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/categories"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/categories/{id}",
+      "method": "PATCH",
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/categories/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/categories/{id}",
+      "method": "DELETE",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/categories/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/coupons",
+      "method": "GET",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/coupons"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/coupons",
+      "method": "POST",
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/coupons"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/coupons/{id}",
+      "method": "PATCH",
+      "input_headers": [
+        "Authorization",
+        "Content-Type",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/coupons/{id}"
+        }
+      ]
+    },
+    {
+      "endpoint": "/api/shop/coupons/{id}",
+      "method": "DELETE",
+      "input_headers": [
+        "Authorization",
+        "X-User-Id",
+        "X-Org-Id"
+      ],
+      "extra_config": {
+        "auth/validator": {
+          "alg": "RS256",
+          "issuer": "http://localhost:8080/realms/mymanager",
+          "jwk_url": "http://keycloak:8080/realms/mymanager/protocol/openid-connect/certs",
+          "disable_jwk_security": true,
+          "cache": true,
+          "propagate_claims": [
+            [
+              "sub",
+              "X-User-Id"
+            ],
+            [
+              "org_id",
+              "X-Org-Id"
+            ]
+          ]
+        }
+      },
+      "backend": [
+        {
+          "host": [
+            "http://commerce-service:7060"
+          ],
+          "url_pattern": "/v1/coupons/{id}"
+        }
+      ]
+    },
+    {
       "endpoint": "/api/shop/orders",
       "method": "GET",
       "input_headers": [

@@ -93,6 +93,7 @@ export const paths = {
     webToolsSocialScheduler: '/social-scheduler',
     webToolsReputation: '/reputation',
     shop: `${ROOTS.DASHBOARD}/shop`,
+    shopSection: (section: string) => `${ROOTS.DASHBOARD}/shop/${section}`,
     products: `${ROOTS.DASHBOARD}/products`,
     orders: `${ROOTS.DASHBOARD}/orders`,
     pos: (shopId: string) => `${ROOTS.DASHBOARD}/pos/${shopId}`,
