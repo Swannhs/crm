@@ -250,7 +250,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.19.3
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
    */
   export type PrismaVersion = {
     client: string
@@ -710,6 +710,10 @@ export namespace Prisma {
             args: Prisma.FileManagerUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.FileManagerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileManagerPayload>[]
+          }
           upsert: {
             args: Prisma.FileManagerUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$FileManagerPayload>
@@ -779,6 +783,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.FileManagerActivityUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileManagerActivityUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileManagerActivityPayload>[]
           }
           upsert: {
             args: Prisma.FileManagerActivityUpsertArgs<ExtArgs>
@@ -850,6 +858,10 @@ export namespace Prisma {
             args: Prisma.ImageLibraryUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ImageLibraryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageLibraryPayload>[]
+          }
           upsert: {
             args: Prisma.ImageLibraryUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ImageLibraryPayload>
@@ -919,6 +931,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.FileUploadProgressUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FileUploadProgressUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FileUploadProgressPayload>[]
           }
           upsert: {
             args: Prisma.FileUploadProgressUpsertArgs<ExtArgs>
@@ -1439,6 +1455,26 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["fileManager"]>
 
+  export type FileManagerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    parentId?: boolean
+    name?: boolean
+    type?: boolean
+    mimeType?: boolean
+    size?: boolean
+    path?: boolean
+    url?: boolean
+    thumbnail?: boolean
+    isStarred?: boolean
+    isShared?: boolean
+    sharedWith?: boolean
+    isDeleted?: boolean
+    deletedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fileManager"]>
 
   export type FileManagerSelectScalar = {
     id?: boolean
@@ -1689,6 +1725,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends FileManagerUpdateManyArgs>(args: SelectSubset<T, FileManagerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileManagers and returns the data updated in the database.
+     * @param {FileManagerUpdateManyAndReturnArgs} args - Arguments to update many FileManagers.
+     * @example
+     * // Update many FileManagers
+     * const fileManager = await prisma.fileManager.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileManagers and only return the `id`
+     * const fileManagerWithIdOnly = await prisma.fileManager.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileManagerUpdateManyAndReturnArgs>(args: SelectSubset<T, FileManagerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileManagerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one FileManager.
@@ -2157,6 +2223,36 @@ export namespace Prisma {
      * Filter which FileManagers to update
      */
     where?: FileManagerWhereInput
+    /**
+     * Limit how many FileManagers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileManager updateManyAndReturn
+   */
+  export type FileManagerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileManager
+     */
+    select?: FileManagerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileManager
+     */
+    omit?: FileManagerOmit<ExtArgs> | null
+    /**
+     * The data used to update FileManagers.
+     */
+    data: XOR<FileManagerUpdateManyMutationInput, FileManagerUncheckedUpdateManyInput>
+    /**
+     * Filter which FileManagers to update
+     */
+    where?: FileManagerWhereInput
+    /**
+     * Limit how many FileManagers to update.
+     */
+    limit?: number
   }
 
   /**
@@ -2211,6 +2307,10 @@ export namespace Prisma {
      * Filter which FileManagers to delete
      */
     where?: FileManagerWhereInput
+    /**
+     * Limit how many FileManagers to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -2416,6 +2516,15 @@ export namespace Prisma {
     createdAt?: boolean
   }, ExtArgs["result"]["fileManagerActivity"]>
 
+  export type FileManagerActivitySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    fileId?: boolean
+    action?: boolean
+    details?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["fileManagerActivity"]>
 
   export type FileManagerActivitySelectScalar = {
     id?: boolean
@@ -2644,6 +2753,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends FileManagerActivityUpdateManyArgs>(args: SelectSubset<T, FileManagerActivityUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileManagerActivities and returns the data updated in the database.
+     * @param {FileManagerActivityUpdateManyAndReturnArgs} args - Arguments to update many FileManagerActivities.
+     * @example
+     * // Update many FileManagerActivities
+     * const fileManagerActivity = await prisma.fileManagerActivity.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileManagerActivities and only return the `id`
+     * const fileManagerActivityWithIdOnly = await prisma.fileManagerActivity.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileManagerActivityUpdateManyAndReturnArgs>(args: SelectSubset<T, FileManagerActivityUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileManagerActivityPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one FileManagerActivity.
@@ -3101,6 +3240,36 @@ export namespace Prisma {
      * Filter which FileManagerActivities to update
      */
     where?: FileManagerActivityWhereInput
+    /**
+     * Limit how many FileManagerActivities to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileManagerActivity updateManyAndReturn
+   */
+  export type FileManagerActivityUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileManagerActivity
+     */
+    select?: FileManagerActivitySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileManagerActivity
+     */
+    omit?: FileManagerActivityOmit<ExtArgs> | null
+    /**
+     * The data used to update FileManagerActivities.
+     */
+    data: XOR<FileManagerActivityUpdateManyMutationInput, FileManagerActivityUncheckedUpdateManyInput>
+    /**
+     * Filter which FileManagerActivities to update
+     */
+    where?: FileManagerActivityWhereInput
+    /**
+     * Limit how many FileManagerActivities to update.
+     */
+    limit?: number
   }
 
   /**
@@ -3155,6 +3324,10 @@ export namespace Prisma {
      * Filter which FileManagerActivities to delete
      */
     where?: FileManagerActivityWhereInput
+    /**
+     * Limit how many FileManagerActivities to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -3465,6 +3638,22 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["imageLibrary"]>
 
+  export type ImageLibrarySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    url?: boolean
+    thumbnail?: boolean
+    width?: boolean
+    height?: boolean
+    mimeType?: boolean
+    size?: boolean
+    category?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["imageLibrary"]>
 
   export type ImageLibrarySelectScalar = {
     id?: boolean
@@ -3707,6 +3896,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ImageLibraryUpdateManyArgs>(args: SelectSubset<T, ImageLibraryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ImageLibraries and returns the data updated in the database.
+     * @param {ImageLibraryUpdateManyAndReturnArgs} args - Arguments to update many ImageLibraries.
+     * @example
+     * // Update many ImageLibraries
+     * const imageLibrary = await prisma.imageLibrary.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ImageLibraries and only return the `id`
+     * const imageLibraryWithIdOnly = await prisma.imageLibrary.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ImageLibraryUpdateManyAndReturnArgs>(args: SelectSubset<T, ImageLibraryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageLibraryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ImageLibrary.
@@ -4171,6 +4390,36 @@ export namespace Prisma {
      * Filter which ImageLibraries to update
      */
     where?: ImageLibraryWhereInput
+    /**
+     * Limit how many ImageLibraries to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ImageLibrary updateManyAndReturn
+   */
+  export type ImageLibraryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageLibrary
+     */
+    select?: ImageLibrarySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageLibrary
+     */
+    omit?: ImageLibraryOmit<ExtArgs> | null
+    /**
+     * The data used to update ImageLibraries.
+     */
+    data: XOR<ImageLibraryUpdateManyMutationInput, ImageLibraryUncheckedUpdateManyInput>
+    /**
+     * Filter which ImageLibraries to update
+     */
+    where?: ImageLibraryWhereInput
+    /**
+     * Limit how many ImageLibraries to update.
+     */
+    limit?: number
   }
 
   /**
@@ -4225,6 +4474,10 @@ export namespace Prisma {
      * Filter which ImageLibraries to delete
      */
     where?: ImageLibraryWhereInput
+    /**
+     * Limit how many ImageLibraries to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -4481,6 +4734,16 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["fileUploadProgress"]>
 
+  export type FileUploadProgressSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    fileName?: boolean
+    totalSize?: boolean
+    uploadedSize?: boolean
+    status?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["fileUploadProgress"]>
 
   export type FileUploadProgressSelectScalar = {
     id?: boolean
@@ -4711,6 +4974,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends FileUploadProgressUpdateManyArgs>(args: SelectSubset<T, FileUploadProgressUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FileUploadProgresses and returns the data updated in the database.
+     * @param {FileUploadProgressUpdateManyAndReturnArgs} args - Arguments to update many FileUploadProgresses.
+     * @example
+     * // Update many FileUploadProgresses
+     * const fileUploadProgress = await prisma.fileUploadProgress.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FileUploadProgresses and only return the `id`
+     * const fileUploadProgressWithIdOnly = await prisma.fileUploadProgress.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FileUploadProgressUpdateManyAndReturnArgs>(args: SelectSubset<T, FileUploadProgressUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileUploadProgressPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one FileUploadProgress.
@@ -5169,6 +5462,36 @@ export namespace Prisma {
      * Filter which FileUploadProgresses to update
      */
     where?: FileUploadProgressWhereInput
+    /**
+     * Limit how many FileUploadProgresses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FileUploadProgress updateManyAndReturn
+   */
+  export type FileUploadProgressUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileUploadProgress
+     */
+    select?: FileUploadProgressSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileUploadProgress
+     */
+    omit?: FileUploadProgressOmit<ExtArgs> | null
+    /**
+     * The data used to update FileUploadProgresses.
+     */
+    data: XOR<FileUploadProgressUpdateManyMutationInput, FileUploadProgressUncheckedUpdateManyInput>
+    /**
+     * Filter which FileUploadProgresses to update
+     */
+    where?: FileUploadProgressWhereInput
+    /**
+     * Limit how many FileUploadProgresses to update.
+     */
+    limit?: number
   }
 
   /**
@@ -5223,6 +5546,10 @@ export namespace Prisma {
      * Filter which FileUploadProgresses to delete
      */
     where?: FileUploadProgressWhereInput
+    /**
+     * Limit how many FileUploadProgresses to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -5424,6 +5751,13 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -6507,12 +6841,13 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -6557,12 +6892,13 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -6991,12 +7327,13 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>

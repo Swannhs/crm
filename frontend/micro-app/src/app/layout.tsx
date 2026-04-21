@@ -12,6 +12,7 @@ import { getInitColorSchemeScript } from 'src/theme/color-scheme-script';
 import { ProgressBar } from 'src/components/progress-bar';
 import QueryProvider from 'src/components/query-provider';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
+import { ToastProvider } from 'src/components/toast';
 import { detectSettings } from 'src/components/settings/server';
 import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/components/settings';
 
@@ -34,7 +35,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         {getInitColorSchemeScript}
 
         <AuthProvider>
@@ -46,6 +47,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               <ThemeProvider>
                 <MotionLazy>
                   <ProgressBar />
+                  <ToastProvider />
                   <SettingsDrawer />
                   {children}
                 </MotionLazy>

@@ -19,9 +19,9 @@ export class BillingController {
     return res.status(500).json({ message, code: 'INTERNAL_SERVER_ERROR' });
   }
 
-  listInvoices = async (req: AuthenticatedRequest, res: Response) => {
+  listInvoices = async (req: any, res: Response) => {
     try {
-      const { orgId } = req.identity;
+      const { orgId } = (req as AuthenticatedRequest).identity;
       const result = await this.billingService.getInvoices(orgId, req.query);
       return res.json(result);
     } catch (error) {
@@ -29,9 +29,9 @@ export class BillingController {
     }
   };
 
-  getInvoiceStats = async (req: AuthenticatedRequest, res: Response) => {
+  getInvoiceStats = async (req: any, res: Response) => {
     try {
-      const { orgId } = req.identity;
+      const { orgId } = (req as AuthenticatedRequest).identity;
       const result = await this.billingService.getInvoiceStats(orgId);
       return res.json(result);
     } catch (error) {
@@ -39,9 +39,22 @@ export class BillingController {
     }
   };
 
-  getInvoice = async (req: AuthenticatedRequest, res: Response) => {
+  getLegacyFinanceStatistics = async (req: any, res: Response) => {
     try {
-      const { orgId } = req.identity;
+      const { orgId } = (req as AuthenticatedRequest).identity;
+      const result = await this.billingService.getLegacyFinanceStatistics(orgId, req.query);
+      return res.json({ 
+        data: result,
+        ...result 
+      });
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  };
+
+  getInvoice = async (req: any, res: Response) => {
+    try {
+      const { orgId } = (req as AuthenticatedRequest).identity;
       const invoice = await this.billingService.getInvoiceById(orgId, req.params.id);
       return res.json({ data: invoice });
     } catch (error) {
@@ -49,9 +62,9 @@ export class BillingController {
     }
   };
 
-  createInvoice = async (req: AuthenticatedRequest, res: Response) => {
+  createInvoice = async (req: any, res: Response) => {
     try {
-      const { orgId, userId } = req.identity;
+      const { orgId, userId } = (req as AuthenticatedRequest).identity;
       const invoice = await this.billingService.createInvoice(orgId, userId, req.body);
       return res.status(201).json({ data: invoice });
     } catch (error) {
@@ -59,9 +72,9 @@ export class BillingController {
     }
   };
 
-  listPayments = async (req: AuthenticatedRequest, res: Response) => {
+  listPayments = async (req: any, res: Response) => {
     try {
-      const { orgId } = req.identity;
+      const { orgId } = (req as AuthenticatedRequest).identity;
       const payments = await this.billingService.getPayments(orgId, req.query);
       return res.json(payments);
     } catch (error) {
@@ -69,9 +82,9 @@ export class BillingController {
     }
   };
 
-  recordPayment = async (req: AuthenticatedRequest, res: Response) => {
+  recordPayment = async (req: any, res: Response) => {
     try {
-      const { orgId, userId } = req.identity;
+      const { orgId, userId } = (req as AuthenticatedRequest).identity;
       const payment = await this.billingService.recordPayment(orgId, userId, req.body, req.log as never);
       return res.status(201).json({ data: payment });
     } catch (error) {

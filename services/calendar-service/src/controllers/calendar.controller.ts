@@ -48,4 +48,8 @@ export class EventController {
       return res.status(500).json({ message: err.message });
     }
   }
+
+  async categories(_req: AuthenticatedRequest, res: Response) {
+    return res.json({ data: [] });
+  }
 }

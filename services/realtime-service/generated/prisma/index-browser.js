@@ -22,11 +22,11 @@ exports.$Enums = {}
 
 /**
  * Prisma Client JS version: 6.19.3
- * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+ * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
  */
 Prisma.prismaVersion = {
   client: "6.19.3",
-  engine: "605197351a3c8bdd595af2d2a9bc3025bca48ea2"
+  engine: "c2990dca591cba766e3b7ef5d9e8a84796e47ab7"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -199,6 +199,46 @@ exports.Prisma.SocketConnectionScalarFieldEnum = {
   disconnectedAt: 'disconnectedAt'
 };
 
+exports.Prisma.OmniConversationScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  contactId: 'contactId',
+  provider: 'provider',
+  providerRef: 'providerRef',
+  status: 'status',
+  subject: 'subject',
+  lastMessage: 'lastMessage',
+  lastMessageAt: 'lastMessageAt',
+  metadata: 'metadata',
+  assignedAgentId: 'assignedAgentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OmniMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  senderType: 'senderType',
+  content: 'content',
+  type: 'type',
+  status: 'status',
+  direction: 'direction',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OmniParticipantScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  participantId: 'participantId',
+  participantType: 'participantType',
+  role: 'role',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -232,7 +272,10 @@ exports.Prisma.ModelName = {
   LiveChatContact: 'LiveChatContact',
   LiveChatWidgetSetting: 'LiveChatWidgetSetting',
   LiveChatStatistics: 'LiveChatStatistics',
-  SocketConnection: 'SocketConnection'
+  SocketConnection: 'SocketConnection',
+  OmniConversation: 'OmniConversation',
+  OmniMessage: 'OmniMessage',
+  OmniParticipant: 'OmniParticipant'
 };
 
 /**

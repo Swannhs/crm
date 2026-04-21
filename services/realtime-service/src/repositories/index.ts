@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import type { LiveChatChannelInput, LiveChatMessageInput, LiveChatContactInput, LiveChatWidgetSettingInput, SocketConnectionInput, ChatStatisticsInput } from '../types/index.js';
+import type { LiveChatChannelInput, LiveChatMessageInput, LiveChatContactInput, LiveChatWidgetSettingInput, SocketConnectionInput, ChatStatisticsInput, OmniConversationInput, OmniMessageInput, OmniParticipantInput } from '../types/index.js';
 
 export class LiveChatChannelRepository {
   async create(data: LiveChatChannelInput) {
@@ -93,6 +93,12 @@ export class LiveChatContactRepository {
   async update(id: string, data: Partial<LiveChatContactInput>) {
     return db.liveChatContact.update({ where: { id }, data });
   }
+
+  async findByPhone(phone: string, organizationId: string) {
+    return db.liveChatContact.findFirst({
+      where: { phone, organizationId }
+    });
+  }
 }
 
 export class LiveChatWidgetSettingRepository {
@@ -161,5 +167,82 @@ export class SocketConnectionRepository {
       where: { socketId },
       data: { disconnectedAt: new Date() }
     });
+  }
+}
+
+export class OmniConversationRepository {
+  async create(data: OmniConversationInput) {
+    return db.omniConversation.create({ data });
+  }
+
+  async findById(id: string) {
+    return db.omniConversation.findUnique({
+      where: { id },
+      include: { participants: true }
+    });
+  }
+
+  async findByOrganizationId(organizationId: string) {
+    return db.omniConversation.findMany({
+      where: { organizationId },
+      orderBy: { updatedAt: 'desc' },
+      include: { participants: true }
+    });
+  }
+
+  async findByOrganizationAndProviderRef(organizationId: string, provider: string, providerRef: string) {
+    return db.omniConversation.findFirst({
+      where: { organizationId, provider, providerRef }
+    });
+  }
+
+  async findByContactId(contactId: string) {
+    return db.omniConversation.findMany({
+      where: { contactId },
+      orderBy: { updatedAt: 'desc' }
+    });
+  }
+
+  async update(id: string, data: Partial<OmniConversationInput>) {
+    return db.omniConversation.update({ where: { id }, data });
+  }
+
+  async assignAgent(id: string, agentId: string) {
+    return db.omniConversation.update({
+      where: { id },
+      data: { assignedAgentId: agentId }
+    });
+  }
+}
+
+export class OmniMessageRepository {
+  async create(data: OmniMessageInput) {
+    return db.omniMessage.create({ data });
+  }
+
+  async findByConversationId(conversationId: string, limit = 50) {
+    return db.omniMessage.findMany({
+      where: { conversationId },
+      orderBy: { createdAt: 'desc' },
+      take: limit
+    });
+  }
+
+  async updateStatus(id: string, status: string) {
+    return db.omniMessage.update({ where: { id }, data: { status } });
+  }
+}
+
+export class OmniParticipantRepository {
+  async create(data: OmniParticipantInput) {
+    return db.omniParticipant.create({ data });
+  }
+
+  async findByConversationId(conversationId: string) {
+    return db.omniParticipant.findMany({ where: { conversationId } });
+  }
+
+  async delete(id: string) {
+    return db.omniParticipant.delete({ where: { id } });
   }
 }

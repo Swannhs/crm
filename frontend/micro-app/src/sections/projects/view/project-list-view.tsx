@@ -46,7 +46,7 @@ const TABLE_HEAD = [
 ];
 
 export const NewProjectSchema = zod.object({
-  title: zod.string().min(1, { message: 'Project title is required!' }),
+  name: zod.string().min(1, { message: 'Project name is required!' }),
   description: zod.string(),
 });
 
@@ -67,7 +67,7 @@ export function ProjectListView() {
   const methods = useForm({
     resolver: zodResolver(NewProjectSchema),
     defaultValues: {
-      title: '',
+      name: '',
       description: '',
     },
   });
@@ -190,7 +190,7 @@ export function ProjectListView() {
               gridTemplateColumns="1fr"
               sx={{ p: 3 }}
             >
-              <RHFTextField name="title" label="Project Title" />
+              <RHFTextField name="name" label="Project Name" />
               <RHFTextField name="description" label="Description" multiline rows={4} />
             </Box>
           </DialogContent>

@@ -6,7 +6,12 @@ import {
   ShopifyStoreRepository,
   UberEatsConfigRepository,
   EasyPostConfigRepository,
-  IntegrationActivityRepository
+  IntegrationActivityRepository,
+  UserIntegrationSettingsRepository,
+  MetaIntegrationRepository,
+  VoiceIntegrationRepository,
+  WhatsAppInstanceRepository,
+  TelegramSessionRepository
 } from '../repositories/index.js';
 import type { 
   IntegrationConnectionInput, 
@@ -15,7 +20,12 @@ import type {
   ZoomMeetingInput,
   ShopifyStoreInput,
   UberEatsConfigInput,
-  EasyPostConfigInput
+  EasyPostConfigInput,
+  UserIntegrationSettingsInput,
+  MetaIntegrationInput,
+  VoiceIntegrationInput,
+  WhatsAppInstanceInput,
+  TelegramSessionInput
 } from '../types/index.js';
 
 export class IntegrationConnectionService {
@@ -323,5 +333,210 @@ export class EasyPostIntegrationService {
 
   async getRates(userId: string, parcelData: any) {
     return { rates: [] };
+  }
+}
+
+export class UserIntegrationSettingsService {
+  private repo = new UserIntegrationSettingsRepository();
+
+  async getSettings(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async updateSettings(userId: string, data: UserIntegrationSettingsInput) {
+    return this.repo.upsert(userId, data);
+  }
+
+  async validateApiKey(apiKey: string) {
+    return this.repo.findByApiKey(apiKey);
+  }
+}
+
+export class MetaIntegrationService {
+  private repo = new MetaIntegrationRepository();
+
+  async getIntegration(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async updateIntegration(userId: string, organizationId: string | undefined, data: MetaIntegrationInput) {
+    return this.repo.upsert(userId, organizationId, data);
+  }
+
+  async getOrganizationIntegrations(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+}
+
+export class VoiceIntegrationService {
+  private repo = new VoiceIntegrationRepository();
+
+  async getIntegration(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async updateIntegration(userId: string, organizationId: string | undefined, data: VoiceIntegrationInput) {
+    return this.repo.upsert(userId, organizationId, data);
+  }
+
+  async getOrganizationIntegrations(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+}
+
+import { emitOmniMessageReceived } from '../kafka/omni.producer.js';
+
+export class WebhookService {
+  async verifyMetaWebhook(mode: string, token: string, challenge: string) {
+    const verifyToken = process.env.META_WEBHOOK_VERIFY_TOKEN || 'mymanager_token';
+    if (mode === 'subscribe' && token === verifyToken) {
+      return challenge;
+    }
+    throw new Error('Verification failed');
+  }
+
+  async handleMetaWebhook(body: any, logger: any) {
+    // Basic WhatsApp message extraction logic based on WACRM parity
+    if (body.object === 'whatsapp_business_account') {
+      for (const entry of body.entry) {
+        for (const change of entry.changes) {
+          if (change.value.messages) {
+            for (const message of change.value.messages) {
+              const contact = change.value.contacts?.[0];
+              const event: OmniMessageReceivedEvent = {
+                provider: 'whatsapp',
+                instanceId: change.value.metadata.phone_number_id,
+                contactMobile: message.from,
+                contactName: contact?.profile?.name,
+                content: message.text?.body || '',
+                type: message.type,
+                timestamp: parseInt(message.timestamp),
+                organizationId: 'PENDING_LOOKUP', // Needs lookup by phone_number_id
+                metadata: {
+                  messageId: message.id,
+                  raw: body
+                }
+              };
+              
+              // Here we would look up the organizationId by businessPhoneNumberId
+              // For now, we emit with a placeholder or handle lookup in controller
+              await emitOmniMessageReceived(event, logger);
+            }
+          }
+        }
+      }
+    }
+    return { success: true };
+  }
+
+  async handleTelegramWebhook(body: any, logger: any) {
+    if (body.message) {
+      const event: OmniMessageReceivedEvent = {
+        provider: 'telegram',
+        instanceId: 'PENDING_LOOKUP', // Lookup by bot token/id
+        contactMobile: body.message.from.id.toString(),
+        contactName: `${body.message.from.first_name || ''} ${body.message.from.last_name || ''}`.trim(),
+        content: body.message.text || '',
+        type: 'text',
+        timestamp: body.message.date,
+        organizationId: 'PENDING_LOOKUP',
+        metadata: {
+          messageId: body.message.message_id.toString(),
+          raw: body
+        }
+      };
+      await emitOmniMessageReceived(event, logger);
+    }
+    return { success: true };
+  }
+}
+
+export class WhatsAppService {
+  private repo = new WhatsAppInstanceRepository();
+
+  async getInstances(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async createInstance(userId: string, organizationId: string | undefined, name?: string) {
+    const instanceId = `wa_${Math.random().toString(36).substring(2, 15)}`;
+    return this.repo.create({ userId, organizationId, name, instanceId, status: 'initial' });
+  }
+
+  async updateStatus(instanceId: string, status: string, qr?: string, phone?: string) {
+    return this.repo.update(instanceId, { status, qr, phone });
+  }
+
+  async deleteInstance(instanceId: string) {
+    return this.repo.delete(instanceId);
+  }
+}
+
+export class TelegramService {
+  private repo = new TelegramSessionRepository();
+
+  async getSessions(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async createSession(userId: string, organizationId: string | undefined, name?: string) {
+    const sessionId = `tg_${Math.random().toString(36).substring(2, 15)}`;
+    return this.repo.create({ userId, organizationId, name, sessionId, status: 'disconnected' });
+  }
+
+  async updateStatus(sessionId: string, status: string, phone?: string) {
+    return this.repo.update(sessionId, { status, phone });
+  }
+
+  async deleteSession(sessionId: string) {
+    return this.repo.delete(sessionId);
+  }
+}
+
+export class UserIntegrationSettingsService {
+  private repo = new UserIntegrationSettingsRepository();
+
+  async getSettings(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async updateSettings(userId: string, data: UserIntegrationSettingsInput) {
+    return this.repo.upsert(userId, data);
+  }
+
+  async validateApiKey(apiKey: string) {
+    return this.repo.findByApiKey(apiKey);
+  }
+}
+
+export class MetaIntegrationService {
+  private repo = new MetaIntegrationRepository();
+
+  async getIntegration(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async updateIntegration(userId: string, organizationId: string | undefined, data: MetaIntegrationInput) {
+    return this.repo.upsert(userId, organizationId, data);
+  }
+
+  async getOrganizationIntegrations(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+}
+
+export class VoiceIntegrationService {
+  private repo = new VoiceIntegrationRepository();
+
+  async getIntegration(userId: string) {
+    return this.repo.findByUserId(userId);
+  }
+
+  async updateIntegration(userId: string, organizationId: string | undefined, data: VoiceIntegrationInput) {
+    return this.repo.upsert(userId, organizationId, data);
+  }
+
+  async getOrganizationIntegrations(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
   }
 }

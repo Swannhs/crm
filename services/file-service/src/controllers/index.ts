@@ -28,7 +28,7 @@ export class FileManagerController {
   async searchFiles(req: AuthenticatedRequest, res: Response) {
     try {
       const query = req.query.q as string;
-      if (!query) return res.status(400).json({ success: false, message: 'Query is required' });
+      if (!query) return res.json({ success: true, data: [] });
       
       const results = await this.svc.search(req.identity.userId, req.identity.orgId, query);
       return res.json({ success: true, data: results });

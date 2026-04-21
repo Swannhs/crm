@@ -149,7 +149,7 @@ export class EmailMessageService {
   async getMessages(orgId: string, filters: any) {
     const page = parseInt(filters.page || '1');
     const limit = parseInt(filters.limit || '20');
-    return this.repo.findMany({ orgId, isDeleted: false }, (page - 1) * limit, limit);
+    return this.repo.findMany({ org_id: orgId, is_deleted: false }, (page - 1) * limit, limit);
   }
 
   async getTotals(orgId: string) {

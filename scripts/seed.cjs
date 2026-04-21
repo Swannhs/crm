@@ -1,14 +1,22 @@
 const http = require('http');
 
 const CONFIG = {
-  host: 'localhost',
-  ports: {
-    projects: 8040,
-    crm: 8010,
-    billing: 7020
+  services: {
+    projects: {
+      host: process.env.SEED_PROJECTS_HOST || process.env.SEED_HOST || 'localhost',
+      port: Number(process.env.SEED_PROJECTS_PORT || 8040),
+    },
+    crm: {
+      host: process.env.SEED_CRM_HOST || process.env.SEED_HOST || 'localhost',
+      port: Number(process.env.SEED_CRM_PORT || 8010),
+    },
+    billing: {
+      host: process.env.SEED_BILLING_HOST || process.env.SEED_HOST || 'localhost',
+      port: Number(process.env.SEED_BILLING_PORT || 7020),
+    },
   },
-  userId: 'user-dev-123',
-  orgId: 'd6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384' // Valid UUID
+  userId: process.env.SEED_USER_ID || 'user-dev-123',
+  orgId: process.env.SEED_ORG_ID || 'd6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384',
 };
 
 const DUMMY_DATA = {
@@ -28,12 +36,19 @@ const DUMMY_DATA = {
   ]
 };
 
-async function post(port, path, data) {
+async function post(serviceName, path, data) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify(data);
+    const service = CONFIG.services[serviceName];
+
+    if (!service) {
+      reject(new Error(`Unknown service target: ${serviceName}`));
+      return;
+    }
+
     const req = http.request({
-      hostname: CONFIG.host,
-      port: port,
+      hostname: service.host,
+      port: service.port,
       path: path,
       method: 'POST',
       headers: {
@@ -50,7 +65,7 @@ async function post(port, path, data) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           try { resolve(JSON.parse(responseBody)); } catch (e) { resolve(responseBody); }
         } else {
-          reject(new Error(`Failed [Port ${port}] ${path}: ${res.statusCode} - ${responseBody}`));
+          reject(new Error(`Failed [${serviceName} ${service.host}:${service.port}] ${path}: ${res.statusCode} - ${responseBody}`));
         }
       });
     });
@@ -68,22 +83,22 @@ async function seed() {
   for (const proj of DUMMY_DATA.projects) {
     try {
       console.log(`📂 Creating Project: ${proj.name}`);
-      const res = await post(CONFIG.ports.projects, '/v1/projects', proj);
+      const res = await post('projects', '/v1/projects', proj);
       const project = res.data || res;
       const projectId = project.id || project._id;
       
       console.log(`📋 Creating Board for Project: ${projectId}`);
-      const boardRes = await post(CONFIG.ports.projects, `/v1/projects/${projectId}/boards`, { name: 'Master Board' });
+      const boardRes = await post('projects', `/v1/projects/${projectId}/boards`, { name: 'Master Board' });
       const board = boardRes.data || boardRes;
       const boardId = board.id || board._id;
 
       for (const colTitle of DUMMY_DATA.columns) {
-        const colRes = await post(CONFIG.ports.projects, `/v1/boards/${boardId}/columns`, { name: colTitle });
+        const colRes = await post('projects', `/v1/boards/${boardId}/columns`, { name: colTitle });
         const col = colRes.data || colRes;
         const columnId = col.id || col._id;
         for (let i = 0; i < 2; i++) {
            const taskTitle = DUMMY_DATA.tasks[Math.floor(Math.random() * DUMMY_DATA.tasks.length)];
-           await post(CONFIG.ports.projects, `/v1/boards/${boardId}/cards`, {
+           await post('projects', `/v1/boards/${boardId}/cards`, {
              title: taskTitle, columnId: columnId, description: 'Auto-seeded task.'
            });
         }
@@ -103,7 +118,7 @@ async function seed() {
   for (const c of contacts) {
     try {
       console.log(`👤 Creating Contact: ${c.name}`);
-      const res = await post(CONFIG.ports.crm, '/api/v1/contacts', c);
+      const res = await post('crm', '/api/v1/contacts', c);
       createdContacts.push(res.data || res);
     } catch (err) { console.error(`❌ CRM: ${err.message}`); }
   }
@@ -115,7 +130,7 @@ async function seed() {
       const contactId = contact.id || contact._id;
       const contactName = contact.name || contact.fullName;
       console.log(`🧾 Creating Invoice for: ${contactName}`);
-      await post(CONFIG.ports.billing, '/v1/invoices', {
+      await post('billing', '/v1/invoices', {
         contactId,
         amount_cents: (Math.floor(Math.random() * 5000) + 500) * 100,
         status: 'pending',
@@ -126,7 +141,5 @@ async function seed() {
 
   console.log('\n✅ Seeding Successfully Completed.');
 }
-
-seed().catch(console.error);
 
 seed().catch(console.error);

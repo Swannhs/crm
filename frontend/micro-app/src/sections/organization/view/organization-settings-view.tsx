@@ -19,6 +19,8 @@ import { organizationService } from 'src/services/organization-service';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 
+import { OmniIntegrationView } from '../omni-integration-view';
+
 // ----------------------------------------------------------------------
 
 export function OrganizationSettingsView() {
@@ -49,6 +51,7 @@ export function OrganizationSettingsView() {
         <Tab icon={<Iconify icon="ic:round-business" />} label="General" value="general" />
         <Tab icon={<Iconify icon="ic:round-color-lens" />} label="Branding" value="branding" />
         <Tab icon={<Iconify icon="ic:round-people" />} label="Roles & Permissions" value="roles" />
+        <Tab icon={<Iconify icon="solar:chat-round-bold" />} label="Omnichannel" value="omni" />
       </Tabs>
 
       {currentTab === 'general' && (
@@ -99,6 +102,7 @@ export function OrganizationSettingsView() {
             </Grid>
          </Grid>
       )}
+      {currentTab === 'omni' && <OmniIntegrationView />}
     </DashboardContent>
   );
 }

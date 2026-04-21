@@ -18,7 +18,13 @@ export class ProjectService {
   }
 
   async createProject(orgId: string, userId: string, data: any) {
-    return this.repo.create({ orgId, createdBy: userId, name: data.name, description: data.description, color: data.color });
+    const project = await this.repo.create({ orgId, createdBy: userId, name: data.name, description: data.description, color: data.color });
+    
+    // Auto-create a default board
+    const boardService = new BoardService();
+    await boardService.createBoard(orgId, userId, project.id, { name: 'Main Board' });
+    
+    return project;
   }
 
   async updateProject(id: string, orgId: string, data: any) {
@@ -44,7 +50,15 @@ export class BoardService {
   }
 
   async createBoard(orgId: string, userId: string, projectId: string, data: any) {
-    return this.repo.create({ orgId, projectId, createdBy: userId, name: data.name, description: data.description, background: data.background });
+    const board = await this.repo.create({ orgId, projectId, createdBy: userId, name: data.name, description: data.description, background: data.background });
+    
+    // Auto-create default columns
+    const columnService = new ColumnService();
+    await columnService.createColumn(board.id, orgId, { name: 'To Do', position: 1 });
+    await columnService.createColumn(board.id, orgId, { name: 'In Progress', position: 2 });
+    await columnService.createColumn(board.id, orgId, { name: 'Done', position: 3 });
+    
+    return board;
   }
 
   async updateBoard(id: string, orgId: string, data: any) {

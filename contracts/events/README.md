@@ -1,11 +1,12 @@
 # Event Contracts
 
-We use a topic exchange named `domain-events` (RabbitMQ).
+We use Kafka topics for domain events.
 
-Routing keys are namespaced by domain, e.g.:
+Topics are namespaced by domain, e.g.:
 - `crm.contact.created`
 - `crm.contact.updated`
 - `billing.invoice.created`
+- `billing.payment.recorded`
 
 Payloads are JSON.
 
@@ -16,3 +17,6 @@ Events should include:
 - `actor_user_id` (when applicable)
 - `occurred_at`
 
+## Current Topics
+
+- `billing.payment.recorded`

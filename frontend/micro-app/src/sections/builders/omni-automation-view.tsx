@@ -1,0 +1,127 @@
+'use client';
+
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Divider from '@mui/material/Divider';
+import CircularProgress from '@mui/material/CircularProgress';
+
+import { omniAutomationService } from 'src/services/omni-service';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { Iconify } from 'src/components/iconify';
+
+// ----------------------------------------------------------------------
+
+export function OmniAutomationView() {
+  const [currentTab, setCurrentTab] = useState('chatbots');
+  const queryClient = useQueryClient();
+
+  const { data: chatbots, isLoading: chatbotsLoading } = useQuery({
+    queryKey: ['omni-chatbots'],
+    queryFn: () => omniAutomationService.getChatbots(),
+  });
+
+  const { data: triggers, isLoading: triggersLoading } = useQuery({
+    queryKey: ['omni-triggers'],
+    queryFn: () => omniAutomationService.getTriggers(),
+  });
+
+  return (
+    <DashboardContent maxWidth="xl">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+        <Box>
+          <Typography variant="h4">Omnichannel Automation</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Configure AI chatbots and keyword-based triggers.
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Tabs
+        value={currentTab}
+        onChange={(e, val) => setCurrentTab(val)}
+        sx={{ mb: 5 }}
+      >
+        <Tab icon={<Iconify icon="solar:bot-bold" />} label="AI Chatbots" value="chatbots" />
+        <Tab icon={<Iconify icon="solar:key-minimalistic-square-bold" />} label="Keyword Triggers" value="triggers" />
+      </Tabs>
+
+      {currentTab === 'chatbots' && (
+        <Stack spacing={3}>
+           {chatbotsLoading && <CircularProgress />}
+           {(chatbots || []).map((bot: any) => (
+             <Card key={bot.id} sx={{ p: 3 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                   <Stack direction="row" spacing={2} alignItems="center">
+                      <Box sx={{ p: 1.5, bgcolor: 'primary.lighter', color: 'primary.main', borderRadius: 1.5 }}>
+                         <Iconify icon="solar:bot-bold" width={24} />
+                      </Box>
+                      <Box>
+                        <Typography variant="subtitle1">{bot.name}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>Provider: {bot.provider}</Typography>
+                      </Box>
+                   </Stack>
+                   <FormControlLabel control={<Switch checked={bot.isActive} />} label="Active" />
+                </Stack>
+                <Divider sx={{ borderStyle: 'dashed', my: 2 }} />
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>AI Prompt</Typography>
+                <TextField fullWidth multiline rows={3} defaultValue={bot.aiPrompt} disabled />
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                   <Button variant="soft" color="error">Delete</Button>
+                   <Button variant="soft" color="primary">Edit Configuration</Button>
+                </Box>
+             </Card>
+           ))}
+           <Button variant="dashed" sx={{ py: 3 }} startIcon={<Iconify icon="mingcute:add-line" />}>
+              Create New Chatbot
+           </Button>
+        </Stack>
+      )}
+
+      {currentTab === 'triggers' && (
+        <Stack spacing={3}>
+           {triggersLoading && <CircularProgress />}
+           {(triggers || []).map((trigger: any) => (
+             <Card key={trigger.id} sx={{ p: 3 }}>
+                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                   <Chip label={trigger.matchType} color="info" variant="soft" size="small" />
+                   <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>Keyword: "{trigger.keyword}"</Typography>
+                   <FormControlLabel control={<Switch checked={trigger.isActive} />} label="" />
+                </Stack>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                  Executes workflow: <Typography component="span" variant="subtitle2" color="primary">{trigger.workflowId}</Typography>
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                   <Button variant="soft" color="error" size="small">Delete</Button>
+                   <Button variant="soft" color="primary" size="small">Edit</Button>
+                </Box>
+             </Card>
+           ))}
+           <Button variant="dashed" sx={{ py: 3 }} startIcon={<Iconify icon="mingcute:add-line" />}>
+              Add Keyword Trigger
+           </Button>
+        </Stack>
+      )}
+    </DashboardContent>
+  );
+}
+
+// Minimal Chip mock if not available
+function Chip({ label, color, variant, size }: any) {
+    return <Box sx={{ 
+        px: 1, py: 0.5, borderRadius: 1, fontSize: 12, fontWeight: 'bold',
+        bgcolor: color === 'info' ? 'info.lighter' : 'grey.200',
+        color: color === 'info' ? 'info.dark' : 'grey.800'
+    }}>{label}</Box>;
+}

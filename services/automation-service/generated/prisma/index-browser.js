@@ -241,6 +241,34 @@ exports.Prisma.WorkflowExecutionHistoryScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.OmniChatbotScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  provider: 'provider',
+  isActive: 'isActive',
+  aiEnabled: 'aiEnabled',
+  aiPrompt: 'aiPrompt',
+  welcomeMessage: 'welcomeMessage',
+  fallbackMessage: 'fallbackMessage',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OmniKeywordTriggerScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  keyword: 'keyword',
+  matchType: 'matchType',
+  workflowId: 'workflowId',
+  replyMessage: 'replyMessage',
+  isActive: 'isActive',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -248,6 +276,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -275,7 +307,9 @@ exports.Prisma.ModelName = {
   WorkflowWorkspace: 'WorkflowWorkspace',
   WorkflowStartAction: 'WorkflowStartAction',
   WorkflowActivityLog: 'WorkflowActivityLog',
-  WorkflowExecutionHistory: 'WorkflowExecutionHistory'
+  WorkflowExecutionHistory: 'WorkflowExecutionHistory',
+  OmniChatbot: 'OmniChatbot',
+  OmniKeywordTrigger: 'OmniKeywordTrigger'
 };
 
 /**

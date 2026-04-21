@@ -78,4 +78,12 @@ export class InvoiceRepository {
 
     return { aggregate, grouped };
   }
+
+  async findAllByOrgId(orgId: string) {
+    return this.client.invoice.findMany({
+      where: { orgId },
+      orderBy: { createdAt: 'desc' },
+      include: { payments: true },
+    });
+  }
 }

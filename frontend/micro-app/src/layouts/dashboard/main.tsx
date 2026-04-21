@@ -3,6 +3,8 @@
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
+import { BoxProps } from '@mui/material/Box';
+import { ContainerProps } from '@mui/material/Container';
 
 import { layoutClasses } from 'src/layouts/classes';
 
@@ -10,7 +12,12 @@ import { useSettingsContext } from 'src/components/settings';
 
 // ----------------------------------------------------------------------
 
-export function Main({ children, isNavHorizontal, sx, ...other }) {
+interface MainProps extends BoxProps {
+  children: React.ReactNode;
+  isNavHorizontal?: boolean;
+}
+
+export function Main({ children, isNavHorizontal, sx, ...other }: MainProps) {
   return (
     <Box
       component="main"
@@ -33,7 +40,12 @@ export function Main({ children, isNavHorizontal, sx, ...other }) {
 
 // ----------------------------------------------------------------------
 
-export function DashboardContent({ sx, children, disablePadding, maxWidth = 'lg', ...other }) {
+interface DashboardContentProps extends ContainerProps {
+  children: React.ReactNode;
+  disablePadding?: boolean;
+}
+
+export function DashboardContent({ sx, children, disablePadding, maxWidth = 'lg', ...other }: DashboardContentProps) {
   const theme = useTheme();
 
   const settings = useSettingsContext();

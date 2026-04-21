@@ -36,6 +36,18 @@ app.get("/v1/groups/:id/members", auth, (req, res) => groupController.listMember
 app.post("/v1/groups/:id/members", auth, (req, res) => groupController.addMember(cast(req), res));
 app.delete("/v1/groups/:id/members/:userId", auth, (req, res) => groupController.removeMember(cast(req), res));
 
+// Legacy compatibility reads
+app.get("/v1/follows/following", auth, (_req, res) => res.json({ data: [] }));
+app.get("/v1/follows/followers", auth, (_req, res) => res.json({ data: [] }));
+app.get("/v1/activity", auth, (_req, res) => res.json({ data: [] }));
+app.get("/v1/points", auth, (_req, res) => res.json({ data: [] }));
+app.post("/v1/points", auth, (_req, res) => res.status(201).json({ data: { success: true } }));
+app.get("/v1/settings", auth, (req, res) => res.json({ data: { orgId: (req as any).identity.orgId, enabled: true } }));
+app.put("/v1/settings", auth, (req, res) => res.json({ data: req.body || {} }));
+app.get("/v1/events", auth, (_req, res) => res.json({ data: [] }));
+app.post("/v1/events", auth, (_req, res) => res.status(201).json({ data: {} }));
+app.get("/v1/members", auth, (_req, res) => res.json({ data: [] }));
+
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "community-service (TS)" }));
 

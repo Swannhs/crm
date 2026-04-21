@@ -38,6 +38,16 @@ export type Automation = $Result.DefaultSelection<Prisma.$AutomationPayload>
  * 
  */
 export type OptinForm = $Result.DefaultSelection<Prisma.$OptinFormPayload>
+/**
+ * Model OmniBroadcast
+ * 
+ */
+export type OmniBroadcast = $Result.DefaultSelection<Prisma.$OmniBroadcastPayload>
+/**
+ * Model OmniBroadcastLog
+ * 
+ */
+export type OmniBroadcastLog = $Result.DefaultSelection<Prisma.$OmniBroadcastLogPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -206,6 +216,26 @@ export class PrismaClient<
     * ```
     */
   get optinForm(): Prisma.OptinFormDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.omniBroadcast`: Exposes CRUD operations for the **OmniBroadcast** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OmniBroadcasts
+    * const omniBroadcasts = await prisma.omniBroadcast.findMany()
+    * ```
+    */
+  get omniBroadcast(): Prisma.OmniBroadcastDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.omniBroadcastLog`: Exposes CRUD operations for the **OmniBroadcastLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more OmniBroadcastLogs
+    * const omniBroadcastLogs = await prisma.omniBroadcastLog.findMany()
+    * ```
+    */
+  get omniBroadcastLog(): Prisma.OmniBroadcastLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -651,7 +681,9 @@ export namespace Prisma {
     EmailMessage: 'EmailMessage',
     Subscriber: 'Subscriber',
     Automation: 'Automation',
-    OptinForm: 'OptinForm'
+    OptinForm: 'OptinForm',
+    OmniBroadcast: 'OmniBroadcast',
+    OmniBroadcastLog: 'OmniBroadcastLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -670,7 +702,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "campaign" | "emailMessage" | "subscriber" | "automation" | "optinForm"
+      modelProps: "campaign" | "emailMessage" | "subscriber" | "automation" | "optinForm" | "omniBroadcast" | "omniBroadcastLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1044,6 +1076,154 @@ export namespace Prisma {
           }
         }
       }
+      OmniBroadcast: {
+        payload: Prisma.$OmniBroadcastPayload<ExtArgs>
+        fields: Prisma.OmniBroadcastFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OmniBroadcastFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OmniBroadcastFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>
+          }
+          findFirst: {
+            args: Prisma.OmniBroadcastFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OmniBroadcastFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>
+          }
+          findMany: {
+            args: Prisma.OmniBroadcastFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>[]
+          }
+          create: {
+            args: Prisma.OmniBroadcastCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>
+          }
+          createMany: {
+            args: Prisma.OmniBroadcastCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OmniBroadcastCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>[]
+          }
+          delete: {
+            args: Prisma.OmniBroadcastDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>
+          }
+          update: {
+            args: Prisma.OmniBroadcastUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>
+          }
+          deleteMany: {
+            args: Prisma.OmniBroadcastDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OmniBroadcastUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OmniBroadcastUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>[]
+          }
+          upsert: {
+            args: Prisma.OmniBroadcastUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastPayload>
+          }
+          aggregate: {
+            args: Prisma.OmniBroadcastAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOmniBroadcast>
+          }
+          groupBy: {
+            args: Prisma.OmniBroadcastGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OmniBroadcastGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OmniBroadcastCountArgs<ExtArgs>
+            result: $Utils.Optional<OmniBroadcastCountAggregateOutputType> | number
+          }
+        }
+      }
+      OmniBroadcastLog: {
+        payload: Prisma.$OmniBroadcastLogPayload<ExtArgs>
+        fields: Prisma.OmniBroadcastLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.OmniBroadcastLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.OmniBroadcastLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>
+          }
+          findFirst: {
+            args: Prisma.OmniBroadcastLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.OmniBroadcastLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>
+          }
+          findMany: {
+            args: Prisma.OmniBroadcastLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>[]
+          }
+          create: {
+            args: Prisma.OmniBroadcastLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>
+          }
+          createMany: {
+            args: Prisma.OmniBroadcastLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.OmniBroadcastLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>[]
+          }
+          delete: {
+            args: Prisma.OmniBroadcastLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>
+          }
+          update: {
+            args: Prisma.OmniBroadcastLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.OmniBroadcastLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.OmniBroadcastLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OmniBroadcastLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.OmniBroadcastLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OmniBroadcastLogPayload>
+          }
+          aggregate: {
+            args: Prisma.OmniBroadcastLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateOmniBroadcastLog>
+          }
+          groupBy: {
+            args: Prisma.OmniBroadcastLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<OmniBroadcastLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.OmniBroadcastLogCountArgs<ExtArgs>
+            result: $Utils.Optional<OmniBroadcastLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1145,6 +1325,8 @@ export namespace Prisma {
     subscriber?: SubscriberOmit
     automation?: AutomationOmit
     optinForm?: OptinFormOmit
+    omniBroadcast?: OmniBroadcastOmit
+    omniBroadcastLog?: OmniBroadcastLogOmit
   }
 
   /* Types for Logging */
@@ -1248,6 +1430,37 @@ export namespace Prisma {
    */
   export type CampaignCountOutputTypeCountEmailsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EmailMessageWhereInput
+  }
+
+
+  /**
+   * Count Type OmniBroadcastCountOutputType
+   */
+
+  export type OmniBroadcastCountOutputType = {
+    logs: number
+  }
+
+  export type OmniBroadcastCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    logs?: boolean | OmniBroadcastCountOutputTypeCountLogsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * OmniBroadcastCountOutputType without action
+   */
+  export type OmniBroadcastCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastCountOutputType
+     */
+    select?: OmniBroadcastCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * OmniBroadcastCountOutputType without action
+   */
+  export type OmniBroadcastCountOutputTypeCountLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OmniBroadcastLogWhereInput
   }
 
 
@@ -6845,6 +7058,2363 @@ export namespace Prisma {
 
 
   /**
+   * Model OmniBroadcast
+   */
+
+  export type AggregateOmniBroadcast = {
+    _count: OmniBroadcastCountAggregateOutputType | null
+    _avg: OmniBroadcastAvgAggregateOutputType | null
+    _sum: OmniBroadcastSumAggregateOutputType | null
+    _min: OmniBroadcastMinAggregateOutputType | null
+    _max: OmniBroadcastMaxAggregateOutputType | null
+  }
+
+  export type OmniBroadcastAvgAggregateOutputType = {
+    totalCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+  }
+
+  export type OmniBroadcastSumAggregateOutputType = {
+    totalCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+  }
+
+  export type OmniBroadcastMinAggregateOutputType = {
+    id: string | null
+    orgId: string | null
+    createdBy: string | null
+    name: string | null
+    provider: string | null
+    phonebookId: string | null
+    message: string | null
+    mediaUrl: string | null
+    status: string | null
+    totalCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+    scheduledAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniBroadcastMaxAggregateOutputType = {
+    id: string | null
+    orgId: string | null
+    createdBy: string | null
+    name: string | null
+    provider: string | null
+    phonebookId: string | null
+    message: string | null
+    mediaUrl: string | null
+    status: string | null
+    totalCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+    scheduledAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type OmniBroadcastCountAggregateOutputType = {
+    id: number
+    orgId: number
+    createdBy: number
+    name: number
+    provider: number
+    phonebookId: number
+    message: number
+    mediaUrl: number
+    status: number
+    totalCount: number
+    sentCount: number
+    failedCount: number
+    scheduledAt: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type OmniBroadcastAvgAggregateInputType = {
+    totalCount?: true
+    sentCount?: true
+    failedCount?: true
+  }
+
+  export type OmniBroadcastSumAggregateInputType = {
+    totalCount?: true
+    sentCount?: true
+    failedCount?: true
+  }
+
+  export type OmniBroadcastMinAggregateInputType = {
+    id?: true
+    orgId?: true
+    createdBy?: true
+    name?: true
+    provider?: true
+    phonebookId?: true
+    message?: true
+    mediaUrl?: true
+    status?: true
+    totalCount?: true
+    sentCount?: true
+    failedCount?: true
+    scheduledAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniBroadcastMaxAggregateInputType = {
+    id?: true
+    orgId?: true
+    createdBy?: true
+    name?: true
+    provider?: true
+    phonebookId?: true
+    message?: true
+    mediaUrl?: true
+    status?: true
+    totalCount?: true
+    sentCount?: true
+    failedCount?: true
+    scheduledAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type OmniBroadcastCountAggregateInputType = {
+    id?: true
+    orgId?: true
+    createdBy?: true
+    name?: true
+    provider?: true
+    phonebookId?: true
+    message?: true
+    mediaUrl?: true
+    status?: true
+    totalCount?: true
+    sentCount?: true
+    failedCount?: true
+    scheduledAt?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type OmniBroadcastAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniBroadcast to aggregate.
+     */
+    where?: OmniBroadcastWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcasts to fetch.
+     */
+    orderBy?: OmniBroadcastOrderByWithRelationInput | OmniBroadcastOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OmniBroadcastWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcasts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcasts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OmniBroadcasts
+    **/
+    _count?: true | OmniBroadcastCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: OmniBroadcastAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: OmniBroadcastSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OmniBroadcastMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OmniBroadcastMaxAggregateInputType
+  }
+
+  export type GetOmniBroadcastAggregateType<T extends OmniBroadcastAggregateArgs> = {
+        [P in keyof T & keyof AggregateOmniBroadcast]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOmniBroadcast[P]>
+      : GetScalarType<T[P], AggregateOmniBroadcast[P]>
+  }
+
+
+
+
+  export type OmniBroadcastGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OmniBroadcastWhereInput
+    orderBy?: OmniBroadcastOrderByWithAggregationInput | OmniBroadcastOrderByWithAggregationInput[]
+    by: OmniBroadcastScalarFieldEnum[] | OmniBroadcastScalarFieldEnum
+    having?: OmniBroadcastScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OmniBroadcastCountAggregateInputType | true
+    _avg?: OmniBroadcastAvgAggregateInputType
+    _sum?: OmniBroadcastSumAggregateInputType
+    _min?: OmniBroadcastMinAggregateInputType
+    _max?: OmniBroadcastMaxAggregateInputType
+  }
+
+  export type OmniBroadcastGroupByOutputType = {
+    id: string
+    orgId: string
+    createdBy: string
+    name: string
+    provider: string
+    phonebookId: string | null
+    message: string
+    mediaUrl: string | null
+    status: string
+    totalCount: number
+    sentCount: number
+    failedCount: number
+    scheduledAt: Date | null
+    metadata: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: OmniBroadcastCountAggregateOutputType | null
+    _avg: OmniBroadcastAvgAggregateOutputType | null
+    _sum: OmniBroadcastSumAggregateOutputType | null
+    _min: OmniBroadcastMinAggregateOutputType | null
+    _max: OmniBroadcastMaxAggregateOutputType | null
+  }
+
+  type GetOmniBroadcastGroupByPayload<T extends OmniBroadcastGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OmniBroadcastGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OmniBroadcastGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OmniBroadcastGroupByOutputType[P]>
+            : GetScalarType<T[P], OmniBroadcastGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OmniBroadcastSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    createdBy?: boolean
+    name?: boolean
+    provider?: boolean
+    phonebookId?: boolean
+    message?: boolean
+    mediaUrl?: boolean
+    status?: boolean
+    totalCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    scheduledAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    logs?: boolean | OmniBroadcast$logsArgs<ExtArgs>
+    _count?: boolean | OmniBroadcastCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["omniBroadcast"]>
+
+  export type OmniBroadcastSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    createdBy?: boolean
+    name?: boolean
+    provider?: boolean
+    phonebookId?: boolean
+    message?: boolean
+    mediaUrl?: boolean
+    status?: boolean
+    totalCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    scheduledAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniBroadcast"]>
+
+  export type OmniBroadcastSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orgId?: boolean
+    createdBy?: boolean
+    name?: boolean
+    provider?: boolean
+    phonebookId?: boolean
+    message?: boolean
+    mediaUrl?: boolean
+    status?: boolean
+    totalCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    scheduledAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["omniBroadcast"]>
+
+  export type OmniBroadcastSelectScalar = {
+    id?: boolean
+    orgId?: boolean
+    createdBy?: boolean
+    name?: boolean
+    provider?: boolean
+    phonebookId?: boolean
+    message?: boolean
+    mediaUrl?: boolean
+    status?: boolean
+    totalCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    scheduledAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type OmniBroadcastOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "createdBy" | "name" | "provider" | "phonebookId" | "message" | "mediaUrl" | "status" | "totalCount" | "sentCount" | "failedCount" | "scheduledAt" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["omniBroadcast"]>
+  export type OmniBroadcastInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    logs?: boolean | OmniBroadcast$logsArgs<ExtArgs>
+    _count?: boolean | OmniBroadcastCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type OmniBroadcastIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type OmniBroadcastIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $OmniBroadcastPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OmniBroadcast"
+    objects: {
+      logs: Prisma.$OmniBroadcastLogPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      orgId: string
+      createdBy: string
+      name: string
+      provider: string
+      phonebookId: string | null
+      message: string
+      mediaUrl: string | null
+      status: string
+      totalCount: number
+      sentCount: number
+      failedCount: number
+      scheduledAt: Date | null
+      metadata: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["omniBroadcast"]>
+    composites: {}
+  }
+
+  type OmniBroadcastGetPayload<S extends boolean | null | undefined | OmniBroadcastDefaultArgs> = $Result.GetResult<Prisma.$OmniBroadcastPayload, S>
+
+  type OmniBroadcastCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OmniBroadcastFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OmniBroadcastCountAggregateInputType | true
+    }
+
+  export interface OmniBroadcastDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OmniBroadcast'], meta: { name: 'OmniBroadcast' } }
+    /**
+     * Find zero or one OmniBroadcast that matches the filter.
+     * @param {OmniBroadcastFindUniqueArgs} args - Arguments to find a OmniBroadcast
+     * @example
+     * // Get one OmniBroadcast
+     * const omniBroadcast = await prisma.omniBroadcast.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OmniBroadcastFindUniqueArgs>(args: SelectSubset<T, OmniBroadcastFindUniqueArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OmniBroadcast that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OmniBroadcastFindUniqueOrThrowArgs} args - Arguments to find a OmniBroadcast
+     * @example
+     * // Get one OmniBroadcast
+     * const omniBroadcast = await prisma.omniBroadcast.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OmniBroadcastFindUniqueOrThrowArgs>(args: SelectSubset<T, OmniBroadcastFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniBroadcast that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastFindFirstArgs} args - Arguments to find a OmniBroadcast
+     * @example
+     * // Get one OmniBroadcast
+     * const omniBroadcast = await prisma.omniBroadcast.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OmniBroadcastFindFirstArgs>(args?: SelectSubset<T, OmniBroadcastFindFirstArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniBroadcast that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastFindFirstOrThrowArgs} args - Arguments to find a OmniBroadcast
+     * @example
+     * // Get one OmniBroadcast
+     * const omniBroadcast = await prisma.omniBroadcast.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OmniBroadcastFindFirstOrThrowArgs>(args?: SelectSubset<T, OmniBroadcastFindFirstOrThrowArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OmniBroadcasts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OmniBroadcasts
+     * const omniBroadcasts = await prisma.omniBroadcast.findMany()
+     * 
+     * // Get first 10 OmniBroadcasts
+     * const omniBroadcasts = await prisma.omniBroadcast.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const omniBroadcastWithIdOnly = await prisma.omniBroadcast.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OmniBroadcastFindManyArgs>(args?: SelectSubset<T, OmniBroadcastFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OmniBroadcast.
+     * @param {OmniBroadcastCreateArgs} args - Arguments to create a OmniBroadcast.
+     * @example
+     * // Create one OmniBroadcast
+     * const OmniBroadcast = await prisma.omniBroadcast.create({
+     *   data: {
+     *     // ... data to create a OmniBroadcast
+     *   }
+     * })
+     * 
+     */
+    create<T extends OmniBroadcastCreateArgs>(args: SelectSubset<T, OmniBroadcastCreateArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OmniBroadcasts.
+     * @param {OmniBroadcastCreateManyArgs} args - Arguments to create many OmniBroadcasts.
+     * @example
+     * // Create many OmniBroadcasts
+     * const omniBroadcast = await prisma.omniBroadcast.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OmniBroadcastCreateManyArgs>(args?: SelectSubset<T, OmniBroadcastCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OmniBroadcasts and returns the data saved in the database.
+     * @param {OmniBroadcastCreateManyAndReturnArgs} args - Arguments to create many OmniBroadcasts.
+     * @example
+     * // Create many OmniBroadcasts
+     * const omniBroadcast = await prisma.omniBroadcast.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OmniBroadcasts and only return the `id`
+     * const omniBroadcastWithIdOnly = await prisma.omniBroadcast.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OmniBroadcastCreateManyAndReturnArgs>(args?: SelectSubset<T, OmniBroadcastCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OmniBroadcast.
+     * @param {OmniBroadcastDeleteArgs} args - Arguments to delete one OmniBroadcast.
+     * @example
+     * // Delete one OmniBroadcast
+     * const OmniBroadcast = await prisma.omniBroadcast.delete({
+     *   where: {
+     *     // ... filter to delete one OmniBroadcast
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OmniBroadcastDeleteArgs>(args: SelectSubset<T, OmniBroadcastDeleteArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OmniBroadcast.
+     * @param {OmniBroadcastUpdateArgs} args - Arguments to update one OmniBroadcast.
+     * @example
+     * // Update one OmniBroadcast
+     * const omniBroadcast = await prisma.omniBroadcast.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OmniBroadcastUpdateArgs>(args: SelectSubset<T, OmniBroadcastUpdateArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OmniBroadcasts.
+     * @param {OmniBroadcastDeleteManyArgs} args - Arguments to filter OmniBroadcasts to delete.
+     * @example
+     * // Delete a few OmniBroadcasts
+     * const { count } = await prisma.omniBroadcast.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OmniBroadcastDeleteManyArgs>(args?: SelectSubset<T, OmniBroadcastDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniBroadcasts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OmniBroadcasts
+     * const omniBroadcast = await prisma.omniBroadcast.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OmniBroadcastUpdateManyArgs>(args: SelectSubset<T, OmniBroadcastUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniBroadcasts and returns the data updated in the database.
+     * @param {OmniBroadcastUpdateManyAndReturnArgs} args - Arguments to update many OmniBroadcasts.
+     * @example
+     * // Update many OmniBroadcasts
+     * const omniBroadcast = await prisma.omniBroadcast.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OmniBroadcasts and only return the `id`
+     * const omniBroadcastWithIdOnly = await prisma.omniBroadcast.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OmniBroadcastUpdateManyAndReturnArgs>(args: SelectSubset<T, OmniBroadcastUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OmniBroadcast.
+     * @param {OmniBroadcastUpsertArgs} args - Arguments to update or create a OmniBroadcast.
+     * @example
+     * // Update or create a OmniBroadcast
+     * const omniBroadcast = await prisma.omniBroadcast.upsert({
+     *   create: {
+     *     // ... data to create a OmniBroadcast
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OmniBroadcast we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OmniBroadcastUpsertArgs>(args: SelectSubset<T, OmniBroadcastUpsertArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OmniBroadcasts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastCountArgs} args - Arguments to filter OmniBroadcasts to count.
+     * @example
+     * // Count the number of OmniBroadcasts
+     * const count = await prisma.omniBroadcast.count({
+     *   where: {
+     *     // ... the filter for the OmniBroadcasts we want to count
+     *   }
+     * })
+    **/
+    count<T extends OmniBroadcastCountArgs>(
+      args?: Subset<T, OmniBroadcastCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OmniBroadcastCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OmniBroadcast.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OmniBroadcastAggregateArgs>(args: Subset<T, OmniBroadcastAggregateArgs>): Prisma.PrismaPromise<GetOmniBroadcastAggregateType<T>>
+
+    /**
+     * Group by OmniBroadcast.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OmniBroadcastGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OmniBroadcastGroupByArgs['orderBy'] }
+        : { orderBy?: OmniBroadcastGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OmniBroadcastGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOmniBroadcastGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OmniBroadcast model
+   */
+  readonly fields: OmniBroadcastFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OmniBroadcast.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OmniBroadcastClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    logs<T extends OmniBroadcast$logsArgs<ExtArgs> = {}>(args?: Subset<T, OmniBroadcast$logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OmniBroadcast model
+   */
+  interface OmniBroadcastFieldRefs {
+    readonly id: FieldRef<"OmniBroadcast", 'String'>
+    readonly orgId: FieldRef<"OmniBroadcast", 'String'>
+    readonly createdBy: FieldRef<"OmniBroadcast", 'String'>
+    readonly name: FieldRef<"OmniBroadcast", 'String'>
+    readonly provider: FieldRef<"OmniBroadcast", 'String'>
+    readonly phonebookId: FieldRef<"OmniBroadcast", 'String'>
+    readonly message: FieldRef<"OmniBroadcast", 'String'>
+    readonly mediaUrl: FieldRef<"OmniBroadcast", 'String'>
+    readonly status: FieldRef<"OmniBroadcast", 'String'>
+    readonly totalCount: FieldRef<"OmniBroadcast", 'Int'>
+    readonly sentCount: FieldRef<"OmniBroadcast", 'Int'>
+    readonly failedCount: FieldRef<"OmniBroadcast", 'Int'>
+    readonly scheduledAt: FieldRef<"OmniBroadcast", 'DateTime'>
+    readonly metadata: FieldRef<"OmniBroadcast", 'Json'>
+    readonly createdAt: FieldRef<"OmniBroadcast", 'DateTime'>
+    readonly updatedAt: FieldRef<"OmniBroadcast", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OmniBroadcast findUnique
+   */
+  export type OmniBroadcastFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcast to fetch.
+     */
+    where: OmniBroadcastWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcast findUniqueOrThrow
+   */
+  export type OmniBroadcastFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcast to fetch.
+     */
+    where: OmniBroadcastWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcast findFirst
+   */
+  export type OmniBroadcastFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcast to fetch.
+     */
+    where?: OmniBroadcastWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcasts to fetch.
+     */
+    orderBy?: OmniBroadcastOrderByWithRelationInput | OmniBroadcastOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniBroadcasts.
+     */
+    cursor?: OmniBroadcastWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcasts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcasts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniBroadcasts.
+     */
+    distinct?: OmniBroadcastScalarFieldEnum | OmniBroadcastScalarFieldEnum[]
+  }
+
+  /**
+   * OmniBroadcast findFirstOrThrow
+   */
+  export type OmniBroadcastFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcast to fetch.
+     */
+    where?: OmniBroadcastWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcasts to fetch.
+     */
+    orderBy?: OmniBroadcastOrderByWithRelationInput | OmniBroadcastOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniBroadcasts.
+     */
+    cursor?: OmniBroadcastWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcasts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcasts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniBroadcasts.
+     */
+    distinct?: OmniBroadcastScalarFieldEnum | OmniBroadcastScalarFieldEnum[]
+  }
+
+  /**
+   * OmniBroadcast findMany
+   */
+  export type OmniBroadcastFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcasts to fetch.
+     */
+    where?: OmniBroadcastWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcasts to fetch.
+     */
+    orderBy?: OmniBroadcastOrderByWithRelationInput | OmniBroadcastOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OmniBroadcasts.
+     */
+    cursor?: OmniBroadcastWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcasts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcasts.
+     */
+    skip?: number
+    distinct?: OmniBroadcastScalarFieldEnum | OmniBroadcastScalarFieldEnum[]
+  }
+
+  /**
+   * OmniBroadcast create
+   */
+  export type OmniBroadcastCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OmniBroadcast.
+     */
+    data: XOR<OmniBroadcastCreateInput, OmniBroadcastUncheckedCreateInput>
+  }
+
+  /**
+   * OmniBroadcast createMany
+   */
+  export type OmniBroadcastCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OmniBroadcasts.
+     */
+    data: OmniBroadcastCreateManyInput | OmniBroadcastCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniBroadcast createManyAndReturn
+   */
+  export type OmniBroadcastCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * The data used to create many OmniBroadcasts.
+     */
+    data: OmniBroadcastCreateManyInput | OmniBroadcastCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniBroadcast update
+   */
+  export type OmniBroadcastUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OmniBroadcast.
+     */
+    data: XOR<OmniBroadcastUpdateInput, OmniBroadcastUncheckedUpdateInput>
+    /**
+     * Choose, which OmniBroadcast to update.
+     */
+    where: OmniBroadcastWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcast updateMany
+   */
+  export type OmniBroadcastUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OmniBroadcasts.
+     */
+    data: XOR<OmniBroadcastUpdateManyMutationInput, OmniBroadcastUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniBroadcasts to update
+     */
+    where?: OmniBroadcastWhereInput
+    /**
+     * Limit how many OmniBroadcasts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniBroadcast updateManyAndReturn
+   */
+  export type OmniBroadcastUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * The data used to update OmniBroadcasts.
+     */
+    data: XOR<OmniBroadcastUpdateManyMutationInput, OmniBroadcastUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniBroadcasts to update
+     */
+    where?: OmniBroadcastWhereInput
+    /**
+     * Limit how many OmniBroadcasts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniBroadcast upsert
+   */
+  export type OmniBroadcastUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OmniBroadcast to update in case it exists.
+     */
+    where: OmniBroadcastWhereUniqueInput
+    /**
+     * In case the OmniBroadcast found by the `where` argument doesn't exist, create a new OmniBroadcast with this data.
+     */
+    create: XOR<OmniBroadcastCreateInput, OmniBroadcastUncheckedCreateInput>
+    /**
+     * In case the OmniBroadcast was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OmniBroadcastUpdateInput, OmniBroadcastUncheckedUpdateInput>
+  }
+
+  /**
+   * OmniBroadcast delete
+   */
+  export type OmniBroadcastDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+    /**
+     * Filter which OmniBroadcast to delete.
+     */
+    where: OmniBroadcastWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcast deleteMany
+   */
+  export type OmniBroadcastDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniBroadcasts to delete
+     */
+    where?: OmniBroadcastWhereInput
+    /**
+     * Limit how many OmniBroadcasts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniBroadcast.logs
+   */
+  export type OmniBroadcast$logsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    where?: OmniBroadcastLogWhereInput
+    orderBy?: OmniBroadcastLogOrderByWithRelationInput | OmniBroadcastLogOrderByWithRelationInput[]
+    cursor?: OmniBroadcastLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OmniBroadcastLogScalarFieldEnum | OmniBroadcastLogScalarFieldEnum[]
+  }
+
+  /**
+   * OmniBroadcast without action
+   */
+  export type OmniBroadcastDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcast
+     */
+    select?: OmniBroadcastSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcast
+     */
+    omit?: OmniBroadcastOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model OmniBroadcastLog
+   */
+
+  export type AggregateOmniBroadcastLog = {
+    _count: OmniBroadcastLogCountAggregateOutputType | null
+    _min: OmniBroadcastLogMinAggregateOutputType | null
+    _max: OmniBroadcastLogMaxAggregateOutputType | null
+  }
+
+  export type OmniBroadcastLogMinAggregateOutputType = {
+    id: string | null
+    broadcastId: string | null
+    contactId: string | null
+    phone: string | null
+    status: string | null
+    error: string | null
+    sentAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type OmniBroadcastLogMaxAggregateOutputType = {
+    id: string | null
+    broadcastId: string | null
+    contactId: string | null
+    phone: string | null
+    status: string | null
+    error: string | null
+    sentAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type OmniBroadcastLogCountAggregateOutputType = {
+    id: number
+    broadcastId: number
+    contactId: number
+    phone: number
+    status: number
+    error: number
+    metadata: number
+    sentAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type OmniBroadcastLogMinAggregateInputType = {
+    id?: true
+    broadcastId?: true
+    contactId?: true
+    phone?: true
+    status?: true
+    error?: true
+    sentAt?: true
+    createdAt?: true
+  }
+
+  export type OmniBroadcastLogMaxAggregateInputType = {
+    id?: true
+    broadcastId?: true
+    contactId?: true
+    phone?: true
+    status?: true
+    error?: true
+    sentAt?: true
+    createdAt?: true
+  }
+
+  export type OmniBroadcastLogCountAggregateInputType = {
+    id?: true
+    broadcastId?: true
+    contactId?: true
+    phone?: true
+    status?: true
+    error?: true
+    metadata?: true
+    sentAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type OmniBroadcastLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniBroadcastLog to aggregate.
+     */
+    where?: OmniBroadcastLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcastLogs to fetch.
+     */
+    orderBy?: OmniBroadcastLogOrderByWithRelationInput | OmniBroadcastLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: OmniBroadcastLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcastLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcastLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned OmniBroadcastLogs
+    **/
+    _count?: true | OmniBroadcastLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: OmniBroadcastLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: OmniBroadcastLogMaxAggregateInputType
+  }
+
+  export type GetOmniBroadcastLogAggregateType<T extends OmniBroadcastLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateOmniBroadcastLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateOmniBroadcastLog[P]>
+      : GetScalarType<T[P], AggregateOmniBroadcastLog[P]>
+  }
+
+
+
+
+  export type OmniBroadcastLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OmniBroadcastLogWhereInput
+    orderBy?: OmniBroadcastLogOrderByWithAggregationInput | OmniBroadcastLogOrderByWithAggregationInput[]
+    by: OmniBroadcastLogScalarFieldEnum[] | OmniBroadcastLogScalarFieldEnum
+    having?: OmniBroadcastLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: OmniBroadcastLogCountAggregateInputType | true
+    _min?: OmniBroadcastLogMinAggregateInputType
+    _max?: OmniBroadcastLogMaxAggregateInputType
+  }
+
+  export type OmniBroadcastLogGroupByOutputType = {
+    id: string
+    broadcastId: string
+    contactId: string | null
+    phone: string
+    status: string
+    error: string | null
+    metadata: JsonValue
+    sentAt: Date | null
+    createdAt: Date
+    _count: OmniBroadcastLogCountAggregateOutputType | null
+    _min: OmniBroadcastLogMinAggregateOutputType | null
+    _max: OmniBroadcastLogMaxAggregateOutputType | null
+  }
+
+  type GetOmniBroadcastLogGroupByPayload<T extends OmniBroadcastLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<OmniBroadcastLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof OmniBroadcastLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], OmniBroadcastLogGroupByOutputType[P]>
+            : GetScalarType<T[P], OmniBroadcastLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type OmniBroadcastLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    broadcastId?: boolean
+    contactId?: boolean
+    phone?: boolean
+    status?: boolean
+    error?: boolean
+    metadata?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    broadcast?: boolean | OmniBroadcastDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["omniBroadcastLog"]>
+
+  export type OmniBroadcastLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    broadcastId?: boolean
+    contactId?: boolean
+    phone?: boolean
+    status?: boolean
+    error?: boolean
+    metadata?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    broadcast?: boolean | OmniBroadcastDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["omniBroadcastLog"]>
+
+  export type OmniBroadcastLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    broadcastId?: boolean
+    contactId?: boolean
+    phone?: boolean
+    status?: boolean
+    error?: boolean
+    metadata?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    broadcast?: boolean | OmniBroadcastDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["omniBroadcastLog"]>
+
+  export type OmniBroadcastLogSelectScalar = {
+    id?: boolean
+    broadcastId?: boolean
+    contactId?: boolean
+    phone?: boolean
+    status?: boolean
+    error?: boolean
+    metadata?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+  }
+
+  export type OmniBroadcastLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "broadcastId" | "contactId" | "phone" | "status" | "error" | "metadata" | "sentAt" | "createdAt", ExtArgs["result"]["omniBroadcastLog"]>
+  export type OmniBroadcastLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    broadcast?: boolean | OmniBroadcastDefaultArgs<ExtArgs>
+  }
+  export type OmniBroadcastLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    broadcast?: boolean | OmniBroadcastDefaultArgs<ExtArgs>
+  }
+  export type OmniBroadcastLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    broadcast?: boolean | OmniBroadcastDefaultArgs<ExtArgs>
+  }
+
+  export type $OmniBroadcastLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "OmniBroadcastLog"
+    objects: {
+      broadcast: Prisma.$OmniBroadcastPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      broadcastId: string
+      contactId: string | null
+      phone: string
+      status: string
+      error: string | null
+      metadata: Prisma.JsonValue
+      sentAt: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["omniBroadcastLog"]>
+    composites: {}
+  }
+
+  type OmniBroadcastLogGetPayload<S extends boolean | null | undefined | OmniBroadcastLogDefaultArgs> = $Result.GetResult<Prisma.$OmniBroadcastLogPayload, S>
+
+  type OmniBroadcastLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<OmniBroadcastLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: OmniBroadcastLogCountAggregateInputType | true
+    }
+
+  export interface OmniBroadcastLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OmniBroadcastLog'], meta: { name: 'OmniBroadcastLog' } }
+    /**
+     * Find zero or one OmniBroadcastLog that matches the filter.
+     * @param {OmniBroadcastLogFindUniqueArgs} args - Arguments to find a OmniBroadcastLog
+     * @example
+     * // Get one OmniBroadcastLog
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends OmniBroadcastLogFindUniqueArgs>(args: SelectSubset<T, OmniBroadcastLogFindUniqueArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one OmniBroadcastLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {OmniBroadcastLogFindUniqueOrThrowArgs} args - Arguments to find a OmniBroadcastLog
+     * @example
+     * // Get one OmniBroadcastLog
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends OmniBroadcastLogFindUniqueOrThrowArgs>(args: SelectSubset<T, OmniBroadcastLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniBroadcastLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastLogFindFirstArgs} args - Arguments to find a OmniBroadcastLog
+     * @example
+     * // Get one OmniBroadcastLog
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends OmniBroadcastLogFindFirstArgs>(args?: SelectSubset<T, OmniBroadcastLogFindFirstArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first OmniBroadcastLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastLogFindFirstOrThrowArgs} args - Arguments to find a OmniBroadcastLog
+     * @example
+     * // Get one OmniBroadcastLog
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends OmniBroadcastLogFindFirstOrThrowArgs>(args?: SelectSubset<T, OmniBroadcastLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more OmniBroadcastLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all OmniBroadcastLogs
+     * const omniBroadcastLogs = await prisma.omniBroadcastLog.findMany()
+     * 
+     * // Get first 10 OmniBroadcastLogs
+     * const omniBroadcastLogs = await prisma.omniBroadcastLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const omniBroadcastLogWithIdOnly = await prisma.omniBroadcastLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends OmniBroadcastLogFindManyArgs>(args?: SelectSubset<T, OmniBroadcastLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a OmniBroadcastLog.
+     * @param {OmniBroadcastLogCreateArgs} args - Arguments to create a OmniBroadcastLog.
+     * @example
+     * // Create one OmniBroadcastLog
+     * const OmniBroadcastLog = await prisma.omniBroadcastLog.create({
+     *   data: {
+     *     // ... data to create a OmniBroadcastLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends OmniBroadcastLogCreateArgs>(args: SelectSubset<T, OmniBroadcastLogCreateArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many OmniBroadcastLogs.
+     * @param {OmniBroadcastLogCreateManyArgs} args - Arguments to create many OmniBroadcastLogs.
+     * @example
+     * // Create many OmniBroadcastLogs
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends OmniBroadcastLogCreateManyArgs>(args?: SelectSubset<T, OmniBroadcastLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many OmniBroadcastLogs and returns the data saved in the database.
+     * @param {OmniBroadcastLogCreateManyAndReturnArgs} args - Arguments to create many OmniBroadcastLogs.
+     * @example
+     * // Create many OmniBroadcastLogs
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many OmniBroadcastLogs and only return the `id`
+     * const omniBroadcastLogWithIdOnly = await prisma.omniBroadcastLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends OmniBroadcastLogCreateManyAndReturnArgs>(args?: SelectSubset<T, OmniBroadcastLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a OmniBroadcastLog.
+     * @param {OmniBroadcastLogDeleteArgs} args - Arguments to delete one OmniBroadcastLog.
+     * @example
+     * // Delete one OmniBroadcastLog
+     * const OmniBroadcastLog = await prisma.omniBroadcastLog.delete({
+     *   where: {
+     *     // ... filter to delete one OmniBroadcastLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends OmniBroadcastLogDeleteArgs>(args: SelectSubset<T, OmniBroadcastLogDeleteArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one OmniBroadcastLog.
+     * @param {OmniBroadcastLogUpdateArgs} args - Arguments to update one OmniBroadcastLog.
+     * @example
+     * // Update one OmniBroadcastLog
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends OmniBroadcastLogUpdateArgs>(args: SelectSubset<T, OmniBroadcastLogUpdateArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more OmniBroadcastLogs.
+     * @param {OmniBroadcastLogDeleteManyArgs} args - Arguments to filter OmniBroadcastLogs to delete.
+     * @example
+     * // Delete a few OmniBroadcastLogs
+     * const { count } = await prisma.omniBroadcastLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends OmniBroadcastLogDeleteManyArgs>(args?: SelectSubset<T, OmniBroadcastLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniBroadcastLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many OmniBroadcastLogs
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends OmniBroadcastLogUpdateManyArgs>(args: SelectSubset<T, OmniBroadcastLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more OmniBroadcastLogs and returns the data updated in the database.
+     * @param {OmniBroadcastLogUpdateManyAndReturnArgs} args - Arguments to update many OmniBroadcastLogs.
+     * @example
+     * // Update many OmniBroadcastLogs
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more OmniBroadcastLogs and only return the `id`
+     * const omniBroadcastLogWithIdOnly = await prisma.omniBroadcastLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OmniBroadcastLogUpdateManyAndReturnArgs>(args: SelectSubset<T, OmniBroadcastLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one OmniBroadcastLog.
+     * @param {OmniBroadcastLogUpsertArgs} args - Arguments to update or create a OmniBroadcastLog.
+     * @example
+     * // Update or create a OmniBroadcastLog
+     * const omniBroadcastLog = await prisma.omniBroadcastLog.upsert({
+     *   create: {
+     *     // ... data to create a OmniBroadcastLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the OmniBroadcastLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends OmniBroadcastLogUpsertArgs>(args: SelectSubset<T, OmniBroadcastLogUpsertArgs<ExtArgs>>): Prisma__OmniBroadcastLogClient<$Result.GetResult<Prisma.$OmniBroadcastLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of OmniBroadcastLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastLogCountArgs} args - Arguments to filter OmniBroadcastLogs to count.
+     * @example
+     * // Count the number of OmniBroadcastLogs
+     * const count = await prisma.omniBroadcastLog.count({
+     *   where: {
+     *     // ... the filter for the OmniBroadcastLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends OmniBroadcastLogCountArgs>(
+      args?: Subset<T, OmniBroadcastLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], OmniBroadcastLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a OmniBroadcastLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends OmniBroadcastLogAggregateArgs>(args: Subset<T, OmniBroadcastLogAggregateArgs>): Prisma.PrismaPromise<GetOmniBroadcastLogAggregateType<T>>
+
+    /**
+     * Group by OmniBroadcastLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {OmniBroadcastLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends OmniBroadcastLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: OmniBroadcastLogGroupByArgs['orderBy'] }
+        : { orderBy?: OmniBroadcastLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, OmniBroadcastLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOmniBroadcastLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the OmniBroadcastLog model
+   */
+  readonly fields: OmniBroadcastLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for OmniBroadcastLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__OmniBroadcastLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    broadcast<T extends OmniBroadcastDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OmniBroadcastDefaultArgs<ExtArgs>>): Prisma__OmniBroadcastClient<$Result.GetResult<Prisma.$OmniBroadcastPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the OmniBroadcastLog model
+   */
+  interface OmniBroadcastLogFieldRefs {
+    readonly id: FieldRef<"OmniBroadcastLog", 'String'>
+    readonly broadcastId: FieldRef<"OmniBroadcastLog", 'String'>
+    readonly contactId: FieldRef<"OmniBroadcastLog", 'String'>
+    readonly phone: FieldRef<"OmniBroadcastLog", 'String'>
+    readonly status: FieldRef<"OmniBroadcastLog", 'String'>
+    readonly error: FieldRef<"OmniBroadcastLog", 'String'>
+    readonly metadata: FieldRef<"OmniBroadcastLog", 'Json'>
+    readonly sentAt: FieldRef<"OmniBroadcastLog", 'DateTime'>
+    readonly createdAt: FieldRef<"OmniBroadcastLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * OmniBroadcastLog findUnique
+   */
+  export type OmniBroadcastLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcastLog to fetch.
+     */
+    where: OmniBroadcastLogWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcastLog findUniqueOrThrow
+   */
+  export type OmniBroadcastLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcastLog to fetch.
+     */
+    where: OmniBroadcastLogWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcastLog findFirst
+   */
+  export type OmniBroadcastLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcastLog to fetch.
+     */
+    where?: OmniBroadcastLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcastLogs to fetch.
+     */
+    orderBy?: OmniBroadcastLogOrderByWithRelationInput | OmniBroadcastLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniBroadcastLogs.
+     */
+    cursor?: OmniBroadcastLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcastLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcastLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniBroadcastLogs.
+     */
+    distinct?: OmniBroadcastLogScalarFieldEnum | OmniBroadcastLogScalarFieldEnum[]
+  }
+
+  /**
+   * OmniBroadcastLog findFirstOrThrow
+   */
+  export type OmniBroadcastLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcastLog to fetch.
+     */
+    where?: OmniBroadcastLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcastLogs to fetch.
+     */
+    orderBy?: OmniBroadcastLogOrderByWithRelationInput | OmniBroadcastLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for OmniBroadcastLogs.
+     */
+    cursor?: OmniBroadcastLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcastLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcastLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of OmniBroadcastLogs.
+     */
+    distinct?: OmniBroadcastLogScalarFieldEnum | OmniBroadcastLogScalarFieldEnum[]
+  }
+
+  /**
+   * OmniBroadcastLog findMany
+   */
+  export type OmniBroadcastLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * Filter, which OmniBroadcastLogs to fetch.
+     */
+    where?: OmniBroadcastLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of OmniBroadcastLogs to fetch.
+     */
+    orderBy?: OmniBroadcastLogOrderByWithRelationInput | OmniBroadcastLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing OmniBroadcastLogs.
+     */
+    cursor?: OmniBroadcastLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` OmniBroadcastLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` OmniBroadcastLogs.
+     */
+    skip?: number
+    distinct?: OmniBroadcastLogScalarFieldEnum | OmniBroadcastLogScalarFieldEnum[]
+  }
+
+  /**
+   * OmniBroadcastLog create
+   */
+  export type OmniBroadcastLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a OmniBroadcastLog.
+     */
+    data: XOR<OmniBroadcastLogCreateInput, OmniBroadcastLogUncheckedCreateInput>
+  }
+
+  /**
+   * OmniBroadcastLog createMany
+   */
+  export type OmniBroadcastLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many OmniBroadcastLogs.
+     */
+    data: OmniBroadcastLogCreateManyInput | OmniBroadcastLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * OmniBroadcastLog createManyAndReturn
+   */
+  export type OmniBroadcastLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many OmniBroadcastLogs.
+     */
+    data: OmniBroadcastLogCreateManyInput | OmniBroadcastLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OmniBroadcastLog update
+   */
+  export type OmniBroadcastLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a OmniBroadcastLog.
+     */
+    data: XOR<OmniBroadcastLogUpdateInput, OmniBroadcastLogUncheckedUpdateInput>
+    /**
+     * Choose, which OmniBroadcastLog to update.
+     */
+    where: OmniBroadcastLogWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcastLog updateMany
+   */
+  export type OmniBroadcastLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update OmniBroadcastLogs.
+     */
+    data: XOR<OmniBroadcastLogUpdateManyMutationInput, OmniBroadcastLogUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniBroadcastLogs to update
+     */
+    where?: OmniBroadcastLogWhereInput
+    /**
+     * Limit how many OmniBroadcastLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniBroadcastLog updateManyAndReturn
+   */
+  export type OmniBroadcastLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * The data used to update OmniBroadcastLogs.
+     */
+    data: XOR<OmniBroadcastLogUpdateManyMutationInput, OmniBroadcastLogUncheckedUpdateManyInput>
+    /**
+     * Filter which OmniBroadcastLogs to update
+     */
+    where?: OmniBroadcastLogWhereInput
+    /**
+     * Limit how many OmniBroadcastLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * OmniBroadcastLog upsert
+   */
+  export type OmniBroadcastLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the OmniBroadcastLog to update in case it exists.
+     */
+    where: OmniBroadcastLogWhereUniqueInput
+    /**
+     * In case the OmniBroadcastLog found by the `where` argument doesn't exist, create a new OmniBroadcastLog with this data.
+     */
+    create: XOR<OmniBroadcastLogCreateInput, OmniBroadcastLogUncheckedCreateInput>
+    /**
+     * In case the OmniBroadcastLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<OmniBroadcastLogUpdateInput, OmniBroadcastLogUncheckedUpdateInput>
+  }
+
+  /**
+   * OmniBroadcastLog delete
+   */
+  export type OmniBroadcastLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+    /**
+     * Filter which OmniBroadcastLog to delete.
+     */
+    where: OmniBroadcastLogWhereUniqueInput
+  }
+
+  /**
+   * OmniBroadcastLog deleteMany
+   */
+  export type OmniBroadcastLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which OmniBroadcastLogs to delete
+     */
+    where?: OmniBroadcastLogWhereInput
+    /**
+     * Limit how many OmniBroadcastLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * OmniBroadcastLog without action
+   */
+  export type OmniBroadcastLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OmniBroadcastLog
+     */
+    select?: OmniBroadcastLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the OmniBroadcastLog
+     */
+    omit?: OmniBroadcastLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OmniBroadcastLogInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -6946,6 +9516,43 @@ export namespace Prisma {
   };
 
   export type OptinFormScalarFieldEnum = (typeof OptinFormScalarFieldEnum)[keyof typeof OptinFormScalarFieldEnum]
+
+
+  export const OmniBroadcastScalarFieldEnum: {
+    id: 'id',
+    orgId: 'orgId',
+    createdBy: 'createdBy',
+    name: 'name',
+    provider: 'provider',
+    phonebookId: 'phonebookId',
+    message: 'message',
+    mediaUrl: 'mediaUrl',
+    status: 'status',
+    totalCount: 'totalCount',
+    sentCount: 'sentCount',
+    failedCount: 'failedCount',
+    scheduledAt: 'scheduledAt',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type OmniBroadcastScalarFieldEnum = (typeof OmniBroadcastScalarFieldEnum)[keyof typeof OmniBroadcastScalarFieldEnum]
+
+
+  export const OmniBroadcastLogScalarFieldEnum: {
+    id: 'id',
+    broadcastId: 'broadcastId',
+    contactId: 'contactId',
+    phone: 'phone',
+    status: 'status',
+    error: 'error',
+    metadata: 'metadata',
+    sentAt: 'sentAt',
+    createdAt: 'createdAt'
+  };
+
+  export type OmniBroadcastLogScalarFieldEnum = (typeof OmniBroadcastLogScalarFieldEnum)[keyof typeof OmniBroadcastLogScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -7517,6 +10124,193 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"OptinForm"> | Date | string
   }
 
+  export type OmniBroadcastWhereInput = {
+    AND?: OmniBroadcastWhereInput | OmniBroadcastWhereInput[]
+    OR?: OmniBroadcastWhereInput[]
+    NOT?: OmniBroadcastWhereInput | OmniBroadcastWhereInput[]
+    id?: UuidFilter<"OmniBroadcast"> | string
+    orgId?: UuidFilter<"OmniBroadcast"> | string
+    createdBy?: StringFilter<"OmniBroadcast"> | string
+    name?: StringFilter<"OmniBroadcast"> | string
+    provider?: StringFilter<"OmniBroadcast"> | string
+    phonebookId?: UuidNullableFilter<"OmniBroadcast"> | string | null
+    message?: StringFilter<"OmniBroadcast"> | string
+    mediaUrl?: StringNullableFilter<"OmniBroadcast"> | string | null
+    status?: StringFilter<"OmniBroadcast"> | string
+    totalCount?: IntFilter<"OmniBroadcast"> | number
+    sentCount?: IntFilter<"OmniBroadcast"> | number
+    failedCount?: IntFilter<"OmniBroadcast"> | number
+    scheduledAt?: DateTimeNullableFilter<"OmniBroadcast"> | Date | string | null
+    metadata?: JsonFilter<"OmniBroadcast">
+    createdAt?: DateTimeFilter<"OmniBroadcast"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniBroadcast"> | Date | string
+    logs?: OmniBroadcastLogListRelationFilter
+  }
+
+  export type OmniBroadcastOrderByWithRelationInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdBy?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    phonebookId?: SortOrderInput | SortOrder
+    message?: SortOrder
+    mediaUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    totalCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    scheduledAt?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    logs?: OmniBroadcastLogOrderByRelationAggregateInput
+  }
+
+  export type OmniBroadcastWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OmniBroadcastWhereInput | OmniBroadcastWhereInput[]
+    OR?: OmniBroadcastWhereInput[]
+    NOT?: OmniBroadcastWhereInput | OmniBroadcastWhereInput[]
+    orgId?: UuidFilter<"OmniBroadcast"> | string
+    createdBy?: StringFilter<"OmniBroadcast"> | string
+    name?: StringFilter<"OmniBroadcast"> | string
+    provider?: StringFilter<"OmniBroadcast"> | string
+    phonebookId?: UuidNullableFilter<"OmniBroadcast"> | string | null
+    message?: StringFilter<"OmniBroadcast"> | string
+    mediaUrl?: StringNullableFilter<"OmniBroadcast"> | string | null
+    status?: StringFilter<"OmniBroadcast"> | string
+    totalCount?: IntFilter<"OmniBroadcast"> | number
+    sentCount?: IntFilter<"OmniBroadcast"> | number
+    failedCount?: IntFilter<"OmniBroadcast"> | number
+    scheduledAt?: DateTimeNullableFilter<"OmniBroadcast"> | Date | string | null
+    metadata?: JsonFilter<"OmniBroadcast">
+    createdAt?: DateTimeFilter<"OmniBroadcast"> | Date | string
+    updatedAt?: DateTimeFilter<"OmniBroadcast"> | Date | string
+    logs?: OmniBroadcastLogListRelationFilter
+  }, "id">
+
+  export type OmniBroadcastOrderByWithAggregationInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdBy?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    phonebookId?: SortOrderInput | SortOrder
+    message?: SortOrder
+    mediaUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    totalCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    scheduledAt?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: OmniBroadcastCountOrderByAggregateInput
+    _avg?: OmniBroadcastAvgOrderByAggregateInput
+    _max?: OmniBroadcastMaxOrderByAggregateInput
+    _min?: OmniBroadcastMinOrderByAggregateInput
+    _sum?: OmniBroadcastSumOrderByAggregateInput
+  }
+
+  export type OmniBroadcastScalarWhereWithAggregatesInput = {
+    AND?: OmniBroadcastScalarWhereWithAggregatesInput | OmniBroadcastScalarWhereWithAggregatesInput[]
+    OR?: OmniBroadcastScalarWhereWithAggregatesInput[]
+    NOT?: OmniBroadcastScalarWhereWithAggregatesInput | OmniBroadcastScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"OmniBroadcast"> | string
+    orgId?: UuidWithAggregatesFilter<"OmniBroadcast"> | string
+    createdBy?: StringWithAggregatesFilter<"OmniBroadcast"> | string
+    name?: StringWithAggregatesFilter<"OmniBroadcast"> | string
+    provider?: StringWithAggregatesFilter<"OmniBroadcast"> | string
+    phonebookId?: UuidNullableWithAggregatesFilter<"OmniBroadcast"> | string | null
+    message?: StringWithAggregatesFilter<"OmniBroadcast"> | string
+    mediaUrl?: StringNullableWithAggregatesFilter<"OmniBroadcast"> | string | null
+    status?: StringWithAggregatesFilter<"OmniBroadcast"> | string
+    totalCount?: IntWithAggregatesFilter<"OmniBroadcast"> | number
+    sentCount?: IntWithAggregatesFilter<"OmniBroadcast"> | number
+    failedCount?: IntWithAggregatesFilter<"OmniBroadcast"> | number
+    scheduledAt?: DateTimeNullableWithAggregatesFilter<"OmniBroadcast"> | Date | string | null
+    metadata?: JsonWithAggregatesFilter<"OmniBroadcast">
+    createdAt?: DateTimeWithAggregatesFilter<"OmniBroadcast"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"OmniBroadcast"> | Date | string
+  }
+
+  export type OmniBroadcastLogWhereInput = {
+    AND?: OmniBroadcastLogWhereInput | OmniBroadcastLogWhereInput[]
+    OR?: OmniBroadcastLogWhereInput[]
+    NOT?: OmniBroadcastLogWhereInput | OmniBroadcastLogWhereInput[]
+    id?: UuidFilter<"OmniBroadcastLog"> | string
+    broadcastId?: UuidFilter<"OmniBroadcastLog"> | string
+    contactId?: UuidNullableFilter<"OmniBroadcastLog"> | string | null
+    phone?: StringFilter<"OmniBroadcastLog"> | string
+    status?: StringFilter<"OmniBroadcastLog"> | string
+    error?: StringNullableFilter<"OmniBroadcastLog"> | string | null
+    metadata?: JsonFilter<"OmniBroadcastLog">
+    sentAt?: DateTimeNullableFilter<"OmniBroadcastLog"> | Date | string | null
+    createdAt?: DateTimeFilter<"OmniBroadcastLog"> | Date | string
+    broadcast?: XOR<OmniBroadcastScalarRelationFilter, OmniBroadcastWhereInput>
+  }
+
+  export type OmniBroadcastLogOrderByWithRelationInput = {
+    id?: SortOrder
+    broadcastId?: SortOrder
+    contactId?: SortOrderInput | SortOrder
+    phone?: SortOrder
+    status?: SortOrder
+    error?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    broadcast?: OmniBroadcastOrderByWithRelationInput
+  }
+
+  export type OmniBroadcastLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: OmniBroadcastLogWhereInput | OmniBroadcastLogWhereInput[]
+    OR?: OmniBroadcastLogWhereInput[]
+    NOT?: OmniBroadcastLogWhereInput | OmniBroadcastLogWhereInput[]
+    broadcastId?: UuidFilter<"OmniBroadcastLog"> | string
+    contactId?: UuidNullableFilter<"OmniBroadcastLog"> | string | null
+    phone?: StringFilter<"OmniBroadcastLog"> | string
+    status?: StringFilter<"OmniBroadcastLog"> | string
+    error?: StringNullableFilter<"OmniBroadcastLog"> | string | null
+    metadata?: JsonFilter<"OmniBroadcastLog">
+    sentAt?: DateTimeNullableFilter<"OmniBroadcastLog"> | Date | string | null
+    createdAt?: DateTimeFilter<"OmniBroadcastLog"> | Date | string
+    broadcast?: XOR<OmniBroadcastScalarRelationFilter, OmniBroadcastWhereInput>
+  }, "id">
+
+  export type OmniBroadcastLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    broadcastId?: SortOrder
+    contactId?: SortOrderInput | SortOrder
+    phone?: SortOrder
+    status?: SortOrder
+    error?: SortOrderInput | SortOrder
+    metadata?: SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: OmniBroadcastLogCountOrderByAggregateInput
+    _max?: OmniBroadcastLogMaxOrderByAggregateInput
+    _min?: OmniBroadcastLogMinOrderByAggregateInput
+  }
+
+  export type OmniBroadcastLogScalarWhereWithAggregatesInput = {
+    AND?: OmniBroadcastLogScalarWhereWithAggregatesInput | OmniBroadcastLogScalarWhereWithAggregatesInput[]
+    OR?: OmniBroadcastLogScalarWhereWithAggregatesInput[]
+    NOT?: OmniBroadcastLogScalarWhereWithAggregatesInput | OmniBroadcastLogScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"OmniBroadcastLog"> | string
+    broadcastId?: UuidWithAggregatesFilter<"OmniBroadcastLog"> | string
+    contactId?: UuidNullableWithAggregatesFilter<"OmniBroadcastLog"> | string | null
+    phone?: StringWithAggregatesFilter<"OmniBroadcastLog"> | string
+    status?: StringWithAggregatesFilter<"OmniBroadcastLog"> | string
+    error?: StringNullableWithAggregatesFilter<"OmniBroadcastLog"> | string | null
+    metadata?: JsonWithAggregatesFilter<"OmniBroadcastLog">
+    sentAt?: DateTimeNullableWithAggregatesFilter<"OmniBroadcastLog"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"OmniBroadcastLog"> | Date | string
+  }
+
   export type CampaignCreateInput = {
     id?: string
     orgId: string
@@ -8045,6 +10839,226 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type OmniBroadcastCreateInput = {
+    id?: string
+    orgId: string
+    createdBy: string
+    name: string
+    provider: string
+    phonebookId?: string | null
+    message: string
+    mediaUrl?: string | null
+    status?: string
+    totalCount?: number
+    sentCount?: number
+    failedCount?: number
+    scheduledAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    logs?: OmniBroadcastLogCreateNestedManyWithoutBroadcastInput
+  }
+
+  export type OmniBroadcastUncheckedCreateInput = {
+    id?: string
+    orgId: string
+    createdBy: string
+    name: string
+    provider: string
+    phonebookId?: string | null
+    message: string
+    mediaUrl?: string | null
+    status?: string
+    totalCount?: number
+    sentCount?: number
+    failedCount?: number
+    scheduledAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    logs?: OmniBroadcastLogUncheckedCreateNestedManyWithoutBroadcastInput
+  }
+
+  export type OmniBroadcastUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: StringFieldUpdateOperationsInput | string
+    createdBy?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    phonebookId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    totalCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    logs?: OmniBroadcastLogUpdateManyWithoutBroadcastNestedInput
+  }
+
+  export type OmniBroadcastUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: StringFieldUpdateOperationsInput | string
+    createdBy?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    phonebookId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    totalCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    logs?: OmniBroadcastLogUncheckedUpdateManyWithoutBroadcastNestedInput
+  }
+
+  export type OmniBroadcastCreateManyInput = {
+    id?: string
+    orgId: string
+    createdBy: string
+    name: string
+    provider: string
+    phonebookId?: string | null
+    message: string
+    mediaUrl?: string | null
+    status?: string
+    totalCount?: number
+    sentCount?: number
+    failedCount?: number
+    scheduledAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniBroadcastUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: StringFieldUpdateOperationsInput | string
+    createdBy?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    phonebookId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    totalCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: StringFieldUpdateOperationsInput | string
+    createdBy?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    phonebookId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    totalCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastLogCreateInput = {
+    id?: string
+    contactId?: string | null
+    phone: string
+    status?: string
+    error?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    broadcast: OmniBroadcastCreateNestedOneWithoutLogsInput
+  }
+
+  export type OmniBroadcastLogUncheckedCreateInput = {
+    id?: string
+    broadcastId: string
+    contactId?: string | null
+    phone: string
+    status?: string
+    error?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniBroadcastLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    broadcast?: OmniBroadcastUpdateOneRequiredWithoutLogsNestedInput
+  }
+
+  export type OmniBroadcastLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    broadcastId?: StringFieldUpdateOperationsInput | string
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastLogCreateManyInput = {
+    id?: string
+    broadcastId: string
+    contactId?: string | null
+    phone: string
+    status?: string
+    error?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniBroadcastLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    broadcastId?: StringFieldUpdateOperationsInput | string
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -8546,6 +11560,122 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type OmniBroadcastLogListRelationFilter = {
+    every?: OmniBroadcastLogWhereInput
+    some?: OmniBroadcastLogWhereInput
+    none?: OmniBroadcastLogWhereInput
+  }
+
+  export type OmniBroadcastLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type OmniBroadcastCountOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdBy?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    phonebookId?: SortOrder
+    message?: SortOrder
+    mediaUrl?: SortOrder
+    status?: SortOrder
+    totalCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    scheduledAt?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniBroadcastAvgOrderByAggregateInput = {
+    totalCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+  }
+
+  export type OmniBroadcastMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdBy?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    phonebookId?: SortOrder
+    message?: SortOrder
+    mediaUrl?: SortOrder
+    status?: SortOrder
+    totalCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    scheduledAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniBroadcastMinOrderByAggregateInput = {
+    id?: SortOrder
+    orgId?: SortOrder
+    createdBy?: SortOrder
+    name?: SortOrder
+    provider?: SortOrder
+    phonebookId?: SortOrder
+    message?: SortOrder
+    mediaUrl?: SortOrder
+    status?: SortOrder
+    totalCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    scheduledAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type OmniBroadcastSumOrderByAggregateInput = {
+    totalCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+  }
+
+  export type OmniBroadcastScalarRelationFilter = {
+    is?: OmniBroadcastWhereInput
+    isNot?: OmniBroadcastWhereInput
+  }
+
+  export type OmniBroadcastLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    broadcastId?: SortOrder
+    contactId?: SortOrder
+    phone?: SortOrder
+    status?: SortOrder
+    error?: SortOrder
+    metadata?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OmniBroadcastLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    broadcastId?: SortOrder
+    contactId?: SortOrder
+    phone?: SortOrder
+    status?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type OmniBroadcastLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    broadcastId?: SortOrder
+    contactId?: SortOrder
+    phone?: SortOrder
+    status?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type EmailMessageCreateNestedManyWithoutCampaignInput = {
     create?: XOR<EmailMessageCreateWithoutCampaignInput, EmailMessageUncheckedCreateWithoutCampaignInput> | EmailMessageCreateWithoutCampaignInput[] | EmailMessageUncheckedCreateWithoutCampaignInput[]
     connectOrCreate?: EmailMessageCreateOrConnectWithoutCampaignInput | EmailMessageCreateOrConnectWithoutCampaignInput[]
@@ -8630,6 +11760,62 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type OmniBroadcastLogCreateNestedManyWithoutBroadcastInput = {
+    create?: XOR<OmniBroadcastLogCreateWithoutBroadcastInput, OmniBroadcastLogUncheckedCreateWithoutBroadcastInput> | OmniBroadcastLogCreateWithoutBroadcastInput[] | OmniBroadcastLogUncheckedCreateWithoutBroadcastInput[]
+    connectOrCreate?: OmniBroadcastLogCreateOrConnectWithoutBroadcastInput | OmniBroadcastLogCreateOrConnectWithoutBroadcastInput[]
+    createMany?: OmniBroadcastLogCreateManyBroadcastInputEnvelope
+    connect?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+  }
+
+  export type OmniBroadcastLogUncheckedCreateNestedManyWithoutBroadcastInput = {
+    create?: XOR<OmniBroadcastLogCreateWithoutBroadcastInput, OmniBroadcastLogUncheckedCreateWithoutBroadcastInput> | OmniBroadcastLogCreateWithoutBroadcastInput[] | OmniBroadcastLogUncheckedCreateWithoutBroadcastInput[]
+    connectOrCreate?: OmniBroadcastLogCreateOrConnectWithoutBroadcastInput | OmniBroadcastLogCreateOrConnectWithoutBroadcastInput[]
+    createMany?: OmniBroadcastLogCreateManyBroadcastInputEnvelope
+    connect?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+  }
+
+  export type OmniBroadcastLogUpdateManyWithoutBroadcastNestedInput = {
+    create?: XOR<OmniBroadcastLogCreateWithoutBroadcastInput, OmniBroadcastLogUncheckedCreateWithoutBroadcastInput> | OmniBroadcastLogCreateWithoutBroadcastInput[] | OmniBroadcastLogUncheckedCreateWithoutBroadcastInput[]
+    connectOrCreate?: OmniBroadcastLogCreateOrConnectWithoutBroadcastInput | OmniBroadcastLogCreateOrConnectWithoutBroadcastInput[]
+    upsert?: OmniBroadcastLogUpsertWithWhereUniqueWithoutBroadcastInput | OmniBroadcastLogUpsertWithWhereUniqueWithoutBroadcastInput[]
+    createMany?: OmniBroadcastLogCreateManyBroadcastInputEnvelope
+    set?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    disconnect?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    delete?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    connect?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    update?: OmniBroadcastLogUpdateWithWhereUniqueWithoutBroadcastInput | OmniBroadcastLogUpdateWithWhereUniqueWithoutBroadcastInput[]
+    updateMany?: OmniBroadcastLogUpdateManyWithWhereWithoutBroadcastInput | OmniBroadcastLogUpdateManyWithWhereWithoutBroadcastInput[]
+    deleteMany?: OmniBroadcastLogScalarWhereInput | OmniBroadcastLogScalarWhereInput[]
+  }
+
+  export type OmniBroadcastLogUncheckedUpdateManyWithoutBroadcastNestedInput = {
+    create?: XOR<OmniBroadcastLogCreateWithoutBroadcastInput, OmniBroadcastLogUncheckedCreateWithoutBroadcastInput> | OmniBroadcastLogCreateWithoutBroadcastInput[] | OmniBroadcastLogUncheckedCreateWithoutBroadcastInput[]
+    connectOrCreate?: OmniBroadcastLogCreateOrConnectWithoutBroadcastInput | OmniBroadcastLogCreateOrConnectWithoutBroadcastInput[]
+    upsert?: OmniBroadcastLogUpsertWithWhereUniqueWithoutBroadcastInput | OmniBroadcastLogUpsertWithWhereUniqueWithoutBroadcastInput[]
+    createMany?: OmniBroadcastLogCreateManyBroadcastInputEnvelope
+    set?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    disconnect?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    delete?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    connect?: OmniBroadcastLogWhereUniqueInput | OmniBroadcastLogWhereUniqueInput[]
+    update?: OmniBroadcastLogUpdateWithWhereUniqueWithoutBroadcastInput | OmniBroadcastLogUpdateWithWhereUniqueWithoutBroadcastInput[]
+    updateMany?: OmniBroadcastLogUpdateManyWithWhereWithoutBroadcastInput | OmniBroadcastLogUpdateManyWithWhereWithoutBroadcastInput[]
+    deleteMany?: OmniBroadcastLogScalarWhereInput | OmniBroadcastLogScalarWhereInput[]
+  }
+
+  export type OmniBroadcastCreateNestedOneWithoutLogsInput = {
+    create?: XOR<OmniBroadcastCreateWithoutLogsInput, OmniBroadcastUncheckedCreateWithoutLogsInput>
+    connectOrCreate?: OmniBroadcastCreateOrConnectWithoutLogsInput
+    connect?: OmniBroadcastWhereUniqueInput
+  }
+
+  export type OmniBroadcastUpdateOneRequiredWithoutLogsNestedInput = {
+    create?: XOR<OmniBroadcastCreateWithoutLogsInput, OmniBroadcastUncheckedCreateWithoutLogsInput>
+    connectOrCreate?: OmniBroadcastCreateOrConnectWithoutLogsInput
+    upsert?: OmniBroadcastUpsertWithoutLogsInput
+    connect?: OmniBroadcastWhereUniqueInput
+    update?: XOR<XOR<OmniBroadcastUpdateToOneWithWhereWithoutLogsInput, OmniBroadcastUpdateWithoutLogsInput>, OmniBroadcastUncheckedUpdateWithoutLogsInput>
   }
 
   export type NestedUuidFilter<$PrismaModel = never> = {
@@ -9032,6 +12218,161 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type OmniBroadcastLogCreateWithoutBroadcastInput = {
+    id?: string
+    contactId?: string | null
+    phone: string
+    status?: string
+    error?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniBroadcastLogUncheckedCreateWithoutBroadcastInput = {
+    id?: string
+    contactId?: string | null
+    phone: string
+    status?: string
+    error?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniBroadcastLogCreateOrConnectWithoutBroadcastInput = {
+    where: OmniBroadcastLogWhereUniqueInput
+    create: XOR<OmniBroadcastLogCreateWithoutBroadcastInput, OmniBroadcastLogUncheckedCreateWithoutBroadcastInput>
+  }
+
+  export type OmniBroadcastLogCreateManyBroadcastInputEnvelope = {
+    data: OmniBroadcastLogCreateManyBroadcastInput | OmniBroadcastLogCreateManyBroadcastInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OmniBroadcastLogUpsertWithWhereUniqueWithoutBroadcastInput = {
+    where: OmniBroadcastLogWhereUniqueInput
+    update: XOR<OmniBroadcastLogUpdateWithoutBroadcastInput, OmniBroadcastLogUncheckedUpdateWithoutBroadcastInput>
+    create: XOR<OmniBroadcastLogCreateWithoutBroadcastInput, OmniBroadcastLogUncheckedCreateWithoutBroadcastInput>
+  }
+
+  export type OmniBroadcastLogUpdateWithWhereUniqueWithoutBroadcastInput = {
+    where: OmniBroadcastLogWhereUniqueInput
+    data: XOR<OmniBroadcastLogUpdateWithoutBroadcastInput, OmniBroadcastLogUncheckedUpdateWithoutBroadcastInput>
+  }
+
+  export type OmniBroadcastLogUpdateManyWithWhereWithoutBroadcastInput = {
+    where: OmniBroadcastLogScalarWhereInput
+    data: XOR<OmniBroadcastLogUpdateManyMutationInput, OmniBroadcastLogUncheckedUpdateManyWithoutBroadcastInput>
+  }
+
+  export type OmniBroadcastLogScalarWhereInput = {
+    AND?: OmniBroadcastLogScalarWhereInput | OmniBroadcastLogScalarWhereInput[]
+    OR?: OmniBroadcastLogScalarWhereInput[]
+    NOT?: OmniBroadcastLogScalarWhereInput | OmniBroadcastLogScalarWhereInput[]
+    id?: UuidFilter<"OmniBroadcastLog"> | string
+    broadcastId?: UuidFilter<"OmniBroadcastLog"> | string
+    contactId?: UuidNullableFilter<"OmniBroadcastLog"> | string | null
+    phone?: StringFilter<"OmniBroadcastLog"> | string
+    status?: StringFilter<"OmniBroadcastLog"> | string
+    error?: StringNullableFilter<"OmniBroadcastLog"> | string | null
+    metadata?: JsonFilter<"OmniBroadcastLog">
+    sentAt?: DateTimeNullableFilter<"OmniBroadcastLog"> | Date | string | null
+    createdAt?: DateTimeFilter<"OmniBroadcastLog"> | Date | string
+  }
+
+  export type OmniBroadcastCreateWithoutLogsInput = {
+    id?: string
+    orgId: string
+    createdBy: string
+    name: string
+    provider: string
+    phonebookId?: string | null
+    message: string
+    mediaUrl?: string | null
+    status?: string
+    totalCount?: number
+    sentCount?: number
+    failedCount?: number
+    scheduledAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniBroadcastUncheckedCreateWithoutLogsInput = {
+    id?: string
+    orgId: string
+    createdBy: string
+    name: string
+    provider: string
+    phonebookId?: string | null
+    message: string
+    mediaUrl?: string | null
+    status?: string
+    totalCount?: number
+    sentCount?: number
+    failedCount?: number
+    scheduledAt?: Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OmniBroadcastCreateOrConnectWithoutLogsInput = {
+    where: OmniBroadcastWhereUniqueInput
+    create: XOR<OmniBroadcastCreateWithoutLogsInput, OmniBroadcastUncheckedCreateWithoutLogsInput>
+  }
+
+  export type OmniBroadcastUpsertWithoutLogsInput = {
+    update: XOR<OmniBroadcastUpdateWithoutLogsInput, OmniBroadcastUncheckedUpdateWithoutLogsInput>
+    create: XOR<OmniBroadcastCreateWithoutLogsInput, OmniBroadcastUncheckedCreateWithoutLogsInput>
+    where?: OmniBroadcastWhereInput
+  }
+
+  export type OmniBroadcastUpdateToOneWithWhereWithoutLogsInput = {
+    where?: OmniBroadcastWhereInput
+    data: XOR<OmniBroadcastUpdateWithoutLogsInput, OmniBroadcastUncheckedUpdateWithoutLogsInput>
+  }
+
+  export type OmniBroadcastUpdateWithoutLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: StringFieldUpdateOperationsInput | string
+    createdBy?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    phonebookId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    totalCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastUncheckedUpdateWithoutLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orgId?: StringFieldUpdateOperationsInput | string
+    createdBy?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    phonebookId?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    totalCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type EmailMessageCreateManyCampaignInput = {
     id?: string
     orgId: string
@@ -9081,6 +12422,50 @@ export namespace Prisma {
     sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastLogCreateManyBroadcastInput = {
+    id?: string
+    contactId?: string | null
+    phone: string
+    status?: string
+    error?: string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type OmniBroadcastLogUpdateWithoutBroadcastInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastLogUncheckedUpdateWithoutBroadcastInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OmniBroadcastLogUncheckedUpdateManyWithoutBroadcastInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    contactId?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: JsonNullValueInput | InputJsonValue
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

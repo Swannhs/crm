@@ -4,14 +4,20 @@ import {
   LiveChatContactRepository,
   LiveChatWidgetSettingRepository,
   LiveChatStatisticsRepository,
-  SocketConnectionRepository
+  SocketConnectionRepository,
+  OmniConversationRepository,
+  OmniMessageRepository,
+  OmniParticipantRepository
 } from '../repositories/index.js';
 import type { 
   LiveChatChannelInput, 
   LiveChatMessageInput, 
   LiveChatContactInput, 
   LiveChatWidgetSettingInput,
-  ChatStatisticsInput
+  ChatStatisticsInput,
+  OmniConversationInput,
+  OmniMessageInput,
+  OmniParticipantInput
 } from '../types/index.js';
 
 export class LiveChatChannelService {
@@ -83,6 +89,18 @@ export class LiveChatContactService {
   async updateContact(id: string, data: Partial<LiveChatContactInput>) {
     return this.repo.update(id, data);
   }
+
+  async findOrCreateByPhone(phone: string, organizationId: string, name?: string) {
+    const existing = await this.repo.findByPhone(phone, organizationId);
+    if (existing) return existing;
+
+    return this.repo.create({
+      phone,
+      organizationId,
+      name: name || `Contact ${phone.slice(-4)}`,
+      userId: '00000000-0000-0000-0000-000000000000'
+    });
+  }
 }
 
 export class LiveChatWidgetSettingService {
@@ -132,5 +150,100 @@ export class SocketConnectionService {
 
   async getUserConnections(userId: string) {
     return this.repo.findByUserId(userId);
+  }
+}
+
+export class OmniConversationService {
+  private repo = new OmniConversationRepository();
+  private participantRepo = new OmniParticipantRepository();
+
+  async createConversation(data: OmniConversationInput) {
+    const conversation = await this.repo.create(data);
+    // Add contact as participant
+    await this.participantRepo.create({
+      conversationId: conversation.id,
+      participantId: data.contactId,
+      participantType: 'contact'
+    });
+    return conversation;
+  }
+
+  async findOrCreateByContact(contactId: string, organizationId: string, provider: string, providerRef: string) {
+    const existing = await this.repo.findByOrganizationAndProviderRef(organizationId, provider, providerRef);
+    if (existing) return existing;
+
+    return this.createConversation({
+      contactId,
+      organizationId,
+      provider,
+      providerRef,
+      status: 'open'
+    });
+  }
+
+  async getConversationsByOrganization(organizationId: string) {
+    return this.repo.findByOrganizationId(organizationId);
+  }
+
+  async getConversationById(id: string) {
+    return this.repo.findById(id);
+  }
+
+  async assignAgent(id: string, agentId: string) {
+    // Add agent as participant if not already there
+    const participants = await this.participantRepo.findByConversationId(id);
+    const isAgentIn = participants.some(p => p.participantId === agentId);
+    
+    if (!isAgentIn) {
+      await this.participantRepo.create({
+        conversationId: id,
+        participantId: agentId,
+        participantType: 'agent'
+      });
+    }
+
+    return this.repo.assignAgent(id, agentId);
+  }
+
+  async updateConversation(id: string, data: Partial<OmniConversationInput>) {
+    return this.repo.update(id, data);
+  }
+}
+
+export class OmniMessageService {
+  private repo = new OmniMessageRepository();
+  private convRepo = new OmniConversationRepository();
+
+  async addMessage(data: OmniMessageInput) {
+    const message = await this.repo.create(data);
+    
+    // Update conversation last message
+    await this.convRepo.update(data.conversationId, {
+      lastMessage: data.content,
+      lastMessageAt: new Date()
+    });
+    
+    return message;
+  }
+
+  async addInboundMessage(data: { conversationId: string; senderId: string; content: string; type: string; metadata?: any }) {
+    return this.addMessage({
+      conversationId: data.conversationId,
+      senderId: data.senderId,
+      senderType: 'contact',
+      content: data.content,
+      type: data.type,
+      direction: 'inbound',
+      status: 'delivered',
+      metadata: data.metadata
+    });
+  }
+
+  async getConversationHistory(conversationId: string, limit = 50) {
+    return this.repo.findByConversationId(conversationId, limit);
+  }
+
+  async updateMessageStatus(id: string, status: string) {
+    return this.repo.updateStatus(id, status);
   }
 }

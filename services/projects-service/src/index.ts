@@ -2,7 +2,11 @@ import { createServiceApp } from "@mymanager/node-service-kit";
 import { ProjectController, BoardController, ColumnController, CardController, TaskController, LabelController } from "./controllers/project.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
-const { app, logger } = createServiceApp({ serviceName: "projects-service", jsonLimit: "5mb" });
+const { app, logger } = createServiceApp({ 
+  serviceName: "projects-service", 
+  jsonLimit: "5mb",
+  enableCors: false
+});
 const auth = identityMiddleware;
 const cast = (req: any) => req as any;
 

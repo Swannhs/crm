@@ -25,6 +25,7 @@ app.post("/v1/invoices/:id/payments", auth, (req, res) => invoiceController.addP
 // --- Deposits ---
 app.get("/v1/deposits", auth, (req, res) => depositController.list(cast(req), res));
 app.post("/v1/deposits", auth, (req, res) => depositController.create(cast(req), res));
+app.get("/v1/payments", auth, (req, res) => depositController.listPayments(cast(req), res));
 
 // --- Public checkout / QR pay ---
 app.get("/v1/checkout-pages/public/:slug", (req, res) => checkoutPageController.getPublic(cast(req), res));

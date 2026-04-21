@@ -1,45 +1,31 @@
 import axios from 'axios';
 
 import { CONFIG } from 'src/config-global';
+import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: CONFIG.site.serverUrl });
 
-const decodeJwtSub = (token: string | null) => {
-  if (!token) return null;
-
-  try {
-    const [, payload] = token.split('.');
-    if (!payload) return null;
-
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const decoded = JSON.parse(atob(normalized));
-    return decoded?.sub || null;
-  } catch {
-    return null;
-  }
-};
-
 axiosInstance.interceptors.request.use(
   (config) => {
     const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
-    const orgId = typeof window !== 'undefined' ? sessionStorage.getItem('organizationId') : null;
-    const userId =
-      typeof window !== 'undefined'
-        ? sessionStorage.getItem('userId') || decodeJwtSub(accessToken)
-        : null;
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
-    }
 
-    if (orgId) {
-      config.headers['X-Org-Id'] = orgId;
-    }
-
-    if (userId) {
-      config.headers['X-User-Id'] = userId;
+      try {
+        // Decode JWT to extract user and org IDs
+        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+        if (payload.sub) {
+          config.headers['X-User-Id'] = payload.sub;
+        }
+        if (payload.org_id) {
+          config.headers['X-Org-Id'] = payload.org_id;
+        }
+      } catch (e) {
+        console.error('Failed to decode JWT:', e);
+      }
     }
 
     return config;
@@ -53,8 +39,23 @@ axiosInstance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('accessToken');
+        showToast({
+          message: 'Your session has expired. Please sign in again.',
+          severity: 'warning',
+        });
         window.dispatchEvent(new CustomEvent('auth-unauthorized'));
       }
+    } else if (typeof window !== 'undefined') {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Something went wrong!';
+
+      showToast({
+        message,
+        severity: 'error',
+      });
     }
     return Promise.reject((error.response && error.response.data) || 'Something went wrong!');
   }

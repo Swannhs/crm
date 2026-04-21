@@ -37,11 +37,11 @@ exports.$Enums = {}
 
 /**
  * Prisma Client JS version: 6.19.3
- * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+ * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
  */
 Prisma.prismaVersion = {
   client: "6.19.3",
-  engine: "605197351a3c8bdd595af2d2a9bc3025bca48ea2"
+  engine: "c2990dca591cba766e3b7ef5d9e8a84796e47ab7"
 }
 
 Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
@@ -203,7 +203,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/repo/services/pos-service/generated/prisma",
+      "value": "/workspace/services/pos-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -212,12 +212,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "linux-musl",
+        "value": "linux-musl-openssl-3.0.x",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/repo/services/pos-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/pos-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -225,7 +225,7 @@ const config = {
   },
   "relativePath": "../../prisma",
   "clientVersion": "6.19.3",
-  "engineVersion": "605197351a3c8bdd595af2d2a9bc3025bca48ea2",
+  "engineVersion": "c2990dca591cba766e3b7ef5d9e8a84796e47ab7",
   "datasourceNames": [
     "db"
   ],

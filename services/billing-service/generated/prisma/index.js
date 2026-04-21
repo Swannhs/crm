@@ -166,7 +166,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/repo/services/billing-service/generated/prisma",
+      "value": "/workspace/services/billing-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -180,7 +180,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/repo/services/billing-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/billing-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

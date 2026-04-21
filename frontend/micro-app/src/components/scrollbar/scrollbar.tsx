@@ -1,13 +1,23 @@
 import { forwardRef } from 'react';
-import SimpleBar from 'simplebar-react';
+import SimpleBar, { Props as SimpleBarProps } from 'simplebar-react';
 
-import Box from '@mui/material/Box';
+import Box, { BoxProps } from '@mui/material/Box';
 
 import { scrollbarClasses } from './classes';
 
 // ----------------------------------------------------------------------
 
-export const Scrollbar = forwardRef(
+export interface ScrollbarProps extends BoxProps {
+  slotProps?: {
+    wrapper?: Record<string, any>;
+    contentWrapper?: Record<string, any>;
+    content?: Record<string, any>;
+  };
+  fillContent?: boolean;
+  naturalScroll?: boolean;
+}
+
+export const Scrollbar = forwardRef<HTMLDivElement, ScrollbarProps>(
   ({ slotProps, children, fillContent, naturalScroll, sx, ...other }, ref) => (
     <Box
       component={SimpleBar}

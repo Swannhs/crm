@@ -1,4 +1,5 @@
 import { db } from '../db.js';
+import type { OmniBroadcastInput, OmniBroadcastLogInput } from '../types/index.js';
 
 export class CampaignRepository {
   async findMany(where: any, skip: number, take: number) {
@@ -89,5 +90,54 @@ export class OptinFormRepository {
 
   async softDelete(id: string, orgId: string) {
     return db.optinForm.updateMany({ where: { id, orgId }, data: { isDeleted: true } });
+  }
+}
+
+export class OmniBroadcastRepository {
+  async findMany(where: any, skip: number, take: number) {
+    const [data, total] = await Promise.all([
+      db.omniBroadcast.findMany({ 
+        where, 
+        orderBy: { createdAt: "desc" }, 
+        skip, 
+        take,
+        include: { _count: { select: { logs: true } } }
+      }),
+      db.omniBroadcast.count({ where })
+    ]);
+    return { data, total };
+  }
+
+  async findUnique(id: string, orgId: string) {
+    return db.omniBroadcast.findFirst({ 
+      where: { id, orgId }, 
+      include: { logs: { take: 100 } } 
+    });
+  }
+
+  async create(data: OmniBroadcastInput & { orgId: string; createdBy: string }) {
+    return db.omniBroadcast.create({ data });
+  }
+
+  async update(id: string, orgId: string, data: Partial<OmniBroadcastInput>) {
+    return db.omniBroadcast.updateMany({ where: { id, orgId }, data });
+  }
+
+  async updateStats(id: string, orgId: string, stats: { sentCount?: number; failedCount?: number; status?: string }) {
+    return db.omniBroadcast.updateMany({ where: { id, orgId }, data: stats });
+  }
+}
+
+export class OmniBroadcastLogRepository {
+  async createMany(logs: (OmniBroadcastLogInput & { broadcastId: string })[]) {
+    return db.omniBroadcastLog.createMany({ data: logs });
+  }
+
+  async findByBroadcastId(broadcastId: string, skip: number, take: number) {
+    const [data, total] = await Promise.all([
+      db.omniBroadcastLog.findMany({ where: { broadcastId }, skip, take, orderBy: { createdAt: 'desc' } }),
+      db.omniBroadcastLog.count({ where: { broadcastId } })
+    ]);
+    return { data, total };
   }
 }

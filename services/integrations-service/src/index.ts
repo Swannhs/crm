@@ -1,3 +1,4 @@
+import http from "node:http";
 import { createServiceApp } from "@mymanager/node-service-kit";
 import { 
   IntegrationController,
@@ -9,11 +10,19 @@ import {
   TikTokController,
   ShopifyController,
   UberEatsController,
-  EasyPostController
+  EasyPostController,
+  UserIntegrationSettingsController,
+  MetaIntegrationController,
+  VoiceIntegrationController,
+  WhatsAppController,
+  TelegramController,
+  WebhookController
 } from "./controllers/index.js";
 import { identityMiddleware } from "./middleware/identity.js";
+import { startOmniSendConsumer } from './kafka/omni.send.consumer.js';
 
 const { app, logger } = createServiceApp({ serviceName: "integrations-service", jsonLimit: "10mb" });
+const server = http.createServer(app);
 const auth = identityMiddleware;
 const cast = (req: any) => req as any;
 
@@ -27,6 +36,17 @@ const tiktokCtrl = new TikTokController();
 const shopifyCtrl = new ShopifyController();
 const uberEatsCtrl = new UberEatsController();
 const easyPostCtrl = new EasyPostController();
+const settingsCtrl = new UserIntegrationSettingsController();
+const metaCtrl = new MetaIntegrationController();
+const voiceCtrl = new VoiceIntegrationController();
+const whatsappCtrl = new WhatsAppController();
+const telegramCtrl = new TelegramController();
+const webhookCtrl = new WebhookController();
+
+// --- Webhooks (Public) ---
+app.get("/v1/webhook/whatsapp", (req, res) => webhookCtrl.verifyMeta(req, res));
+app.post("/v1/webhook/whatsapp", (req, res) => webhookCtrl.handleMeta(req, res));
+app.post("/v1/webhook/telegram", (req, res) => webhookCtrl.handleTelegram(req, res));
 
 // --- Generic Integration ---
 app.post("/v1/integrations/connect", auth, (req, res) => integrationCtrl.connect(cast(req), res));
@@ -88,4 +108,11 @@ app.post("/v1/integrations/easypost/rates", auth, (req, res) => easyPostCtrl.get
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "integrations-service" }));
 
 const port = Number(process.env.PORT || 7140);
-app.listen(port, "0.0.0.0", () => logger.info({ port }, "integrations-service listening"));
+server.listen(port, "0.0.0.0", async () => {
+  logger.info({ port }, "integrations-service listening");
+  try {
+    await startOmniSendConsumer(logger);
+  } catch (err) {
+    logger.error({ err }, "Failed to start omni send consumer");
+  }
+});

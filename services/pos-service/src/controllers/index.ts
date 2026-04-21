@@ -8,7 +8,7 @@ export class PosSettingController {
   async get(req: AuthenticatedRequest, res: Response) {
     try {
       const shopId = req.query.shopId as string;
-      if (!shopId) return res.status(400).json({ success: false, message: 'ShopId is required' });
+      if (!shopId) return res.json({ success: true, data: null });
       
       const setting = await this.svc.getPosSetting(shopId);
       return res.json({ success: true, data: setting });
@@ -85,7 +85,7 @@ export class PosSettingController {
   async getTipShifts(req: AuthenticatedRequest, res: Response) {
     try {
       const shopId = req.query.shopId as string;
-      if (!shopId) return res.status(400).json({ success: false, message: 'shopId is required' });
+      if (!shopId) return res.json({ success: true, data: [], totalTip: 0 });
 
       const result = await this.svc.getTipShifts(shopId);
       return res.json({ success: true, ...result });
@@ -146,7 +146,7 @@ export class PosTableController {
   async get(req: AuthenticatedRequest, res: Response) {
     try {
       const shopId = req.query.shopId as string;
-      if (!shopId) return res.status(400).json({ success: false, message: 'ShopId is required' });
+      if (!shopId) return res.json({ success: true, data: [] });
 
       const table = await this.svc.get(shopId);
       return res.json({ success: true, data: table });
@@ -158,7 +158,7 @@ export class PosTableController {
   async getAll(req: AuthenticatedRequest, res: Response) {
     try {
       const shopId = req.query.shopId as string;
-      if (!shopId) return res.status(400).json({ success: false, message: 'ShopId is required' });
+      if (!shopId) return res.json({ success: true, data: [] });
 
       const tables = await this.svc.getAll(shopId);
       return res.json({ success: true, data: tables });
@@ -222,7 +222,7 @@ export class PosTableModeController {
   async get(req: AuthenticatedRequest, res: Response) {
     try {
       const shopId = req.query.shopId as string;
-      if (!shopId) return res.status(400).json({ success: false, message: 'ShopId is required' });
+      if (!shopId) return res.json({ success: true, data: [] });
 
       const tables = await this.svc.get(shopId);
       return res.json({ success: true, data: tables });
@@ -356,7 +356,7 @@ export class PosTableOrderController {
   async getAll(req: AuthenticatedRequest, res: Response) {
     try {
       const shopId = req.query.shopId as string;
-      if (!shopId) return res.status(400).json({ success: false, message: 'ShopId is required' });
+      if (!shopId) return res.json({ success: true, data: [] });
 
       const orders = await this.svc.getAll(shopId);
       return res.json({ success: true, data: orders });

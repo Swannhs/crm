@@ -14,6 +14,7 @@ class RequireIdentityContext
         $userId = $request->header('X-User-Id');
         $orgId = $request->header('X-Org-Id');
 
+
         if (! is_string($userId) || $userId === '' || ! is_string($orgId) || $orgId === '') {
             return $this->unauthorized('Missing identity context headers.');
         }

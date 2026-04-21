@@ -17,7 +17,66 @@ The gateway validates the Keycloak JWT, then propagates identity context headers
 
 Services should rely on these headers for multi-tenant request scoping.
 
-## Local Development
+## Docker Modes
+
+The Docker stack now supports three intended modes:
+
+- `development`: local coding with bind mounts, watchers, and fast feedback
+- `web-test`: production-like runtime commands plus seeded dummy data for demos/QA
+- `production`: production-oriented commands and env wiring for real-user environments
+
+### Local development
+
+```bash
+cd microservices
+yarn compose:dev
+```
+
+This mode keeps the current repo-mounted workflow:
+- `tsx watch` / `next dev`
+- Prisma `db push` on service boot where needed
+- local ports published for direct debugging
+
+### Web testing with dummy data
+
+```bash
+cd microservices
+yarn compose:web-test
+```
+
+This mode layers `infra/compose/docker-compose.web-test.yml` on top of the base stack:
+- frontend runs with `next build && next start`
+- Node services switch from watch mode to `build && start`
+- a one-shot `seed-dummy-data` container populates projects, contacts, and invoices
+- good for shared QA environments, demos, or browser-based review
+
+The dummy seeder reads Docker-friendly env vars from:
+- `.env.docker.web-test.example`
+
+### Production mode
+
+1. Copy the example env file and replace placeholders:
+
+```bash
+cd microservices
+cp .env.docker.prod.example .env.docker.prod
+```
+
+2. Start the production-oriented stack:
+
+```bash
+yarn compose:prod
+```
+
+This mode layers `infra/compose/docker-compose.prod.yml` on top of the base stack:
+- frontend and Node services run in `NODE_ENV=production`
+- services use `build && start` rather than watch mode
+- restart policies are enabled for long-running services
+- env values are pulled from `.env.docker.prod`
+
+This is intended as the repo’s “real user” compose entrypoint until a fully image-driven deployment pipeline replaces the current source-mounted setup.
+
+## Previous Local Development
 
 Start the platform stack:
 

@@ -1,0 +1,75 @@
+import http from "node:http";
+import { Server as SocketIOServer } from "socket.io";
+import { createServiceApp, startKafkaConsumer } from "@mymanager/node-service-kit";
+import { LiveChatChannelController, LiveChatMessageController, LiveChatContactController, LiveChatWidgetSettingController, LiveChatStatisticsController } from "./controllers/index.js";
+import { identityMiddleware } from "./middleware/identity.js";
+const { app, logger } = createServiceApp({ serviceName: "realtime-service", jsonLimit: "10mb" });
+const auth = identityMiddleware;
+const cast = (req) => req;
+const channelCtrl = new LiveChatChannelController();
+const messageCtrl = new LiveChatMessageController();
+const contactCtrl = new LiveChatContactController();
+const widgetCtrl = new LiveChatWidgetSettingController();
+const statsCtrl = new LiveChatStatisticsController();
+app.post("/v1/livechat/channels", auth, (req, res) => channelCtrl.getChannelsByAdminId(cast(req), res));
+app.get("/v1/livechat/channel/:channelId", auth, (req, res) => channelCtrl.getChannelById(cast(req), res));
+app.delete("/v1/livechat/channel/:channelId/:contactId", auth, (req, res) => channelCtrl.deleteChannel(cast(req), res));
+app.get("/v1/livechat/chathistory/:channelId", (req, res) => messageCtrl.getChatHistory(cast(req), res));
+app.post("/v1/livechat/newmessage", (req, res) => messageCtrl.addMessage(cast(req), res));
+app.get("/v1/livechat/chats-and-contacts", auth, (req, res) => messageCtrl.getChatsAndContacts(cast(req), res));
+app.post("/v1/livechat/contact", auth, (req, res) => contactCtrl.createContact(cast(req), res));
+app.post("/v1/livechat/widget-setting", auth, (req, res) => widgetCtrl.saveSetting(cast(req), res));
+app.get("/v1/livechat/widget-setting", auth, (req, res) => widgetCtrl.getSetting(cast(req), res));
+app.get("/v1/livechat/widget-setting/pub", (req, res) => widgetCtrl.getPublicSetting(cast(req), res));
+app.post("/v1/livechat/widget-setting/send-code", auth, (req, res) => widgetCtrl.sendCode(cast(req), res));
+app.get("/v1/livechat/statistics", auth, (req, res) => statsCtrl.getStatistics(cast(req), res));
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+    cors: { origin: "*" }
+});
+io.on("connection", (socket) => {
+    logger.info({ id: socket.id }, "socket connected");
+    socket.on("join-org", (orgId) => {
+        socket.join(`org:${orgId}`);
+        logger.info({ socketId: socket.id, orgId }, "socket joined org room");
+    });
+    socket.on("join-channel", (channelId) => {
+        socket.join(`channel:${channelId}`);
+        logger.info({ socketId: socket.id, channelId }, "socket joined channel room");
+    });
+    socket.on("send-message", (data) => {
+        io.to(`channel:${data.channelId}`).emit("new-message", data.message);
+    });
+    socket.on("typing", (data) => {
+        socket.to(`channel:${data.channelId}`).emit("user-typing", data);
+    });
+    socket.on("mark-read", (data) => {
+        io.to(`channel:${data.channelId}`).emit("messages-read", data);
+    });
+    socket.emit("hello", { message: "connected to realtime-service" });
+    socket.on("disconnect", () => logger.info({ id: socket.id }, "socket disconnected"));
+});
+async function startConsumer() {
+    const brokers = process.env.KAFKA_BROKERS || "localhost:9092";
+    await startKafkaConsumer({
+        clientId: "realtime-service",
+        brokers,
+        groupId: "realtime-service.domain-events",
+        topics: ["billing.payment.recorded"],
+        logger,
+        onMessage: async ({ topic, payload }) => {
+            io.emit("domain-event", { routingKey: topic, data: payload });
+        },
+    });
+}
+app.get("/health", (_req, res) => res.json({ status: "ok", service: "realtime-service" }));
+const port = Number(process.env.PORT || 7030);
+server.listen(port, "0.0.0.0", async () => {
+    logger.info({ port }, "realtime-service listening (TS + Socket.IO)");
+    try {
+        await startConsumer();
+    }
+    catch (err) {
+        logger.error({ err }, "failed to start consumer");
+    }
+});

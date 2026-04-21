@@ -1,5 +1,14 @@
 import { Response } from 'express';
-import { AutomationService, WorkflowService, WorkflowWorkspaceService, WorkflowStartActionService } from '../services/index.js';
+import { 
+  AutomationService, 
+  WorkflowService, 
+  WorkflowWorkspaceService, 
+  WorkflowStartActionService,
+  OmniChatbotService,
+  OmniKeywordTriggerService,
+  OmniBroadcastService,
+  OmniWebhookService
+} from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
 export class AutomationController {
@@ -50,7 +59,7 @@ export class AutomationController {
   async getByIds(req: AuthenticatedRequest, res: Response) {
     try {
       const ids = req.query.ids as string;
-      if (!ids) return res.status(400).json({ success: false, message: 'IDs are required' });
+      if (!ids) return res.json({ success: true, data: [] });
       
       const idsArray = ids.split(',');
       const automations = await this.svc.getByIds(idsArray);
@@ -111,7 +120,7 @@ export class WorkflowController {
   async getById(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.query.id as string;
-      if (!id) return res.status(400).json({ success: false, message: 'ID is required' });
+      if (!id) return res.json({ success: true, data: null });
       
       const workflow = await this.svc.getById(id);
       if (!workflow) return res.status(404).json({ success: false, message: 'Workflow not found' });
@@ -173,7 +182,7 @@ export class WorkflowController {
   async getNodes(req: AuthenticatedRequest, res: Response) {
     try {
       const workflowId = req.query.workflowId as string;
-      if (!workflowId) return res.status(400).json({ success: false, message: 'Workflow ID is required' });
+      if (!workflowId) return res.json({ success: true, data: [] });
       
       const nodes = await this.svc.getNodes(workflowId);
       return res.json({ success: true, data: nodes });
@@ -209,7 +218,7 @@ export class WorkflowController {
   async getActivityLogs(req: AuthenticatedRequest, res: Response) {
     try {
       const workflowId = req.query.workflowId as string;
-      if (!workflowId) return res.status(400).json({ success: false, message: 'Workflow ID is required' });
+      if (!workflowId) return res.json({ success: true, data: [] });
       
       const logs = await this.svc.getActivityLogs(workflowId);
       return res.json({ success: true, data: logs });
@@ -221,7 +230,7 @@ export class WorkflowController {
   async getActivityLogsCount(req: AuthenticatedRequest, res: Response) {
     try {
       const workflowId = req.query.workflowId as string;
-      if (!workflowId) return res.status(400).json({ success: false, message: 'Workflow ID is required' });
+      if (!workflowId) return res.json({ success: true, data: { count: 0 } });
       
       const count = await this.svc.getActivityCount(workflowId);
       return res.json({ success: true, data: { count } });
@@ -333,7 +342,7 @@ export class WorkflowActionController {
   async getStartActionList(req: AuthenticatedRequest, res: Response) {
     try {
       const workflowId = req.query.workflowId as string;
-      if (!workflowId) return res.status(400).json({ success: false, message: 'Workflow ID is required' });
+      if (!workflowId) return res.json({ success: true, data: [] });
       
       const actions = await this.svc.getAll(workflowId);
       return res.json({ success: true, data: actions });
@@ -368,6 +377,181 @@ export class WorkflowActionController {
       const id = req.params.id;
       await this.svc.delete(id);
       return res.json({ success: true, message: 'Action deleted' });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class OmniChatbotController {
+  private svc = new OmniChatbotService();
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const chatbot = await this.svc.create(req.body, req.identity.orgId);
+      return res.status(201).json({ success: true, data: chatbot });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const chatbots = await this.svc.getAll(req.identity.orgId);
+      return res.json({ success: true, data: chatbots });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async get(req: AuthenticatedRequest, res: Response) {
+    try {
+      const chatbot = await this.svc.getById(req.params.id);
+      if (!chatbot) return res.status(404).json({ success: false, message: 'Chatbot not found' });
+      return res.json({ success: true, data: chatbot });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async update(req: AuthenticatedRequest, res: Response) {
+    try {
+      const chatbot = await this.svc.update(req.params.id, req.body);
+      return res.json({ success: true, data: chatbot });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async delete(req: AuthenticatedRequest, res: Response) {
+    try {
+      await this.svc.delete(req.params.id);
+      return res.json({ success: true, message: 'Chatbot deleted' });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class OmniKeywordTriggerController {
+  private svc = new OmniKeywordTriggerService();
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const trigger = await this.svc.create(req.body, req.identity.orgId);
+      return res.status(201).json({ success: true, data: trigger });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const triggers = await this.svc.getAll(req.identity.orgId);
+      return res.json({ success: true, data: triggers });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async update(req: AuthenticatedRequest, res: Response) {
+    try {
+      const trigger = await this.svc.update(req.params.id, req.body);
+      return res.json({ success: true, data: trigger });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async delete(req: AuthenticatedRequest, res: Response) {
+    try {
+      await this.svc.delete(req.params.id);
+      return res.json({ success: true, message: 'Trigger deleted' });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class OmniBroadcastController {
+  private svc = new OmniBroadcastService();
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { recipients, ...data } = req.body;
+      if (!recipients || !Array.isArray(recipients)) {
+        return res.status(400).json({ success: false, message: 'recipients array is required' });
+      }
+
+      const broadcast = await this.svc.createBroadcast(
+        data, 
+        recipients, 
+        req.identity.orgId, 
+        req.identity.userId
+      );
+      
+      return res.status(201).json({ success: true, data: broadcast });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const broadcasts = await this.svc.getBroadcasts(req.identity.orgId);
+      return res.json({ success: true, data: broadcasts });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async get(req: AuthenticatedRequest, res: Response) {
+    try {
+      const broadcast = await this.svc.getBroadcastById(req.params.id);
+      if (!broadcast) return res.status(404).json({ success: false, message: 'Broadcast not found' });
+      return res.json({ success: true, data: broadcast });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class OmniWebhookController {
+  private service = new OmniWebhookService();
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const webhook = await this.service.create(req.body, req.identity.orgId);
+      return res.json({ success: true, data: webhook });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getAll(req: AuthenticatedRequest, res: Response) {
+    try {
+      const webhooks = await this.service.getAll(req.identity.orgId);
+      return res.json({ success: true, data: webhooks });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getLogs(req: AuthenticatedRequest, res: Response) {
+    try {
+      const logs = await this.service.getLogs(req.params.id);
+      return res.json({ success: true, data: logs });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  // Public endpoint for receiving webhooks
+  async receive(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const result = await this.service.handleWebhook(id, req.body, req.headers, req.app.get('logger') || console);
+      return res.status(result.status).json(result);
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
     }

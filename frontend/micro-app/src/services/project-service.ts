@@ -13,7 +13,11 @@ export async function getProject(id: string) {
 }
 
 export async function createProject(data: any) {
-  const response = await axiosInstance.post('/api/projects/v1/projects', data);
+  const payload = {
+    ...data,
+    name: data.name ?? data.title,
+  };
+  const response = await axiosInstance.post('/api/projects/v1/projects', payload);
   return response.data;
 }
 
@@ -59,6 +63,16 @@ export async function createColumn(boardId: string, data: any) {
   return response.data;
 }
 
+export async function updateColumn(id: string, data: any) {
+  const response = await axiosInstance.patch(`/api/projects/v1/columns/${id}`, data);
+  return response.data;
+}
+
+export async function deleteColumn(id: string) {
+  const response = await axiosInstance.delete(`/api/projects/v1/columns/${id}`);
+  return response.data;
+}
+
 // Cards / Tasks
 export async function getCards(boardId: string) {
   const response = await axiosInstance.get(`/api/projects/v1/boards/${boardId}/cards`);
@@ -75,6 +89,16 @@ export async function createCard(boardId: string, data: any) {
   return response.data;
 }
 
+export async function updateCard(id: string, data: any) {
+  const response = await axiosInstance.patch(`/api/projects/v1/cards/${id}`, data);
+  return response.data;
+}
+
+export async function deleteCard(id: string) {
+  const response = await axiosInstance.delete(`/api/projects/v1/cards/${id}`);
+  return response.data;
+}
+
 export const projectService = {
   getProjects,
   getProject,
@@ -85,7 +109,11 @@ export const projectService = {
   createBoard,
   getColumns,
   createColumn,
+  updateColumn,
+  deleteColumn,
   getCards,
   getBoard,
   createCard,
+  updateCard,
+  deleteCard,
 };

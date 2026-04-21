@@ -24,6 +24,59 @@ export class EmployeeController {
       return res.status(500).json({ success: false, message: e.message });
     }
   }
+
+  async metrics(req: AuthenticatedRequest, res: Response) {
+    try {
+      const employees = await this.svc.getEmployees(req.identity.orgId);
+      return res.json({
+        data: {
+          total: employees.length,
+          active: employees.filter((employee: any) => employee.status !== "inactive").length,
+          inactive: employees.filter((employee: any) => employee.status === "inactive").length,
+        },
+      });
+    } catch (e: any) {
+      return res.status(500).json({ message: e.message });
+    }
+  }
+
+  async scheduleList(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getEmployeesWithScheduleSummary(req.identity.orgId, req.query);
+      return res.json({ data });
+    } catch (e: any) {
+      return res.status(500).json({ message: e.message });
+    }
+  }
+
+  async salaryList(_req: AuthenticatedRequest, res: Response) {
+    return res.json({ data: [] });
+  }
+
+  async budgetList(_req: AuthenticatedRequest, res: Response) {
+    return res.json({ data: [] });
+  }
+
+  async categoryList(req: AuthenticatedRequest, res: Response) {
+    try {
+      const employees = await this.svc.getEmployees(req.identity.orgId);
+      const categories = Array.from(
+        new Set(
+          employees
+            .flatMap((employee: any) => [employee.department, employee.jobTitle])
+            .filter(Boolean)
+            .map((value: any) => String(value))
+        )
+      ).map((name) => ({ name }));
+      return res.json({ data: categories });
+    } catch (e: any) {
+      return res.status(500).json({ message: e.message });
+    }
+  }
+
+  async activityLog(_req: AuthenticatedRequest, res: Response) {
+    return res.json({ data: [] });
+  }
 }
 
 export class ShiftController {
@@ -63,5 +116,14 @@ export class PayrollController {
   async create(req: AuthenticatedRequest, res: Response) {
     try { return res.status(201).json({ data: await this.svc.createPayroll(req.identity.orgId, req.identity.userId, req.body) }); }
     catch (e: any) { return res.status(500).json({ message: e.message }); }
+  }
+
+  async history(req: AuthenticatedRequest, res: Response) {
+    try {
+      const r = await this.svc.getPayroll(req.identity.orgId, req.query);
+      return res.json({ data: r.data, total: r.total });
+    } catch (e: any) {
+      return res.status(500).json({ message: e.message });
+    }
   }
 }

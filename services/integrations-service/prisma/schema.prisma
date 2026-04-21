@@ -136,4 +136,88 @@ model IntegrationActivity {
   @@index([userId])
   @@index([provider])
   @@index([organizationId])
+  @@map("integration_activities")
+}
+
+model UserIntegrationSettings {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid @unique
+  timezone        String?
+  apiKey          String?  @unique @map("api_key")
+  fcmData         Json?    @map("fcm_data")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("user_integration_settings")
+}
+
+model MetaIntegration {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @db.Uuid @unique
+  organizationId        String?  @db.Uuid
+  wabaId                String?  @map("waba_id")
+  accessToken           String?  @map("access_token")
+  businessPhoneNumberId String?  @map("business_phone_number_id")
+  appId                 String?  @map("app_id")
+  loginType             String?  @map("login_type") // manual | embed
+  embedData             Json?    @map("embed_data")
+  isActive              Boolean  @default(true) @map("is_active")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("meta_integrations")
+}
+
+model VoiceIntegration {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid @unique
+  organizationId String?  @db.Uuid
+  provider       String   @default("elevenlabs")
+  apiKey         String?  @map("api_key")
+  voiceId        String?  @map("voice_id")
+  settings       Json?
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("voice_integrations")
+}
+
+model WhatsAppInstance {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  name            String?
+  instanceId      String   @unique @map("instance_id")
+  status          String   @default("disconnected") // connected | disconnected | initial
+  qr              String?  @db.Text
+  phone           String?
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("whatsapp_instances")
+}
+
+model TelegramSession {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  organizationId String?  @db.Uuid
+  name            String?
+  sessionId       String   @unique @map("session_id")
+  status          String   @default("disconnected")
+  phone           String?
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("telegram_sessions")
 }

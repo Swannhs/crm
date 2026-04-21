@@ -25,6 +25,7 @@ class ContactController extends Controller
             ->where('org_id', $orgId)
             ->orderByDesc('created_at');
 
+
         if ($request->filled('q')) {
             $q = '%'.strtolower($request->string('q')->toString()).'%';
             $query->where(function ($sub) use ($q): void {

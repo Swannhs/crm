@@ -9,7 +9,12 @@ import {
   TikTokIntegrationService,
   ShopifyIntegrationService,
   UberEatsIntegrationService,
-  EasyPostIntegrationService
+  EasyPostIntegrationService,
+  WhatsAppService,
+  TelegramService,
+  UserIntegrationSettingsService,
+  MetaIntegrationService,
+  VoiceIntegrationService
 } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
@@ -377,6 +382,174 @@ export class EasyPostController {
       return res.json({ success: true, data: rates });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class UserIntegrationSettingsController {
+  private svc = new UserIntegrationSettingsService();
+
+  async getSettings(req: AuthenticatedRequest, res: Response) {
+    try {
+      const settings = await this.svc.getSettings(req.identity.userId);
+      return res.json({ success: true, data: settings });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async updateSettings(req: AuthenticatedRequest, res: Response) {
+    try {
+      const settings = await this.svc.updateSettings(req.identity.userId, req.body);
+      return res.json({ success: true, data: settings });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class MetaIntegrationController {
+  private svc = new MetaIntegrationService();
+
+  async getIntegration(req: AuthenticatedRequest, res: Response) {
+    try {
+      const integration = await this.svc.getIntegration(req.identity.userId);
+      return res.json({ success: true, data: integration });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async updateIntegration(req: AuthenticatedRequest, res: Response) {
+    try {
+      const integration = await this.svc.updateIntegration(req.identity.userId, req.identity.orgId, req.body);
+      return res.json({ success: true, data: integration });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class WhatsAppController {
+  private svc = new WhatsAppService();
+
+  async getInstances(req: AuthenticatedRequest, res: Response) {
+    try {
+      const instances = await this.svc.getInstances(req.identity.userId);
+      return res.json({ success: true, data: instances });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async createInstance(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { name } = req.body;
+      const instance = await this.svc.createInstance(req.identity.userId, req.identity.orgId, name);
+      return res.status(201).json({ success: true, data: instance });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async deleteInstance(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { instanceId } = req.params;
+      await this.svc.deleteInstance(instanceId);
+      return res.json({ success: true, message: 'Instance deleted' });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class TelegramController {
+  private svc = new TelegramService();
+
+  async getSessions(req: AuthenticatedRequest, res: Response) {
+    try {
+      const sessions = await this.svc.getSessions(req.identity.userId);
+      return res.json({ success: true, data: sessions });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async createSession(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { name } = req.body;
+      const session = await this.svc.createSession(req.identity.userId, req.identity.orgId, name);
+      return res.status(201).json({ success: true, data: session });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async deleteSession(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { sessionId } = req.params;
+      await this.svc.deleteSession(sessionId);
+      return res.json({ success: true, message: 'Session deleted' });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class VoiceIntegrationController {
+  private svc = new VoiceIntegrationService();
+
+  async getIntegration(req: AuthenticatedRequest, res: Response) {
+    try {
+      const integration = await this.svc.getIntegration(req.identity.userId);
+      return res.json({ success: true, data: integration });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async updateIntegration(req: AuthenticatedRequest, res: Response) {
+    try {
+      const integration = await this.svc.updateIntegration(req.identity.userId, req.identity.orgId, req.body);
+      return res.json({ success: true, data: integration });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+import { WebhookService } from '../services/index.js';
+
+export class WebhookController {
+  private svc = new WebhookService();
+
+  async verifyMeta(req: any, res: Response) {
+    try {
+      const mode = req.query['hub.mode'];
+      const token = req.query['hub.verify_token'];
+      const challenge = req.query['hub.challenge'];
+      const result = await this.svc.verifyMetaWebhook(mode, token, challenge);
+      return res.send(result);
+    } catch (err: any) {
+      return res.status(403).send('Forbidden');
+    }
+  }
+
+  async handleMeta(req: any, res: Response) {
+    try {
+      await this.svc.handleMetaWebhook(req.body, req.logger);
+      return res.status(200).send('EVENT_RECEIVED');
+    } catch (err: any) {
+      return res.status(200).send('EVENT_RECEIVED'); // Meta expects 200 even on error to stop retries
+    }
+  }
+
+  async handleTelegram(req: any, res: Response) {
+    try {
+      await this.svc.handleTelegramWebhook(req.body, req.logger);
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.json({ success: true });
     }
   }
 }
