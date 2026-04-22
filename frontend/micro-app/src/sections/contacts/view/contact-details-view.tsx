@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -32,6 +32,14 @@ import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import {
+  ContactOverviewTab,
+  ContactBillingTab,
+  ContactWorkHistoryTab,
+  ContactPetsTab,
+  ContactFilesTab,
+} from './contact-workspace-sections';
+
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -41,6 +49,7 @@ type Props = {
 
 export function ContactDetailsView({ id, mode = 'overview' }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [currentTab, setCurrentTab] = useState(mode);
   const [editOpen, setEditOpen] = useState(false);
@@ -60,7 +69,7 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
   const { data: invoices, isLoading: invoicesLoading } = useQuery({
     queryKey: ['contact-invoices', id],
     queryFn: () => billingService.getInvoices({ contactId: id }),
-    enabled: currentTab === 'invoices',
+    enabled: currentTab === 'billing' || currentTab === 'invoices',
   });
 
   useEffect(() => {
@@ -106,6 +115,28 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
     }
   };
 
+  const renderTabContent = () => {
+    switch (currentTab) {
+      case 'overview':
+        return <ContactOverviewTab contact={contact} />;
+      case 'billing':
+      case 'invoices':
+        return <ContactBillingTab invoices={invoices} loading={invoicesLoading} />;
+      case 'work-history':
+        return <ContactWorkHistoryTab />;
+      case 'pets':
+        return <ContactPetsTab />;
+      case 'files':
+        return <ContactFilesTab />;
+      case 'notes':
+        return <NotesTab />;
+      case 'tasks':
+        return <TasksTab />;
+      default:
+        return <ContactOverviewTab contact={contact} />;
+    }
+  };
+
   if (contactLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
@@ -118,17 +149,20 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
     return <Typography variant="h5">Contact not found</Typography>;
   }
 
+  const isEmployee = contact?.contactType?.includes('Employee');
+  const isClient = contact?.contactType?.includes('Client');
+
   return (
     <DashboardContent maxWidth="xl">
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center' }}>
         <Button
           onClick={() => router.push(paths.dashboard.contacts)}
-          startIcon={<Iconify icon="eva:arrow-ios-back-fill" />}
+          startIcon={<Iconify icon="solar:arrow-left-bold" />}
           sx={{ mr: 2 }}
         >
           Back
         </Button>
-        <Typography variant="h4">Contact Details</Typography>
+        <Typography variant="h4">{isEmployee ? 'Employee' : 'Contact'} Profile: {contact.fullName}</Typography>
       </Box>
 
       <Grid container spacing={3}>
@@ -137,7 +171,7 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
             <Avatar
               src={contact.photo}
               alt={contact.fullName}
-              sx={{ width: 120, height: 120, mx: 'auto', mb: 3 }}
+              sx={{ width: 120, height: 120, mx: 'auto', mb: 3, border: (theme) => `4px solid ${theme.palette.background.neutral}` }}
             >
               {contact.fullName.charAt(0).toUpperCase()}
             </Avatar>
@@ -159,16 +193,9 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
             <Divider sx={{ borderStyle: 'dashed', my: 3 }} />
 
             <Stack spacing={2} sx={{ textAlign: 'left' }}>
-              <Stack direction="row" spacing={1}>
-                <Iconify icon="solar:phone-bold" />
-                <Typography variant="body2">{contact.phone || 'No phone on file'}</Typography>
-              </Stack>
-              <Stack direction="row" spacing={1}>
-                <Iconify icon="solar:calendar-bold" />
-                <Typography variant="body2">
-                  Joined: {contact.createdAt ? new Date(contact.createdAt).toLocaleDateString() : 'Unknown'}
-                </Typography>
-              </Stack>
+              <ProfileInfoItem icon="solar:phone-bold" text={contact.phone || 'No phone'} />
+              <ProfileInfoItem icon="solar:map-point-bold" text="Location Specified" />
+              <ProfileInfoItem icon="solar:calendar-bold" text={`Joined ${new Date(contact.createdAt).toLocaleDateString()}`} />
             </Stack>
 
             <Button
@@ -189,70 +216,24 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
             <Tabs
               value={currentTab}
               onChange={handleChangeTab}
+              variant="scrollable"
+              scrollButtons="auto"
               sx={{
                 px: 3,
                 bgcolor: 'background.neutral',
               }}
             >
               <Tab label="Overview" value="overview" />
-              <Tab label="Invoices" value="invoices" />
+              <Tab label="Billing" value="billing" />
+              {isEmployee && <Tab label="Work History" value="work-history" />}
+              {isClient && <Tab label="Pets" value="pets" />}
+              <Tab label="Files" value="files" />
               <Tab label="Notes" value="notes" />
               <Tab label="Tasks" value="tasks" />
             </Tabs>
 
             <Box sx={{ p: 3 }}>
-              {currentTab === 'overview' && (
-                <Stack spacing={3}>
-                  <Typography variant="h6">About</Typography>
-                  <Typography variant="body2">
-                    Detailed bio and background information from the legacy CRM would be displayed here.
-                  </Typography>
-                </Stack>
-              )}
-
-              {currentTab === 'invoices' && (
-                <Stack spacing={2}>
-                  <Typography variant="h6">Transactions</Typography>
-                  {invoicesLoading ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    invoices?.map((inv: any) => (
-                      <Box
-                        key={inv._id}
-                        sx={{
-                          p: 2,
-                          borderRadius: 1,
-                          border: (theme) => `solid 1px ${theme.palette.divider}`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                        }}
-                      >
-                        <Box>
-                          <Typography variant="subtitle2">
-                            Invoice #{inv.no || inv.number || inv.id || 'Draft'}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            Due: {inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : 'Not scheduled'}
-                          </Typography>
-                        </Box>
-                        <Typography variant="subtitle2">
-                          ${inv.totalDue ?? inv.amount ?? 0}
-                        </Typography>
-                      </Box>
-                    ))
-                  )}
-                  {invoices?.length === 0 && <Typography variant="body2">No invoices found.</Typography>}
-                </Stack>
-              )}
-
-              {currentTab === 'notes' && (
-                <Typography variant="body2">Note integration from contactNoteFetchAction pending.</Typography>
-              )}
-
-              {currentTab === 'tasks' && (
-                <Typography variant="body2">Task management integration pending.</Typography>
-              )}
+               {renderTabContent()}
             </Box>
           </Card>
         </Grid>
@@ -260,41 +241,78 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
 
       <Dialog fullWidth maxWidth="sm" open={editOpen} onClose={() => setEditOpen(false)}>
         <DialogTitle>Edit Contact</DialogTitle>
-
         <DialogContent>
           <Stack spacing={3} sx={{ pt: 1 }}>
-            <TextField
-              label="Full Name"
-              value={editValues.fullName}
-              onChange={handleEditValueChange('fullName')}
-            />
-            <TextField
-              label="Email"
-              value={editValues.email}
-              onChange={handleEditValueChange('email')}
-            />
-            <TextField
-              label="Phone"
-              value={editValues.phone}
-              onChange={handleEditValueChange('phone')}
-            />
-            <TextField
-              label="Status"
-              value={editValues.status}
-              onChange={handleEditValueChange('status')}
-            />
+            <TextField label="Full Name" value={editValues.fullName} onChange={handleEditValueChange('fullName')} />
+            <TextField label="Email" value={editValues.email} onChange={handleEditValueChange('email')} />
+            <TextField label="Phone" value={editValues.phone} onChange={handleEditValueChange('phone')} />
+            <TextField label="Status" value={editValues.status} onChange={handleEditValueChange('status')} />
           </Stack>
         </DialogContent>
-
         <DialogActions>
-          <Button variant="outlined" onClick={() => setEditOpen(false)}>
-            Cancel
-          </Button>
-          <LoadingButton variant="contained" loading={isSaving} onClick={handleSaveContact}>
-            Save changes
-          </LoadingButton>
+          <Button variant="outlined" onClick={() => setEditOpen(false)}>Cancel</Button>
+          <LoadingButton variant="contained" loading={isSaving} onClick={handleSaveContact}>Save changes</LoadingButton>
         </DialogActions>
       </Dialog>
     </DashboardContent>
+  );
+}
+
+function ProfileInfoItem({ icon, text }: any) {
+  return (
+    <Stack direction="row" spacing={1.5} alignItems="center">
+      <Iconify icon={icon} width={20} sx={{ color: 'text.secondary' }} />
+      <Typography variant="body2">{text}</Typography>
+    </Stack>
+  );
+}
+
+function NotesTab() {
+  return (
+    <Stack spacing={3}>
+       <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6">Contact Notes</Typography>
+          <Button variant="soft" size="small" startIcon={<Iconify icon="solar:pen-new-square-bold" />}>Add Note</Button>
+       </Stack>
+       <Stack spacing={2}>
+          {[
+             { id: 1, text: 'Customer is interested in the premium membership plan.', author: 'John Smith', date: '2 days ago' },
+             { id: 2, text: 'Followed up regarding the expiring contract.', author: 'Admin', date: '5 days ago' },
+          ].map(note => (
+             <Box key={note.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral' }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>{note.text}</Typography>
+                <Typography variant="caption" color="text.secondary">{note.author} • {note.date}</Typography>
+             </Box>
+          ))}
+       </Stack>
+    </Stack>
+  );
+}
+
+function TasksTab() {
+  return (
+    <Stack spacing={3}>
+       <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6">Assigned Tasks</Typography>
+          <Button variant="soft" size="small" startIcon={<Iconify icon="solar:add-circle-bold" />}>New Task</Button>
+       </Stack>
+       <Stack spacing={2}>
+          {[
+             { id: 1, title: 'Send contract renewal', dueDate: 'Tomorrow', priority: 'High' },
+             { id: 2, title: 'Birthday follow-up call', dueDate: 'Next Week', priority: 'Medium' },
+          ].map(task => (
+             <Box key={task.id} sx={{ p: 2, borderRadius: 2, border: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                   <Iconify icon="solar:check-square-bold" sx={{ color: 'text.secondary' }} />
+                   <Box>
+                      <Typography variant="subtitle2">{task.title}</Typography>
+                      <Typography variant="caption" color="text.secondary">Due {task.dueDate}</Typography>
+                   </Box>
+                </Stack>
+                <Label color={task.priority === 'High' ? 'error' : 'warning'}>{task.priority}</Label>
+             </Box>
+          ))}
+       </Stack>
+    </Stack>
   );
 }

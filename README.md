@@ -29,7 +29,7 @@ The Docker stack now supports three intended modes:
 
 ```bash
 cd microservices
-yarn compose:dev
+./compose-dev.sh
 ```
 
 This mode keeps the current repo-mounted workflow:
@@ -41,7 +41,7 @@ This mode keeps the current repo-mounted workflow:
 
 ```bash
 cd microservices
-yarn compose:web-test
+./compose-web-test.sh
 ```
 
 This mode layers `infra/compose/docker-compose.web-test.yml` on top of the base stack:
@@ -65,7 +65,7 @@ cp .env.docker.prod.example .env.docker.prod
 2. Start the production-oriented stack:
 
 ```bash
-yarn compose:prod
+./compose-prod.sh
 ```
 
 This mode layers `infra/compose/docker-compose.prod.yml` on top of the base stack:

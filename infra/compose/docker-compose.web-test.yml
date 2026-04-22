@@ -75,9 +75,6 @@ services:
       WATCHPACK_POLLING: "false"
     restart: unless-stopped
 
-  krakend:
-    restart: unless-stopped
-
   seed-dummy-data:
     image: node:24-alpine
     container_name: ms-seed-dummy-data

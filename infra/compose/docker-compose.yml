@@ -10,6 +10,11 @@ services:
       - "5433:5432"
     volumes:
       - keycloak_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.6.1
@@ -31,7 +36,8 @@ services:
       - ../../auth/keycloak/realm:/opt/keycloak/data/import:ro
       - ../../auth/keycloak/themes:/opt/keycloak/themes:ro
     depends_on:
-      - keycloak-db
+      keycloak-db:
+        condition: service_healthy
 
   kafka:
     image: apache/kafka:3.7.0
@@ -70,6 +76,11 @@ services:
       - "5437:5432"
     volumes:
       - community_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U community -d community"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   commerce-db:
     image: postgres:17-alpine
@@ -82,6 +93,11 @@ services:
       - "5438:5432"
     volumes:
       - commerce_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commerce -d commerce"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   crm-db:
     image: postgres:17-alpine
@@ -94,6 +110,11 @@ services:
       - "5434:5432"
     volumes:
       - crm_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crm -d crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   organization-db:
     image: postgres:17-alpine
@@ -106,6 +127,11 @@ services:
       - "5435:5432"
     volumes:
       - organization_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U organization -d organization"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   billing-db:
     image: postgres:17-alpine
@@ -118,6 +144,11 @@ services:
       - "5436:5432"
     volumes:
       - billing_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U billing -d billing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   booking-db:
     image: postgres:17-alpine
@@ -130,6 +161,11 @@ services:
       - "5439:5432"
     volumes:
       - booking_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   documents-db:
     image: postgres:17-alpine
@@ -142,6 +178,11 @@ services:
       - "5440:5432"
     volumes:
       - documents_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U documents -d documents"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   payments-db:
     image: postgres:17-alpine
@@ -154,6 +195,11 @@ services:
       - "5441:5432"
     volumes:
       - payments_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payments -d payments"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   notification-db:
     image: postgres:17-alpine
@@ -166,6 +212,11 @@ services:
       - "5442:5432"
     volumes:
       - notification_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notification -d notification"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   employees-db:
     image: postgres:17-alpine
@@ -178,6 +229,11 @@ services:
       - "5443:5432"
     volumes:
       - employees_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U employees -d employees"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   marketing-db:
     image: postgres:17-alpine
@@ -190,6 +246,11 @@ services:
       - "5444:5432"
     volumes:
       - marketing_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketing -d marketing"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   projects-db:
     image: postgres:17-alpine
@@ -202,6 +263,11 @@ services:
       - "5445:5432"
     volumes:
       - projects_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U projects -d projects"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   calendar-db:
     image: postgres:17-alpine
@@ -214,6 +280,11 @@ services:
       - "5446:5432"
     volumes:
       - calendar_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calendar -d calendar"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   mongo:
     image: mongo:6.0
@@ -222,6 +293,11 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   monolith:
     container_name: ms-monolith
@@ -251,7 +327,8 @@ services:
       S3_BUCKET: local-dev-bucket
       SENDGRID_API_KEY: SG.local-dev
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     ports:
       - "5000:5000"
 
@@ -272,7 +349,8 @@ services:
     ports:
       - "8010:8010"
     depends_on:
-      - crm-db
+      crm-db:
+        condition: service_healthy
     volumes:
       - ../../services/crm-service:/app
 
@@ -283,8 +361,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://organization:organization@organization-db:5432/organization
     depends_on:
-      - kafka
-      - organization-db
+      kafka:
+        condition: service_started
+      organization-db:
+        condition: service_healthy
     ports:
       - "7010:7010"
 
@@ -295,8 +375,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://billing:billing@billing-db:5432/billing
     depends_on:
-      - kafka
-      - billing-db
+      kafka:
+        condition: service_started
+      billing-db:
+        condition: service_healthy
     ports:
       - "7020:7020"
 
@@ -307,8 +389,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://booking:booking@booking-db:5432/booking
     depends_on:
-      - kafka
-      - booking-db
+      kafka:
+        condition: service_started
+      booking-db:
+        condition: service_healthy
     ports:
       - "7040:7040"
 
@@ -326,8 +410,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://community:community@community-db:5432/community
     depends_on:
-      - kafka
-      - community-db
+      kafka:
+        condition: service_started
+      community-db:
+        condition: service_healthy
     ports:
       - "7050:7050"
 
@@ -338,8 +424,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://commerce:commerce@commerce-db:5432/commerce
     depends_on:
-      - kafka
-      - commerce-db
+      kafka:
+        condition: service_started
+      commerce-db:
+        condition: service_healthy
     ports:
       - "7060:7060"
 
@@ -350,8 +438,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://documents:documents@documents-db:5432/documents
     depends_on:
-      - kafka
-      - documents-db
+      kafka:
+        condition: service_started
+      documents-db:
+        condition: service_healthy
     ports:
       - "7080:7080"
 
@@ -362,8 +452,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://payments:payments@payments-db:5432/payments
     depends_on:
-      - kafka
-      - payments-db
+      kafka:
+        condition: service_started
+      payments-db:
+        condition: service_healthy
     ports:
       - "7090:7090"
 
@@ -374,8 +466,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://notification:notification@notification-db:5432/notification
     depends_on:
-      - kafka
-      - notification-db
+      kafka:
+        condition: service_started
+      notification-db:
+        condition: service_healthy
     ports:
       - "8000:8000"
 
@@ -386,8 +480,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://employees:employees@employees-db:5432/employees
     depends_on:
-      - kafka
-      - employees-db
+      kafka:
+        condition: service_started
+      employees-db:
+        condition: service_healthy
     ports:
       - "7070:7070"
 
@@ -402,6 +498,11 @@ services:
       - "5452:5432"
     volumes:
       - realtime_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U realtime -d realtime"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   realtime-service:
     container_name: ms-realtime-service
@@ -411,9 +512,12 @@ services:
       REDIS_URL: redis://redis:6379
       DB_URL: postgres://realtime:realtime@realtime-db:5432/realtime
     depends_on:
-      - kafka
-      - redis
-      - realtime-db
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_started
+      realtime-db:
+        condition: service_healthy
     ports:
       - "7030:7030"
 
@@ -424,8 +528,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://marketing:marketing@marketing-db:5432/marketing
     depends_on:
-      - kafka
-      - marketing-db
+      kafka:
+        condition: service_started
+      marketing-db:
+        condition: service_healthy
     ports:
       - "8030:8030"
 
@@ -436,8 +542,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://projects:projects@projects-db:5432/projects
     depends_on:
-      - kafka
-      - projects-db
+      kafka:
+        condition: service_started
+      projects-db:
+        condition: service_healthy
     ports:
       - "8040:8040"
 
@@ -448,8 +556,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://calendar:calendar@calendar-db:5432/calendar
     depends_on:
-      - kafka
-      - calendar-db
+      kafka:
+        condition: service_started
+      calendar-db:
+        condition: service_healthy
     ports:
       - "8050:8050"
 
@@ -464,6 +574,11 @@ services:
       - "5447:5432"
     volumes:
       - pos_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pos -d pos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   pos-service:
     container_name: ms-pos-service
@@ -472,8 +587,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://pos:pos@pos-db:5432/pos
     depends_on:
-      - kafka
-      - pos-db
+      kafka:
+        condition: service_started
+      pos-db:
+        condition: service_healthy
     ports:
       - "7100:7100"
 
@@ -488,6 +605,11 @@ services:
       - "5448:5432"
     volumes:
       - automation_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U automation -d automation"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   automation-service:
     container_name: ms-automation-service
@@ -496,8 +618,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://automation:automation@automation-db:5432/automation
     depends_on:
-      - kafka
-      - automation-db
+      kafka:
+        condition: service_started
+      automation-db:
+        condition: service_healthy
     ports:
       - "7110:7110"
 
@@ -512,6 +636,11 @@ services:
       - "5449:5432"
     volumes:
       - device_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U device -d device"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   device-service:
     container_name: ms-device-service
@@ -520,8 +649,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://device:device@device-db:5432/device
     depends_on:
-      - kafka
-      - device-db
+      kafka:
+        condition: service_started
+      device-db:
+        condition: service_healthy
     ports:
       - "7120:7120"
 
@@ -536,6 +667,11 @@ services:
       - "5450:5432"
     volumes:
       - file_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U file -d file"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   file-service:
     container_name: ms-file-service
@@ -544,8 +680,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://file:file@file-db:5432/file
     depends_on:
-      - kafka
-      - file-db
+      kafka:
+        condition: service_started
+      file-db:
+        condition: service_healthy
     ports:
       - "7130:7130"
 
@@ -560,6 +698,11 @@ services:
       - "5451:5432"
     volumes:
       - integrations_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U integrations -d integrations"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   integrations-service:
     container_name: ms-integrations-service
@@ -568,8 +711,10 @@ services:
       KAFKA_BROKERS: kafka:9092
       DB_URL: postgres://integrations:integrations@integrations-db:5432/integrations
     depends_on:
-      - kafka
-      - integrations-db
+      kafka:
+        condition: service_started
+      integrations-db:
+        condition: service_healthy
     ports:
       - "7140:7140"
 
@@ -584,18 +729,81 @@ services:
       - "5453:5432"
     volumes:
       - scoring_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scoring -d scoring"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  deal-db:
+    image: postgres:17-alpine
+    container_name: ms-deal-db
+    environment:
+      POSTGRES_DB: deal_service
+      POSTGRES_USER: deal
+      POSTGRES_PASSWORD: deal
+    ports:
+      - "5454:5432"
+    volumes:
+      - deal_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deal -d deal_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  email-sync-db:
+    image: postgres:17-alpine
+    container_name: ms-email-sync-db
+    environment:
+      POSTGRES_DB: email_sync_service
+      POSTGRES_USER: emailsync
+      POSTGRES_PASSWORD: emailsync
+    ports:
+      - "5455:5432"
+    volumes:
+      - email_sync_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emailsync -d email_sync_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   scoring-service:
     container_name: ms-scoring-service
     environment:
-      PORT: 7160
+      PORT: 7180
       DATABASE_URL: postgres://scoring:scoring@scoring-db:5432/scoring
       CORS_ORIGINS: http://localhost:3034,http://localhost:3000
       CRM_SERVICE_URL: http://crm-service:8010
       DEAL_SERVICE_URL: http://deal-service:7150
     depends_on:
-      - scoring-db
-      - crm-service
+      scoring-db:
+        condition: service_healthy
+      crm-service:
+        condition: service_started
+    ports:
+      - "7180:7180"
+
+  deal-service:
+    container_name: ms-deal-service
+    environment:
+      PORT: 7150
+      DATABASE_URL: postgres://deal:deal@deal-db:5432/deal_service
+    depends_on:
+      deal-db:
+        condition: service_healthy
+    ports:
+      - "7150:7150"
+
+  email-sync-service:
+    container_name: ms-email-sync-service
+    environment:
+      PORT: 7160
+      DATABASE_URL: postgres://emailsync:emailsync@email-sync-db:5432/email_sync_service
+    depends_on:
+      email-sync-db:
+        condition: service_healthy
     ports:
       - "7160:7160"
 
@@ -604,6 +812,7 @@ services:
     container_name: ms-nginx
     volumes:
       - ../../gateway/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../gateway/nginx/cors.conf:/etc/nginx/cors.conf:ro
     ports:
       - "8081:8081"
     depends_on:
@@ -644,4 +853,6 @@ volumes:
   integrations_db_data:
   realtime_db_data:
   scoring_db_data:
+  deal_db_data:
+  email_sync_db_data:
   mongo_data:

@@ -14,6 +14,14 @@ const CONFIG = {
       host: process.env.SEED_BILLING_HOST || process.env.SEED_HOST || 'localhost',
       port: Number(process.env.SEED_BILLING_PORT || 7020),
     },
+    deal: {
+      host: process.env.SEED_DEAL_HOST || process.env.SEED_HOST || 'localhost',
+      port: Number(process.env.SEED_DEAL_PORT || 7150),
+    },
+    emailSync: {
+      host: process.env.SEED_EMAIL_SYNC_HOST || process.env.SEED_HOST || 'localhost',
+      port: Number(process.env.SEED_EMAIL_SYNC_PORT || 7160),
+    },
   },
   userId: process.env.SEED_USER_ID || 'user-dev-123',
   orgId: process.env.SEED_ORG_ID || 'd6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384',
@@ -33,6 +41,12 @@ const DUMMY_DATA = {
     'Integrate ApexCharts', 'Complete CRM Migration', 'Refactor Layout Tree',
     'Sync Docker Compose', 'Update Env Variables', 'Audit API Gateway',
     'Finalize Invoices UI'
+  ],
+  deals: [
+    { name: 'Enterprise License - Google', amount: 50000, stage: 'negotiation' },
+    { name: 'SME Package - Local Startup', amount: 5000, stage: 'prospecting' },
+    { name: 'Government Contract - BMEB', amount: 120000, stage: 'proposal' },
+    { name: 'Consulting Retainer', amount: 15000, stage: 'closed-won' }
   ]
 };
 
@@ -138,6 +152,26 @@ async function seed() {
       });
     } catch (err) { console.error(`❌ Billing: ${err.message}`); }
   }
+
+  // 4. SEED DEALS
+  console.log('\n--- Seeding Deal Service (7150) ---');
+  for (const deal of DUMMY_DATA.deals) {
+    try {
+      console.log(`🤝 Creating Deal: ${deal.name}`);
+      await post('deal', '/api/v1/deals', deal);
+    } catch (err) { console.error(`❌ Deal: ${err.message}`); }
+  }
+
+  // 5. SEED EMAIL SYNC
+  console.log('\n--- Seeding Email Sync Service (7160) ---');
+  try {
+    console.log(`📧 Creating Test Email Account`);
+    await post('emailSync', '/api/v1/accounts', {
+      email: 'test@mymanager.com',
+      provider: 'gmail',
+      syncEnabled: true
+    });
+  } catch (err) { console.error(`❌ EmailSync: ${err.message}`); }
 
   console.log('\n✅ Seeding Successfully Completed.');
 }

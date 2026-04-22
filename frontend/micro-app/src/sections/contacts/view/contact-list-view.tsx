@@ -7,10 +7,14 @@ import { useQuery } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Menu from '@mui/material/Menu';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
@@ -35,6 +39,7 @@ import { useRouter } from 'src/routes/hooks';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { contactService } from 'src/services/contact-service';
 
+import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { Form, RHFTextField } from 'src/components/hook-form';
@@ -44,7 +49,7 @@ import { showToast } from 'src/components/toast';
 
 const TABLE_HEAD = [
   { id: 'fullName', label: 'Name' },
-  { id: 'email', label: 'Email' },
+  { id: 'contactType', label: 'Type' },
   { id: 'phone', label: 'Phone' },
   { id: 'status', label: 'Status' },
   { id: 'action', label: 'Action', align: 'right' as const },
@@ -60,14 +65,15 @@ export const NewContactSchema = zod.object({
 
 export function ContactListView() {
   const [search, setSearch] = useState('');
+  const [currentTab, setCurrentTab] = useState('all');
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const router = useRouter();
   const quickEdit = useBoolean();
 
   const { data: contactsData, isLoading, refetch } = useQuery({
-    queryKey: ['contacts', search],
-    queryFn: () => contactService.getContacts({ search }),
+    queryKey: ['contacts', search, currentTab],
+    queryFn: () => contactService.getContacts({ search, type: currentTab === 'all' ? undefined : currentTab }),
   });
 
   const contacts = contactsData || [];
@@ -123,15 +129,38 @@ export function ContactListView() {
   return (
     <DashboardContent maxWidth="xl">
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="h4">Contacts</Typography>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={quickEdit.onTrue}
-        >
-          New Contact
-        </Button>
+        <Typography variant="h4">Contact Manager</Typography>
+        <Stack direction="row" spacing={1.5}>
+           <Button
+             variant="soft"
+             color="inherit"
+             startIcon={<Iconify icon="solar:import-bold" />}
+             onClick={() => showToast({ message: 'Import feature coming soon!', severity: 'info' })}
+           >
+             Import
+           </Button>
+           <Button
+             variant="contained"
+             startIcon={<Iconify icon="solar:add-circle-bold" />}
+             onClick={quickEdit.onTrue}
+           >
+             New Contact
+           </Button>
+        </Stack>
       </Box>
+
+      <Tabs
+        value={currentTab}
+        onChange={(e, val) => setCurrentTab(val)}
+        sx={{ mb: 3 }}
+      >
+        <Tab label="All" value="all" />
+        <Tab label="Leads" value="lead" />
+        <Tab label="Members" value="member" />
+        <Tab label="Clients" value="client" />
+        <Tab label="Vendors" value="vendor" />
+        <Tab label="Employees" value="employee" />
+      </Tabs>
 
       <Card>
         <Box sx={{ p: 2 }}>
@@ -139,11 +168,11 @@ export function ContactListView() {
             fullWidth
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search contacts..."
+            placeholder="Search leads, members, or clients..."
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                  <Iconify icon="solar:magnifer-bold" sx={{ color: 'text.disabled' }} />
                 </InputAdornment>
               ),
             }}
@@ -175,17 +204,33 @@ export function ContactListView() {
                     {contacts.map((row: any) => (
                       <TableRow key={row._id} hover>
                         <TableCell>
-                          <Typography
-                            variant="subtitle2"
-                            onClick={() => router.push(paths.dashboard.contactView(row._id, 'overview'))}
-                            sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-                          >
-                            {row.fullName}
-                          </Typography>
+                           <Stack direction="row" spacing={2} alignItems="center">
+                              <Avatar src={row.photo} alt={row.fullName}>
+                                 {row.fullName?.charAt(0).toUpperCase()}
+                              </Avatar>
+                              <Box>
+                                 <Typography
+                                    variant="subtitle2"
+                                    onClick={() => router.push(paths.dashboard.contactView(row._id, 'overview'))}
+                                    sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                                 >
+                                    {row.fullName}
+                                 </Typography>
+                                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>{row.email}</Typography>
+                              </Box>
+                           </Stack>
                         </TableCell>
-                        <TableCell>{row.email}</TableCell>
+                        <TableCell>
+                           <Label variant="soft" color="info">
+                              {row.contactType?.[0] || 'Client'}
+                           </Label>
+                        </TableCell>
                         <TableCell>{row.phone}</TableCell>
-                        <TableCell>{row.status}</TableCell>
+                        <TableCell>
+                           <Label variant="soft" color={row.status === 'active' ? 'success' : 'warning'}>
+                              {row.status || 'active'}
+                           </Label>
+                        </TableCell>
                         <TableCell align="right">
                           <IconButton onClick={(event) => handleOpenMenu(event, row._id)}>
                             <Iconify icon="solar:menu-dots-bold" />
@@ -216,10 +261,18 @@ export function ContactListView() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={() => handleOpenContact('overview')}>View details</MenuItem>
-        <MenuItem onClick={() => handleOpenContact('invoices')}>View invoices</MenuItem>
-        <MenuItem onClick={() => handleOpenContact('notes')}>View notes</MenuItem>
-        <MenuItem onClick={() => handleOpenContact('tasks')}>View tasks</MenuItem>
+        <MenuItem onClick={() => handleOpenContact('overview')}>
+           <Iconify icon="solar:eye-bold" sx={{ mr: 1 }} /> View details
+        </MenuItem>
+        <MenuItem onClick={() => handleOpenContact('invoices')}>
+           <Iconify icon="solar:bill-list-bold" sx={{ mr: 1 }} /> View invoices
+        </MenuItem>
+        <MenuItem onClick={() => handleOpenContact('notes')}>
+           <Iconify icon="solar:notes-bold" sx={{ mr: 1 }} /> View notes
+        </MenuItem>
+        <MenuItem onClick={() => handleOpenContact('tasks')}>
+           <Iconify icon="solar:check-square-bold" sx={{ mr: 1 }} /> View tasks
+        </MenuItem>
       </Menu>
 
       <Dialog fullWidth maxWidth="sm" open={quickEdit.value} onClose={quickEdit.onFalse}>

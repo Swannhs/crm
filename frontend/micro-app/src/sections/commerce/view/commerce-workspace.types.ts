@@ -144,18 +144,29 @@ export type CommerceDashboardModule =
   | 'coupons'
   | 'orders'
   | 'customers'
+  | 'memberships'
+  | 'pos'
+  | 'kds'
+  | 'cfd'
+  | 'kiosk'
+  | 'inventory'
+  | 'designer'
   | 'tables'
   | 'settings';
 
-export const COMMERCE_DASHBOARD_MODULES: CommerceDashboardModule[] = [
-  'dashboard',
-  'products',
-  'categories',
-  'coupons',
-  'orders',
-  'customers',
-  'tables',
-  'settings',
+export const COMMERCE_DASHBOARD_MODULES: { label: string; value: CommerceDashboardModule; icon: string }[] = [
+  { label: 'Dashboard', value: 'dashboard', icon: 'solar:chart-square-bold' },
+  { label: 'POS', value: 'pos', icon: 'solar:cash-out-bold' },
+  { label: 'Products', value: 'products', icon: 'solar:box-bold' },
+  { label: 'Inventory', value: 'inventory', icon: 'solar:archive-bold' },
+  { label: 'Orders', value: 'orders', icon: 'solar:cart-large-bold' },
+  { label: 'KDS', value: 'kds', icon: 'solar:clutter-bold' },
+  { label: 'Customers', value: 'customers', icon: 'solar:users-group-rounded-bold' },
+  { label: 'Memberships', value: 'memberships', icon: 'solar:medal-ribbon-bold' },
+  { label: 'Categories', value: 'categories', icon: 'solar:layers-bold' },
+  { label: 'Coupons', value: 'coupons', icon: 'solar:tag-bold' },
+  { label: 'Tables', value: 'tables', icon: 'solar:tuning-square-2-bold' },
+  { label: 'Settings', value: 'settings', icon: 'solar:settings-bold' },
 ];
 
 export type CustomerSummary = {

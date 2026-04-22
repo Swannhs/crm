@@ -17,7 +17,7 @@ export const metadata = {
 export default function Page({ params }: Props) {
   const { section } = params;
 
-  if (!COMMERCE_DASHBOARD_MODULES.includes(section as (typeof COMMERCE_DASHBOARD_MODULES)[number])) {
+  if (!COMMERCE_DASHBOARD_MODULES.some((m) => m.value === section)) {
     redirect(paths.dashboard.shopSection('dashboard'));
   }
 

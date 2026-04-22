@@ -39,6 +39,21 @@ export async function getWorkflowActivity(workflowId: string) {
   return response.data?.data ?? response.data ?? [];
 }
 
+export async function getEmailTemplates() {
+  const response = await axiosInstance.get('/api/marketing/v1/email-templates');
+  return response.data?.data ?? response.data ?? [];
+}
+
+export async function getSmsCampaigns() {
+  const response = await axiosInstance.get('/api/marketing/v1/sms-campaigns');
+  return response.data?.data ?? response.data ?? [];
+}
+
+export async function getAdAccounts() {
+  const response = await axiosInstance.get('/api/marketing/v1/ad-accounts');
+  return response.data?.data ?? response.data ?? [];
+}
+
 export const marketingService = {
   getCampaigns,
   getOptinForms,
@@ -47,4 +62,7 @@ export const marketingService = {
   getWorkflowWorkspaces,
   getWorkflowById,
   getWorkflowActivity,
+  getEmailTemplates,
+  getSmsCampaigns,
+  getAdAccounts,
 };

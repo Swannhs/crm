@@ -263,13 +263,34 @@ services:
       dockerfile: infra/docker/node-service/Dockerfile.prod
       args:
         SERVICE_NAME: scoring-service
+        SERVICE_PORT: 7180
+    environment:
+      NODE_ENV: production
+      PORT: ${SCORING_SERVICE_PORT:-7180}
+    restart: unless-stopped
+
+  deal-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: deal-service
+        SERVICE_PORT: 7150
+    environment:
+      NODE_ENV: production
+      PORT: ${DEAL_SERVICE_PORT:-7150}
+    restart: unless-stopped
+
+  email-sync-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: email-sync-service
         SERVICE_PORT: 7160
     environment:
       NODE_ENV: production
-      PORT: ${SCORING_SERVICE_PORT:-7160}
-    restart: unless-stopped
-
-  krakend:
+      PORT: ${EMAIL_SYNC_SERVICE_PORT:-7160}
     restart: unless-stopped
 
   frontend:

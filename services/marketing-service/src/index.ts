@@ -5,7 +5,7 @@ import { identityMiddleware } from "./middleware/identity.js";
 const { app, logger } = createServiceApp({ 
   serviceName: "marketing-service", 
   jsonLimit: "10mb",
-  enableCors: false
+  enableCors: true
 });
 const auth = identityMiddleware;
 const cast = (req: any) => req as any;

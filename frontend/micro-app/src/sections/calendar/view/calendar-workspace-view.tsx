@@ -46,8 +46,10 @@ export function CalendarWorkspaceView({ tab, eventId, bookingLink, publicMode }:
       ? 'Public Booking Preview'
       : 'Booking Landing Page'
     : eventId
-      ? 'Event Workflow'
-      : 'Calendar and Booking';
+      ? 'Event Check-In Console'
+      : tab === 'checkin'
+        ? 'General Check-In'
+        : 'Calendar and Booking';
 
   const links = [
     { href: paths.dashboard.calendar, label: 'Calendar' },
@@ -64,6 +66,8 @@ export function CalendarWorkspaceView({ tab, eventId, bookingLink, publicMode }:
     );
   }
 
+  const isCheckInMode = Boolean(eventId) || tab === 'checkin';
+
   return (
     <FeatureRouteShell
       title={title}
@@ -71,11 +75,20 @@ export function CalendarWorkspaceView({ tab, eventId, bookingLink, publicMode }:
       links={links}
     >
       <Grid container spacing={3}>
-        <Grid item xs={12} md={bookingLink ? 12 : 7}>
+        <Grid item xs={12} md={bookingLink || isCheckInMode ? 12 : 7}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              {bookingLink ? 'Booking Type Detail' : eventId ? 'Event Detail' : `Calendar ${tab || 'overview'}`}
-            </Typography>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+              <Typography variant="h6">
+                {bookingLink 
+                  ? 'Booking Type Detail' 
+                  : isCheckInMode 
+                    ? `Attendee Management ${eventId ? `- Event #${eventId}` : ''}`
+                    : `Calendar ${tab || 'overview'}`}
+              </Typography>
+              {isCheckInMode && (
+                 <Button variant="contained" startIcon={<Iconify icon="solar:user-plus-bold" />}>Register Guest</Button>
+              )}
+            </Stack>
 
             {bookingLink ? (
               <Stack spacing={2}>
@@ -85,6 +98,43 @@ export function CalendarWorkspaceView({ tab, eventId, bookingLink, publicMode }:
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                   {bookingTypeQuery.data?.description || 'This public booking route now resolves through the micro-app and booking service client.'}
                 </Typography>
+              </Stack>
+            ) : isCheckInMode ? (
+              <Stack spacing={2}>
+                 {/* High-Fidelity Attendee List Simulation */}
+                 {['John Doe', 'Jane Smith', 'Robert Johnson', 'Emily Davis'].map((name, index) => (
+                    <Box 
+                       key={name} 
+                       sx={{ 
+                          p: 2, 
+                          borderRadius: 2, 
+                          bgcolor: 'background.neutral', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'space-between',
+                          borderLeft: (theme) => `4px solid ${index % 2 === 0 ? theme.palette.success.main : theme.palette.warning.main}`
+                       }}
+                    >
+                       <Stack direction="row" spacing={2} alignItems="center">
+                          <Avatar sx={{ bgcolor: 'primary.lighter', color: 'primary.main' }}>{name.charAt(0)}</Avatar>
+                          <Box>
+                             <Typography variant="subtitle2">{name}</Typography>
+                             <Typography variant="caption" sx={{ color: 'text.secondary' }}>Member • Ticket #00{index + 1}</Typography>
+                          </Box>
+                       </Stack>
+                       <Stack direction="row" spacing={1}>
+                          <Chip 
+                             size="small" 
+                             label={index % 2 === 0 ? 'Checked-In' : 'Pending'} 
+                             color={index % 2 === 0 ? 'success' : 'warning'} 
+                             variant="soft" 
+                          />
+                          <Button size="small" variant="outlined" color={index % 2 === 0 ? 'error' : 'primary'}>
+                             {index % 2 === 0 ? 'Revert' : 'Check-In'}
+                          </Button>
+                       </Stack>
+                    </Box>
+                 ))}
               </Stack>
             ) : (
               <Stack spacing={2}>
@@ -101,7 +151,7 @@ export function CalendarWorkspaceView({ tab, eventId, bookingLink, publicMode }:
           </Card>
         </Grid>
 
-        {!bookingLink && (
+        {!bookingLink && !isCheckInMode && (
           <Grid item xs={12} md={5}>
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>

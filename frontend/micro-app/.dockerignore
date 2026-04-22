@@ -2,7 +2,7 @@
 .gitignore
 .next
 .next-build
-node_modules
+# node_modules removed to allow local dependency copy
 npm-debug.log
 yarn-error.log
 coverage

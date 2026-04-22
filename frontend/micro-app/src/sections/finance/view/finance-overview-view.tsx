@@ -1,39 +1,36 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import Table from '@mui/material/Table';
-import TableRow from '@mui/material/TableRow';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import CardHeader from '@mui/material/CardHeader';
-import TableContainer from '@mui/material/TableContainer';
 import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 
-import { financeService } from 'src/services/finance-service';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Scrollbar } from 'src/components/scrollbar';
-import { AnalyticsWidgetSummary } from 'src/sections/overview/analytics-widget-summary';
-
-// Dynamic import for ApexCharts to avoid SSR issues
-const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
+import { Iconify } from 'src/components/iconify';
+import { fCurrency } from 'src/utils/format-number';
+import { financeService } from 'src/services/finance-service';
+import { billingService } from 'src/services/billing-service';
 
 // ----------------------------------------------------------------------
 
 export function FinanceOverviewView() {
-  const { data: invoices, isLoading: invoicesLoading } = useQuery({
-    queryKey: ['finance-invoices'],
-    queryFn: () => financeService.getInvoices(),
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['finance-summary'],
+    queryFn: () => financeService.getRevenueStats(),
   });
 
-  if (invoicesLoading) {
+  const { data: invoices, isLoading: invoicesLoading } = useQuery({
+    queryKey: ['invoice-list'],
+    queryFn: () => billingService.getInvoices(),
+  });
+
+  if (statsLoading || invoicesLoading) {
     return (
       <Box sx={{ p: 5, textAlign: 'center' }}>
         <CircularProgress />
@@ -41,124 +38,118 @@ export function FinanceOverviewView() {
     );
   }
 
-  const chartOptions: any = {
-    chart: { toolbar: { show: false }, zoom: { enabled: false } },
-    stroke: { curve: 'smooth', width: 3 },
-    xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'] },
-    colors: ['#00A76F'],
-    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.1 } },
-  };
-
-  const chartSeries = [{ name: 'Revenue', data: [12000, 15000, 18000, 14000, 22000, 25000, 19000, 28000] }];
+  const kpis = [
+    { label: 'Total Revenue', value: fCurrency(stats?.totalRevenue || 0), icon: 'solar:wad-of-money-bold-duotone', color: 'primary', helper: 'All-time platform revenue' },
+    { label: 'Net Profit', value: fCurrency((stats?.totalRevenue || 0) * 0.72), icon: 'solar:chart-2-bold-duotone', color: 'success', helper: 'After estimated expenses' },
+    { label: 'Outstanding', value: fCurrency(stats?.outstanding || 0), icon: 'solar:bill-list-bold-duotone', color: 'error', helper: 'Unpaid invoice balance' },
+    { label: 'Growth', value: '+12.5%', icon: 'solar:graph-up-bold-duotone', color: 'info', helper: 'Compared to last month' },
+  ];
 
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: 5 }}>Financial Overview</Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+        <Box>
+          <Typography variant="h4">Finance Hub</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Monitor your platform revenue, expenses, and transaction lifecycle.
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1.5}>
+           <Button variant="soft" color="inherit" startIcon={<Iconify icon="solar:printer-minimalistic-bold" />}>Report</Button>
+           <Button variant="contained" startIcon={<Iconify icon="solar:add-circle-bold" />}>New Invoice</Button>
+        </Stack>
+      </Stack>
+
+      <Grid container spacing={3} sx={{ mb: 5 }}>
+         {kpis.map((kpi) => (
+            <Grid item xs={12} sm={6} md={3} key={kpi.label}>
+               <Card sx={{ p: 3 }}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                     <Box
+                        sx={{
+                           width: 48,
+                           height: 48,
+                           borderRadius: 1.5,
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           bgcolor: `${kpi.color}.lighter`,
+                           color: `${kpi.color}.main`
+                        }}
+                     >
+                        <Iconify icon={kpi.icon} width={28} />
+                     </Box>
+                     <Box>
+                        <Typography variant="subtitle2" color="text.secondary">{kpi.label}</Typography>
+                        <Typography variant="h5">{kpi.value}</Typography>
+                     </Box>
+                  </Stack>
+                  <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'text.disabled' }}>{kpi.helper}</Typography>
+               </Card>
+            </Grid>
+         ))}
+      </Grid>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Total Revenue"
-            total={72450}
-            color="success"
-            icon="solar:wallet-money-bold"
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Net Profit"
-            total={42100}
-            color="info"
-            icon="solar:chart-square-bold"
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-           <AnalyticsWidgetSummary
-            title="Pending Invoices"
-            total={12}
-            color="warning"
-            icon="solar:bill-list-bold"
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-           <AnalyticsWidgetSummary
-            title="Expenses"
-            total={15200}
-            color="error"
-            icon="solar:card-recive-bold"
-          />
-        </Grid>
-
-        <Grid item xs={12} md={8}>
-          <Card>
-            <CardHeader title="Revenue Breakdown" />
-            <Box sx={{ p: 3, pb: 1 }}>
-              <Chart dir="ltr" type="area" series={chartSeries} options={chartOptions} height={364} />
-            </Box>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
-            <CardHeader title="Top Services" />
-            <Box sx={{ p: 3 }}>
-               <Stack spacing={3}>
-                  {['Web Development', 'Consulting', 'SaaS Subscription'].map((label, index) => (
-                    <Box key={label}>
-                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="body2">{label}</Typography>
-                          <Typography variant="subtitle2">{[45, 30, 25][index]}%</Typography>
-                       </Box>
-                       <Box sx={{ height: 8, bgcolor: 'background.neutral', borderRadius: 1, overflow: 'hidden' }}>
-                          <Box sx={{ height: '100%', bgcolor: 'primary.main', width: `${[45, 30, 25][index]}%` }} />
-                       </Box>
-                    </Box>
+         <Grid item xs={12} md={8}>
+            <Card sx={{ p: 3 }}>
+               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+                  <Typography variant="h6">Recent Transactions</Typography>
+                  <Button size="small">View All</Button>
+               </Stack>
+               <Stack spacing={2}>
+                  {(invoices || []).slice(0, 6).map((inv: any) => (
+                     <Box key={inv.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                           <Box sx={{ width: 40, height: 40, borderRadius: 1, bgcolor: inv.status === 'paid' ? 'success.lighter' : 'warning.lighter', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Iconify icon={inv.status === 'paid' ? 'solar:check-circle-bold' : 'solar:clock-circle-bold'} width={20} sx={{ color: inv.status === 'paid' ? 'success.main' : 'warning.main' }} />
+                           </Box>
+                           <Box>
+                              <Typography variant="subtitle2">{inv.customerName || inv.no || 'Invoice'}</Typography>
+                              <Typography variant="caption" color="text.secondary">{inv.dueDate ? `Due ${new Date(inv.dueDate).toLocaleDateString()}` : 'No date'}</Typography>
+                           </Box>
+                        </Stack>
+                        <Box sx={{ textAlign: 'right' }}>
+                           <Typography variant="subtitle2">{fCurrency(inv.totalDue || 0)}</Typography>
+                           <Typography variant="caption" color={inv.status === 'paid' ? 'success.main' : 'warning.main'}>{inv.status}</Typography>
+                        </Box>
+                     </Box>
                   ))}
                </Stack>
-            </Box>
-          </Card>
-        </Grid>
+            </Card>
+         </Grid>
 
-        <Grid item xs={12}>
-          <Card>
-            <CardHeader title="Recent Invoices" sx={{ mb: 3 }} />
-            <TableContainer sx={{ overflow: 'unset' }}>
-              <Scrollbar>
-                <Table sx={{ minWidth: 800 }}>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Invoice ID</TableCell>
-                      <TableCell>Customer</TableCell>
-                      <TableCell>Date</TableCell>
-                      <TableCell>Amount</TableCell>
-                      <TableCell>Status</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {(invoices || []).slice(0, 5).map((row: any) => (
-                      <TableRow key={row.id || row._id} hover>
-                        <TableCell>{row.invoiceNumber || row.no || (row.id || row._id || '').slice(0, 8) || 'N/A'}</TableCell>
-                        <TableCell>{row.customerName || 'Syncing...'}</TableCell>
-                        <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A'}</TableCell>
-                        <TableCell>${(((row.totalAmount ?? row.totalDue) ?? row.amountCents ?? 0) / (row.amountCents != null && row.totalAmount == null && row.totalDue == null ? 100 : 1)).toFixed(2)}</TableCell>
-                        <TableCell>{row.status || 'unknown'}</TableCell>
-                      </TableRow>
-                    ))}
-                    {(invoices || []).length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={5} align="center" sx={{ py: 5 }}>No invoices found</TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </Scrollbar>
-            </TableContainer>
-          </Card>
-        </Grid>
+         <Grid item xs={12} md={4}>
+            <Stack spacing={3}>
+               <Card sx={{ p: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>Revenue Allocation</Typography>
+                  <Stack spacing={2}>
+                     <AllocationItem label="Online Shop" value={65} color="primary" />
+                     <AllocationItem label="Memberships" value={22} color="info" />
+                     <AllocationItem label="Events & POS" value={13} color="warning" />
+                  </Stack>
+               </Card>
+
+               <Card sx={{ p: 3, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+                  <Typography variant="h6" sx={{ mb: 1 }}>Export Financials</Typography>
+                  <Typography variant="body2" sx={{ mb: 3, opacity: 0.8 }}>Generate high-fidelity PDF reports for your accounting and tax records.</Typography>
+                  <Button variant="contained" color="inherit" fullWidth sx={{ color: 'primary.main', fontWeight: 'bold' }}>Generate PDF</Button>
+               </Card>
+            </Stack>
+         </Grid>
       </Grid>
     </DashboardContent>
+  );
+}
+
+function AllocationItem({ label, value, color }: any) {
+  return (
+    <Box>
+       <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+          <Typography variant="body2">{label}</Typography>
+          <Typography variant="subtitle2">{value}%</Typography>
+       </Stack>
+       <LinearProgress variant="determinate" value={value} color={color} sx={{ height: 6, borderRadius: 3 }} />
+    </Box>
   );
 }

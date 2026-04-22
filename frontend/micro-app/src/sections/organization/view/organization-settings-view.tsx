@@ -20,6 +20,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 
 import { OmniIntegrationView } from '../omni-integration-view';
+import { IntegrationAdp } from '../integration-adp';
 
 // ----------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ export function OrganizationSettingsView() {
         <Tab icon={<Iconify icon="ic:round-color-lens" />} label="Branding" value="branding" />
         <Tab icon={<Iconify icon="ic:round-people" />} label="Roles & Permissions" value="roles" />
         <Tab icon={<Iconify icon="solar:chat-round-bold" />} label="Omnichannel" value="omni" />
+        <Tab icon={<Iconify icon="ic:round-extension" />} label="Integrations" value="integrations" />
       </Tabs>
 
       {currentTab === 'general' && (
@@ -103,6 +105,19 @@ export function OrganizationSettingsView() {
          </Grid>
       )}
       {currentTab === 'omni' && <OmniIntegrationView />}
+      {currentTab === 'integrations' && (
+        <Grid container spacing={3}>
+           <Grid item xs={12} md={4}>
+              <Typography variant="h6" sx={{ mb: 1 }}>Third-Party Integrations</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Connect your organization with external services to sync data and automate workflows.
+              </Typography>
+           </Grid>
+           <Grid item xs={12} md={8}>
+              <IntegrationAdp />
+           </Grid>
+        </Grid>
+      )}
     </DashboardContent>
   );
 }

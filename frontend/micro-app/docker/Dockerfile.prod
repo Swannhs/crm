@@ -1,22 +1,15 @@
-FROM node:24-alpine AS deps
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
-ENV NEXT_TELEMETRY_DISABLED=1
-
-COPY package.json ./
-
-RUN corepack enable && corepack yarn install
-
-FROM deps AS builder
-
 COPY . .
 
+ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-RUN corepack yarn build
+RUN corepack enable && corepack yarn build
 
-FROM node:24-alpine AS runner
+FROM node:24-slim AS runner
 
 WORKDIR /app
 
@@ -24,7 +17,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3034
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
@@ -32,4 +25,4 @@ COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
 EXPOSE 3034
 
-CMD ["sh", "-c", "corepack yarn start"]
+CMD ["sh", "-c", "./node_modules/.bin/next start"]

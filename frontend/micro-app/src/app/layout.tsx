@@ -18,6 +18,8 @@ import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/component
 
 import { AuthProvider } from 'src/auth/context/auth-provider';
 
+import { dancingScript } from 'src/theme/fonts';
+
 // ----------------------------------------------------------------------
 
 export const viewport = {
@@ -35,7 +37,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body className={dancingScript.variable} suppressHydrationWarning>
         {getInitColorSchemeScript}
 
         <AuthProvider>

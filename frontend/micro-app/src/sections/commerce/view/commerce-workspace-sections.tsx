@@ -2097,6 +2097,13 @@ type DashboardModulesProps = {
   couponsTable: React.ReactNode;
   ordersTable: React.ReactNode;
   customersTable: React.ReactNode;
+  membershipsTable: React.ReactNode;
+  posPanel: React.ReactNode;
+  kdsPanel: React.ReactNode;
+  cfdPanel: React.ReactNode;
+  kioskPanel: React.ReactNode;
+  inventoryPanel: React.ReactNode;
+  designerPanel: React.ReactNode;
   tablesPanel: React.ReactNode;
   settingsPanel: React.ReactNode;
 };
@@ -2111,30 +2118,53 @@ export function CommerceDashboardModules({
   couponsTable,
   ordersTable,
   customersTable,
+  membershipsTable,
+  posPanel,
+  kdsPanel,
+  cfdPanel,
+  kioskPanel,
+  inventoryPanel,
+  designerPanel,
   tablesPanel,
   settingsPanel,
 }: DashboardModulesProps) {
   return (
     <Stack spacing={4}>
-      <Tabs value={currentModule} onChange={(_event, value) => onModuleChange(value)}>
+      <Tabs value={currentModule} onChange={(_event, value) => onModuleChange(value)} variant="scrollable" scrollButtons="auto">
         <Tab value="dashboard" label="Dashboard" />
+        <Tab value="pos" label="POS" />
         <Tab value="products" label="Products" />
+        <Tab value="inventory" label="Inventory" />
+        <Tab value="orders" label="Orders" />
+        <Tab value="kds" label="KDS" />
+        <Tab value="cfd" label="CFD" />
+        <Tab value="kiosk" label="Kiosk" />
+        <Tab value="customers" label="Customers" />
+        <Tab value="memberships" label="Memberships" />
         <Tab value="categories" label="Categories" />
         <Tab value="coupons" label="Coupons" />
-        <Tab value="orders" label="Orders" />
-        <Tab value="customers" label="Customers" />
+        <Tab value="designer" label="Designer" />
         <Tab value="tables" label="Tables" />
         <Tab value="settings" label="Settings" />
       </Tabs>
 
       {currentModule === 'dashboard' && summaryCards}
 
+      {currentModule === 'pos' && posPanel}
       {currentModule === 'products' && productsTable}
+      {currentModule === 'inventory' && inventoryPanel}
 
       {currentModule === 'categories' && categoriesTable}
       {currentModule === 'coupons' && couponsTable}
       {currentModule === 'orders' && ordersTable}
       {currentModule === 'customers' && customersTable}
+      {currentModule === 'memberships' && membershipsTable}
+
+      {currentModule === 'kds' && kdsPanel}
+      {currentModule === 'cfd' && cfdPanel}
+      {currentModule === 'kiosk' && kioskPanel}
+      {currentModule === 'designer' && designerPanel}
+
       {currentModule === 'tables' && tablesPanel}
       {currentModule === 'settings' && settingsPanel}
     </Stack>
@@ -2357,5 +2387,65 @@ export function CommerceTableGuideDialog({
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+export function CommerceMembershipsTable() {
+  return (
+    <Card sx={{ overflow: 'hidden' }}>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h5">Membership Contracts</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          Manage digital membership tiers, contracts, and automated renewal triggers.
+        </Typography>
+      </Box>
+      <Divider />
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Membership Tier</TableCell>
+              <TableCell>Contract Status</TableCell>
+              <TableCell>Revenue Impact</TableCell>
+              <TableCell>Active Members</TableCell>
+              <TableCell align="right">Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {[
+              { name: 'Elite Performance (Annual)', status: 'active', price: '$1,200', members: 42 },
+              { name: 'Standard Monthly', status: 'active', price: '$99', members: 128 },
+              { name: 'Trial Pass (14 Days)', status: 'draft', price: '$0', members: 0 },
+            ].map((membership) => (
+              <TableRow key={membership.name} hover>
+                <TableCell>
+                   <Typography variant="subtitle2">{membership.name}</Typography>
+                   <Typography variant="caption" color="text.secondary">Digital Contract ID: MC-8201</Typography>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    label={membership.status.toUpperCase()}
+                    color={membership.status === 'active' ? 'success' : 'default'}
+                    variant="outlined"
+                  />
+                </TableCell>
+                <TableCell>
+                   <Typography variant="subtitle2">{membership.price}</Typography>
+                   <Typography variant="caption" color="text.secondary">Per cycle</Typography>
+                </TableCell>
+                <TableCell>
+                   <Typography variant="h6">{membership.members}</Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Button size="small" color="inherit">Manage Tiers</Button>
+                  <Button size="small" color="inherit">Edit Contract</Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Card>
   );
 }

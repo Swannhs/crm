@@ -2,29 +2,62 @@ import axios from 'axios';
 
 import { CONFIG } from 'src/config-global';
 import { showToast } from 'src/components/toast';
+import { STORAGE_KEY as JWT_STORAGE_KEY } from 'src/auth/context/jwt/constant';
 
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: CONFIG.site.serverUrl });
 
+function getStoredAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  return (
+    sessionStorage.getItem(JWT_STORAGE_KEY) ||
+    sessionStorage.getItem('accessToken') ||
+    localStorage.getItem('accessToken')
+  );
+}
+
+function clearStoredAccessTokens(): void {
+  if (typeof window === 'undefined') return;
+
+  sessionStorage.removeItem(JWT_STORAGE_KEY);
+  sessionStorage.removeItem('accessToken');
+  localStorage.removeItem('accessToken');
+}
+
+function decodeJwtPayload(token: string): Record<string, any> | null {
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return JSON.parse(atob(padded));
+  } catch (error) {
+    console.error('Failed to decode JWT:', error);
+    return null;
+  }
+}
+
 axiosInstance.interceptors.request.use(
   (config) => {
-    const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+    const accessToken = getStoredAccessToken();
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
 
-      try {
-        // Decode JWT to extract user and org IDs
-        const payload = JSON.parse(atob(accessToken.split('.')[1]));
-        if (payload.sub) {
-          config.headers['X-User-Id'] = payload.sub;
+      const payload = decodeJwtPayload(accessToken);
+      if (payload) {
+        const userId = payload.sub || payload.userId || payload.user_id || payload.id;
+        const orgId = payload.org_id || payload.orgId || payload.organizationId || payload.organization_id;
+
+        if (userId) {
+          config.headers['X-User-Id'] = userId;
         }
-        if (payload.org_id) {
-          config.headers['X-Org-Id'] = payload.org_id;
+        if (orgId) {
+          config.headers['X-Org-Id'] = orgId;
         }
-      } catch (e) {
-        console.error('Failed to decode JWT:', e);
       }
     }
 
@@ -38,7 +71,7 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('accessToken');
+        clearStoredAccessTokens();
         showToast({
           message: 'Your session has expired. Please sign in again.',
           severity: 'warning',

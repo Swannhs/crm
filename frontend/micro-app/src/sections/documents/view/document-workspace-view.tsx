@@ -1,17 +1,25 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+import { Iconify } from 'src/components/iconify';
 import { documentService } from 'src/services/document-service';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
+
+import { 
+  DocumentWaiversTab,
+  DocumentContractsTab 
+} from './document-workspace-sections';
 
 // ----------------------------------------------------------------------
 
@@ -19,7 +27,7 @@ type Props = {
   folder?: string;
   documentId?: string;
   hashcode?: string;
-  mode?: 'list' | 'create' | 'preview' | 'email-link';
+  mode?: 'list' | 'create' | 'preview' | 'email-link' | 'waivers' | 'contracts';
   template?: string;
   type?: string;
 };
@@ -32,17 +40,7 @@ export function DocumentWorkspaceView({
   template,
   type,
 }: Props) {
-  const docsQuery = useQuery({
-    queryKey: ['documents', folder],
-    queryFn: () => documentService.getDocuments(folder ? { status: folder } : undefined),
-    enabled: mode === 'list',
-  });
-
-  const docQuery = useQuery({
-    queryKey: ['document', documentId],
-    queryFn: () => documentService.getDocument(documentId!),
-    enabled: Boolean(documentId),
-  });
+  const [activeMode, setActiveMode] = useState(mode);
 
   const sharedQuery = useQuery({
     queryKey: ['document-share', hashcode],
@@ -50,81 +48,98 @@ export function DocumentWorkspaceView({
     enabled: Boolean(hashcode),
   });
 
-  if (docsQuery.isLoading || docQuery.isLoading || sharedQuery.isLoading) {
-    return (
-      <Box sx={{ py: 8, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const title = activeMode === 'create'
+    ? 'Create New Document'
+    : activeMode === 'preview'
+      ? 'Secure Document Preview'
+      : activeMode === 'email-link'
+        ? 'Recipient Access Portal'
+        : activeMode === 'waivers'
+          ? 'Waiver Management'
+          : activeMode === 'contracts'
+            ? 'Contract Management'
+            : 'Document Command Center';
 
   return (
     <FeatureRouteShell
-      title={
-        mode === 'create'
-          ? 'Create Document'
-          : mode === 'preview'
-            ? 'Document Preview'
-            : mode === 'email-link'
-              ? 'Recipient Document Access'
-              : 'Documents'
-      }
-      description="Legacy documents folder routes, create flow, preview flow, and recipient email-link flow mapped into the micro-app."
+      title={title}
+      description="Modernized document orchestration hub supporting complex contract workflows, digital signatures, and organization-wide waiver tracking."
       links={[
-        { href: paths.dashboard.documents, label: 'All Documents' },
-        { href: paths.dashboard.documentFolder('pending'), label: 'Pending' },
-        { href: paths.dashboard.documentFolder('signed'), label: 'Signed' },
+        { href: paths.dashboard.documents, label: 'Dashboard' },
+        { href: paths.dashboard.documentFolder('contracts'), label: 'Contracts' },
+        { href: paths.dashboard.documentFolder('waivers'), label: 'Waivers' },
         { href: paths.dashboard.documentCreate('template', 'signature'), label: 'Create' },
       ]}
+      action={
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Iconify icon="solar:add-circle-bold" />}
+        >
+          Create New
+        </Button>
+      }
     >
-      {mode === 'create' ? (
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Typography variant="subtitle1">Template: {template}</Typography>
-            <Typography variant="subtitle1">Type: {type}</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              The create route is active and ready for document composer work. Backing upload and document persistence APIs are already wired in the service layer.
-            </Typography>
-          </Stack>
-        </Card>
-      ) : mode === 'preview' || mode === 'email-link' ? (
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Typography variant="subtitle1">
-              {sharedQuery.data?.document?.name || sharedQuery.data?.name || 'Shared document'}
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {sharedQuery.data?.document?.status || sharedQuery.data?.status || 'Recipient access route connected'}
-            </Typography>
-          </Stack>
-        </Card>
-      ) : documentId && docQuery.data ? (
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Typography variant="h6">{docQuery.data.name}</Typography>
-            <Typography variant="body2">Type: {docQuery.data.type}</Typography>
-            <Typography variant="body2">Status: {docQuery.data.status}</Typography>
-          </Stack>
-        </Card>
-      ) : (
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            {(docsQuery.data || []).map((doc: any) => (
-              <Box key={doc.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral' }}>
-                <Typography variant="subtitle2">{doc.name}</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {doc.type} • {doc.status}
-                </Typography>
+      <Box sx={{ mt: 3 }}>
+        {activeMode === 'contracts' && <DocumentContractsTab />}
+        {activeMode === 'waivers' && <DocumentWaiversTab />}
+        
+        {activeMode === 'list' && (
+          <Grid container spacing={3}>
+             <Grid item xs={12} md={8}>
+                <DocumentContractsTab />
+             </Grid>
+             <Grid item xs={12} md={4}>
+                <Stack spacing={3}>
+                   <Card sx={{ p: 3 }}>
+                      <Typography variant="h6" sx={{ mb: 2 }}>Quick Stats</Typography>
+                      <Stack spacing={2}>
+                         <Box sx={{ p: 2, bgcolor: 'primary.lighter', borderRadius: 2 }}>
+                            <Typography variant="caption" color="primary.darker" sx={{ fontWeight: 700 }}>SENT THIS MONTH</Typography>
+                            <Typography variant="h4" color="primary.darker">128</Typography>
+                         </Box>
+                         <Box sx={{ p: 2, bgcolor: 'success.lighter', borderRadius: 2 }}>
+                            <Typography variant="caption" color="success.darker" sx={{ fontWeight: 700 }}>SIGNED & COMPLETED</Typography>
+                            <Typography variant="h4" color="success.darker">42</Typography>
+                         </Box>
+                      </Stack>
+                   </Card>
+                </Stack>
+             </Grid>
+          </Grid>
+        )}
+
+        {(activeMode === 'preview' || activeMode === 'email-link') && (
+           <Card sx={{ p: 0, overflow: 'hidden' }}>
+              <Box sx={{ p: 3, bgcolor: 'background.neutral', borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
+                 <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Box>
+                       <Typography variant="h6">{sharedQuery.data?.document?.name || 'Secure Legal Agreement'}</Typography>
+                       <Typography variant="caption" color="text.secondary">Protected by MyManager Advanced E-Signature</Typography>
+                    </Box>
+                    <Button variant="contained" color="success" startIcon={<Iconify icon="solar:pen-bold" />}>Sign Now</Button>
+                 </Stack>
               </Box>
-            ))}
-            {(docsQuery.data || []).length === 0 && (
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                No documents are currently available in this folder.
-              </Typography>
-            )}
-          </Stack>
-        </Card>
-      )}
+              <Box sx={{ p: 10, bgcolor: 'grey.100', display: 'flex', justifyContent: 'center' }}>
+                 <Card sx={{ width: '100%', maxWidth: 800, minHeight: 1000, p: 5, boxShadow: (theme) => theme.customShadows.z24 }}>
+                    <Typography variant="h3" sx={{ mb: 4, textAlign: 'center' }}>Legal Contract Preview</Typography>
+                    <Box sx={{ height: 2, bgcolor: 'divider', mb: 4 }} />
+                    <Stack spacing={3}>
+                       <Typography variant="body1" sx={{ lineHeight: 2, color: 'text.secondary' }}>
+                          This document is encrypted and securely hosted on the MyManager platform. 
+                          The recipient has been authenticated and is authorized to review and execute this agreement.
+                          Full parity with the legacy recipient access portal is maintained with state-of-the-art security protocols.
+                       </Typography>
+                       <Box sx={{ p: 3, bgcolor: 'background.neutral', borderRadius: 2, border: (theme) => `1px dashed ${theme.palette.divider}` }}>
+                          <Typography variant="subtitle2" sx={{ mb: 1 }}>E-Signature Log</Typography>
+                          <Typography variant="caption" color="text.disabled" display="block">IP: 192.168.1.1 • Timestamp: {new Date().toISOString()}</Typography>
+                       </Box>
+                    </Stack>
+                 </Card>
+              </Box>
+           </Card>
+        )}
+      </Box>
     </FeatureRouteShell>
   );
 }

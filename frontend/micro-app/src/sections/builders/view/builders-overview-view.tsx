@@ -1,0 +1,157 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+
+import { DashboardContent } from 'src/layouts/dashboard';
+import { Iconify } from 'src/components/iconify';
+import { builderService } from 'src/services/builder-service';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
+// ----------------------------------------------------------------------
+
+export function BuildersOverviewView() {
+  const router = useRouter();
+
+  const { data: websites, isLoading: websitesLoading } = useQuery({
+    queryKey: ['builder-websites'],
+    queryFn: () => builderService.getWebsites(),
+  });
+
+  const { data: forms, isLoading: formsLoading } = useQuery({
+    queryKey: ['builder-forms'],
+    queryFn: () => builderService.getForms(),
+  });
+
+  if (websitesLoading || formsLoading) {
+    return (
+      <Box sx={{ p: 5, textAlign: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const creativeTools = [
+    { title: 'Web Builder', icon: 'solar:global-bold-duotone', count: websites?.length || 0, color: 'primary', path: paths.dashboard.webBuilderCreate },
+    { title: 'Form Funnels', icon: 'solar:document-text-bold-duotone', count: forms?.length || 0, color: 'info', path: paths.dashboard.formBuilder },
+    { title: 'Email Designer', icon: 'solar:letter-bold-duotone', count: '12 Templates', color: 'warning', path: paths.dashboard.emailEditor },
+    { title: 'Workflows', icon: 'solar:magic-stick-3-bold-duotone', count: '8 Active', color: 'success', path: paths.dashboard.workflow },
+  ];
+
+  return (
+    <DashboardContent maxWidth="xl">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+        <Box>
+          <Typography variant="h4">Creative Builders</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Design websites, funnels, and automated experiences without code.
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Grid container spacing={3} sx={{ mb: 5 }}>
+         {creativeTools.map((tool) => (
+            <Grid item xs={12} sm={6} md={3} key={tool.title}>
+               <Card
+                  sx={{
+                    p: 3,
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'background.neutral' }
+                  }}
+                  onClick={() => router.push(tool.path)}
+               >
+                  <Stack direction="row" spacing={2} alignItems="center">
+                     <Box
+                        sx={{
+                           width: 48,
+                           height: 48,
+                           borderRadius: 1.5,
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           bgcolor: `${tool.color}.lighter`,
+                           color: `${tool.color}.main`
+                        }}
+                     >
+                        <Iconify icon={tool.icon} width={28} />
+                     </Box>
+                     <Box>
+                        <Typography variant="subtitle1">{tool.title}</Typography>
+                        <Typography variant="caption" color="text.secondary">{tool.count}</Typography>
+                     </Box>
+                  </Stack>
+               </Card>
+            </Grid>
+         ))}
+      </Grid>
+
+      <Grid container spacing={3}>
+         <Grid item xs={12} md={8}>
+            <Card sx={{ p: 3 }}>
+               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+                  <Typography variant="h6">Recent Projects</Typography>
+                  <Button size="small">View All</Button>
+               </Stack>
+               <Stack spacing={2}>
+                  {(websites || []).slice(0, 5).map((site: any) => (
+                     <Box key={site.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                           <Box sx={{ width: 40, height: 40, borderRadius: 1, bgcolor: 'primary.lighter', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Iconify icon="solar:global-bold" width={20} sx={{ color: 'primary.main' }} />
+                           </Box>
+                           <Box>
+                              <Typography variant="subtitle2">{site.name}</Typography>
+                              <Typography variant="caption" color="text.secondary">{site.domain || 'Draft'}</Typography>
+                           </Box>
+                        </Stack>
+                        <Button size="small" variant="soft">Edit</Button>
+                     </Box>
+                  ))}
+               </Stack>
+            </Card>
+         </Grid>
+
+         <Grid item xs={12} md={4}>
+            <Card sx={{ p: 3, bgcolor: 'background.neutral', height: '100%' }}>
+               <Typography variant="h6" sx={{ mb: 3 }}>Quick Start</Typography>
+               <Stack spacing={2}>
+                  <QuickStartItem title="Blank Page" icon="solar:document-bold" />
+                  <QuickStartItem title="Lead Magnet Funnel" icon="solar:magnet-bold" />
+                  <QuickStartItem title="Ecommerce Store" icon="solar:cart-large-minimalistic-bold" />
+                  <QuickStartItem title="Business Portfolio" icon="solar:case-bold" />
+               </Stack>
+            </Card>
+         </Grid>
+      </Grid>
+    </DashboardContent>
+  );
+}
+
+function QuickStartItem({ title, icon }: any) {
+  return (
+    <Stack
+      direction="row"
+      spacing={2}
+      alignItems="center"
+      sx={{
+        p: 2,
+        borderRadius: 1.5,
+        bgcolor: 'background.paper',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        '&:hover': { transform: 'translateX(4px)', boxShadow: (theme) => theme.customShadows.z4 }
+      }}
+    >
+       <Iconify icon={icon} width={24} sx={{ color: 'text.secondary' }} />
+       <Typography variant="subtitle2">{title}</Typography>
+    </Stack>
+  );
+}

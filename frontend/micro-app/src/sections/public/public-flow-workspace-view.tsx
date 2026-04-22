@@ -39,7 +39,52 @@ type PublicMode =
   | 'mobile-menu'
   | 'integration-callback'
   | 'forgot-password'
-  | 'generic-auth';
+  | 'generic-auth'
+  | 'payment-method'
+  | 'affiliate-signup'
+  | 'event-checkin'
+  | 'event-bracket'
+  | 'fundraising-preview'
+  | 'ticket-feedback'
+  | 'chatbot-feedback'
+  | 'feedback'
+  | 'help-center'
+  | 'help-article'
+  | 'membership-checkout'
+  | 'membership-sign'
+  | 'organization-onboarding'
+  | 'organization-verified'
+  | 'organization-plans'
+  | 'organization-payment'
+  | 'organization-success'
+  | 'token-auth'
+  | 'fdd-public'
+  | 'quote-view'
+  | 'quote-accept'
+  | 'mobile-sign'
+  | 'checkout-page'
+  | 'qr-pay'
+  | 'a2p-legal'
+  | 'a2p-optin'
+  | 'verify-email'
+  | 'board-invitation'
+  | 'contact-phone-auth'
+  | 'sign-in-code'
+  | 'web-preview'
+  | 'board-share'
+  | 'online-shop'
+  | 'product-detail'
+  | 'order-pay'
+  | 'shipping-pay'
+  | 'checkout-preauth'
+  | 'shop-receipt'
+  | 'shop-login'
+  | 'shop-signup'
+  | 'customer-orders'
+  | 'pos-main'
+  | 'kds-display'
+  | 'cfd-display'
+  | 'kiosk-mode';
 
 type Props = {
   mode: PublicMode;
@@ -53,6 +98,19 @@ type Props = {
   email?: string;
   formId?: string;
   formPageId?: string;
+  referralCode?: string;
+  eventId?: string;
+  type?: string;
+  guestId?: string;
+  campaignId?: string;
+  ticketId?: string;
+  chatbotId?: string;
+  sessionId?: string;
+  contractId?: string;
+  planId?: string;
+  token?: string;
+  duration?: string;
+  userId?: string;
 };
 
 export function PublicFlowWorkspaceView(props: Props) {
@@ -68,6 +126,7 @@ export function PublicFlowWorkspaceView(props: Props) {
     email,
     formId,
     formPageId,
+    referralCode,
   } = props;
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [qrTracked, setQrTracked] = useState(false);
@@ -94,6 +153,15 @@ export function PublicFlowWorkspaceView(props: Props) {
       signerName: '',
       signature: '',
       questionAnswers: '',
+    },
+  });
+
+  const affiliateMethods = useForm({
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      referralCode: referralCode || '',
     },
   });
 
@@ -130,18 +198,6 @@ export function PublicFlowWorkspaceView(props: Props) {
     onSuccess: () => setQrTracked(true),
   });
 
-  const waiverSignMutation = useMutation({
-    mutationFn: (values: any) =>
-      publicFlowService.signPublicWaiver(id!, {
-        ...values,
-        waiverChecks,
-        questionAnswers: values.questionAnswers
-          ? values.questionAnswers.split('\n').map((item: string) => item.trim())
-          : [],
-      }),
-    onSuccess: () => setSignSuccess(true),
-  });
-
   const isLoading = checkoutQuery.isLoading || qrPayQuery.isLoading || waiverQuery.isLoading;
 
   if (isLoading) {
@@ -155,8 +211,6 @@ export function PublicFlowWorkspaceView(props: Props) {
   const checkoutData = checkoutQuery.data;
   const qrPayData = qrPayQuery.data;
   const waiverData = waiverQuery.data;
-  const waiverItems = waiverData?.waiver || [];
-  const questionItems = waiverData?.questions || [];
 
   return (
     <Container maxWidth="lg" sx={{ py: 5 }}>
@@ -191,29 +245,105 @@ export function PublicFlowWorkspaceView(props: Props) {
                                       ? 'Integration Callback'
                                       : mode === 'forgot-password'
                                         ? 'Forgot Password'
-                                        : 'Authentication'}
+                                        : mode === 'affiliate-signup'
+                                          ? 'Join the Partner Program'
+                                          : mode === 'payment-method'
+                                            ? 'Update Payment Method'
+                                            : 'Authentication'}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-            Legacy public and mobile flow routes mapped into the micro-app with compatibility data where available.
+            {mode === 'payment-method' 
+               ? 'Securely update your credit card or billing information on file.' 
+               : 'Legacy public and mobile flow routes mapped into the micro-app with compatibility data where available.'}
           </Typography>
         </Box>
 
-        <Card sx={{ p: 3 }}>
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            <Button component={Link} href={paths.public.login} variant="soft" color="inherit">
-              Login
-            </Button>
-            <Button component={Link} href={paths.public.register} variant="soft" color="inherit">
-              Register
-            </Button>
-            <Button component={Link} href={paths.public.onboarding} variant="soft" color="inherit">
-              Onboarding
-            </Button>
-            <Button component={Link} href={paths.public.notifications} variant="soft" color="inherit">
-              Notifications
-            </Button>
-          </Stack>
-        </Card>
+        {mode === 'payment-method' ? null : (
+           <Card sx={{ p: 3 }}>
+             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+               <Button component={Link} href={paths.public.login} variant="soft" color="inherit">
+                 Login
+               </Button>
+               <Button component={Link} href={paths.public.register} variant="soft" color="inherit">
+                 Register
+               </Button>
+               <Button component={Link} href={paths.public.onboarding} variant="soft" color="inherit">
+                 Onboarding
+               </Button>
+               <Button component={Link} href={paths.public.notifications} variant="soft" color="inherit">
+                 Notifications
+               </Button>
+             </Stack>
+           </Card>
+        )}
+
+        {mode === 'payment-method' && (
+           <Grid container spacing={3} justifyContent="center">
+              <Grid item xs={12} md={6}>
+                 <Card sx={{ p: 4 }}>
+                    <Stack spacing={3}>
+                       <Box sx={{ textAlign: 'center' }}>
+                          <Iconify icon="solar:shield-check-bold-duotone" width={60} sx={{ color: 'success.main', mb: 2 }} />
+                          <Typography variant="h5">Secure Payment Update</Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>Organization ID: {organizationId}</Typography>
+                       </Box>
+
+                       <Alert severity="info">
+                          Your information is encrypted and securely processed. We do not store your full card number.
+                       </Alert>
+
+                       <Stack spacing={2.5}>
+                          <TextField fullWidth label="Cardholder Name" placeholder="John Doe" />
+                          <TextField fullWidth label="Card Number" placeholder="**** **** **** ****" />
+                          <Stack direction="row" spacing={2}>
+                             <TextField fullWidth label="Expiry Date" placeholder="MM/YY" />
+                             <TextField fullWidth label="CVV" placeholder="***" />
+                          </Stack>
+                          <TextField fullWidth label="Billing ZIP / Postal Code" />
+                          <Button fullWidth size="large" variant="contained" color="primary">Update Billing Information</Button>
+                       </Stack>
+
+                       <Box sx={{ textAlign: 'center', mt: 2 }}>
+                          <Iconify icon="logos:visa" width={32} sx={{ mr: 1 }} />
+                          <Iconify icon="logos:mastercard" width={32} sx={{ mr: 1 }} />
+                          <Iconify icon="logos:stripe" width={40} />
+                       </Box>
+                    </Stack>
+                 </Card>
+              </Grid>
+           </Grid>
+        )}
+
+        {mode === 'affiliate-signup' && (
+           <Grid container spacing={3} justifyContent="center">
+              <Grid item xs={12} md={6}>
+                 <Card sx={{ p: 4 }}>
+                    <Stack spacing={3}>
+                       <Box sx={{ textAlign: 'center' }}>
+                          <Box sx={{ width: 80, height: 80, borderRadius: '50%', bgcolor: 'primary.lighter', color: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+                             <Iconify icon="solar:star-bold-duotone" width={40} />
+                          </Box>
+                          <Typography variant="h5">Partner with Us</Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>Earn rewards for every successful referral.</Typography>
+                       </Box>
+
+                       <Stack spacing={2.5}>
+                          <TextField fullWidth label="Full Name" {...affiliateMethods.register('fullName')} />
+                          <TextField fullWidth label="Email Address" {...affiliateMethods.register('email')} />
+                          <TextField fullWidth label="Password" type="password" {...affiliateMethods.register('password')} />
+                          <TextField 
+                             fullWidth 
+                             label="Referral Code" 
+                             disabled={Boolean(referralCode)} 
+                             {...affiliateMethods.register('referralCode')} 
+                          />
+                          <Button fullWidth size="large" variant="contained">Create Partner Account</Button>
+                       </Stack>
+                    </Stack>
+                 </Card>
+              </Grid>
+           </Grid>
+        )}
 
         {mode === 'checkout' && (
           <Grid container spacing={3}>
@@ -291,71 +421,7 @@ export function PublicFlowWorkspaceView(props: Props) {
         )}
 
         {mode === 'waiver' && (
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={7}>
-              <Card sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  {waiverData?.title || waiverData?.name || 'Waiver'}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                  {waiverData?.content || 'Public waiver content loaded from the legacy compatibility API.'}
-                </Typography>
-                {waiverItems.length > 0 && (
-                  <Stack spacing={1}>
-                    {waiverItems.map((item: any, index: number) => (
-                      <FormControlLabel
-                        key={index}
-                        control={
-                          <Checkbox
-                            checked={Boolean(waiverChecks[index])}
-                            onChange={() => {
-                              const next = [...waiverChecks];
-                              next[index] = !next[index];
-                              setWaiverChecks(next);
-                            }}
-                          />
-                        }
-                        label={item.waiver || item.label || `Waiver item ${index + 1}`}
-                      />
-                    ))}
-                  </Stack>
-                )}
-                <Divider sx={{ my: 2 }} />
-                <Stack
-                  component="form"
-                  spacing={2}
-                  onSubmit={waiverMethods.handleSubmit((values) => waiverSignMutation.mutate(values))}
-                >
-                  <TextField label="Signer Name" {...waiverMethods.register('signerName')} />
-                  <TextField label="Signature" {...waiverMethods.register('signature')} />
-                  {questionItems.length > 0 && (
-                    <TextField
-                      label="Question Answers"
-                      helperText="One answer per line."
-                      multiline
-                      minRows={4}
-                      {...waiverMethods.register('questionAnswers')}
-                    />
-                  )}
-                  <Button type="submit" variant="contained" disabled={waiverSignMutation.isPending}>
-                    Sign Waiver
-                  </Button>
-                </Stack>
-                {signSuccess && <Alert severity="success" sx={{ mt: 2 }}>Waiver submitted successfully.</Alert>}
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={5}>
-              <Card sx={{ p: 3 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Waiver Status
-                </Typography>
-                <Typography variant="body2">status: {waiverData?.status || 'pending'}</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-                  This is a simplified signing experience backed by the public waiver API.
-                </Typography>
-              </Card>
-            </Grid>
-          </Grid>
+           <WaiverSignView id={id!} />
         )}
 
         {mode === 'phone-auth' && (
@@ -473,7 +539,112 @@ export function PublicFlowWorkspaceView(props: Props) {
             </Alert>
           </Card>
         )}
+
+        {mode === 'event-checkin' && (
+           <PublicEventView mode="checkin" eventId={eventId} />
+        )}
+
+        {mode === 'event-bracket' && (
+           <PublicEventView mode="bracket" eventId={eventId} />
+        )}
+
+        {mode === 'fundraising-preview' && (
+           <PublicEventView mode="fundraising" campaignId={campaignId} />
+        )}
+
+        {(mode === 'ticket-feedback' || mode === 'chatbot-feedback' || mode === 'feedback') && (
+           <PublicSupportView mode={mode} ticketId={ticketId} chatbotId={chatbotId} />
+        )}
+
+        {(mode === 'help-center' || mode === 'help-article') && (
+           <PublicSupportView mode={mode} id={id} />
+        )}
+
+        {(mode === 'membership-checkout' || mode === 'membership-sign') && (
+           <PublicMembershipView 
+             mode={mode === 'membership-checkout' ? 'checkout' : 'sign'} 
+             contractId={contractId} 
+             contactId={contactId} 
+           />
+        )}
+
+        {(mode === 'organization-onboarding' || 
+          mode === 'organization-verified' || 
+          mode === 'organization-plans' || 
+          mode === 'organization-payment' || 
+          mode === 'organization-success' || 
+          mode === 'token-auth' || 
+          mode === 'fdd-public') && (
+           <PublicOrgView 
+             mode={mode.replace('organization-', '') as any} 
+             orgId={organizationId} 
+             planId={planId} 
+             token={token}
+             formId={formId}
+             userId={userId}
+           />
+        )}
+
+        {(mode === 'quote-view' || 
+          mode === 'quote-accept' || 
+          mode === 'mobile-sign' || 
+          mode === 'checkout-page' || 
+          mode === 'qr-pay' || 
+          mode === 'a2p-legal' || 
+          mode === 'a2p-optin' || 
+          mode === 'verify-email' || 
+          mode === 'board-invitation' || 
+          mode === 'contact-phone-auth' || 
+          mode === 'sign-in-code') && (
+           <PublicPagesView 
+             mode={mode} 
+             slug={slug} 
+             id={id} 
+             token={token}
+             formId={formId}
+             userId={userId}
+             organizationId={organizationId}
+             location={location}
+           />
+        )}
+
+        {(mode === 'board-share' || 
+          mode === 'online-shop' || 
+          mode === 'product-detail' || 
+          mode === 'order-pay' || 
+          mode === 'shipping-pay' || 
+          mode === 'checkout-preauth' || 
+          mode === 'shop-receipt' || 
+          mode === 'shop-login' || 
+          mode === 'shop-signup' || 
+          mode === 'customer-orders' || 
+          mode === 'pos-main' || 
+          mode === 'kds-display' || 
+          mode === 'cfd-display' || 
+          mode === 'kiosk-mode') && (
+           <PublicCommerceView 
+             mode={mode} 
+             shopId={shopId} 
+             productId={productId} 
+             orderId={orderId}
+             workspaceId={workspaceId}
+             boardId={boardId}
+             cartId={cartId}
+           />
+        )}
       </Stack>
     </Container>
   );
 }
+
+// --- Internal Import ---
+import { PublicEventView } from './public-event-view';
+import { PublicSupportView } from './public-support-view';
+import { PublicMembershipView } from './public-membership-view';
+import { PublicOrgView } from './public-org-view';
+import { PublicPagesView } from './public-pages-view';
+import { PublicCommerceView } from './public-commerce-view';
+import { Iconify } from 'src/components/iconify';
+import { WaiverSignView } from './waiver-sign-view';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';

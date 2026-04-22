@@ -31,7 +31,7 @@ export type LeadScore = $Result.DefaultSelection<Prisma.$LeadScorePayload>
 
 /**
  * ##  Prisma Client ʲˢ
- *
+ * 
  * Type-safe database client for TypeScript & Node.js
  * @example
  * ```
@@ -40,19 +40,19 @@ export type LeadScore = $Result.DefaultSelection<Prisma.$LeadScorePayload>
  * const scoringModels = await prisma.scoringModel.findMany()
  * ```
  *
- *
+ * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
 
     /**
    * ##  Prisma Client ʲˢ
-   *
+   * 
    * Type-safe database client for TypeScript & Node.js
    * @example
    * ```
@@ -61,12 +61,12 @@ export class PrismaClient<
    * const scoringModels = await prisma.scoringModel.findMany()
    * ```
    *
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
    */
 
   constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
-  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
+  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): void;
 
   /**
    * Connect with the database
@@ -78,13 +78,20 @@ export class PrismaClient<
    */
   $disconnect(): $Utils.JsPromise<void>;
 
+  /**
+   * Add a middleware
+   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
+   * @see https://pris.ly/d/extensions
+   */
+  $use(cb: Prisma.Middleware): void
+
 /**
    * Executes a prepared raw query and returns the number of affected rows.
    * @example
    * ```
    * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -96,7 +103,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -107,7 +114,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -119,7 +126,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -143,9 +150,7 @@ export class PrismaClient<
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
 
-  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
-    extArgs: ExtArgs
-  }>>
+  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb, ExtArgs>
 
       /**
    * `prisma.scoringModel`: Exposes CRUD operations for the **ScoringModel** model.
@@ -155,7 +160,7 @@ export class PrismaClient<
     * const scoringModels = await prisma.scoringModel.findMany()
     * ```
     */
-  get scoringModel(): Prisma.ScoringModelDelegate<ExtArgs, ClientOptions>;
+  get scoringModel(): Prisma.ScoringModelDelegate<ExtArgs>;
 
   /**
    * `prisma.scoringRule`: Exposes CRUD operations for the **ScoringRule** model.
@@ -165,7 +170,7 @@ export class PrismaClient<
     * const scoringRules = await prisma.scoringRule.findMany()
     * ```
     */
-  get scoringRule(): Prisma.ScoringRuleDelegate<ExtArgs, ClientOptions>;
+  get scoringRule(): Prisma.ScoringRuleDelegate<ExtArgs>;
 
   /**
    * `prisma.leadScore`: Exposes CRUD operations for the **LeadScore** model.
@@ -175,7 +180,7 @@ export class PrismaClient<
     * const leadScores = await prisma.leadScore.findMany()
     * ```
     */
-  get leadScore(): Prisma.LeadScoreDelegate<ExtArgs, ClientOptions>;
+  get leadScore(): Prisma.LeadScoreDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -196,6 +201,7 @@ export namespace Prisma {
   export import PrismaClientRustPanicError = runtime.PrismaClientRustPanicError
   export import PrismaClientInitializationError = runtime.PrismaClientInitializationError
   export import PrismaClientValidationError = runtime.PrismaClientValidationError
+  export import NotFoundError = runtime.NotFoundError
 
   /**
    * Re-export of sql-template-tag
@@ -216,7 +222,7 @@ export namespace Prisma {
   export type DecimalJsLike = runtime.DecimalJsLike
 
   /**
-   * Metrics
+   * Metrics 
    */
   export type Metrics = runtime.Metrics
   export type Metric<T> = runtime.Metric<T>
@@ -234,21 +240,20 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.19.3
-   * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
+   * Prisma Client JS version: 5.22.0
+   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
    */
   export type PrismaVersion = {
     client: string
   }
 
-  export const prismaVersion: PrismaVersion
+  export const prismaVersion: PrismaVersion 
 
   /**
    * Utility Types
    */
 
 
-  export import Bytes = runtime.Bytes
   export import JsonObject = runtime.JsonObject
   export import JsonArray = runtime.JsonArray
   export import JsonValue = runtime.JsonValue
@@ -258,15 +263,15 @@ export namespace Prisma {
 
   /**
    * Types of the values used to represent different kinds of `null` values when working with JSON fields.
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   namespace NullTypes {
     /**
     * Type of `Prisma.DbNull`.
-    *
+    * 
     * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
-    *
+    * 
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class DbNull {
@@ -276,9 +281,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.JsonNull`.
-    *
+    * 
     * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
-    *
+    * 
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class JsonNull {
@@ -288,9 +293,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.AnyNull`.
-    *
+    * 
     * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
-    *
+    * 
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class AnyNull {
@@ -301,21 +306,21 @@ export namespace Prisma {
 
   /**
    * Helper for filtering JSON entries that have `null` on the database (empty on the db)
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const DbNull: NullTypes.DbNull
 
   /**
    * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const JsonNull: NullTypes.JsonNull
 
   /**
    * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const AnyNull: NullTypes.AnyNull
@@ -503,7 +508,7 @@ export namespace Prisma {
   type AtLeast<O extends object, K extends string> = NoExpand<
     O extends unknown
     ? | (K extends keyof O ? { [P in K]: O[P] } & O : O)
-      | {[P in keyof O as P extends K ? P : never]-?: O[P]} & O
+      | {[P in keyof O as P extends K ? K : never]-?: O[P]} & O
     : never>;
 
   type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
@@ -629,14 +634,11 @@ export namespace Prisma {
     db?: Datasource
   }
 
-  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
-    returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
+  interface TypeMapCb extends $Utils.Fn<{extArgs: $Extensions.InternalArgs, clientOptions: PrismaClientOptions }, $Utils.Record<string, any>> {
+    returns: Prisma.TypeMap<this['params']['extArgs'], this['params']['clientOptions']>
   }
 
-  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
-    globalOmitOptions: {
-      omit: GlobalOmitOptions
-    }
+  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
       modelProps: "scoringModel" | "scoringRule" | "leadScore"
       txIsolationLevel: Prisma.TransactionIsolationLevel
@@ -693,10 +695,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ScoringModelUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ScoringModelUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScoringModelPayload>[]
           }
           upsert: {
             args: Prisma.ScoringModelUpsertArgs<ExtArgs>
@@ -768,10 +766,6 @@ export namespace Prisma {
             args: Prisma.ScoringRuleUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.ScoringRuleUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScoringRulePayload>[]
-          }
           upsert: {
             args: Prisma.ScoringRuleUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ScoringRulePayload>
@@ -842,10 +836,6 @@ export namespace Prisma {
             args: Prisma.LeadScoreUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.LeadScoreUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$LeadScorePayload>[]
-          }
           upsert: {
             args: Prisma.LeadScoreUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$LeadScorePayload>
@@ -907,24 +897,16 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Shorthand for `emit: 'stdout'`
+     * // Defaults to stdout
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events only
+     * // Emit as events
      * log: [
-     *   { emit: 'event', level: 'query' },
-     *   { emit: 'event', level: 'info' },
-     *   { emit: 'event', level: 'warn' }
-     *   { emit: 'event', level: 'error' }
+     *   { emit: 'stdout', level: 'query' },
+     *   { emit: 'stdout', level: 'info' },
+     *   { emit: 'stdout', level: 'warn' }
+     *   { emit: 'stdout', level: 'error' }
      * ]
-     * 
-     * / Emit as events and log to stdout
-     * og: [
-     *  { emit: 'stdout', level: 'query' },
-     *  { emit: 'stdout', level: 'info' },
-     *  { emit: 'stdout', level: 'warn' }
-     *  { emit: 'stdout', level: 'error' }
-     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -939,31 +921,8 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
-    /**
-     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
-     */
-    adapter?: runtime.SqlDriverAdapterFactory | null
-    /**
-     * Global configuration for omitting model fields by default.
-     * 
-     * @example
-     * ```
-     * const prisma = new PrismaClient({
-     *   omit: {
-     *     user: {
-     *       password: true
-     *     }
-     *   }
-     * })
-     * ```
-     */
-    omit?: Prisma.GlobalOmitConfig
   }
-  export type GlobalOmitConfig = {
-    scoringModel?: ScoringModelOmit
-    scoringRule?: ScoringRuleOmit
-    leadScore?: LeadScoreOmit
-  }
+
 
   /* Types for Logging */
   export type LogLevel = 'info' | 'query' | 'warn' | 'error'
@@ -972,15 +931,10 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
-
-  export type GetLogType<T> = CheckIsLogLevel<
-    T extends LogDefinition ? T['level'] : T
-  >;
-
-  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
-    ? GetLogType<T[number]>
-    : never;
+  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
+  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
+    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
+    : never
 
   export type QueryEvent = {
     timestamp: Date
@@ -1009,7 +963,6 @@ export namespace Prisma {
     | 'createManyAndReturn'
     | 'update'
     | 'updateMany'
-    | 'updateManyAndReturn'
     | 'upsert'
     | 'delete'
     | 'deleteMany'
@@ -1020,6 +973,25 @@ export namespace Prisma {
     | 'runCommandRaw'
     | 'findRaw'
     | 'groupBy'
+
+  /**
+   * These options are being passed into the middleware as "params"
+   */
+  export type MiddlewareParams = {
+    model?: ModelName
+    action: PrismaAction
+    args: any
+    dataPath: string[]
+    runInTransaction: boolean
+  }
+
+  /**
+   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
+   */
+  export type Middleware<T = any> = (
+    params: MiddlewareParams,
+    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
+  ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
@@ -1282,17 +1254,6 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["scoringModel"]>
 
-  export type ScoringModelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    orgId?: boolean
-    name?: boolean
-    description?: boolean
-    thresholds?: boolean
-    isActive?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["scoringModel"]>
-
   export type ScoringModelSelectScalar = {
     id?: boolean
     orgId?: boolean
@@ -1304,14 +1265,12 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ScoringModelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "name" | "description" | "thresholds" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["scoringModel"]>
   export type ScoringModelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     rules?: boolean | ScoringModel$rulesArgs<ExtArgs>
     leadScores?: boolean | ScoringModel$leadScoresArgs<ExtArgs>
     _count?: boolean | ScoringModelCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ScoringModelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type ScoringModelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ScoringModelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ScoringModel"
@@ -1334,12 +1293,12 @@ export namespace Prisma {
 
   type ScoringModelGetPayload<S extends boolean | null | undefined | ScoringModelDefaultArgs> = $Result.GetResult<Prisma.$ScoringModelPayload, S>
 
-  type ScoringModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ScoringModelFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type ScoringModelCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ScoringModelFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: ScoringModelCountAggregateInputType | true
     }
 
-  export interface ScoringModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface ScoringModelDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ScoringModel'], meta: { name: 'ScoringModel' } }
     /**
      * Find zero or one ScoringModel that matches the filter.
@@ -1352,10 +1311,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends ScoringModelFindUniqueArgs>(args: SelectSubset<T, ScoringModelFindUniqueArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends ScoringModelFindUniqueArgs>(args: SelectSubset<T, ScoringModelFindUniqueArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one ScoringModel that matches the filter or throw an error with `error.code='P2025'`
+     * Find one ScoringModel that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {ScoringModelFindUniqueOrThrowArgs} args - Arguments to find a ScoringModel
      * @example
@@ -1366,7 +1325,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends ScoringModelFindUniqueOrThrowArgs>(args: SelectSubset<T, ScoringModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends ScoringModelFindUniqueOrThrowArgs>(args: SelectSubset<T, ScoringModelFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first ScoringModel that matches the filter.
@@ -1381,7 +1340,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends ScoringModelFindFirstArgs>(args?: SelectSubset<T, ScoringModelFindFirstArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends ScoringModelFindFirstArgs>(args?: SelectSubset<T, ScoringModelFindFirstArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first ScoringModel that matches the filter or
@@ -1397,7 +1356,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends ScoringModelFindFirstOrThrowArgs>(args?: SelectSubset<T, ScoringModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends ScoringModelFindFirstOrThrowArgs>(args?: SelectSubset<T, ScoringModelFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more ScoringModels that matches the filter.
@@ -1415,7 +1374,7 @@ export namespace Prisma {
      * const scoringModelWithIdOnly = await prisma.scoringModel.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends ScoringModelFindManyArgs>(args?: SelectSubset<T, ScoringModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends ScoringModelFindManyArgs>(args?: SelectSubset<T, ScoringModelFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a ScoringModel.
@@ -1429,7 +1388,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends ScoringModelCreateArgs>(args: SelectSubset<T, ScoringModelCreateArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends ScoringModelCreateArgs>(args: SelectSubset<T, ScoringModelCreateArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many ScoringModels.
@@ -1457,7 +1416,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many ScoringModels and only return the `id`
-     * const scoringModelWithIdOnly = await prisma.scoringModel.createManyAndReturn({
+     * const scoringModelWithIdOnly = await prisma.scoringModel.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -1467,7 +1426,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends ScoringModelCreateManyAndReturnArgs>(args?: SelectSubset<T, ScoringModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends ScoringModelCreateManyAndReturnArgs>(args?: SelectSubset<T, ScoringModelCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a ScoringModel.
@@ -1481,7 +1440,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends ScoringModelDeleteArgs>(args: SelectSubset<T, ScoringModelDeleteArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends ScoringModelDeleteArgs>(args: SelectSubset<T, ScoringModelDeleteArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one ScoringModel.
@@ -1498,7 +1457,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends ScoringModelUpdateArgs>(args: SelectSubset<T, ScoringModelUpdateArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends ScoringModelUpdateArgs>(args: SelectSubset<T, ScoringModelUpdateArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more ScoringModels.
@@ -1534,36 +1493,6 @@ export namespace Prisma {
     updateMany<T extends ScoringModelUpdateManyArgs>(args: SelectSubset<T, ScoringModelUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more ScoringModels and returns the data updated in the database.
-     * @param {ScoringModelUpdateManyAndReturnArgs} args - Arguments to update many ScoringModels.
-     * @example
-     * // Update many ScoringModels
-     * const scoringModel = await prisma.scoringModel.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ScoringModels and only return the `id`
-     * const scoringModelWithIdOnly = await prisma.scoringModel.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ScoringModelUpdateManyAndReturnArgs>(args: SelectSubset<T, ScoringModelUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one ScoringModel.
      * @param {ScoringModelUpsertArgs} args - Arguments to update or create a ScoringModel.
      * @example
@@ -1580,7 +1509,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends ScoringModelUpsertArgs>(args: SelectSubset<T, ScoringModelUpsertArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends ScoringModelUpsertArgs>(args: SelectSubset<T, ScoringModelUpsertArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -1720,10 +1649,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__ScoringModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__ScoringModelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    rules<T extends ScoringModel$rulesArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModel$rulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    leadScores<T extends ScoringModel$leadScoresArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModel$leadScoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rules<T extends ScoringModel$rulesArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModel$rulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findMany"> | Null>
+    leadScores<T extends ScoringModel$leadScoresArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModel$leadScoresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1751,7 +1680,7 @@ export namespace Prisma {
 
   /**
    * Fields of the ScoringModel model
-   */
+   */ 
   interface ScoringModelFieldRefs {
     readonly id: FieldRef<"ScoringModel", 'String'>
     readonly orgId: FieldRef<"ScoringModel", 'String'>
@@ -1774,10 +1703,6 @@ export namespace Prisma {
      */
     select?: ScoringModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringModelInclude<ExtArgs> | null
@@ -1796,10 +1721,6 @@ export namespace Prisma {
      */
     select?: ScoringModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringModelInclude<ExtArgs> | null
@@ -1817,10 +1738,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringModel
      */
     select?: ScoringModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -1870,10 +1787,6 @@ export namespace Prisma {
      */
     select?: ScoringModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringModelInclude<ExtArgs> | null
@@ -1922,10 +1835,6 @@ export namespace Prisma {
      */
     select?: ScoringModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringModelInclude<ExtArgs> | null
@@ -1969,10 +1878,6 @@ export namespace Prisma {
      */
     select?: ScoringModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringModelInclude<ExtArgs> | null
@@ -2002,10 +1907,6 @@ export namespace Prisma {
      */
     select?: ScoringModelSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
      * The data used to create many ScoringModels.
      */
     data: ScoringModelCreateManyInput | ScoringModelCreateManyInput[]
@@ -2020,10 +1921,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringModel
      */
     select?: ScoringModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2050,36 +1947,6 @@ export namespace Prisma {
      * Filter which ScoringModels to update
      */
     where?: ScoringModelWhereInput
-    /**
-     * Limit how many ScoringModels to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScoringModel updateManyAndReturn
-   */
-  export type ScoringModelUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScoringModel
-     */
-    select?: ScoringModelSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
-     * The data used to update ScoringModels.
-     */
-    data: XOR<ScoringModelUpdateManyMutationInput, ScoringModelUncheckedUpdateManyInput>
-    /**
-     * Filter which ScoringModels to update
-     */
-    where?: ScoringModelWhereInput
-    /**
-     * Limit how many ScoringModels to update.
-     */
-    limit?: number
   }
 
   /**
@@ -2090,10 +1957,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringModel
      */
     select?: ScoringModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2121,10 +1984,6 @@ export namespace Prisma {
      */
     select?: ScoringModelSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringModelInclude<ExtArgs> | null
@@ -2142,10 +2001,6 @@ export namespace Prisma {
      * Filter which ScoringModels to delete
      */
     where?: ScoringModelWhereInput
-    /**
-     * Limit how many ScoringModels to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -2156,10 +2011,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringRule
      */
     select?: ScoringRuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2181,10 +2032,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: LeadScoreInclude<ExtArgs> | null
@@ -2204,10 +2051,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringModel
      */
     select?: ScoringModelSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringModel
-     */
-    omit?: ScoringModelOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2479,21 +2322,6 @@ export namespace Prisma {
     model?: boolean | ScoringModelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["scoringRule"]>
 
-  export type ScoringRuleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    orgId?: boolean
-    modelId?: boolean
-    name?: boolean
-    entityType?: boolean
-    conditions?: boolean
-    points?: boolean
-    isActive?: boolean
-    priority?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    model?: boolean | ScoringModelDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scoringRule"]>
-
   export type ScoringRuleSelectScalar = {
     id?: boolean
     orgId?: boolean
@@ -2508,14 +2336,10 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ScoringRuleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "modelId" | "name" | "entityType" | "conditions" | "points" | "isActive" | "priority" | "createdAt" | "updatedAt", ExtArgs["result"]["scoringRule"]>
   export type ScoringRuleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     model?: boolean | ScoringModelDefaultArgs<ExtArgs>
   }
   export type ScoringRuleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    model?: boolean | ScoringModelDefaultArgs<ExtArgs>
-  }
-  export type ScoringRuleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     model?: boolean | ScoringModelDefaultArgs<ExtArgs>
   }
 
@@ -2542,12 +2366,12 @@ export namespace Prisma {
 
   type ScoringRuleGetPayload<S extends boolean | null | undefined | ScoringRuleDefaultArgs> = $Result.GetResult<Prisma.$ScoringRulePayload, S>
 
-  type ScoringRuleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ScoringRuleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type ScoringRuleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ScoringRuleFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: ScoringRuleCountAggregateInputType | true
     }
 
-  export interface ScoringRuleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface ScoringRuleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ScoringRule'], meta: { name: 'ScoringRule' } }
     /**
      * Find zero or one ScoringRule that matches the filter.
@@ -2560,10 +2384,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends ScoringRuleFindUniqueArgs>(args: SelectSubset<T, ScoringRuleFindUniqueArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends ScoringRuleFindUniqueArgs>(args: SelectSubset<T, ScoringRuleFindUniqueArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one ScoringRule that matches the filter or throw an error with `error.code='P2025'`
+     * Find one ScoringRule that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {ScoringRuleFindUniqueOrThrowArgs} args - Arguments to find a ScoringRule
      * @example
@@ -2574,7 +2398,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends ScoringRuleFindUniqueOrThrowArgs>(args: SelectSubset<T, ScoringRuleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends ScoringRuleFindUniqueOrThrowArgs>(args: SelectSubset<T, ScoringRuleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first ScoringRule that matches the filter.
@@ -2589,7 +2413,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends ScoringRuleFindFirstArgs>(args?: SelectSubset<T, ScoringRuleFindFirstArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends ScoringRuleFindFirstArgs>(args?: SelectSubset<T, ScoringRuleFindFirstArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first ScoringRule that matches the filter or
@@ -2605,7 +2429,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends ScoringRuleFindFirstOrThrowArgs>(args?: SelectSubset<T, ScoringRuleFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends ScoringRuleFindFirstOrThrowArgs>(args?: SelectSubset<T, ScoringRuleFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more ScoringRules that matches the filter.
@@ -2623,7 +2447,7 @@ export namespace Prisma {
      * const scoringRuleWithIdOnly = await prisma.scoringRule.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends ScoringRuleFindManyArgs>(args?: SelectSubset<T, ScoringRuleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends ScoringRuleFindManyArgs>(args?: SelectSubset<T, ScoringRuleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a ScoringRule.
@@ -2637,7 +2461,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends ScoringRuleCreateArgs>(args: SelectSubset<T, ScoringRuleCreateArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends ScoringRuleCreateArgs>(args: SelectSubset<T, ScoringRuleCreateArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many ScoringRules.
@@ -2665,7 +2489,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many ScoringRules and only return the `id`
-     * const scoringRuleWithIdOnly = await prisma.scoringRule.createManyAndReturn({
+     * const scoringRuleWithIdOnly = await prisma.scoringRule.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -2675,7 +2499,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends ScoringRuleCreateManyAndReturnArgs>(args?: SelectSubset<T, ScoringRuleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends ScoringRuleCreateManyAndReturnArgs>(args?: SelectSubset<T, ScoringRuleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a ScoringRule.
@@ -2689,7 +2513,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends ScoringRuleDeleteArgs>(args: SelectSubset<T, ScoringRuleDeleteArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends ScoringRuleDeleteArgs>(args: SelectSubset<T, ScoringRuleDeleteArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one ScoringRule.
@@ -2706,7 +2530,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends ScoringRuleUpdateArgs>(args: SelectSubset<T, ScoringRuleUpdateArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends ScoringRuleUpdateArgs>(args: SelectSubset<T, ScoringRuleUpdateArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more ScoringRules.
@@ -2742,36 +2566,6 @@ export namespace Prisma {
     updateMany<T extends ScoringRuleUpdateManyArgs>(args: SelectSubset<T, ScoringRuleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more ScoringRules and returns the data updated in the database.
-     * @param {ScoringRuleUpdateManyAndReturnArgs} args - Arguments to update many ScoringRules.
-     * @example
-     * // Update many ScoringRules
-     * const scoringRule = await prisma.scoringRule.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ScoringRules and only return the `id`
-     * const scoringRuleWithIdOnly = await prisma.scoringRule.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ScoringRuleUpdateManyAndReturnArgs>(args: SelectSubset<T, ScoringRuleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one ScoringRule.
      * @param {ScoringRuleUpsertArgs} args - Arguments to update or create a ScoringRule.
      * @example
@@ -2788,7 +2582,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends ScoringRuleUpsertArgs>(args: SelectSubset<T, ScoringRuleUpsertArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends ScoringRuleUpsertArgs>(args: SelectSubset<T, ScoringRuleUpsertArgs<ExtArgs>>): Prisma__ScoringRuleClient<$Result.GetResult<Prisma.$ScoringRulePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -2928,9 +2722,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__ScoringRuleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__ScoringRuleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    model<T extends ScoringModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModelDefaultArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    model<T extends ScoringModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModelDefaultArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2958,7 +2752,7 @@ export namespace Prisma {
 
   /**
    * Fields of the ScoringRule model
-   */
+   */ 
   interface ScoringRuleFieldRefs {
     readonly id: FieldRef<"ScoringRule", 'String'>
     readonly orgId: FieldRef<"ScoringRule", 'String'>
@@ -2984,10 +2778,6 @@ export namespace Prisma {
      */
     select?: ScoringRuleSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringRuleInclude<ExtArgs> | null
@@ -3006,10 +2796,6 @@ export namespace Prisma {
      */
     select?: ScoringRuleSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringRuleInclude<ExtArgs> | null
@@ -3027,10 +2813,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringRule
      */
     select?: ScoringRuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3080,10 +2862,6 @@ export namespace Prisma {
      */
     select?: ScoringRuleSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringRuleInclude<ExtArgs> | null
@@ -3132,10 +2910,6 @@ export namespace Prisma {
      */
     select?: ScoringRuleSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringRuleInclude<ExtArgs> | null
@@ -3179,10 +2953,6 @@ export namespace Prisma {
      */
     select?: ScoringRuleSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringRuleInclude<ExtArgs> | null
@@ -3212,10 +2982,6 @@ export namespace Prisma {
      */
     select?: ScoringRuleSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
      * The data used to create many ScoringRules.
      */
     data: ScoringRuleCreateManyInput | ScoringRuleCreateManyInput[]
@@ -3234,10 +3000,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringRule
      */
     select?: ScoringRuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3264,40 +3026,6 @@ export namespace Prisma {
      * Filter which ScoringRules to update
      */
     where?: ScoringRuleWhereInput
-    /**
-     * Limit how many ScoringRules to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScoringRule updateManyAndReturn
-   */
-  export type ScoringRuleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScoringRule
-     */
-    select?: ScoringRuleSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
-     * The data used to update ScoringRules.
-     */
-    data: XOR<ScoringRuleUpdateManyMutationInput, ScoringRuleUncheckedUpdateManyInput>
-    /**
-     * Filter which ScoringRules to update
-     */
-    where?: ScoringRuleWhereInput
-    /**
-     * Limit how many ScoringRules to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScoringRuleIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3308,10 +3036,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringRule
      */
     select?: ScoringRuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3339,10 +3063,6 @@ export namespace Prisma {
      */
     select?: ScoringRuleSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ScoringRuleInclude<ExtArgs> | null
@@ -3360,10 +3080,6 @@ export namespace Prisma {
      * Filter which ScoringRules to delete
      */
     where?: ScoringRuleWhereInput
-    /**
-     * Limit how many ScoringRules to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -3374,10 +3090,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the ScoringRule
      */
     select?: ScoringRuleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScoringRule
-     */
-    omit?: ScoringRuleOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3649,21 +3361,6 @@ export namespace Prisma {
     model?: boolean | ScoringModelDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["leadScore"]>
 
-  export type LeadScoreSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    orgId?: boolean
-    contactId?: boolean
-    modelId?: boolean
-    score?: boolean
-    grade?: boolean
-    factors?: boolean
-    previousScore?: boolean
-    changedAt?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    model?: boolean | ScoringModelDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["leadScore"]>
-
   export type LeadScoreSelectScalar = {
     id?: boolean
     orgId?: boolean
@@ -3678,14 +3375,10 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type LeadScoreOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "contactId" | "modelId" | "score" | "grade" | "factors" | "previousScore" | "changedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["leadScore"]>
   export type LeadScoreInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     model?: boolean | ScoringModelDefaultArgs<ExtArgs>
   }
   export type LeadScoreIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    model?: boolean | ScoringModelDefaultArgs<ExtArgs>
-  }
-  export type LeadScoreIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     model?: boolean | ScoringModelDefaultArgs<ExtArgs>
   }
 
@@ -3712,12 +3405,12 @@ export namespace Prisma {
 
   type LeadScoreGetPayload<S extends boolean | null | undefined | LeadScoreDefaultArgs> = $Result.GetResult<Prisma.$LeadScorePayload, S>
 
-  type LeadScoreCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<LeadScoreFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type LeadScoreCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<LeadScoreFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: LeadScoreCountAggregateInputType | true
     }
 
-  export interface LeadScoreDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface LeadScoreDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LeadScore'], meta: { name: 'LeadScore' } }
     /**
      * Find zero or one LeadScore that matches the filter.
@@ -3730,10 +3423,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends LeadScoreFindUniqueArgs>(args: SelectSubset<T, LeadScoreFindUniqueArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends LeadScoreFindUniqueArgs>(args: SelectSubset<T, LeadScoreFindUniqueArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one LeadScore that matches the filter or throw an error with `error.code='P2025'`
+     * Find one LeadScore that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {LeadScoreFindUniqueOrThrowArgs} args - Arguments to find a LeadScore
      * @example
@@ -3744,7 +3437,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends LeadScoreFindUniqueOrThrowArgs>(args: SelectSubset<T, LeadScoreFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends LeadScoreFindUniqueOrThrowArgs>(args: SelectSubset<T, LeadScoreFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first LeadScore that matches the filter.
@@ -3759,7 +3452,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends LeadScoreFindFirstArgs>(args?: SelectSubset<T, LeadScoreFindFirstArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends LeadScoreFindFirstArgs>(args?: SelectSubset<T, LeadScoreFindFirstArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first LeadScore that matches the filter or
@@ -3775,7 +3468,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends LeadScoreFindFirstOrThrowArgs>(args?: SelectSubset<T, LeadScoreFindFirstOrThrowArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends LeadScoreFindFirstOrThrowArgs>(args?: SelectSubset<T, LeadScoreFindFirstOrThrowArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more LeadScores that matches the filter.
@@ -3793,7 +3486,7 @@ export namespace Prisma {
      * const leadScoreWithIdOnly = await prisma.leadScore.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends LeadScoreFindManyArgs>(args?: SelectSubset<T, LeadScoreFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends LeadScoreFindManyArgs>(args?: SelectSubset<T, LeadScoreFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a LeadScore.
@@ -3807,7 +3500,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends LeadScoreCreateArgs>(args: SelectSubset<T, LeadScoreCreateArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends LeadScoreCreateArgs>(args: SelectSubset<T, LeadScoreCreateArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many LeadScores.
@@ -3835,7 +3528,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many LeadScores and only return the `id`
-     * const leadScoreWithIdOnly = await prisma.leadScore.createManyAndReturn({
+     * const leadScoreWithIdOnly = await prisma.leadScore.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -3845,7 +3538,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends LeadScoreCreateManyAndReturnArgs>(args?: SelectSubset<T, LeadScoreCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends LeadScoreCreateManyAndReturnArgs>(args?: SelectSubset<T, LeadScoreCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a LeadScore.
@@ -3859,7 +3552,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends LeadScoreDeleteArgs>(args: SelectSubset<T, LeadScoreDeleteArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends LeadScoreDeleteArgs>(args: SelectSubset<T, LeadScoreDeleteArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one LeadScore.
@@ -3876,7 +3569,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends LeadScoreUpdateArgs>(args: SelectSubset<T, LeadScoreUpdateArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends LeadScoreUpdateArgs>(args: SelectSubset<T, LeadScoreUpdateArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more LeadScores.
@@ -3912,36 +3605,6 @@ export namespace Prisma {
     updateMany<T extends LeadScoreUpdateManyArgs>(args: SelectSubset<T, LeadScoreUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more LeadScores and returns the data updated in the database.
-     * @param {LeadScoreUpdateManyAndReturnArgs} args - Arguments to update many LeadScores.
-     * @example
-     * // Update many LeadScores
-     * const leadScore = await prisma.leadScore.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more LeadScores and only return the `id`
-     * const leadScoreWithIdOnly = await prisma.leadScore.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends LeadScoreUpdateManyAndReturnArgs>(args: SelectSubset<T, LeadScoreUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one LeadScore.
      * @param {LeadScoreUpsertArgs} args - Arguments to update or create a LeadScore.
      * @example
@@ -3958,7 +3621,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends LeadScoreUpsertArgs>(args: SelectSubset<T, LeadScoreUpsertArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends LeadScoreUpsertArgs>(args: SelectSubset<T, LeadScoreUpsertArgs<ExtArgs>>): Prisma__LeadScoreClient<$Result.GetResult<Prisma.$LeadScorePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -4098,9 +3761,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__LeadScoreClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__LeadScoreClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    model<T extends ScoringModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModelDefaultArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    model<T extends ScoringModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ScoringModelDefaultArgs<ExtArgs>>): Prisma__ScoringModelClient<$Result.GetResult<Prisma.$ScoringModelPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4128,7 +3791,7 @@ export namespace Prisma {
 
   /**
    * Fields of the LeadScore model
-   */
+   */ 
   interface LeadScoreFieldRefs {
     readonly id: FieldRef<"LeadScore", 'String'>
     readonly orgId: FieldRef<"LeadScore", 'String'>
@@ -4154,10 +3817,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: LeadScoreInclude<ExtArgs> | null
@@ -4176,10 +3835,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: LeadScoreInclude<ExtArgs> | null
@@ -4197,10 +3852,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the LeadScore
      */
     select?: LeadScoreSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4250,10 +3901,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: LeadScoreInclude<ExtArgs> | null
@@ -4302,10 +3949,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: LeadScoreInclude<ExtArgs> | null
@@ -4349,10 +3992,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: LeadScoreInclude<ExtArgs> | null
@@ -4382,10 +4021,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * The data used to create many LeadScores.
      */
     data: LeadScoreCreateManyInput | LeadScoreCreateManyInput[]
@@ -4404,10 +4039,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the LeadScore
      */
     select?: LeadScoreSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4434,40 +4065,6 @@ export namespace Prisma {
      * Filter which LeadScores to update
      */
     where?: LeadScoreWhereInput
-    /**
-     * Limit how many LeadScores to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * LeadScore updateManyAndReturn
-   */
-  export type LeadScoreUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the LeadScore
-     */
-    select?: LeadScoreSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
-     * The data used to update LeadScores.
-     */
-    data: XOR<LeadScoreUpdateManyMutationInput, LeadScoreUncheckedUpdateManyInput>
-    /**
-     * Filter which LeadScores to update
-     */
-    where?: LeadScoreWhereInput
-    /**
-     * Limit how many LeadScores to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: LeadScoreIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4478,10 +4075,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the LeadScore
      */
     select?: LeadScoreSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4509,10 +4102,6 @@ export namespace Prisma {
      */
     select?: LeadScoreSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: LeadScoreInclude<ExtArgs> | null
@@ -4530,10 +4119,6 @@ export namespace Prisma {
      * Filter which LeadScores to delete
      */
     where?: LeadScoreWhereInput
-    /**
-     * Limit how many LeadScores to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -4544,10 +4129,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the LeadScore
      */
     select?: LeadScoreSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LeadScore
-     */
-    omit?: LeadScoreOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4658,7 +4239,7 @@ export namespace Prisma {
 
 
   /**
-   * Field references
+   * Field references 
    */
 
 
@@ -4680,13 +4261,6 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -4830,7 +4404,7 @@ export namespace Prisma {
     priority?: IntFilter<"ScoringRule"> | number
     createdAt?: DateTimeFilter<"ScoringRule"> | Date | string
     updatedAt?: DateTimeFilter<"ScoringRule"> | Date | string
-    model?: XOR<ScoringModelScalarRelationFilter, ScoringModelWhereInput>
+    model?: XOR<ScoringModelRelationFilter, ScoringModelWhereInput>
   }
 
   export type ScoringRuleOrderByWithRelationInput = {
@@ -4863,7 +4437,7 @@ export namespace Prisma {
     priority?: IntFilter<"ScoringRule"> | number
     createdAt?: DateTimeFilter<"ScoringRule"> | Date | string
     updatedAt?: DateTimeFilter<"ScoringRule"> | Date | string
-    model?: XOR<ScoringModelScalarRelationFilter, ScoringModelWhereInput>
+    model?: XOR<ScoringModelRelationFilter, ScoringModelWhereInput>
   }, "id">
 
   export type ScoringRuleOrderByWithAggregationInput = {
@@ -4917,7 +4491,7 @@ export namespace Prisma {
     changedAt?: DateTimeFilter<"LeadScore"> | Date | string
     createdAt?: DateTimeFilter<"LeadScore"> | Date | string
     updatedAt?: DateTimeFilter<"LeadScore"> | Date | string
-    model?: XOR<ScoringModelScalarRelationFilter, ScoringModelWhereInput>
+    model?: XOR<ScoringModelRelationFilter, ScoringModelWhereInput>
   }
 
   export type LeadScoreOrderByWithRelationInput = {
@@ -4951,7 +4525,7 @@ export namespace Prisma {
     changedAt?: DateTimeFilter<"LeadScore"> | Date | string
     createdAt?: DateTimeFilter<"LeadScore"> | Date | string
     updatedAt?: DateTimeFilter<"LeadScore"> | Date | string
-    model?: XOR<ScoringModelScalarRelationFilter, ScoringModelWhereInput>
+    model?: XOR<ScoringModelRelationFilter, ScoringModelWhereInput>
   }, "id" | "orgId_contactId_modelId">
 
   export type LeadScoreOrderByWithAggregationInput = {
@@ -5298,7 +4872,7 @@ export namespace Prisma {
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
-  export type JsonFilter<$PrismaModel = never> =
+  export type JsonFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonFilterBase<$PrismaModel>>
@@ -5308,13 +4882,12 @@ export namespace Prisma {
   export type JsonFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -5429,7 +5002,7 @@ export namespace Prisma {
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonWithAggregatesFilterBase<$PrismaModel>>
@@ -5439,13 +5012,12 @@ export namespace Prisma {
   export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -5489,7 +5061,7 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type ScoringModelScalarRelationFilter = {
+  export type ScoringModelRelationFilter = {
     is?: ScoringModelWhereInput
     isNot?: ScoringModelWhereInput
   }
@@ -5886,7 +5458,7 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
-  export type NestedJsonFilter<$PrismaModel = never> =
+  export type NestedJsonFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
         Required<NestedJsonFilterBase<$PrismaModel>>
@@ -5896,13 +5468,12 @@ export namespace Prisma {
   export type NestedJsonFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -6357,6 +5928,26 @@ export namespace Prisma {
   }
 
 
+
+  /**
+   * Aliases for legacy arg types
+   */
+    /**
+     * @deprecated Use ScoringModelCountOutputTypeDefaultArgs instead
+     */
+    export type ScoringModelCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ScoringModelCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ScoringModelDefaultArgs instead
+     */
+    export type ScoringModelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ScoringModelDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ScoringRuleDefaultArgs instead
+     */
+    export type ScoringRuleArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ScoringRuleDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use LeadScoreDefaultArgs instead
+     */
+    export type LeadScoreArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = LeadScoreDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

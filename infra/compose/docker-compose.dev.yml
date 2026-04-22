@@ -228,6 +228,28 @@ services:
       dockerfile: infra/docker/node-service/Dockerfile.dev
       args:
         SERVICE_NAME: scoring-service
+        SERVICE_PORT: 7180
+    volumes:
+      - ../../:/workspace
+      - workspace_node_modules:/workspace/node_modules
+
+  deal-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.dev
+      args:
+        SERVICE_NAME: deal-service
+        SERVICE_PORT: 7150
+    volumes:
+      - ../../:/workspace
+      - workspace_node_modules:/workspace/node_modules
+
+  email-sync-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.dev
+      args:
+        SERVICE_NAME: email-sync-service
         SERVICE_PORT: 7160
     volumes:
       - ../../:/workspace
