@@ -1,5 +1,5 @@
 import prisma from '../db.js';
-import type { Deal, Pipeline, Activity, Note, Task } from '@prisma/client';
+import type { Deal } from '../../generated/prisma/index.js';
 
 export interface CreateDealInput {
   name: string;

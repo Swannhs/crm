@@ -12,6 +12,10 @@ export async function attachRoleContext(
   next: NextFunction
 ) {
   try {
+    if (req.identity?.userId === 'system') {
+      req.identity.orgRole = 'org_owner';
+      return next();
+    }
     const membership = await svc.resolveMembership(req.identity.orgId, req.identity.userId);
 
     req.identity = {
@@ -33,6 +37,10 @@ export function requireOrgRoles(roles: string[], { allowPlatformAdmin = true } =
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const platformRoles = req.identity?.platformRoles ?? [];
     if (allowPlatformAdmin && platformRoles.includes('platform_admin')) {
+      return next();
+    }
+
+    if (req.identity?.userId === 'system') {
       return next();
     }
 

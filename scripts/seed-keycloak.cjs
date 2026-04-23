@@ -7,13 +7,40 @@ const CONFIG = {
     adminPass: process.env.KEYCLOAK_PASS || 'admin',
     realm: 'mymanager'
   },
-  testUser: {
-    username: 'testuser',
-    password: 'password123',
-    email: 'test@example.com',
-    firstName: 'Test',
-    lastName: 'User'
-  }
+  users: [
+    {
+      id: 'owner-id-001',
+      username: 'org-owner',
+      password: 'password123',
+      email: 'owner@example.com',
+      firstName: 'Org',
+      lastName: 'Owner'
+    },
+    {
+      id: 'admin-id-002',
+      username: 'org-admin',
+      password: 'password123',
+      email: 'admin@example.com',
+      firstName: 'Org',
+      lastName: 'Admin'
+    },
+    {
+      id: 'staff-id-003',
+      username: 'org-staff',
+      password: 'password123',
+      email: 'staff@example.com',
+      firstName: 'Org',
+      lastName: 'Staff'
+    },
+    {
+      id: 'viewer-id-004',
+      username: 'org-viewer',
+      password: 'password123',
+      email: 'viewer@example.com',
+      firstName: 'Org',
+      lastName: 'Viewer'
+    }
+  ]
 };
 
 async function getAdminToken() {
@@ -48,16 +75,17 @@ async function getAdminToken() {
   });
 }
 
-async function createTestUser(token) {
+async function createKeycloakUser(token, user) {
   const userData = JSON.stringify({
-    username: CONFIG.testUser.username,
+    id: user.id,
+    username: user.username,
     enabled: true,
-    email: CONFIG.testUser.email,
-    firstName: CONFIG.testUser.firstName,
-    lastName: CONFIG.testUser.lastName,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
     credentials: [{
       type: 'password',
-      value: CONFIG.testUser.password,
+      value: user.password,
       temporary: false
     }]
   });
@@ -76,10 +104,10 @@ async function createTestUser(token) {
       }
     }, (res) => {
       if (res.statusCode === 201 || res.statusCode === 409) {
-        console.log(res.statusCode === 409 ? 'ℹ️ User already exists' : '✅ User created');
+        console.log(res.statusCode === 409 ? `ℹ️ User ${user.username} already exists` : `✅ User ${user.username} created`);
         resolve();
       } else {
-        reject(new Error(`User Creation Failed: ${res.statusCode}`));
+        reject(new Error(`User Creation Failed for ${user.username}: ${res.statusCode}`));
       }
     });
     req.write(userData);
@@ -91,12 +119,19 @@ async function run() {
   try {
     console.log('🔑 Authenticating with Keycloak...');
     const token = await getAdminToken();
-    console.log('👤 Creating test user...');
-    await createTestUser(token);
-    console.log('🎉 Keycloak seeding complete.');
+    
+    for (const user of CONFIG.users) {
+      console.log(`👤 Creating user: ${user.username}...`);
+      await createKeycloakUser(token, user);
+    }
+    
+    console.log('🎉 Keycloak users seeding complete.');
   } catch (err) {
     console.error(`❌ Keycloak: ${err.message}`);
   }
 }
 
-run().catch(console.error);
+run().then(() => process.exit(0)).catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

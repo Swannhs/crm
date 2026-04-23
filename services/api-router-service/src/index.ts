@@ -80,13 +80,16 @@ const domainRoutes: Record<string, string> = {
   "category": "http://commerce-service:7060",
   "coupon": "http://commerce-service:7060",
   "document": "http://documents-service:7080",
+  "documents": "http://documents-service:7080",
   "document-recipient": "http://documents-service:7080",
   "document-signature": "http://documents-service:7080",
   "upload": "http://documents-service:7080",
   "payment": "http://payments-service:7090",
+  "payments": "http://payments-service:7090",
   "payment-cards": "http://payments-service:7090",
   "deposit": "http://payments-service:7090",
   "employee": "http://employees-service:7070",
+  "employees": "http://employees-service:7070",
   "employee-schedule": "http://employees-service:7070",
   "employee-timeoff-request": "http://employees-service:7070",
   "employee-attendance": "http://employees-service:7070"
@@ -175,24 +178,24 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = rest === "/models"
           ? "/api/v1/scoring/models"
           : `/api/v1/scoring/leads/hot${query ? `?${query}` : ""}`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
       }
 
       if (req.method === "POST" && rest === "/models") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: "/api/v1/scoring/models" });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/models" });
       }
 
       if (req.method === "POST" && rest === "/calculate") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: "/api/v1/scoring/calculate" });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/calculate" });
       }
 
       if (req.method === "POST" && rest === "/sync") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: "/api/v1/scoring/sync" });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/sync" });
       }
 
       if (req.method === "POST" && rest.startsWith("/sync/contacts/")) {
         const contactId = rest.split("/").pop();
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath: `/api/v1/scoring/sync/contacts/${contactId}` });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: `/api/v1/scoring/sync/contacts/${contactId}` });
       }
 
       if (req.method === "GET" && rest.startsWith("/contacts/") && rest.endsWith("/score")) {
@@ -201,7 +204,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
           : `/api/v1/scoring/contacts/${contactId}/score`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
       }
 
       return notImplemented(res, {
@@ -212,13 +215,20 @@ async function handleApiCompat(req: Request, res: Response) {
       });
     }
 
+    if (module === "business") {
+      if (rest === "/income-report" || rest === "/tax-report" || rest === "/income-statistics") {
+        return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices/finance-statistics" });
+      }
+      return res.json({ data: [] }); // Fallback for other business reports
+    }
+
     if (module === "lead") {
       if (req.method === "GET" && rest === "/hot") {
         const query = new URLSearchParams(req.query as Record<string, string>).toString();
         const targetPath = query
           ? `/api/v1/scoring/leads/hot?${query}`
           : "/api/v1/scoring/leads/hot";
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
       }
 
       if (req.method === "GET" && rest.startsWith("/score/")) {
@@ -227,7 +237,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
           : `/api/v1/scoring/contacts/${contactId}/score`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7160", targetPath });
+        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
       }
 
       return notImplemented(res, {

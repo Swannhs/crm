@@ -107,13 +107,19 @@ case $CMD in
             --network "$NETWORK" \
             -v "$ROOT_DIR:/repo" \
             -w /repo \
-            -e SEED_HOST= \
-            -e SEED_PROJECTS_HOST=projects-service \
-            -e SEED_CRM_HOST=crm-service \
-            -e SEED_BILLING_HOST=billing-service \
-            -e SEED_DEAL_HOST=deal-service \
-            -e SEED_EMAIL_SYNC_HOST=email-sync-service \
-            -e KEYCLOAK_URL=http://keycloak:8080 \
+            -e SEED_ORG_HOST=ms-organization-service \
+            -e SEED_PROJECTS_HOST=ms-projects-service \
+            -e SEED_CRM_HOST=ms-crm-service \
+            -e SEED_BILLING_HOST=ms-billing-service \
+            -e SEED_DEAL_HOST=ms-deal-service \
+            -e SEED_EMAIL_SYNC_HOST=ms-email-sync-service \
+            -e SEED_CALENDAR_HOST=ms-calendar-service \
+            -e SEED_DOCUMENTS_HOST=ms-documents-service \
+            -e SEED_EMPLOYEES_HOST=ms-employees-service \
+            -e SEED_POS_HOST=ms-pos-service \
+            -e SEED_NOTIFICATION_HOST=ms-notification-service \
+            -e SEED_SCORING_HOST=ms-scoring-service \
+            -e KEYCLOAK_URL=http://ms-keycloak:8080 \
             node:24-alpine \
             sh -c "node scripts/seed-keycloak.cjs && node scripts/seed.cjs"
         success "Seeding complete!"

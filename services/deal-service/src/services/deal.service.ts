@@ -1,5 +1,5 @@
 import { dealRepository, type CreateDealInput, type UpdateDealInput } from '../repositories/deal.repository.js';
-import type { Deal } from '@prisma/client';
+import type { Deal } from '../../generated/prisma/index.js';
 
 export class DealService {
   async getDeal(id: string, orgId: string): Promise<Deal | null> {

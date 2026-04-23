@@ -7,6 +7,14 @@ import {
 
 const VALID_ORG_ROLES = ['org_owner', 'org_admin', 'org_manager', 'org_staff', 'org_viewer'];
 
+const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
+  org_owner: ['*:*'],
+  org_admin: ['dashboard:*', 'crm:*', 'projects:*', 'billing:*', 'settings:*', 'employees:*', 'documents:*'],
+  org_manager: ['dashboard:view', 'crm:*', 'projects:*', 'billing:view', 'employees:view', 'documents:*'],
+  org_staff: ['dashboard:view', 'crm:view', 'crm:create', 'projects:view', 'projects:create', 'documents:view'],
+  org_viewer: ['*:view'],
+};
+
 export class OrganizationService {
   private orgRepo = new OrganizationRepository();
 
@@ -120,7 +128,7 @@ export class MembershipService {
         organizationId: orgId,
         userId,
         role: 'org_owner',
-        permissions: [],
+        permissions: DEFAULT_ROLE_PERMISSIONS.org_owner,
         metadata: { bootstrapped: true },
       });
     }
@@ -141,7 +149,9 @@ export class MembershipService {
       throw new Error('Invalid organization role');
     }
 
-    const permissions = Array.isArray(data.permissions) ? data.permissions : [];
+    const permissions = Array.isArray(data.permissions) && data.permissions.length > 0 
+      ? data.permissions 
+      : (DEFAULT_ROLE_PERMISSIONS[role] || []);
 
     return this.membershipRepo.upsert(orgId, userId, {
       role,

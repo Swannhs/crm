@@ -112,6 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         platformRole,
         platformRoles,
         membership,
+        permissions: (membership?.permissions ?? []) as string[],
       };
 
       sessionStorage.setItem(ACCESS_TOKEN_KEY, keycloak.token || '');
@@ -324,6 +325,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.error('Check session error:', error);
           setState({ user: null, loading: false });
         }
+      },
+      hasPermission: (permission: string) => {
+        const userPerms: string[] = state.user?.permissions || [];
+        if (userPerms.includes('*:*')) return true;
+        if (userPerms.includes(permission)) return true;
+        const [resource] = permission.split(':');
+        return userPerms.includes(`${resource}:*`);
       },
     }),
     [clearSession, setState, state.user, status, syncAuthenticatedUser]

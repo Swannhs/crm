@@ -14,6 +14,7 @@ interface AuthContextType {
   checkUserSession?: () => Promise<void>;
   login?: () => void | Promise<void>;
   logout?: () => Promise<void>;
+  hasPermission?: (permission: string) => boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

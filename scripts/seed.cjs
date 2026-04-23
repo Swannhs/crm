@@ -2,75 +2,134 @@ const http = require('http');
 
 const CONFIG = {
   services: {
-    projects: {
-      host: process.env.SEED_PROJECTS_HOST || process.env.SEED_HOST || 'localhost',
-      port: Number(process.env.SEED_PROJECTS_PORT || 8040),
-    },
-    crm: {
-      host: process.env.SEED_CRM_HOST || process.env.SEED_HOST || 'localhost',
-      port: Number(process.env.SEED_CRM_PORT || 8010),
-    },
-    billing: {
-      host: process.env.SEED_BILLING_HOST || process.env.SEED_HOST || 'localhost',
-      port: Number(process.env.SEED_BILLING_PORT || 7020),
-    },
-    deal: {
-      host: process.env.SEED_DEAL_HOST || process.env.SEED_HOST || 'localhost',
-      port: Number(process.env.SEED_DEAL_PORT || 7150),
-    },
-    emailSync: {
-      host: process.env.SEED_EMAIL_SYNC_HOST || process.env.SEED_HOST || 'localhost',
-      port: Number(process.env.SEED_EMAIL_SYNC_PORT || 7160),
-    },
+    organization: { host: process.env.SEED_ORG_HOST || 'localhost', port: 7010 },
+    projects: { host: process.env.SEED_PROJECTS_HOST || 'localhost', port: 8040 },
+    crm: { host: process.env.SEED_CRM_HOST || 'localhost', port: 8010 },
+    billing: { host: process.env.SEED_BILLING_HOST || 'localhost', port: 7020 },
+    deal: { host: process.env.SEED_DEAL_HOST || 'localhost', port: 7150 },
+    emailSync: { host: process.env.SEED_EMAIL_SYNC_HOST || 'localhost', port: 7160 },
+    calendar: { host: process.env.SEED_CALENDAR_HOST || 'localhost', port: 8050 },
+    documents: { host: process.env.SEED_DOCUMENTS_HOST || 'localhost', port: 7080 },
+    employees: { host: process.env.SEED_EMPLOYEES_HOST || 'localhost', port: 7070 },
+    pos: { host: process.env.SEED_POS_HOST || 'localhost', port: 7100 },
+    notification: { host: process.env.SEED_NOTIFICATION_HOST || 'localhost', port: 8000 },
+    scoring: { host: process.env.SEED_SCORING_HOST || 'localhost', port: 7180 }
   },
-  userId: process.env.SEED_USER_ID || 'user-dev-123',
-  orgId: process.env.SEED_ORG_ID || 'd6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384',
+  keycloak: {
+    url: process.env.KEYCLOAK_URL || 'http://keycloak:8080',
+    adminUser: process.env.KEYCLOAK_ADMIN || 'admin',
+    adminPass: process.env.KEYCLOAK_PASS || 'admin',
+    realm: 'mymanager'
+  },
+  orgId: 'd6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384',
+  users: [
+    { username: 'org-owner', role: 'org_owner', email: 'owner@example.com' },
+    { username: 'org-admin', role: 'org_admin', email: 'admin@example.com' },
+    { username: 'org-staff', role: 'org_staff', email: 'staff@example.com' },
+    { username: 'org-viewer', role: 'org_viewer', email: 'viewer@example.com' }
+  ]
 };
 
 const DUMMY_DATA = {
   projects: [
-    { name: 'Modernizing MyManager', description: 'Migration from legacy CRA to Next.js 14 Dashboard.' },
-    { name: 'BMEB Portal Refinement', description: 'Pixel-perfect CSS overhaul for government portal.' },
-    { name: 'Campus Social App', description: 'Cross-platform mobile app for academic networking.' },
-    { name: 'Fintech Dashboard', description: 'Real-time financial analytics and reporting.' },
-    { name: 'Microservices Gateway', description: 'Engineering a high-performance Krakend router.' }
+    { name: 'Enterprise Resource Planning', description: 'Internal ERP modernization.' },
+    { name: 'Customer Portal 2.0', description: 'New React-based customer facing portal.' }
   ],
-  columns: ['Backlog', 'In Progress', 'In Review', 'Done', 'Blocked'],
-  tasks: [
-    'Implement Auth Guards', 'Fix Prisma Validation', 'Add AI Chat Widget',
-    'Integrate ApexCharts', 'Complete CRM Migration', 'Refactor Layout Tree',
-    'Sync Docker Compose', 'Update Env Variables', 'Audit API Gateway',
-    'Finalize Invoices UI'
-  ],
+  columns: ['To Do', 'Doing', 'Done'],
   deals: [
-    { name: 'Enterprise License - Google', amount: 50000, stage: 'negotiation' },
-    { name: 'SME Package - Local Startup', amount: 5000, stage: 'prospecting' },
-    { name: 'Government Contract - BMEB', amount: 120000, stage: 'proposal' },
-    { name: 'Consulting Retainer', amount: 15000, stage: 'closed-won' }
+    { name: 'Cloud Migration Contract', amount: 85000, stage: 'proposal' },
+    { name: 'Security Audit Service', amount: 12000, stage: 'qualification' }
+  ],
+  contacts: [
+    { firstName: 'John', lastName: 'Doe', email: 'john@client.com', phone: '555-1111' },
+    { firstName: 'Jane', lastName: 'Smith', email: 'jane@partner.org', phone: '555-2222' }
+  ],
+  events: [
+    { title: 'Weekly Sync', description: 'Team update meeting', startTime: new Date().toISOString(), duration: 60 },
+    { title: 'Project Kickoff', description: 'New project start', startTime: new Date(Date.now() + 86400000).toISOString(), duration: 90 }
+  ],
+  employees: [
+    { firstName: 'Sarah', lastName: 'Connor', email: 'sarah@mymanager.com', position: 'Developer', department: 'Engineering' },
+    { firstName: 'Kyle', lastName: 'Reese', email: 'kyle@mymanager.com', position: 'Manager', department: 'Sales' }
+  ],
+  documents: [
+    { name: 'Company Handbook.pdf', type: 'policy', size: 1024567 },
+    { name: 'Q1 Financial Report.xlsx', type: 'report', size: 450000 }
   ]
 };
 
-async function post(serviceName, path, data) {
-  return new Promise((resolve, reject) => {
-    const body = JSON.stringify(data);
-    const service = CONFIG.services[serviceName];
+async function getAdminToken() {
+  const data = new URLSearchParams({
+    client_id: 'admin-cli',
+    username: CONFIG.keycloak.adminUser,
+    password: CONFIG.keycloak.adminPass,
+    grant_type: 'password'
+  }).toString();
 
-    if (!service) {
-      reject(new Error(`Unknown service target: ${serviceName}`));
-      return;
-    }
+  return new Promise((resolve, reject) => {
+    const url = new URL(`${CONFIG.keycloak.url}/realms/master/protocol/openid-connect/token`);
+    const req = http.request({
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(data)
+      }
+    }, (res) => {
+      let body = '';
+      res.on('data', (d) => body += d);
+      res.on('end', () => {
+        if (res.statusCode === 200) resolve(JSON.parse(body).access_token);
+        else reject(new Error(`Token Failed: ${res.statusCode} ${body}`));
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
+async function getUserIdByEmail(token, email) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(`${CONFIG.keycloak.url}/admin/realms/${CONFIG.keycloak.realm}/users?email=${email}`);
+    const req = http.request({
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname + url.search,
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    }, (res) => {
+      let body = '';
+      res.on('data', (d) => body += d);
+      res.on('end', () => {
+        if (res.statusCode === 200) {
+          const users = JSON.parse(body);
+          resolve(users[0]?.id || null);
+        } else reject(new Error(`Fetch Failed: ${res.statusCode}`));
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+async function request(serviceName, method, path, data, headers = {}) {
+  return new Promise((resolve, reject) => {
+    const body = data ? JSON.stringify(data) : '';
+    const service = CONFIG.services[serviceName];
 
     const req = http.request({
       hostname: service.host,
       port: service.port,
       path: path,
-      method: 'POST',
+      method: method,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Content-Length': Buffer.byteLength(body),
-        'X-User-Id': CONFIG.userId,
-        'X-Org-Id': CONFIG.orgId
+        'X-Org-Id': CONFIG.orgId,
+        ...headers
       }
     }, (res) => {
       let responseBody = '';
@@ -79,101 +138,76 @@ async function post(serviceName, path, data) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           try { resolve(JSON.parse(responseBody)); } catch (e) { resolve(responseBody); }
         } else {
-          reject(new Error(`Failed [${serviceName} ${service.host}:${service.port}] ${path}: ${res.statusCode} - ${responseBody}`));
+          resolve({ error: true, status: res.statusCode, data: responseBody });
         }
       });
     });
-    req.on('error', reject);
-    req.write(body);
+    req.on('error', (e) => resolve({ error: true, message: e.message }));
+    if (body) req.write(body);
     req.end();
   });
 }
 
 async function seed() {
-  console.log('🚀 Starting Corrected Direct Service Seeding...');
+  console.log('🚀 Starting Comprehensive Multi-Service Seeding...');
   
-  // 1. SEED PROJECTS & KANBAN
-  console.log('\n--- Seeding Projects Service (8040) ---');
+  console.log('🔑 Authenticating with Keycloak for ID resolution...');
+  const token = await getAdminToken();
+  
+  for (const user of CONFIG.users) {
+    user.id = await getUserIdByEmail(token, user.email);
+    console.log(`🆔 Resolved ${user.username} to ${user.id}`);
+  }
+
+  // 1. ORGANIZATION
+  console.log('\n--- Organization ---');
+  for (const user of CONFIG.users) {
+    if (user.id) {
+       await request('organization', 'POST', '/v1/memberships', { userId: user.id, role: user.role, metadata: { username: user.username } }, { 'X-User-Id': 'system' });
+    }
+  }
+
+  const owner = CONFIG.users[0];
+  const staff = CONFIG.users[2];
+
+  // 2. PROJECTS
+  console.log('--- Projects ---');
   for (const proj of DUMMY_DATA.projects) {
-    try {
-      console.log(`📂 Creating Project: ${proj.name}`);
-      const res = await post('projects', '/v1/projects', proj);
-      const project = res.data || res;
-      const projectId = project.id || project._id;
-      
-      console.log(`📋 Creating Board for Project: ${projectId}`);
-      const boardRes = await post('projects', `/v1/projects/${projectId}/boards`, { name: 'Master Board' });
-      const board = boardRes.data || boardRes;
-      const boardId = board.id || board._id;
-
-      for (const colTitle of DUMMY_DATA.columns) {
-        const colRes = await post('projects', `/v1/boards/${boardId}/columns`, { name: colTitle });
-        const col = colRes.data || colRes;
-        const columnId = col.id || col._id;
-        for (let i = 0; i < 2; i++) {
-           const taskTitle = DUMMY_DATA.tasks[Math.floor(Math.random() * DUMMY_DATA.tasks.length)];
-           await post('projects', `/v1/boards/${boardId}/cards`, {
-             title: taskTitle, columnId: columnId, description: 'Auto-seeded task.'
-           });
-        }
-      }
-    } catch (err) { console.error(`❌ Projects: ${err.message}`); }
+    const res = await request('projects', 'POST', '/v1/projects', proj, { 'X-User-Id': owner.id });
+    const projectId = res.data?.id || res.id;
+    if (projectId) {
+      const boardRes = await request('projects', 'POST', `/v1/projects/${projectId}/boards`, { name: 'Main' }, { 'X-User-Id': owner.id });
+      const boardId = boardRes.data?.id || boardRes.id;
+      for (const col of DUMMY_DATA.columns) await request('projects', 'POST', `/v1/boards/${boardId}/columns`, { name: col }, { 'X-User-Id': owner.id });
+    }
   }
 
-  // 2. SEED CRM (CONTACTS)
-  console.log('\n--- Seeding CRM Service (8010) ---');
-  const contacts = [
-    { name: 'Alice Henderson', email: 'alice@enterprise.com', phone: '555-0192' },
-    { name: 'Bob Richards', email: 'bob@startup.io', phone: '555-0123' },
-    { name: 'Charlie Dixon', email: 'charlie@global.net', phone: '555-0456' }
-  ];
+  // 3. CRM & DEALS
+  console.log('--- CRM & Deals ---');
+  for (const c of DUMMY_DATA.contacts) await request('crm', 'POST', '/api/v1/contacts', c, { 'X-User-Id': staff.id });
+  for (const d of DUMMY_DATA.deals) await request('deal', 'POST', '/api/v1/deals', d, { 'X-User-Id': staff.id });
 
-  const createdContacts = [];
-  for (const c of contacts) {
-    try {
-      console.log(`👤 Creating Contact: ${c.name}`);
-      const res = await post('crm', '/api/v1/contacts', c);
-      createdContacts.push(res.data || res);
-    } catch (err) { console.error(`❌ CRM: ${err.message}`); }
-  }
+  // 4. CALENDAR
+  console.log('--- Calendar ---');
+  for (const e of DUMMY_DATA.events) await request('calendar', 'POST', '/v1/events', e, { 'X-User-Id': staff.id });
 
-  // 3. SEED BILLING (INVOICES)
-  console.log('\n--- Seeding Billing Service (7020) ---');
-  for (const contact of createdContacts) {
-    try {
-      const contactId = contact.id || contact._id;
-      const contactName = contact.name || contact.fullName;
-      console.log(`🧾 Creating Invoice for: ${contactName}`);
-      await post('billing', '/v1/invoices', {
-        contactId,
-        amount_cents: (Math.floor(Math.random() * 5000) + 500) * 100,
-        status: 'pending',
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      });
-    } catch (err) { console.error(`❌ Billing: ${err.message}`); }
-  }
+  // 5. EMPLOYEES
+  console.log('--- Employees ---');
+  for (const emp of DUMMY_DATA.employees) await request('employees', 'POST', '/v1/employees', emp, { 'X-User-Id': owner.id });
 
-  // 4. SEED DEALS
-  console.log('\n--- Seeding Deal Service (7150) ---');
-  for (const deal of DUMMY_DATA.deals) {
-    try {
-      console.log(`🤝 Creating Deal: ${deal.name}`);
-      await post('deal', '/api/v1/deals', deal);
-    } catch (err) { console.error(`❌ Deal: ${err.message}`); }
-  }
+  // 6. DOCUMENTS
+  console.log('--- Documents ---');
+  for (const doc of DUMMY_DATA.documents) await request('documents', 'POST', '/v1/documents', doc, { 'X-User-Id': staff.id });
 
-  // 5. SEED EMAIL SYNC
-  console.log('\n--- Seeding Email Sync Service (7160) ---');
-  try {
-    console.log(`📧 Creating Test Email Account`);
-    await post('emailSync', '/api/v1/accounts', {
-      email: 'test@mymanager.com',
-      provider: 'gmail',
-      syncEnabled: true
-    });
-  } catch (err) { console.error(`❌ EmailSync: ${err.message}`); }
+  // 7. POS & BILLING
+  console.log('--- POS & Billing ---');
+  await request('pos', 'POST', '/v1/transactions', { amount: 150.50, items: [{ name: 'License', price: 150.50 }] }, { 'X-User-Id': staff.id });
+  await request('billing', 'POST', '/v1/invoices', { amount_cents: 15050, status: 'paid' }, { 'X-User-Id': owner.id });
 
-  console.log('\n✅ Seeding Successfully Completed.');
+  console.log('\n✅ Comprehensive Seeding Completed!');
 }
 
-seed().catch(console.error);
+seed().then(() => process.exit(0)).catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

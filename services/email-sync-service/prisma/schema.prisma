@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -9,8 +10,8 @@ datasource db {
 
 model EmailAccount {
   id              String   @id @default(uuid())
-  orgId           String   @index
-  userId          String   @index
+  orgId           String
+  userId          String
   email           String   @unique
   provider        String   // gmail, outlook
   isConnected     Boolean  @default(true)
@@ -23,20 +24,23 @@ model EmailAccount {
 
   emails          Email[]
   threads         EmailThread[]
+  syncLogs        SyncLog[]
 
+  @@index([orgId])
+  @@index([userId])
   @@index([orgId, userId])
   @@map("email_accounts")
 }
 
 model Email {
   id            String   @id @default(uuid())
-  orgId         String   @index
-  accountId     String   @index
-  threadId      String?  @index
+  orgId         String
+  accountId     String
+  threadId      String?
   messageId     String   @unique // Provider's message ID
   subject       String?
   fromName      String?
-  fromEmail     String   @index
+  fromEmail     String
   toEmails      String[] 
   ccEmails      String[]
   bccEmails     String[]
@@ -56,8 +60,8 @@ model Email {
   rawHeaders    Json?
   inReplyTo     String?
   references    String[]
-  relatedDealId String?  @index
-  relatedContactId String? @index
+  relatedDealId String?
+  relatedContactId String?
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -65,23 +69,28 @@ model Email {
   account       EmailAccount @relation(fields: [accountId], references: [id])
   thread        EmailThread? @relation(fields: [threadId], references: [id])
 
+  @@index([orgId])
+  @@index([accountId])
+  @@index([threadId])
+  @@index([fromEmail])
+  @@index([relatedDealId])
+  @@index([relatedContactId])
   @@index([orgId, fromEmail])
   @@index([orgId, sentAt])
-  @@index([relatedDealId])
   @@map("emails")
 }
 
 model EmailThread {
   id            String   @id @default(uuid())
-  orgId         String   @index
-  accountId     String   @index
+  orgId         String
+  accountId     String
   subject       String?
   firstMessageId String  @unique
   lastMessageId String?
   messageCount  Int      @default(1)
   participants  String[] // All email addresses in thread
   lastMessageAt DateTime
-  relatedDealId String?  @index
+  relatedDealId String?
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -89,14 +98,17 @@ model EmailThread {
   emails        Email[]
   account       EmailAccount @relation(fields: [accountId], references: [id])
 
+  @@index([orgId])
+  @@index([accountId])
+  @@index([relatedDealId])
   @@index([orgId, lastMessageAt])
   @@map("email_threads")
 }
 
 model SyncLog {
   id            String   @id @default(uuid())
-  orgId         String   @index
-  accountId     String   @index
+  orgId         String
+  accountId     String
   status        String   // success, partial, error
   emailsSynced  Int      @default(0)
   threadsSynced Int      @default(0)
@@ -107,13 +119,15 @@ model SyncLog {
   
   account       EmailAccount @relation(fields: [accountId], references: [id])
 
+  @@index([orgId])
+  @@index([accountId])
   @@index([orgId, startedAt])
   @@map("sync_logs")
 }
 
 model EmailTemplate {
   id            String   @id @default(uuid())
-  orgId         String   @index
+  orgId         String
   name          String
   subject       String
   body          String   // HTML or plain text
@@ -121,17 +135,19 @@ model EmailTemplate {
   variables     String[] // Template variables like {{firstName}}, {{company}}
   isPublic      Boolean  @default(false)
   usageCount    Int      @default(0)
-  createdBy     String   @index
+  createdBy     String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  @@index([orgId])
+  @@index([createdBy])
   @@index([orgId, category])
   @@map("email_templates")
 }
 
 model EmailSequence {
   id            String   @id @default(uuid())
-  orgId         String   @index
+  orgId         String
   name          String
   description   String?
   isActive      Boolean  @default(true)
@@ -139,22 +155,24 @@ model EmailSequence {
   totalDuration Int      // Total duration in days
   enrollmentCount Int    @default(0)
   completionRate Float   @default(0)
-  createdBy     String   @index
+  createdBy     String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   enrollments   SequenceEnrollment[]
 
+  @@index([orgId])
+  @@index([createdBy])
   @@map("email_sequences")
 }
 
 model SequenceEnrollment {
   id            String   @id @default(uuid())
-  orgId         String   @index
-  sequenceId    String   @index
-  contactEmail  String   @index
-  contactId     String?  @index
-  dealId        String?  @index
+  orgId         String
+  sequenceId    String
+  contactEmail  String
+  contactId     String?
+  dealId        String?
   status        String   @default("active") // active, paused, completed, unsubscribed
   currentStep   Int      @default(0)
   startedAt     DateTime @default(now())
@@ -164,14 +182,19 @@ model SequenceEnrollment {
   sequence      EmailSequence @relation(fields: [sequenceId], references: [id])
   activities    SequenceActivity[]
 
+  @@index([orgId])
+  @@index([sequenceId])
+  @@index([contactEmail])
+  @@index([contactId])
+  @@index([dealId])
   @@index([orgId, status])
   @@map("sequence_enrollments")
 }
 
 model SequenceActivity {
   id            String   @id @default(uuid())
-  orgId         String   @index
-  enrollmentId  String   @index
+  orgId         String
+  enrollmentId  String
   stepNumber    Int
   type          String   // email, task, wait
   status        String   @default("pending") // pending, sent, opened, clicked, failed
@@ -183,6 +206,8 @@ model SequenceActivity {
   
   enrollment    SequenceEnrollment @relation(fields: [enrollmentId], references: [id])
 
+  @@index([orgId])
+  @@index([enrollmentId])
   @@index([orgId, scheduledAt])
   @@map("sequence_activities")
 }
