@@ -2,14 +2,15 @@ import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 const router = Router();
+const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
 
 // All routes require identity context
-router.use(requireIdentityContext());
+router.use(identityMiddleware);
 
 // GET /email/accounts - List connected email accounts
 router.get('/accounts', async (req, res, next) => {
   try {
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
     // TODO: Implement account listing
     res.json({
       success: true,
@@ -51,7 +52,7 @@ router.post('/accounts/connect', async (req, res, next) => {
 router.get('/messages', async (req, res, next) => {
   try {
     const { accountId, search, limit, offset } = req.query;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     // TODO: Implement email listing
     res.json({
@@ -73,8 +74,8 @@ router.get('/messages', async (req, res, next) => {
 router.post('/send', async (req, res, next) => {
   try {
     const { to, subject, body, cc, bcc, dealId } = req.body;
-    const orgId = req.orgId!;
-    const userId = req.userId!;
+    const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
 
     if (!to || !subject) {
       return res.status(400).json({
@@ -100,7 +101,7 @@ router.post('/send', async (req, res, next) => {
 router.get('/templates', async (req, res, next) => {
   try {
     const { category } = req.query;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     // TODO: Implement template listing
     res.json({
@@ -117,8 +118,8 @@ router.get('/templates', async (req, res, next) => {
 router.post('/templates', async (req, res, next) => {
   try {
     const { name, subject, body, category } = req.body;
-    const orgId = req.orgId!;
-    const userId = req.userId!;
+    const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
 
     // TODO: Implement template creation
     res.status(201).json({
@@ -136,7 +137,7 @@ router.post('/templates', async (req, res, next) => {
 // GET /email/sequences - List email sequences
 router.get('/sequences', async (req, res, next) => {
   try {
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     // TODO: Implement sequence listing
     res.json({
@@ -153,8 +154,8 @@ router.get('/sequences', async (req, res, next) => {
 router.post('/sequences', async (req, res, next) => {
   try {
     const { name, description, steps } = req.body;
-    const orgId = req.orgId!;
-    const userId = req.userId!;
+    const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
 
     // TODO: Implement sequence creation
     res.status(201).json({

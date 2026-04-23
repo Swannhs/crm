@@ -13,7 +13,7 @@ const {
     urlEncodedLimit?: string;
     enableCors?: boolean;
   }) => { app: Express; logger: ServiceLogger };
-  requireIdentityContext: () => RequestHandler;
+  requireIdentityContext: RequestHandler;
 };
 
 interface ServiceLogger {
@@ -32,5 +32,5 @@ export function createServiceApp(options: {
 }
 
 export function requireIdentityContext(): RequestHandler {
-  return rawRequireIdentityContext() as RequestHandler;
+  return rawRequireIdentityContext as RequestHandler;
 }

@@ -3,15 +3,16 @@ import { dealService } from '../services/deal.service.js';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 const router = Router();
+const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
 
 // All routes require identity context (orgId, userId)
-router.use(requireIdentityContext());
+router.use(identityMiddleware);
 
 // GET /deals - List all deals with optional filters
 router.get('/', async (req, res, next) => {
   try {
     const { stage, ownerId, contactId, search, limit, offset } = req.query;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     const result = await dealService.getDeals(orgId, {
       stage: stage as string,
@@ -40,7 +41,7 @@ router.get('/', async (req, res, next) => {
 router.get('/stats', async (req, res, next) => {
   try {
     const { pipelineId } = req.query;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     const stats = await dealService.getPipelineStats(orgId, pipelineId as string);
 
@@ -57,7 +58,7 @@ router.get('/stats', async (req, res, next) => {
 router.get('/forecast', async (req, res, next) => {
   try {
     const { ownerId } = req.query;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     const forecast = await dealService.getForecast(orgId, ownerId as string);
 
@@ -74,7 +75,7 @@ router.get('/forecast', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     const deal = await dealService.getDeal(id, orgId);
 
@@ -97,8 +98,8 @@ router.get('/:id', async (req, res, next) => {
 // POST /deals - Create new deal
 router.post('/', async (req, res, next) => {
   try {
-    const orgId = req.orgId!;
-    const ownerId = req.userId!; // Default to current user
+    const orgId = req.identity!.orgId;
+    const ownerId = req.identity!.userId; // Default to current user
 
     const data = {
       ...req.body,
@@ -120,7 +121,7 @@ router.post('/', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     const deal = await dealService.updateDeal(id, orgId, req.body);
 
@@ -138,7 +139,7 @@ router.patch('/:id/stage', async (req, res, next) => {
   try {
     const { id } = req.params;
     const { stage } = req.body;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     if (!stage) {
       return res.status(400).json({
@@ -162,7 +163,7 @@ router.patch('/:id/stage', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const orgId = req.orgId!;
+    const orgId = req.identity!.orgId;
 
     await dealService.deleteDeal(id, orgId);
 

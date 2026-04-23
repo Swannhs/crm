@@ -790,6 +790,9 @@ services:
     environment:
       PORT: 7150
       DATABASE_URL: postgres://deal:deal@deal-db:5432/deal_service
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mymanager
+      KEYCLOAK_CLIENT_ID: crm-api
     depends_on:
       deal-db:
         condition: service_healthy
@@ -801,6 +804,9 @@ services:
     environment:
       PORT: 7160
       DATABASE_URL: postgres://emailsync:emailsync@email-sync-db:5432/email_sync_service
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mymanager
+      KEYCLOAK_CLIENT_ID: crm-api
     depends_on:
       email-sync-db:
         condition: service_healthy
