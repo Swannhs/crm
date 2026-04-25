@@ -32,6 +32,9 @@ usage() {
     echo "  seed      Generate dummy data & test users"
     echo "  clean     Remove all volumes & clean install"
     echo ""
+    echo "Optional flags:"
+    echo "  --with-magento   Include local Magento Open Source stack addon (app + DB + search)"
+    echo ""
     echo "Example:"
     echo "  $0 dev up"
     echo "  $0 prod logs"
@@ -56,6 +59,17 @@ ENV=$1
 CMD=$2
 shift 2
 
+WITH_MAGENTO=false
+FILTERED_ARGS=()
+for arg in "$@"; do
+    if [ "$arg" = "--with-magento" ]; then
+        WITH_MAGENTO=true
+    else
+        FILTERED_ARGS+=("$arg")
+    fi
+done
+set -- "${FILTERED_ARGS[@]}"
+
 # Select environment files
 case $ENV in
     dev)
@@ -74,6 +88,11 @@ case $ENV in
         error "Unknown environment: $ENV"
         ;;
 esac
+
+if [ "$WITH_MAGENTO" = true ]; then
+    FILES="$FILES -f $COMPOSE_DIR/docker-compose.magento.yml"
+    info "Magento addon enabled via docker-compose.magento.yml"
+fi
 
 # Configure compose env arguments
 COMPOSE_ENV_ARGS=()

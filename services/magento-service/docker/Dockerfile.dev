@@ -1,0 +1,3 @@
+FROM shinsenter/magento:latest
+
+WORKDIR /var/www/html

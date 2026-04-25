@@ -32,7 +32,9 @@ CRM integrates with Magento through:
 - Nginx route: `/api/magento/*`
 - Magento REST/GraphQL APIs
 
-Magento runs as a separate Docker stack/project and is not included as runtime containers in this CRM compose stack.
+Magento runs as a separate Docker stack/project by default.
+
+For local development, you can opt in to a full local Magento Open Source addon (Magento app + MySQL + OpenSearch) with this repository's orchestrator script.
 
 Canonical gateway route is `/api/magento/*`.
 Legacy `/api/shop/*` routes are deprecated compatibility aliases and should be migrated.
@@ -74,6 +76,40 @@ The Docker stack now supports three intended modes:
 ```bash
 cd microservices
 ./compose-dev.sh
+```
+
+Or use the unified manager and include local Magento:
+
+```bash
+./manage.sh dev up --with-magento
+```
+
+When enabled, Magento and its local infrastructure are exposed at:
+
+- `http://localhost:8088`
+- `https://localhost:8448`
+- `localhost:33306` (Magento MySQL)
+- `localhost:9201` (Magento OpenSearch)
+
+The Magento integration service will default to internal base URL `http://magento`.
+
+Magento runs from source code mounted to:
+
+- default: `<repo>/services/magento-service` -> `/var/www/html` in container
+- override host source path with `MAGENTO_SOURCE_DIR`
+
+Example:
+
+```bash
+MAGENTO_SOURCE_DIR=../../my-magento-src ./manage.sh dev up --with-magento
+```
+
+On first run, if the mounted source directory is empty, the Magento container bootstraps Magento Open Source into it.
+
+If you already have Magento running elsewhere, keep using your external URL:
+
+```bash
+MAGENTO_BASE_URL='http://host.docker.internal:8088' ./manage.sh dev up
 ```
 
 This mode keeps the current repo-mounted workflow:
