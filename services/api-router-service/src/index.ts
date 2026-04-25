@@ -62,6 +62,11 @@ async function proxyTo(req: Request, res: Response, opts: { baseUrl: string; tar
   res.send(buf);
 }
 
+function withQuery(req: Request, targetPath: string) {
+  const query = new URLSearchParams(req.query as Record<string, string>).toString();
+  return query ? `${targetPath}?${query}` : targetPath;
+}
+
 const domainRoutes: Record<string, string> = {
   "community": "http://community-service:7030",
   "community-group": "http://community-service:7030",
@@ -246,6 +251,22 @@ async function handleApiCompat(req: Request, res: Response) {
         path: rest,
         hint: "Implemented: GET /hot, GET /score/:contactId"
       });
+    }
+
+    if (module === "finance-category") {
+      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-category${rest}`) });
+    }
+
+    if (module === "finance-dashboard") {
+      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-dashboard${rest}`) });
+    }
+
+    if (module === "finance-kanban") {
+      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-kanban${rest}`) });
+    }
+
+    if (module === "super-admin-finance") {
+      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/super-admin-finance${rest}`) });
     }
 
     // Fallback: proxy to legacy monolith

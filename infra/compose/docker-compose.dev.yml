@@ -1,17 +1,11 @@
 services:
-  monolith:
-    image: node:16-alpine
-    working_dir: /app
-    volumes:
-      - ../../../server:/app
-    command: sh -c "yarn install && node index.js"
-
   crm-service:
     build:
       context: ../../services/crm-service
       dockerfile: docker/Dockerfile.dev
     volumes:
       - ../../services/crm-service:/app
+      - crm_vendor:/app/vendor
 
   organization-service:
     build:
@@ -42,6 +36,17 @@ services:
       args:
         SERVICE_NAME: booking-service
         SERVICE_PORT: 7040
+    volumes:
+      - ../../:/workspace
+      - workspace_node_modules:/workspace/node_modules
+
+  finance-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.dev
+      args:
+        SERVICE_NAME: finance-service
+        SERVICE_PORT: 7170
     volumes:
       - ../../:/workspace
       - workspace_node_modules:/workspace/node_modules
@@ -273,5 +278,6 @@ services:
       WATCHPACK_POLLING: "true"
 
 volumes:
+  crm_vendor:
   workspace_node_modules:
   frontend_node_modules:

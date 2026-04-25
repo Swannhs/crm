@@ -65,6 +65,18 @@ services:
       PORT: ${BOOKING_SERVICE_PORT:-7040}
     restart: unless-stopped
 
+  finance-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.prod
+      args:
+        SERVICE_NAME: finance-service
+        SERVICE_PORT: 7170
+    environment:
+      NODE_ENV: production
+      PORT: ${FINANCE_SERVICE_PORT:-7170}
+    restart: unless-stopped
+
   api-router-service:
     build:
       context: ../..
