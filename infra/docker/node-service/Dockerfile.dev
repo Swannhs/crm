@@ -14,4 +14,11 @@ RUN apk add --no-cache openssl libc6-compat \
 
 EXPOSE ${SERVICE_PORT}
 
-CMD ["sh", "-c", "set -e; cd /workspace; mkdir -p node_modules; INSTALL_STAMP=/workspace/node_modules/.install-complete; INSTALL_LOCK=/workspace/node_modules/.install-lock; if [ ! -f \"$INSTALL_STAMP\" ]; then if mkdir \"$INSTALL_LOCK\" 2>/dev/null; then trap 'rmdir \"$INSTALL_LOCK\" 2>/dev/null || true' EXIT; corepack yarn install --network-timeout 600000; date > \"$INSTALL_STAMP\"; rmdir \"$INSTALL_LOCK\" 2>/dev/null || true; trap - EXIT; else until [ -f \"$INSTALL_STAMP\" ]; do echo \"Waiting for shared workspace install to finish...\"; sleep 2; done; fi; fi; SCHEMA=/workspace/services/${SERVICE_NAME}/prisma/schema.prisma; if [ -f \"$SCHEMA\" ]; then /workspace/node_modules/.bin/prisma generate --schema \"$SCHEMA\"; /workspace/node_modules/.bin/prisma db push --skip-generate --schema \"$SCHEMA\"; fi; cd services/${SERVICE_NAME}; if [ -f src/index.ts ]; then exec /workspace/node_modules/.bin/tsx src/index.ts; fi; exec corepack yarn dev"]
+ENV SHARED_INSTALL_TIMEOUT_SECONDS=1800
+ENV SHARED_INSTALL_STALE_SECONDS=180
+ENV SHARED_INSTALL_POLL_SECONDS=2
+
+COPY infra/docker/node-service/entrypoint.dev.sh /usr/local/bin/node-service-dev-entrypoint.sh
+RUN chmod +x /usr/local/bin/node-service-dev-entrypoint.sh
+
+CMD ["/usr/local/bin/node-service-dev-entrypoint.sh"]

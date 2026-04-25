@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
 set -eu
 
+if [ ! -f /app/vendor/autoload.php ]; then
+  echo "Composer dependencies missing; installing..."
+  composer install --prefer-dist --no-interaction
+fi
+
 if [ -n "${DB_HOST:-}" ]; then
   echo "Waiting for Postgres at ${DB_HOST}:${DB_PORT:-5432}..."
   php -r '
@@ -16,7 +21,7 @@ if [ -n "${DB_HOST:-}" ]; then
         new PDO($dsn, $user, $pass);
         break;
       } catch (Throwable $e) {
-        if (time() - $start > 60) { fwrite(STDERR, "DB not ready after 60s\n"); exit(1); }
+        if (time() - $start > 180) { fwrite(STDERR, "DB not ready after 180s\n"); exit(1); }
         usleep(250000);
       }
     }
@@ -26,4 +31,3 @@ fi
 php artisan migrate --force
 
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-8010}"
-

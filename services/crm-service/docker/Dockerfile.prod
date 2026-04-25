@@ -13,6 +13,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && docker-php-ext-install pdo_pgsql
 
+COPY --from=vendor /usr/bin/composer /usr/bin/composer
 COPY --from=vendor /app/vendor /app/vendor
 COPY . .
 

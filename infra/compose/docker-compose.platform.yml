@@ -1,0 +1,104 @@
+# Platform services: auth, messaging, cache, and legacy monolith runtime.
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.1
+    container_name: ms-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_DB: mysql
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_PORT: 3306
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../auth/keycloak/realm:/opt/keycloak/data/import:ro
+      - ../../auth/keycloak/themes:/opt/keycloak/themes:ro
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: ms-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    ports:
+      - "9092:9092"
+
+  redis:
+    image: redis:7-alpine
+    container_name: ms-redis
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: mongo:6.0
+    container_name: ms-monolith-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../data/mongo:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  monolith:
+    container_name: ms-monolith
+    image: node:16-alpine
+    working_dir: /app
+    volumes:
+      - ../../../server:/app
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://mongo:27017/mymanager
+      APPNAME: api
+      GCLOUD_PROJECT: local-dev
+      GCS_BUCKET: local-dev-bucket
+      GCS_FOLDER: uploads
+      GCS_TYPE: service_account
+      GCS_PROJECT_ID: local-dev
+      GCS_PRIVATE_KEY_ID: local-dev-key
+      GCS_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nlocal-dev\\n-----END PRIVATE KEY-----\\n"
+      GCS_CLIENT_EMAIL: local-dev@example.com
+      GCS_CLIENT_ID: local-dev-client
+      GCS_AUTH_URI: https://accounts.google.com/o/oauth2/auth
+      GCS_TOKEN_URI: https://oauth2.googleapis.com/token
+      GCS_AUTH_PROVIDER_X509_CERT_URL: https://www.googleapis.com/oauth2/v1/certs
+      GCS_CLIENT_X509_CERT_URL: https://www.googleapis.com/robot/v1/metadata/x509/local-dev%40example.com
+      TWILIO_ACCOUNT_SID: AC00000000000000000000000000000000
+      TWILIO_AUTH_TOKEN: local-dev-token
+      STRIPE_SECRET_KEY: sk_test_local_dev
+      TOKEN_SECRET_KEY: local-dev-token-secret
+      S3_ACCESSKEY: local-dev-access
+      S3_SECRET: local-dev-secret
+      S3_BUCKET: local-dev-bucket
+      SENDGRID_API_KEY: SG.local-dev
+      NODE_ENV: production
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    command: sh -c "yarn install --frozen-lockfile || yarn install && node index.js"
+
