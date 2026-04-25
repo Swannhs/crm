@@ -72,6 +72,8 @@ coverage/
 .pids
 .logs
 .hyperwatch
+infra/data/
+services/finance-service/generated/
 services/magento-service/*
 !services/magento-service/docker/
 !services/magento-service/docker/Dockerfile.dev
