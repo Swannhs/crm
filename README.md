@@ -5,7 +5,8 @@
 This directory contains the new microservices-based backend for **mymanager**.
 
 **Core building blocks**
-- API Gateway: **KrakenD** (`microservices/gateway/krakend`)
+- API Gateway: **Nginx** (`gateway/nginx/nginx.conf`)
+- Legacy gateway config (compat only): **KrakenD** (`gateway/krakend/krakend.json`)
 - AuthN/AuthZ: **Keycloak** (`microservices/auth/keycloak`)
 - Event-driven backbone: **RabbitMQ** (local via compose; Kubernetes manifests planned)
 - Container orchestration: **Kubernetes** (`microservices/infra/k8s` - starting scaffold)
@@ -16,6 +17,49 @@ The gateway validates the Keycloak JWT, then propagates identity context headers
 - `X-Org-Id` (from `org_id`)
 
 Services should rely on these headers for multi-tenant request scoping.
+
+## eCommerce / shop architecture
+
+Magento is the eCommerce system for this platform.
+
+Magento owns catalog, categories, cart, checkout, orders, payments, inventory, shipping, tax, and promotions.
+
+The CRM platform does not implement a separate shop-service for these responsibilities.
+
+CRM integrates with Magento through:
+
+- `services/magento-integration-service`
+- Nginx route: `/api/magento/*`
+- Magento REST/GraphQL APIs
+
+Magento runs as a separate Docker stack/project and is not included as runtime containers in this CRM compose stack.
+
+Canonical gateway route is `/api/magento/*`.
+Legacy `/api/shop/*` routes are deprecated compatibility aliases and should be migrated.
+Legacy `/api/integrations/magento/*` naming is also deprecated and now aliases to `/api/magento/*`.
+
+### Capability ownership
+
+| Capability | Source of truth |
+|---|---|
+| Products | Magento |
+| Categories | Magento |
+| Prices | Magento |
+| Cart | Magento |
+| Checkout | Magento |
+| Orders | Magento |
+| Payments | Magento/payment gateway |
+| Inventory | Magento |
+| Shipping | Magento |
+| Tax | Magento |
+| Promotions/coupons | Magento |
+| Contacts | CRM |
+| Companies | CRM |
+| Sales activities | CRM |
+| Customer notes/timeline | CRM |
+| Organization users/roles | Organization service |
+| Billing summaries/reporting | Billing service / synced Magento references |
+| Magento connection and sync state | Magento integration service |
 
 ## Docker Modes
 
@@ -86,7 +130,7 @@ docker compose -f microservices/infra/compose/docker-compose.yml up --build
 
 Key endpoints (defaults):
 - Keycloak: `http://localhost:8080` (admin/admin)
-- KrakenD: `http://localhost:8081`
+- Nginx gateway: `http://localhost:8081`
 
 Smoke tests:
 - `GET http://localhost:8081/health`

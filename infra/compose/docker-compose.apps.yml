@@ -295,6 +295,25 @@ services:
     ports:
       - "7140:7140"
 
+  magento-integration-service:
+    container_name: ms-magento-integration-service
+    environment:
+      PORT: 7190
+      CRM_SERVICE_URL: http://crm-service:8010
+      BILLING_SERVICE_URL: http://billing-service:7020
+      # Magento itself runs in a separate docker project/stack.
+      # Set this to a reachable Magento base URL, e.g. http://host.docker.internal:8088
+      MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-}
+      MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
+      MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
+    depends_on:
+      crm-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
+    ports:
+      - "7190:7190"
+
   scoring-service:
     container_name: ms-scoring-service
     environment:

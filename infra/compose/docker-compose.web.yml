@@ -22,6 +22,7 @@ services:
       - notification-service
       - marketing-service
       - integrations-service
+      - magento-integration-service
       - realtime-service
       - deal-service
       - email-sync-service
@@ -35,4 +36,3 @@ services:
       - "3034:3034"
     depends_on:
       - nginx
-

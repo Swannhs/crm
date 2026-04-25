@@ -16,11 +16,10 @@ Status legend:
 | `invoice` | `/api/invoice/*` | `billing-service` (Node/Express) | partial |
 | `booking` | `/api/booking/*` | `booking-service` (Node/Express) | scaffolded |
 | `community` | `/api/community/*` | `community-service` (Node/Express) | planned |
-| `shopv2` | `/api/shopv2/*` | `commerce-service` (Node/Express) | planned |
+| `shopv2` | `/api/shopv2/*` | Deprecated legacy mapping (migrate to Magento storefront APIs and `/api/magento/*` admin integration) | planned-deprecated |
 | `user` | `/api/user/*` | `identity-service` (Keycloak + thin BFF) | planned |
 
 ## Notes
 
 - We’ll keep KrakenD endpoints compatible with existing client calls (`/api/...`) while services evolve behind it.
 - For “done”, we also need background jobs + sockets parity (monolith uses Socket.IO namespace `/${APPNAME}`).
-

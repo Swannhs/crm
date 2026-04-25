@@ -227,6 +227,17 @@ services:
       - ../../:/workspace
       - workspace_node_modules:/workspace/node_modules
 
+  magento-integration-service:
+    build:
+      context: ../..
+      dockerfile: infra/docker/node-service/Dockerfile.dev
+      args:
+        SERVICE_NAME: magento-integration-service
+        SERVICE_PORT: 7190
+    volumes:
+      - ../../:/workspace
+      - workspace_node_modules:/workspace/node_modules
+
   scoring-service:
     build:
       context: ../..

@@ -192,135 +192,104 @@ export type ICommerceOrder = {
 };
 
 export const commerceService = {
+  // Canonical admin commerce route is /api/magento/*.
+  // This client is kept for UI compatibility while Magento is the eCommerce source of truth.
   getProducts: async (orgId?: string) => {
-    const response = await axios.get('/api/shop/products', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
-    const rows = response.data?.data ?? response.data ?? [];
-    return Array.isArray(rows) ? rows.map(normalizeProduct) : [];
+    const response = await axios.get('/api/magento/products', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
+    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
+    return rows.map((item: any) =>
+      normalizeProduct({
+        id: item?.id,
+        name: item?.name,
+        sku: item?.sku,
+        description: item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'description')?.value,
+        priceCents: Math.round(Number(item?.price ?? 0) * 100),
+        status: Number(item?.status) === 1 ? 'active' : 'disabled',
+      })
+    );
   },
 
   createProduct: async (orgId: string, data: any) => {
-    const payload = {
-      ...data,
-      category_id: data.categoryId || undefined,
-      price_cents: data.priceCents ?? data.price_cents ?? 0,
-      compare_at_price_cents: data.compareAtPriceCents ?? 0,
-      cost_cents: data.costCents ?? 0,
-      low_stock_threshold: data.lowStockThreshold ?? 5,
-      photos: Array.isArray(data.photos) ? data.photos : [],
-      tags: typeof data.tagsText === 'string'
-        ? data.tagsText.split(',').map((item: string) => item.trim()).filter(Boolean)
-        : data.tags ?? [],
-      variants: data.variants ?? [],
-      modifierGroups: data.modifierGroups ?? [],
-      status: data.status ?? 'active',
-    };
-    delete payload.priceCents;
-    delete payload.categoryId;
-    delete payload.compareAtPriceCents;
-    delete payload.costCents;
-    delete payload.lowStockThreshold;
-    delete payload.tagsText;
-
-    const response = await axios.post('/api/shop/products', payload, { headers: { 'X-Org-Id': orgId } });
-    return normalizeProduct(response.data?.data ?? response.data);
+    throw new Error('Product creation is owned by Magento. Use Magento admin/storefront tooling.');
   },
 
   updateProduct: async (orgId: string, id: string, data: any) => {
-    const payload = {
-      ...data,
-      category_id: data.categoryId || undefined,
-      price_cents: data.priceCents ?? data.price_cents ?? 0,
-      compare_at_price_cents: data.compareAtPriceCents ?? 0,
-      cost_cents: data.costCents ?? 0,
-      low_stock_threshold: data.lowStockThreshold ?? 5,
-      photos: Array.isArray(data.photos) ? data.photos : [],
-      tags: typeof data.tagsText === 'string'
-        ? data.tagsText.split(',').map((item: string) => item.trim()).filter(Boolean)
-        : data.tags ?? [],
-    };
-    delete payload.priceCents;
-    delete payload.categoryId;
-    delete payload.compareAtPriceCents;
-    delete payload.costCents;
-    delete payload.lowStockThreshold;
-    delete payload.tagsText;
-    const response = await axios.patch(`/api/shop/products/${id}`, payload, { headers: { 'X-Org-Id': orgId } });
-    return normalizeProduct(response.data?.data ?? response.data);
+    throw new Error('Product updates are owned by Magento. Use Magento admin/storefront tooling.');
   },
 
   deleteProduct: async (orgId: string, id: string) => {
-    const response = await axios.delete(`/api/shop/products/${id}`, { headers: { 'X-Org-Id': orgId } });
-    return response.data?.data ?? response.data;
+    throw new Error('Product deletion is owned by Magento. Use Magento admin/storefront tooling.');
   },
 
   getOrders: async (orgId?: string) => {
-    const response = await axios.get('/api/shop/orders', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
-    return response.data?.data ?? response.data ?? [];
+    const response = await axios.get('/api/magento/orders', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
+    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
+    return rows.map((order: any) => ({
+      id: String(order?.entity_id || order?.increment_id || ''),
+      totalAmountCents: Math.round(Number(order?.base_grand_total ?? order?.grand_total ?? 0) * 100),
+      status: String(order?.status || 'unknown'),
+      paymentStatus: String(order?.state || order?.status || 'unknown'),
+      items: Array.isArray(order?.items)
+        ? order.items.map((item: any) => ({
+            id: String(item?.item_id || ''),
+            productName: String(item?.name || ''),
+            quantity: Number(item?.qty_ordered ?? 0),
+            unitPriceCents: Math.round(Number(item?.price ?? 0) * 100),
+          }))
+        : [],
+    }));
   },
 
   createOrder: async (orgId: string, data: any) => {
-    const response = await axios.post('/api/shop/orders', data, { headers: { 'X-Org-Id': orgId } });
-    return response.data?.data ?? response.data;
+    throw new Error('Order creation/checkout is owned by Magento storefront APIs.');
   },
 
   getCategories: async (orgId?: string) => {
-    const response = await axios.get('/api/shop/categories', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
-    const rows = response.data?.data ?? response.data ?? [];
-    return Array.isArray(rows) ? rows.map(normalizeCategory) : [];
+    const response = await axios.post(
+      '/api/magento/rest',
+      {
+        method: 'GET',
+        path: '/rest/all/V1/categories',
+      },
+      { headers: orgId ? { 'X-Org-Id': orgId } : {} }
+    );
+    const root = response.data?.data ?? {};
+    const rows = Array.isArray(root?.children_data) ? root.children_data : [];
+    return rows.map((item: any) =>
+      normalizeCategory({
+        id: item?.id,
+        name: item?.name,
+        isActive: item?.is_active,
+      })
+    );
   },
 
   createCategory: async (orgId: string, data: any) => {
-    const response = await axios.post('/api/shop/categories', data, { headers: { 'X-Org-Id': orgId } });
-    return normalizeCategory(response.data?.data ?? response.data);
+    throw new Error('Category creation is owned by Magento. Use Magento admin/storefront tooling.');
   },
 
   updateCategory: async (orgId: string, id: string, data: any) => {
-    const response = await axios.patch(`/api/shop/categories/${id}`, data, { headers: { 'X-Org-Id': orgId } });
-    return normalizeCategory(response.data?.data ?? response.data);
+    throw new Error('Category updates are owned by Magento. Use Magento admin/storefront tooling.');
   },
 
   deleteCategory: async (orgId: string, id: string) => {
-    const response = await axios.delete(`/api/shop/categories/${id}`, { headers: { 'X-Org-Id': orgId } });
-    return response.data?.data ?? response.data;
+    throw new Error('Category deletion is owned by Magento. Use Magento admin/storefront tooling.');
   },
 
   getCoupons: async (orgId?: string) => {
-    const response = await axios.get('/api/shop/coupons', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
-    const rows = response.data?.data ?? response.data ?? [];
-    return Array.isArray(rows) ? rows.map(normalizeCoupon) : [];
+    throw new Error('Coupon/promotion data is owned by Magento and should be managed there.');
   },
 
   createCoupon: async (orgId: string, data: any) => {
-    const payload = {
-      ...data,
-      code: String(data.code || '').trim().toUpperCase(),
-      maxUsage: data.maxUsage === '' || data.maxUsage === undefined ? null : Number(data.maxUsage),
-      minOrderCents: Number(data.minOrderCents ?? 0),
-      value: Number(data.value ?? 0),
-      expiresAt: data.expiresAt || null,
-      isActive: data.isActive !== false,
-    };
-    const response = await axios.post('/api/shop/coupons', payload, { headers: { 'X-Org-Id': orgId } });
-    return normalizeCoupon(response.data?.data ?? response.data);
+    throw new Error('Coupon/promotion creation is owned by Magento.');
   },
 
   updateCoupon: async (orgId: string, id: string, data: any) => {
-    const payload = {
-      ...data,
-      code: String(data.code || '').trim().toUpperCase(),
-      maxUsage: data.maxUsage === '' || data.maxUsage === undefined ? null : Number(data.maxUsage),
-      minOrderCents: Number(data.minOrderCents ?? 0),
-      value: Number(data.value ?? 0),
-      expiresAt: data.expiresAt || null,
-      isActive: data.isActive !== false,
-    };
-    const response = await axios.patch(`/api/shop/coupons/${id}`, payload, { headers: { 'X-Org-Id': orgId } });
-    return normalizeCoupon(response.data?.data ?? response.data);
+    throw new Error('Coupon/promotion updates are owned by Magento.');
   },
 
   deleteCoupon: async (orgId: string, id: string) => {
-    const response = await axios.delete(`/api/shop/coupons/${id}`, { headers: { 'X-Org-Id': orgId } });
-    return response.data?.data ?? response.data;
+    throw new Error('Coupon/promotion deletion is owned by Magento.');
   },
 
   getProductImages: async () => {

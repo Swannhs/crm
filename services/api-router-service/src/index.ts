@@ -78,12 +78,6 @@ const domainRoutes: Record<string, string> = {
   "community-badges": "http://community-service:7030",
   "community-activity": "http://community-service:7030",
   "community-points": "http://community-service:7030",
-  "shopv2": "http://commerce-service:7060",
-  "cart": "http://commerce-service:7060",
-  "product": "http://commerce-service:7060",
-  "product-category": "http://commerce-service:7060",
-  "category": "http://commerce-service:7060",
-  "coupon": "http://commerce-service:7060",
   "document": "http://documents-service:7080",
   "documents": "http://documents-service:7080",
   "document-recipient": "http://documents-service:7080",
@@ -99,6 +93,15 @@ const domainRoutes: Record<string, string> = {
   "employee-timeoff-request": "http://employees-service:7070",
   "employee-attendance": "http://employees-service:7070"
 };
+
+const deprecatedCommerceModules = new Set([
+  "shopv2",
+  "cart",
+  "product",
+  "product-category",
+  "category",
+  "coupon",
+]);
 
 async function handleApiCompat(req: Request, res: Response) {
   const module = req.params.module;
@@ -128,6 +131,15 @@ async function handleApiCompat(req: Request, res: Response) {
           responseRate: 0,
           mentions: 0,
         },
+      });
+    }
+
+    if (deprecatedCommerceModules.has(module)) {
+      return res.status(410).json({
+        message: "Deprecated commerce compatibility module.",
+        module,
+        canonical: "/api/magento/* (CRM/admin integration)",
+        storefront: "Use Magento storefront/GraphQL APIs for public commerce flows.",
       });
     }
 

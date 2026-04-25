@@ -19,7 +19,7 @@ Your current system has **22 microservices** with solid foundations in contacts,
 | **marketing-service** | ✅ Active | Campaigns, Email, Automations, Forms | No journey builder, no A/B testing |
 | **projects-service** | ✅ Active | Boards, Cards, Tasks, Comments | No time tracking, no Gantt charts |
 | **employees-service** | ✅ Active | HR, Payroll, Attendance, Scheduling | No performance reviews, no recruiting |
-| **commerce-service** | ✅ Active | Products, Orders, Coupons, Carts | No inventory, no shipping |
+| **commerce-service** | ⚠️ Legacy/transition | Legacy commerce endpoints only (do not expand) | Magento is the eCommerce source of truth |
 | **pos-service** | ✅ Active | POS tables, orders, settings | No offline mode, no hardware integration |
 | **calendar-service** | ✅ Active | Calendars, Events, Recurring | No external sync (Google/Outlook) |
 | **community-service** | ✅ Active | Posts, Groups, Badges, Follows | No gamification engine |
