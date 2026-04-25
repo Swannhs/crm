@@ -64,6 +64,7 @@ export function DashboardLayout({ sx, children, data }: DashboardLayoutProps) {
       match: (path: string) =>
         path.startsWith('/dashboard/organizations') ||
         path.startsWith('/dashboard/settings') ||
+        path.startsWith('/dashboard/integrations') ||
         path.startsWith('/dashboard/domain') ||
         path.startsWith('/dashboard/white-label') ||
         path.startsWith('/dashboard/devices'),

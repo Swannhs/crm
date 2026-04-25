@@ -65,3 +65,21 @@ The frontend now has explicit Dockerfiles for each mode:
 Used by:
 - `yarn compose:web-test`
 - `yarn compose:prod`
+
+---
+
+## Magento frontend integration
+
+The frontend uses `/api/magento/*` for CRM/admin Magento integration.
+
+Magento is the eCommerce source of truth. The frontend should not use custom CRM shop-service APIs for catalog, cart, checkout, orders, payments, inventory, shipping, tax, or promotions.
+
+Admin Magento integration route:
+- `/integrations/magento`
+
+Canonical API base:
+- `/api/magento`
+
+Deprecated aliases:
+- `/api/shop`
+- `/api/integrations/magento`

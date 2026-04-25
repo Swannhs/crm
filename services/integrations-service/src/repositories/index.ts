@@ -41,6 +41,27 @@ export class IntegrationConnectionRepository {
     return db.integrationConnection.update({ where: { id }, data });
   }
 
+  async upsertByUserProvider(
+    userId: string,
+    provider: string,
+    data: Partial<IntegrationConnectionInput> & { organizationId?: string; isActive?: boolean }
+  ) {
+    const existing = await this.findByUserAndProvider(userId, provider);
+    if (existing) {
+      return db.integrationConnection.update({
+        where: { id: existing.id },
+        data,
+      });
+    }
+    return db.integrationConnection.create({
+      data: {
+        userId,
+        provider,
+        ...data,
+      },
+    });
+  }
+
   async deactivate(userId: string, provider: string) {
     return db.integrationConnection.updateMany({
       where: { userId, provider },

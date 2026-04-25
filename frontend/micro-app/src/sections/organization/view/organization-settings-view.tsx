@@ -14,7 +14,9 @@ import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import Link from 'next/link';
 
+import { paths } from 'src/routes/paths';
 import { organizationService } from 'src/services/organization-service';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -114,6 +116,19 @@ export function OrganizationSettingsView() {
               </Typography>
            </Grid>
            <Grid item xs={12} md={8}>
+                     <Card sx={{ p: 3, mb: 3 }}>
+                        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                           <Box>
+                              <Typography variant="h6">Magento Integration</Typography>
+                              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                 Magento is now the eCommerce source of truth for catalog, checkout, and orders.
+                              </Typography>
+                           </Box>
+                           <Button component={Link} href={paths.public.magentoIntegration} variant="contained">
+                              Open Magento
+                           </Button>
+                        </Stack>
+                     </Card>
               <IntegrationAdp />
            </Grid>
         </Grid>

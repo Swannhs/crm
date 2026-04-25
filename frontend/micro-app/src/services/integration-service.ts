@@ -1,4 +1,15 @@
 import axios from 'src/utils/axios';
+import {
+  connectMagento,
+  disconnectMagento,
+  getMagentoConnection,
+  getMagentoCustomers,
+  getMagentoOrders,
+  getMagentoProducts,
+  getMagentoStores,
+  syncMagentoCustomers,
+  syncMagentoOrders,
+} from 'src/services/magento-service';
 
 // ----------------------------------------------------------------------
 
@@ -25,47 +36,81 @@ export const integrationService = {
     password?: string;
     storeCode?: string;
   }) => {
-    const response = await axios.post('/api/magento/connect', payload);
-    return response.data?.data ?? response.data;
+    if (!payload.accessToken) {
+      throw new Error('Access token is required to connect Magento.');
+    }
+
+    return connectMagento({
+      baseUrl: payload.baseUrl,
+      accessToken: payload.accessToken,
+      storeCode: payload.storeCode,
+    });
   },
 
   getMagentoConnection: async () => {
-    const response = await axios.get('/api/magento/connection');
-    return response.data?.data ?? response.data;
+    return getMagentoConnection();
   },
 
   disconnectMagento: async () => {
-    const response = await axios.post('/api/magento/disconnect');
-    return response.data?.data ?? response.data;
+    return disconnectMagento();
   },
 
   getMagentoStores: async () => {
-    const response = await axios.get('/api/magento/stores');
-    return response.data?.data ?? response.data;
+    return getMagentoStores();
   },
 
   getMagentoProducts: async (params?: { pageSize?: number; currentPage?: number; search?: string }) => {
-    const response = await axios.get('/api/magento/products', { params });
-    return response.data?.data ?? response.data;
+    return getMagentoProducts({
+      page: params?.currentPage,
+      pageSize: params?.pageSize,
+      search: params?.search,
+    });
   },
 
-  getMagentoOrders: async (params?: { pageSize?: number; currentPage?: number }) => {
-    const response = await axios.get('/api/magento/orders', { params });
-    return response.data?.data ?? response.data;
+  getMagentoOrders: async (params?: { pageSize?: number; currentPage?: number; status?: string; search?: string }) => {
+    return getMagentoOrders({
+      page: params?.currentPage,
+      pageSize: params?.pageSize,
+      status: params?.status,
+      search: params?.search,
+    });
   },
 
-  getMagentoCustomers: async (params?: { pageSize?: number; currentPage?: number }) => {
-    const response = await axios.get('/api/magento/customers', { params });
-    return response.data?.data ?? response.data;
+  getMagentoCustomers: async (params?: { pageSize?: number; currentPage?: number; search?: string }) => {
+    return getMagentoCustomers({
+      page: params?.currentPage,
+      pageSize: params?.pageSize,
+      search: params?.search,
+    });
   },
 
-  syncMagentoCustomers: async (payload?: { pageSize?: number; currentPage?: number; dryRun?: boolean }) => {
-    const response = await axios.post('/api/magento/sync/customers', payload ?? {});
-    return response.data?.data ?? response.data;
+  syncMagentoCustomers: async (payload?: {
+    pageSize?: number;
+    currentPage?: number;
+    dryRun?: boolean;
+    since?: string;
+    push?: boolean;
+  }) => {
+    return syncMagentoCustomers({
+      dryRun: payload?.dryRun,
+      limit: payload?.pageSize,
+      since: payload?.since,
+      push: payload?.push,
+    });
   },
 
-  syncMagentoOrders: async (payload?: { pageSize?: number; currentPage?: number; dryRun?: boolean }) => {
-    const response = await axios.post('/api/magento/sync/orders', payload ?? {});
-    return response.data?.data ?? response.data;
+  syncMagentoOrders: async (payload?: {
+    pageSize?: number;
+    currentPage?: number;
+    dryRun?: boolean;
+    since?: string;
+    push?: boolean;
+  }) => {
+    return syncMagentoOrders({
+      dryRun: payload?.dryRun,
+      limit: payload?.pageSize,
+      since: payload?.since,
+      push: payload?.push,
+    });
   },
 };

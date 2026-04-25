@@ -19,6 +19,7 @@ import type {
   ZoomIntegrationInput,
   ZoomMeetingInput,
   ShopifyStoreInput,
+  MagentoIntegrationInput,
   UberEatsConfigInput,
   EasyPostConfigInput,
   UserIntegrationSettingsInput,
@@ -290,6 +291,150 @@ export class ShopifyIntegrationService {
 
   async createOrder(storeId: string, orderData: any) {
     return { orderId: '', success: true };
+  }
+}
+
+export class MagentoIntegrationService {
+  private connRepo = new IntegrationConnectionRepository();
+
+  private normalizeBaseUrl(baseUrl: string) {
+    return baseUrl.replace(/\/+$/, "");
+  }
+
+  private async resolveAccessToken(input: MagentoIntegrationInput) {
+    if (input.accessToken) return input.accessToken;
+    if (!input.username || !input.password) {
+      throw new Error("Either accessToken or username/password is required");
+    }
+
+    const baseUrl = this.normalizeBaseUrl(input.baseUrl);
+    const response = await fetch(`${baseUrl}/rest/V1/integration/admin/token`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ username: input.username, password: input.password }),
+    });
+    if (!response.ok) {
+      throw new Error(`Magento auth failed (${response.status})`);
+    }
+    const token = await response.json();
+    if (!token || typeof token !== "string") {
+      throw new Error("Magento auth returned invalid token");
+    }
+    return token;
+  }
+
+  private async requestMagento(
+    baseUrl: string,
+    accessToken: string,
+    path: string,
+    query: Record<string, string | number | undefined> = {}
+  ) {
+    const url = new URL(`${this.normalizeBaseUrl(baseUrl)}${path}`);
+    for (const [key, value] of Object.entries(query)) {
+      if (value === undefined || value === null || value === "") continue;
+      url.searchParams.set(key, String(value));
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Magento API error (${response.status}): ${text.slice(0, 300)}`);
+    }
+    return response.json();
+  }
+
+  async connect(userId: string, organizationId: string | undefined, data: MagentoIntegrationInput) {
+    const baseUrl = this.normalizeBaseUrl(data.baseUrl);
+    const accessToken = await this.resolveAccessToken(data);
+    const storeCode = data.storeCode || "default";
+
+    const connection = await this.connRepo.upsertByUserProvider(userId, "magento", {
+      organizationId,
+      accessToken,
+      accountId: baseUrl,
+      accountName: `Magento (${storeCode})`,
+      metadata: {
+        baseUrl,
+        storeCode,
+      },
+      isActive: true,
+    });
+
+    return connection;
+  }
+
+  async getConnection(userId: string) {
+    return this.connRepo.findByUserAndProvider(userId, "magento");
+  }
+
+  async disconnect(userId: string) {
+    return this.connRepo.deactivate(userId, "magento");
+  }
+
+  private async getConnectionOrThrow(userId: string) {
+    const connection = await this.connRepo.findByUserAndProvider(userId, "magento");
+    if (!connection || !connection.accessToken) {
+      throw new Error("Magento connection not found");
+    }
+    const metadata = (connection.metadata || {}) as { baseUrl?: string; storeCode?: string };
+    if (!metadata.baseUrl) throw new Error("Magento connection baseUrl is missing");
+    return {
+      baseUrl: this.normalizeBaseUrl(metadata.baseUrl),
+      accessToken: connection.accessToken,
+      storeCode: metadata.storeCode || "default",
+    };
+  }
+
+  async getStores(userId: string) {
+    const connection = await this.getConnectionOrThrow(userId);
+    return this.requestMagento(connection.baseUrl, connection.accessToken, "/rest/all/V1/store/storeConfigs");
+  }
+
+  async getProducts(userId: string, pageSize = 50, currentPage = 1, search = "") {
+    const connection = await this.getConnectionOrThrow(userId);
+    const query: Record<string, string | number | undefined> = {
+      "searchCriteria[pageSize]": pageSize,
+      "searchCriteria[currentPage]": currentPage,
+    };
+    if (search) {
+      query["searchCriteria[filter_groups][0][filters][0][field]"] = "name";
+      query["searchCriteria[filter_groups][0][filters][0][value]"] = `%${search}%`;
+      query["searchCriteria[filter_groups][0][filters][0][condition_type]"] = "like";
+    }
+    return this.requestMagento(
+      connection.baseUrl,
+      connection.accessToken,
+      `/rest/${connection.storeCode}/V1/products`,
+      query
+    );
+  }
+
+  async getOrders(userId: string, pageSize = 50, currentPage = 1) {
+    const connection = await this.getConnectionOrThrow(userId);
+    return this.requestMagento(connection.baseUrl, connection.accessToken, `/rest/${connection.storeCode}/V1/orders`, {
+      "searchCriteria[pageSize]": pageSize,
+      "searchCriteria[currentPage]": currentPage,
+      "searchCriteria[sortOrders][0][field]": "created_at",
+      "searchCriteria[sortOrders][0][direction]": "DESC",
+    });
+  }
+
+  async getCustomers(userId: string, pageSize = 50, currentPage = 1) {
+    const connection = await this.getConnectionOrThrow(userId);
+    return this.requestMagento(
+      connection.baseUrl,
+      connection.accessToken,
+      `/rest/${connection.storeCode}/V1/customers/search`,
+      {
+        "searchCriteria[pageSize]": pageSize,
+        "searchCriteria[currentPage]": currentPage,
+      }
+    );
   }
 }
 

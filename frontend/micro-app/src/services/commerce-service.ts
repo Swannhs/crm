@@ -210,15 +210,15 @@ export const commerceService = {
   },
 
   createProduct: async (orgId: string, data: any) => {
-    throw new Error('Product creation is owned by Magento. Use Magento admin/storefront tooling.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   updateProduct: async (orgId: string, id: string, data: any) => {
-    throw new Error('Product updates are owned by Magento. Use Magento admin/storefront tooling.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   deleteProduct: async (orgId: string, id: string) => {
-    throw new Error('Product deletion is owned by Magento. Use Magento admin/storefront tooling.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   getOrders: async (orgId?: string) => {
@@ -241,7 +241,7 @@ export const commerceService = {
   },
 
   createOrder: async (orgId: string, data: any) => {
-    throw new Error('Order creation/checkout is owned by Magento storefront APIs.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   getCategories: async (orgId?: string) => {
@@ -265,15 +265,15 @@ export const commerceService = {
   },
 
   createCategory: async (orgId: string, data: any) => {
-    throw new Error('Category creation is owned by Magento. Use Magento admin/storefront tooling.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   updateCategory: async (orgId: string, id: string, data: any) => {
-    throw new Error('Category updates are owned by Magento. Use Magento admin/storefront tooling.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   deleteCategory: async (orgId: string, id: string) => {
-    throw new Error('Category deletion is owned by Magento. Use Magento admin/storefront tooling.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   getCoupons: async (orgId?: string) => {
@@ -281,15 +281,15 @@ export const commerceService = {
   },
 
   createCoupon: async (orgId: string, data: any) => {
-    throw new Error('Coupon/promotion creation is owned by Magento.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   updateCoupon: async (orgId: string, id: string, data: any) => {
-    throw new Error('Coupon/promotion updates are owned by Magento.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   deleteCoupon: async (orgId: string, id: string) => {
-    throw new Error('Coupon/promotion deletion is owned by Magento.');
+    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
   getProductImages: async () => {

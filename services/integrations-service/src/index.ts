@@ -9,6 +9,7 @@ import {
   LinkedInController,
   TikTokController,
   ShopifyController,
+  MagentoController,
   UberEatsController,
   EasyPostController,
   UserIntegrationSettingsController,
@@ -34,6 +35,7 @@ const instagramCtrl = new InstagramController();
 const linkedinCtrl = new LinkedInController();
 const tiktokCtrl = new TikTokController();
 const shopifyCtrl = new ShopifyController();
+const magentoCtrl = new MagentoController();
 const uberEatsCtrl = new UberEatsController();
 const easyPostCtrl = new EasyPostController();
 const settingsCtrl = new UserIntegrationSettingsController();
@@ -95,6 +97,15 @@ app.post("/v1/integrations/tiktok/video", auth, (req, res) => tiktokCtrl.createV
 app.post("/v1/integrations/shopify/connect", auth, (req, res) => shopifyCtrl.connect(cast(req), res));
 app.get("/v1/integrations/shopify/stores", auth, (req, res) => shopifyCtrl.getStores(cast(req), res));
 app.get("/v1/integrations/shopify/products", auth, (req, res) => shopifyCtrl.getProducts(cast(req), res));
+
+// --- Magento ---
+app.post("/v1/integrations/magento/connect", auth, (req, res) => magentoCtrl.connect(cast(req), res));
+app.get("/v1/integrations/magento", auth, (req, res) => magentoCtrl.getConnection(cast(req), res));
+app.post("/v1/integrations/magento/disconnect", auth, (req, res) => magentoCtrl.disconnect(cast(req), res));
+app.get("/v1/integrations/magento/stores", auth, (req, res) => magentoCtrl.getStores(cast(req), res));
+app.get("/v1/integrations/magento/products", auth, (req, res) => magentoCtrl.getProducts(cast(req), res));
+app.get("/v1/integrations/magento/orders", auth, (req, res) => magentoCtrl.getOrders(cast(req), res));
+app.get("/v1/integrations/magento/customers", auth, (req, res) => magentoCtrl.getCustomers(cast(req), res));
 
 // --- Uber Eats ---
 app.post("/v1/integrations/uber-eats/connect", auth, (req, res) => uberEatsCtrl.connect(cast(req), res));

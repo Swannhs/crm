@@ -8,6 +8,7 @@ import {
   LinkedInIntegrationService,
   TikTokIntegrationService,
   ShopifyIntegrationService,
+  MagentoIntegrationService,
   UberEatsIntegrationService,
   EasyPostIntegrationService,
   WhatsAppService,
@@ -327,6 +328,92 @@ export class ShopifyController {
       const { storeId } = req.query;
       const products = await this.svc.getProducts(storeId as string);
       return res.json({ success: true, data: products });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class MagentoController {
+  private svc = new MagentoIntegrationService();
+
+  async connect(req: AuthenticatedRequest, res: Response) {
+    try {
+      const { baseUrl, accessToken, username, password, storeCode } = req.body;
+      if (!baseUrl) {
+        return res.status(400).json({ success: false, message: "baseUrl is required" });
+      }
+
+      const connection = await this.svc.connect(req.identity.userId, req.identity.orgId, {
+        baseUrl,
+        accessToken,
+        username,
+        password,
+        storeCode,
+        isActive: true,
+      });
+      return res.status(201).json({ success: true, data: connection });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getConnection(req: AuthenticatedRequest, res: Response) {
+    try {
+      const connection = await this.svc.getConnection(req.identity.userId);
+      return res.json({ success: true, data: connection });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async disconnect(req: AuthenticatedRequest, res: Response) {
+    try {
+      await this.svc.disconnect(req.identity.userId);
+      return res.json({ success: true, message: "Magento disconnected" });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getStores(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getStores(req.identity.userId);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getProducts(req: AuthenticatedRequest, res: Response) {
+    try {
+      const pageSize = Number(req.query.pageSize || 50);
+      const currentPage = Number(req.query.currentPage || 1);
+      const search = String(req.query.search || "");
+      const data = await this.svc.getProducts(req.identity.userId, pageSize, currentPage, search);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getOrders(req: AuthenticatedRequest, res: Response) {
+    try {
+      const pageSize = Number(req.query.pageSize || 50);
+      const currentPage = Number(req.query.currentPage || 1);
+      const data = await this.svc.getOrders(req.identity.userId, pageSize, currentPage);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getCustomers(req: AuthenticatedRequest, res: Response) {
+    try {
+      const pageSize = Number(req.query.pageSize || 50);
+      const currentPage = Number(req.query.currentPage || 1);
+      const data = await this.svc.getCustomers(req.identity.userId, pageSize, currentPage);
+      return res.json({ success: true, data });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
     }

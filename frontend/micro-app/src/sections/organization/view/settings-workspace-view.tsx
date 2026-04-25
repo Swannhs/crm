@@ -47,6 +47,7 @@ export function SettingsWorkspaceView({ tab = 'general' }: Props) {
         { href: paths.dashboard.settingsTab('billing'), label: 'Billing' },
         { href: paths.dashboard.settingsTab('advance'), label: 'Advance' },
         { href: paths.dashboard.settingsTab('smartList'), label: 'Smart List' },
+        { href: paths.public.magentoIntegration, label: 'Integrations -> Magento' },
       ]}
     >
       <Grid container spacing={3}>

@@ -43,6 +43,15 @@ export interface ShopifyStoreInput {
   isActive?: boolean;
 }
 
+export interface MagentoIntegrationInput {
+  baseUrl: string;
+  accessToken?: string;
+  username?: string;
+  password?: string;
+  storeCode?: string;
+  isActive?: boolean;
+}
+
 export interface UberEatsConfigInput {
   storeId?: string;
   accessToken?: string;
@@ -94,6 +103,7 @@ export type IntegrationProvider =
   | 'tiktok' 
   | 'zoom' 
   | 'shopify' 
+  | 'magento'
   | 'uber' 
   | 'uber-eats' 
   | 'easypost'
