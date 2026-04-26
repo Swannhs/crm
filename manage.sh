@@ -175,10 +175,8 @@ case $CMD in
         info "Starting $ENV environment..."
         if [ "$ENV" = "dev" ] && [ "$#" -eq 0 ]; then
             DB_SERVICES=(
-                keycloak-db community-db commerce-db organization-db booking-db
-                finance-db documents-db payments-db notification-db employees-db marketing-db projects-db
-                calendar-db pos-db automation-db device-db file-db integrations-db realtime-db
-                scoring-db deal-db email-sync-db
+                keycloak-db organization-db integrations-db realtime-db
+                email-sync-db odoo-integration-db magento-integration-db
             )
             CORE_SERVICES=(kafka redis api-router-service)
             APP_SERVICES=()
@@ -230,15 +228,7 @@ case $CMD in
             -v "$ROOT_DIR:/repo" \
             -w /repo \
             -e SEED_ORG_HOST=ms-organization-service \
-            -e SEED_PROJECTS_HOST=ms-projects-service \
-            -e SEED_DEAL_HOST=ms-deal-service \
             -e SEED_EMAIL_SYNC_HOST=ms-email-sync-service \
-            -e SEED_CALENDAR_HOST=ms-calendar-service \
-            -e SEED_DOCUMENTS_HOST=ms-documents-service \
-            -e SEED_EMPLOYEES_HOST=ms-employees-service \
-            -e SEED_POS_HOST=ms-pos-service \
-            -e SEED_NOTIFICATION_HOST=ms-notification-service \
-            -e SEED_SCORING_HOST=ms-scoring-service \
             -e KEYCLOAK_URL=http://ms-keycloak:8080 \
             node:24-alpine \
             sh -c "node scripts/seed-keycloak.cjs && node scripts/seed.cjs"

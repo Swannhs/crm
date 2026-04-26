@@ -1,72 +1,98 @@
-# Odoo Integration Service
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
-This service is the integration bridge between the CRM platform and Odoo.
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-## Scope
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-- Odoo connection management
-- Odoo read APIs for contacts, companies, leads, opportunities, sales orders, invoices, products, inventory
-- Magento-to-Odoo sync orchestration (customers and orders)
+## Description
 
-This service does not replace Odoo business logic.
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Environment
+## Project setup
 
-- `PORT` (default `7200`)
-- `ODOO_BASE_URL` (default `http://odoo:8069`)
-- `ODOO_DB`
-- `ODOO_USERNAME`
-- `ODOO_PASSWORD`
-- `ODOO_API_KEY` (preferred over password when available)
-- `MAGENTO_API_BASE_URL` (default `http://magento-integration-service:7190`)
+```bash
+$ npm install
+```
 
-## Routes
+## Compile and run the project
 
-- `GET /health`
-- `GET /v1/odoo/connection`
-- `POST /v1/odoo/connect`
-- `POST /v1/odoo/disconnect`
-- `GET /v1/odoo/contacts`
-- `GET /v1/odoo/companies`
-- `GET /v1/odoo/leads`
-- `GET /v1/odoo/opportunities`
-- `GET /v1/odoo/sales-orders`
-- `GET /v1/odoo/invoices`
-- `GET /v1/odoo/products`
-- `GET /v1/odoo/inventory`
-- `POST /v1/odoo/sync/magento/customers`
-- `POST /v1/odoo/sync/magento/orders`
-- `POST /v1/odoo/sync/magento/all`
+```bash
+# development
+$ npm run start
 
-All `/v1/*` routes require:
+# watch mode
+$ npm run start:dev
 
-- `Authorization: Bearer <token>`
-- `X-Org-Id: <org-id>`
-- `X-User-Id: <user-id>`
+# production mode
+$ npm run start:prod
+```
 
-Read endpoints allow:
+## Run tests
 
-- `org_viewer`, `org_staff`, `org_manager`, `org_admin`, `org_owner`
+```bash
+# unit tests
+$ npm run test
 
-Connect/disconnect/sync endpoints allow:
+# e2e tests
+$ npm run test:e2e
 
-- `org_manager`, `org_admin`, `org_owner`
+# test coverage
+$ npm run test:cov
+```
 
-## Sync behavior
+## Deployment
 
-- `dryRun` defaults to `true`
-- Push sync requires explicit `dryRun: false` and `push: true`
-- Customer idempotency key: `ref = magento:{customer_id}`
-- Order idempotency key: `client_order_ref = magento:{increment_id}`
-- First version does not auto-post invoices or auto-capture payments
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-## Security notes
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 
-- Credentials are env-backed, with optional in-memory org-level override via `/connect`.
-- `/connect` in this version stores org credentials in process memory only.
-- In-memory credentials are plaintext in RAM, not persisted, and are lost on restart.
-- This is not production-safe credential storage; use encrypted secret storage before production use.
-- Prefer env-only credentials in deployed environments.
-- The service never returns Odoo password or API key.
-- Do not log sensitive credentials.
-- TODO: Production must not trust public user-supplied `X-User-Id`/`X-Org-Id`; verified auth layer must set trusted identity headers.
+```bash
+$ npm install -g @nestjs/mau
+$ mau deploy
+```
+
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+
+## Resources
+
+Check out a few resources that may come in handy when working with NestJS:
+
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).

@@ -15,7 +15,8 @@ import {
   TelegramService,
   UserIntegrationSettingsService,
   MetaIntegrationService,
-  VoiceIntegrationService
+  VoiceIntegrationService,
+  OdooIntegrationService
 } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
@@ -344,7 +345,7 @@ export class MagentoController {
         return res.status(400).json({ success: false, message: "baseUrl is required" });
       }
 
-      const connection = await this.svc.connect(req.identity.userId, req.identity.orgId, {
+      const connection = await this.svc.connect(req.identity, {
         baseUrl,
         accessToken,
         username,
@@ -369,7 +370,7 @@ export class MagentoController {
 
   async disconnect(req: AuthenticatedRequest, res: Response) {
     try {
-      await this.svc.disconnect(req.identity.userId);
+      await this.svc.disconnect(req.identity);
       return res.json({ success: true, message: "Magento disconnected" });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -378,7 +379,7 @@ export class MagentoController {
 
   async getStores(req: AuthenticatedRequest, res: Response) {
     try {
-      const data = await this.svc.getStores(req.identity.userId);
+      const data = await this.svc.getStores(req.identity);
       return res.json({ success: true, data });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -390,7 +391,7 @@ export class MagentoController {
       const pageSize = Number(req.query.pageSize || 50);
       const currentPage = Number(req.query.currentPage || 1);
       const search = String(req.query.search || "");
-      const data = await this.svc.getProducts(req.identity.userId, pageSize, currentPage, search);
+      const data = await this.svc.getProducts(req.identity, pageSize, currentPage, search);
       return res.json({ success: true, data });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -401,7 +402,7 @@ export class MagentoController {
     try {
       const pageSize = Number(req.query.pageSize || 50);
       const currentPage = Number(req.query.currentPage || 1);
-      const data = await this.svc.getOrders(req.identity.userId, pageSize, currentPage);
+      const data = await this.svc.getOrders(req.identity, pageSize, currentPage);
       return res.json({ success: true, data });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -412,7 +413,7 @@ export class MagentoController {
     try {
       const pageSize = Number(req.query.pageSize || 50);
       const currentPage = Number(req.query.currentPage || 1);
-      const data = await this.svc.getCustomers(req.identity.userId, pageSize, currentPage);
+      const data = await this.svc.getCustomers(req.identity, pageSize, currentPage);
       return res.json({ success: true, data });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -671,6 +672,69 @@ export class WebhookController {
       return res.json({ success: true });
     } catch (err: any) {
       return res.json({ success: true });
+    }
+  }
+}
+
+export class OdooController {
+  private svc = new OdooIntegrationService();
+
+  async connect(req: AuthenticatedRequest, res: Response) {
+    try {
+      const connection = await this.svc.connect(req.identity, req.body);
+      return res.status(201).json({ success: true, data: connection });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getConnection(req: AuthenticatedRequest, res: Response) {
+    try {
+      const connection = await this.svc.getConnection(req.identity.userId);
+      return res.json({ success: true, data: connection });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async disconnect(req: AuthenticatedRequest, res: Response) {
+    try {
+      await this.svc.disconnect(req.identity);
+      return res.json({ success: true, message: 'Odoo disconnected' });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getContacts(req: AuthenticatedRequest, res: Response) {
+    try {
+      const page = Number(req.query.page || 1);
+      const pageSize = Number(req.query.pageSize || 50);
+      const search = String(req.query.search || '');
+      const data = await this.svc.getContacts(req.identity, page, pageSize, search);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async getInvoices(req: AuthenticatedRequest, res: Response) {
+    try {
+      const page = Number(req.query.page || 1);
+      const pageSize = Number(req.query.pageSize || 50);
+      const data = await this.svc.getInvoices(req.identity, page, pageSize);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async syncMagento(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.syncMagento(req.identity, req.body);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
     }
   }
 }

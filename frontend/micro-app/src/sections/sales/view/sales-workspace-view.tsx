@@ -10,8 +10,13 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import { useTheme, alpha } from '@mui/material/styles';
+
+import { fCurrency } from 'src/utils/format-number';
+
+import { useGetDeals } from 'src/hooks/use-deals';
 
 import { Iconify } from 'src/components/iconify';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
@@ -20,6 +25,8 @@ import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 export function SalesWorkspaceView() {
   const [activeTab, setActiveTab] = useState('pipeline');
+
+  const { deals, dealsLoading } = useGetDeals();
 
   const TABS = [
     { value: 'pipeline', label: 'Sales Pipeline', icon: 'solar:graph-up-bold' },
@@ -65,9 +72,17 @@ export function SalesWorkspaceView() {
           ))}
         </Tabs>
 
-        {activeTab === 'pipeline' && <SalesPipelineTab />}
-        {activeTab === 'leads' && <SalesLeadsTab />}
-        {activeTab === 'funnels' && <SalesFunnelsTab />}
+        {dealsLoading ? (
+          <Box sx={{ py: 10, textAlign: 'center' }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            {activeTab === 'pipeline' && <SalesPipelineTab deals={deals} />}
+            {activeTab === 'leads' && <SalesLeadsTab />}
+            {activeTab === 'funnels' && <SalesFunnelsTab />}
+          </>
+        )}
       </Box>
     </FeatureRouteShell>
   );
@@ -75,34 +90,48 @@ export function SalesWorkspaceView() {
 
 // --- Tab Components ---
 
-function SalesPipelineTab() {
+function SalesPipelineTab({ deals }: { deals: any[] }) {
+  const STAGES = [
+    { id: 'prospect', label: 'Prospecting' },
+    { id: 'qualification', label: 'Qualification' },
+    { id: 'proposal', label: 'Proposal' },
+    { id: 'negotiation', label: 'Negotiation' },
+    { id: 'closed_won', label: 'Closed Won' },
+    { id: 'closed_lost', label: 'Closed Lost' },
+  ];
+
   return (
     <Box sx={{ display: 'flex', gap: 3, overflowX: 'auto', pb: 3 }}>
-       {[
-         { stage: 'New Lead', deals: ['Enterprise SaaS', 'Gym Expansion'] },
-         { stage: 'Qualified', deals: ['Yoga Studio Setup'] },
-         { stage: 'Proposal', deals: ['Martial Arts Franchise'] },
-         { stage: 'Won', deals: ['Local Fitness Hub'] },
-       ].map((col) => (
-          <Box key={col.stage} sx={{ minWidth: 280, width: 280, flexShrink: 0 }}>
-             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle1">{col.stage}</Typography>
-                <Chip label={col.deals.length} size="small" variant="soft" />
-             </Box>
-             <Stack spacing={2}>
-                {col.deals.map((deal) => (
-                   <Card key={deal} sx={{ p: 2, cursor: 'pointer', '&:hover': { boxShadow: (theme) => theme.customShadows.z12 } }}>
-                      <Typography variant="subtitle2" sx={{ mb: 1 }}>{deal}</Typography>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                         <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>$12,500</Typography>
-                         <Iconify icon="solar:flag-bold" width={14} color="text.disabled" />
-                      </Stack>
-                   </Card>
-                ))}
-                <Button fullWidth variant="dashed" startIcon={<Iconify icon="solar:add-circle-bold" />}>Add Deal</Button>
-             </Stack>
-          </Box>
-       ))}
+       {STAGES.map((stage) => {
+         const stageDeals = deals.filter((d) => d.stage === stage.id);
+         
+         return (
+            <Box key={stage.id} sx={{ minWidth: 280, width: 280, flexShrink: 0 }}>
+               <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="subtitle1">{stage.label}</Typography>
+                  <Chip label={stageDeals.length} size="small" variant="soft" />
+               </Box>
+               <Stack spacing={2}>
+                  {stageDeals.map((deal) => (
+                     <Card key={deal.id} sx={{ p: 2, cursor: 'pointer', '&:hover': { boxShadow: (theme) => theme.customShadows.z12 } }}>
+                        <Typography variant="subtitle2" sx={{ mb: 1 }}>{deal.name}</Typography>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                           <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>
+                             {fCurrency(deal.amount)}
+                           </Typography>
+                           <Iconify 
+                             icon={deal.priority === 'high' || deal.priority === 'urgent' ? "solar:flag-bold" : "solar:flag-linear"} 
+                             width={14} 
+                             color={deal.priority === 'high' || deal.priority === 'urgent' ? "error.main" : "text.disabled"} 
+                           />
+                        </Stack>
+                     </Card>
+                  ))}
+                  <Button fullWidth variant="dashed" startIcon={<Iconify icon="solar:add-circle-bold" />}>Add Deal</Button>
+               </Stack>
+            </Box>
+         );
+       })}
     </Box>
   );
 }

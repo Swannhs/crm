@@ -18,40 +18,6 @@ services:
       timeout: 5s
       retries: 5
 
-  community-db:
-    image: postgres:17-alpine
-    container_name: ms-community-db
-    environment:
-      POSTGRES_DB: community
-      POSTGRES_USER: community
-      POSTGRES_PASSWORD: community
-    ports:
-      - "5437:5432"
-    volumes:
-      - ../data/postgres/community-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U community -d community"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  commerce-db:
-    image: postgres:17-alpine
-    container_name: ms-commerce-db
-    environment:
-      POSTGRES_DB: commerce
-      POSTGRES_USER: commerce
-      POSTGRES_PASSWORD: commerce
-    ports:
-      - "5438:5432"
-    volumes:
-      - ../data/postgres/commerce-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U commerce -d commerce"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   organization-db:
     image: postgres:17-alpine
     container_name: ms-organization-db
@@ -65,159 +31,6 @@ services:
       - ../data/postgres/organization-db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U organization -d organization"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  booking-db:
-    image: postgres:17-alpine
-    container_name: ms-booking-db
-    environment:
-      POSTGRES_DB: booking
-      POSTGRES_USER: booking
-      POSTGRES_PASSWORD: booking
-    ports:
-      - "5439:5432"
-    volumes:
-      - ../data/postgres/booking-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  finance-db:
-    image: postgres:17-alpine
-    container_name: ms-finance-db
-    environment:
-      POSTGRES_DB: finance
-      POSTGRES_USER: finance
-      POSTGRES_PASSWORD: finance
-    ports:
-      - "5456:5432"
-    volumes:
-      - ../data/postgres/finance-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U finance -d finance"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  documents-db:
-    image: postgres:17-alpine
-    container_name: ms-documents-db
-    environment:
-      POSTGRES_DB: documents
-      POSTGRES_USER: documents
-      POSTGRES_PASSWORD: documents
-    ports:
-      - "5440:5432"
-    volumes:
-      - ../data/postgres/documents-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U documents -d documents"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  payments-db:
-    image: postgres:17-alpine
-    container_name: ms-payments-db
-    environment:
-      POSTGRES_DB: payments
-      POSTGRES_USER: payments
-      POSTGRES_PASSWORD: payments
-    ports:
-      - "5441:5432"
-    volumes:
-      - ../data/postgres/payments-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U payments -d payments"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  notification-db:
-    image: postgres:17-alpine
-    container_name: ms-notification-db
-    environment:
-      POSTGRES_DB: notification
-      POSTGRES_USER: notification
-      POSTGRES_PASSWORD: notification
-    ports:
-      - "5442:5432"
-    volumes:
-      - ../data/postgres/notification-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U notification -d notification"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  employees-db:
-    image: postgres:17-alpine
-    container_name: ms-employees-db
-    environment:
-      POSTGRES_DB: employees
-      POSTGRES_USER: employees
-      POSTGRES_PASSWORD: employees
-    ports:
-      - "5443:5432"
-    volumes:
-      - ../data/postgres/employees-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U employees -d employees"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  marketing-db:
-    image: postgres:17-alpine
-    container_name: ms-marketing-db
-    environment:
-      POSTGRES_DB: marketing
-      POSTGRES_USER: marketing
-      POSTGRES_PASSWORD: marketing
-    ports:
-      - "5444:5432"
-    volumes:
-      - ../data/postgres/marketing-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U marketing -d marketing"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  projects-db:
-    image: postgres:17-alpine
-    container_name: ms-projects-db
-    environment:
-      POSTGRES_DB: projects
-      POSTGRES_USER: projects
-      POSTGRES_PASSWORD: projects
-    ports:
-      - "5445:5432"
-    volumes:
-      - ../data/postgres/projects-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U projects -d projects"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  calendar-db:
-    image: postgres:17-alpine
-    container_name: ms-calendar-db
-    environment:
-      POSTGRES_DB: calendar
-      POSTGRES_USER: calendar
-      POSTGRES_PASSWORD: calendar
-    ports:
-      - "5446:5432"
-    volumes:
-      - ../data/postgres/calendar-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U calendar -d calendar"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -239,74 +52,6 @@ services:
       timeout: 5s
       retries: 5
 
-  pos-db:
-    image: postgres:17-alpine
-    container_name: ms-pos-db
-    environment:
-      POSTGRES_DB: pos
-      POSTGRES_USER: pos
-      POSTGRES_PASSWORD: pos
-    ports:
-      - "5447:5432"
-    volumes:
-      - ../data/postgres/pos-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pos -d pos"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  automation-db:
-    image: postgres:17-alpine
-    container_name: ms-automation-db
-    environment:
-      POSTGRES_DB: automation
-      POSTGRES_USER: automation
-      POSTGRES_PASSWORD: automation
-    ports:
-      - "5448:5432"
-    volumes:
-      - ../data/postgres/automation-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U automation -d automation"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  device-db:
-    image: postgres:17-alpine
-    container_name: ms-device-db
-    environment:
-      POSTGRES_DB: device
-      POSTGRES_USER: device
-      POSTGRES_PASSWORD: device
-    ports:
-      - "5449:5432"
-    volumes:
-      - ../data/postgres/device-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U device -d device"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  file-db:
-    image: postgres:17-alpine
-    container_name: ms-file-db
-    environment:
-      POSTGRES_DB: file
-      POSTGRES_USER: file
-      POSTGRES_PASSWORD: file
-    ports:
-      - "5450:5432"
-    volumes:
-      - ../data/postgres/file-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U file -d file"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   integrations-db:
     image: postgres:17-alpine
     container_name: ms-integrations-db
@@ -324,40 +69,6 @@ services:
       timeout: 5s
       retries: 5
 
-  scoring-db:
-    image: postgres:17-alpine
-    container_name: ms-scoring-db
-    environment:
-      POSTGRES_DB: scoring
-      POSTGRES_USER: scoring
-      POSTGRES_PASSWORD: scoring
-    ports:
-      - "5453:5432"
-    volumes:
-      - ../data/postgres/scoring-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U scoring -d scoring"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  deal-db:
-    image: postgres:17-alpine
-    container_name: ms-deal-db
-    environment:
-      POSTGRES_DB: deal_service
-      POSTGRES_USER: deal
-      POSTGRES_PASSWORD: deal
-    ports:
-      - "5454:5432"
-    volumes:
-      - ../data/postgres/deal-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U deal -d deal_service"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   email-sync-db:
     image: postgres:17-alpine
     container_name: ms-email-sync-db
@@ -371,6 +82,40 @@ services:
       - ../data/postgres/email-sync-db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U emailsync -d email_sync_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  odoo-integration-db:
+    image: postgres:17-alpine
+    container_name: ms-odoo-integration-db
+    environment:
+      POSTGRES_DB: odoo_integration
+      POSTGRES_USER: odoo_integration
+      POSTGRES_PASSWORD: odoo_integration
+    ports:
+      - "5457:5432"
+    volumes:
+      - ../data/postgres/odoo-integration-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo_integration -d odoo_integration"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  magento-integration-db:
+    image: postgres:17-alpine
+    container_name: ms-magento-integration-db
+    environment:
+      POSTGRES_DB: magento_integration
+      POSTGRES_USER: magento_integration
+      POSTGRES_PASSWORD: magento_integration
+    ports:
+      - "5458:5432"
+    volumes:
+      - ../data/postgres/magento-integration-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U magento_integration -d magento_integration"]
       interval: 5s
       timeout: 5s
       retries: 5

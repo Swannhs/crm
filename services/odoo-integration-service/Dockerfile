@@ -4,16 +4,13 @@ WORKDIR /workspace
 
 RUN corepack enable
 
-COPY package.json yarn.lock ./
-COPY common/node-service-kit/package.json ./common/node-service-kit/package.json
-COPY services/odoo-integration-service/package.json ./services/odoo-integration-service/package.json
+COPY package.json ./
+# In a real workspace, you'd copy the lock file too
+# COPY yarn.lock ./ 
 
-RUN corepack yarn install --frozen-lockfile
+RUN corepack yarn install
 
-COPY common/node-service-kit ./common/node-service-kit
-COPY services/odoo-integration-service ./services/odoo-integration-service
-
-WORKDIR /workspace/services/odoo-integration-service
+COPY . .
 
 RUN corepack yarn build
 
@@ -22,4 +19,4 @@ ENV PORT=7200
 
 EXPOSE 7200
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/main.js"]

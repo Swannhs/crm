@@ -138,4 +138,23 @@ export const endpoints = {
     details: '/api/product/details',
     search: '/api/product/search',
   },
+  deals: {
+    list: '/api/v1/deals',
+    stats: '/api/v1/deals/stats',
+    forecast: '/api/v1/deals/forecast',
+    details: (id: string) => `/api/v1/deals/${id}`,
+    stage: (id: string) => `/api/v1/deals/${id}/stage`,
+  },
+  email: {
+    accounts: '/api/v1/email/accounts',
+    messages: '/api/v1/email/messages',
+    send: '/api/v1/email/send',
+    templates: '/api/v1/email/templates',
+    sequences: '/api/v1/email/sequences',
+  },
+  scoring: {
+    list: '/api/v1/scoring',
+    hot: '/api/v1/scoring/hot',
+    details: (id: string) => `/api/v1/scoring/${id}`,
+  },
 };

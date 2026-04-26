@@ -38,8 +38,8 @@ function asError(res: Response, error: unknown) {
   return res.status(500).json({ success: false, message });
 }
 
-function requireConnection(req: IdentityRequest, res: Response) {
-  const connection = getMagentoConnection(req.identity);
+async function requireConnection(req: IdentityRequest, res: Response) {
+  const connection = await getMagentoConnection(req.identity);
   if (!connection) {
     res.status(400).json({
       success: false,
@@ -61,7 +61,7 @@ app.post("/v1/magento/connect", auth, async (req, res) => {
 
 app.get("/v1/magento/connection", auth, async (req, res) => {
   try {
-    const connection = getMagentoConnection(withIdentity(req).identity);
+    const connection = await getMagentoConnection(withIdentity(req).identity);
     return res.json({ success: true, data: connection ? publicConnection(connection) : null });
   } catch (error) {
     return asError(res, error);
@@ -70,7 +70,7 @@ app.get("/v1/magento/connection", auth, async (req, res) => {
 
 app.post("/v1/magento/disconnect", auth, async (req, res) => {
   try {
-    const removed = disconnectMagento(withIdentity(req).identity);
+    const removed = await disconnectMagento(withIdentity(req).identity);
     return res.json({ success: true, data: { disconnected: removed } });
   } catch (error) {
     return asError(res, error);
@@ -79,7 +79,7 @@ app.post("/v1/magento/disconnect", auth, async (req, res) => {
 
 app.get("/v1/magento/stores", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
+    const connection = await requireConnection(withIdentity(req), res);
     if (!connection) return;
 
     const data = await magentoRequest(connection, "GET", "/rest/all/V1/store/storeConfigs");
@@ -91,7 +91,7 @@ app.get("/v1/magento/stores", auth, async (req, res) => {
 
 app.get("/v1/magento/products", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
+    const connection = await requireConnection(withIdentity(req), res);
     if (!connection) return;
 
     const pageSize = parsePageSize(req.query.pageSize);
@@ -118,7 +118,7 @@ app.get("/v1/magento/products", auth, async (req, res) => {
 
 app.get("/v1/magento/orders", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
+    const connection = await requireConnection(withIdentity(req), res);
     if (!connection) return;
 
     const pageSize = parsePageSize(req.query.pageSize);
@@ -139,7 +139,7 @@ app.get("/v1/magento/orders", auth, async (req, res) => {
 
 app.get("/v1/magento/customers", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
+    const connection = await requireConnection(withIdentity(req), res);
     if (!connection) return;
 
     const pageSize = parsePageSize(req.query.pageSize);
@@ -159,7 +159,7 @@ app.get("/v1/magento/customers", auth, async (req, res) => {
 // Admin/integration use only. Public storefront traffic should hit Magento storefront APIs directly.
 app.post("/v1/magento/graphql", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
+    const connection = await requireConnection(withIdentity(req), res);
     if (!connection) return;
 
     const { query, variables, operationName } = req.body || {};
@@ -177,7 +177,7 @@ app.post("/v1/magento/graphql", auth, async (req, res) => {
 // Security note: raw Magento proxy access must remain protected and allowlisted by caller policy.
 app.post("/v1/magento/rest", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
+    const connection = await requireConnection(withIdentity(req), res);
     if (!connection) return;
 
     const method = String(req.body?.method || "GET").toUpperCase();

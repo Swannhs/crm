@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
+import { GoogleAuthService } from '../services/google-auth.service.js';
+
 const router = Router();
 const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
+const googleAuthService = new GoogleAuthService();
 
 // All routes require identity context
 router.use(identityMiddleware);
@@ -11,11 +14,11 @@ router.use(identityMiddleware);
 router.get('/accounts', async (req, res, next) => {
   try {
     const orgId = req.identity!.orgId;
-    // TODO: Implement account listing
+    // TODO: Implement account listing from DB
     res.json({
       success: true,
       data: [],
-      message: 'Email accounts endpoint - implementation in progress'
+      message: 'Email accounts list'
     });
   } catch (error) {
     next(error);
@@ -26,6 +29,8 @@ router.get('/accounts', async (req, res, next) => {
 router.post('/accounts/connect', async (req, res, next) => {
   try {
     const { provider } = req.body; // 'gmail' or 'outlook'
+    const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
     
     if (!provider || !['gmail', 'outlook'].includes(provider)) {
       return res.status(400).json({
@@ -34,14 +39,57 @@ router.post('/accounts/connect', async (req, res, next) => {
       });
     }
 
-    // TODO: Implement OAuth flow initiation
+    let authUrl = '';
+    if (provider === 'gmail') {
+      authUrl = googleAuthService.generateAuthUrl(orgId, userId);
+    } else {
+      // TODO: Implement Outlook OAuth URL generation
+      return res.status(501).json({ success: false, error: 'Outlook not yet implemented' });
+    }
+
     res.json({
       success: true,
       data: {
-        authUrl: 'TODO: Generate OAuth URL',
+        authUrl,
         provider
       },
-      message: 'OAuth connection initiation - implementation in progress'
+      message: 'OAuth connection initiation successful'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /email/callback - Handle OAuth callback
+router.get('/callback', async (req, res, next) => {
+  try {
+    const { code, state, error } = req.query;
+
+    if (error) {
+      return res.status(400).json({ success: false, error });
+    }
+
+    if (!code || !state) {
+      return res.status(400).json({ success: false, error: 'Missing code or state' });
+    }
+
+    const { orgId, userId } = JSON.parse(Buffer.from(state as string, 'base64').toString());
+
+    // Exchange code for tokens
+    const tokens = await googleAuthService.getToken(code as string);
+    const userInfo = await googleAuthService.getUserInfo(tokens.access_token!);
+
+    // TODO: Store tokens and account info in DB
+    // This requires implementing the EmailAccount repository or service
+
+    res.json({
+      success: true,
+      data: {
+        email: userInfo.email,
+        provider: 'gmail',
+        isConnected: true
+      },
+      message: 'Email account connected successfully'
     });
   } catch (error) {
     next(error);

@@ -17,7 +17,8 @@ import {
   VoiceIntegrationController,
   WhatsAppController,
   TelegramController,
-  WebhookController
+  WebhookController,
+  OdooController
 } from "./controllers/index.js";
 import { identityMiddleware } from "./middleware/identity.js";
 import { startOmniSendConsumer } from './kafka/omni.send.consumer.js';
@@ -44,6 +45,7 @@ const voiceCtrl = new VoiceIntegrationController();
 const whatsappCtrl = new WhatsAppController();
 const telegramCtrl = new TelegramController();
 const webhookCtrl = new WebhookController();
+const odooCtrl = new OdooController();
 
 // --- Webhooks (Public) ---
 app.get("/v1/webhook/whatsapp", (req, res) => webhookCtrl.verifyMeta(req, res));
@@ -139,6 +141,14 @@ app.get("/v1/integrations/whatsapp/status/:instanceId", auth, (req, res) => what
 app.get("/v1/integrations/telegram/sessions", auth, (req, res) => telegramCtrl.getSessions(cast(req), res));
 app.post("/v1/integrations/telegram/sessions", auth, (req, res) => telegramCtrl.createSession(cast(req), res));
 app.delete("/v1/integrations/telegram/sessions/:sessionId", auth, (req, res) => telegramCtrl.deleteSession(cast(req), res));
+
+// --- Odoo ---
+app.post("/v1/integrations/odoo/connect", auth, (req, res) => odooCtrl.connect(cast(req), res));
+app.get("/v1/integrations/odoo", auth, (req, res) => odooCtrl.getConnection(cast(req), res));
+app.post("/v1/integrations/odoo/disconnect", auth, (req, res) => odooCtrl.disconnect(cast(req), res));
+app.get("/v1/integrations/odoo/contacts", auth, (req, res) => odooCtrl.getContacts(cast(req), res));
+app.get("/v1/integrations/odoo/invoices", auth, (req, res) => odooCtrl.getInvoices(cast(req), res));
+app.post("/v1/integrations/odoo/sync/magento", auth, (req, res) => odooCtrl.syncMagento(cast(req), res));
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "integrations-service" }));

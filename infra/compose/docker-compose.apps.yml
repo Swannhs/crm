@@ -5,7 +5,7 @@ services:
     environment:
       PORT: 7010
       KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://organization:organization@organization-db:5432/organization
+      DATABASE_URL: postgres://organization:organization@organization-db:5432/organization
     depends_on:
       kafka:
         condition: service_started
@@ -14,31 +14,6 @@ services:
     ports:
       - "7010:7010"
 
-  booking-service:
-    container_name: ms-booking-service
-    environment:
-      PORT: 7040
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://booking:booking@booking-db:5432/booking
-    depends_on:
-      kafka:
-        condition: service_started
-      booking-db:
-        condition: service_healthy
-    ports:
-      - "7040:7040"
-
-  finance-service:
-    container_name: ms-finance-service
-    environment:
-      PORT: 7170
-      DB_URL: postgres://finance:finance@finance-db:5432/finance
-    depends_on:
-      finance-db:
-        condition: service_healthy
-    ports:
-      - "7170:7170"
-
   api-router-service:
     container_name: ms-api-router-service
     environment:
@@ -46,97 +21,13 @@ services:
     ports:
       - "7001:7001"
 
-  community-service:
-    container_name: ms-community-service
-    environment:
-      PORT: 7050
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://community:community@community-db:5432/community
-    depends_on:
-      kafka:
-        condition: service_started
-      community-db:
-        condition: service_healthy
-    ports:
-      - "7050:7050"
-
-  commerce-service:
-    container_name: ms-commerce-service
-    environment:
-      PORT: 7060
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://commerce:commerce@commerce-db:5432/commerce
-    depends_on:
-      kafka:
-        condition: service_started
-      commerce-db:
-        condition: service_healthy
-    ports:
-      - "7060:7060"
-
-  documents-service:
-    container_name: ms-documents-service
-    environment:
-      PORT: 7080
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://documents:documents@documents-db:5432/documents
-    depends_on:
-      kafka:
-        condition: service_started
-      documents-db:
-        condition: service_healthy
-    ports:
-      - "7080:7080"
-
-  payments-service:
-    container_name: ms-payments-service
-    environment:
-      PORT: 7090
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://payments:payments@payments-db:5432/payments
-    depends_on:
-      kafka:
-        condition: service_started
-      payments-db:
-        condition: service_healthy
-    ports:
-      - "7090:7090"
-
-  notification-service:
-    container_name: ms-notification-service
-    environment:
-      PORT: 8000
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://notification:notification@notification-db:5432/notification
-    depends_on:
-      kafka:
-        condition: service_started
-      notification-db:
-        condition: service_healthy
-    ports:
-      - "8000:8000"
-
-  employees-service:
-    container_name: ms-employees-service
-    environment:
-      PORT: 7070
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://employees:employees@employees-db:5432/employees
-    depends_on:
-      kafka:
-        condition: service_started
-      employees-db:
-        condition: service_healthy
-    ports:
-      - "7070:7070"
-
   realtime-service:
     container_name: ms-realtime-service
     environment:
       PORT: 7030
       KAFKA_BROKERS: kafka:9092
       REDIS_URL: redis://redis:6379
-      DB_URL: postgres://realtime:realtime@realtime-db:5432/realtime
+      DATABASE_URL: postgres://realtime:realtime@realtime-db:5432/realtime
     depends_on:
       kafka:
         condition: service_started
@@ -147,115 +38,23 @@ services:
     ports:
       - "7030:7030"
 
-  marketing-service:
-    container_name: ms-marketing-service
-    environment:
-      PORT: 8030
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://marketing:marketing@marketing-db:5432/marketing
-    depends_on:
-      kafka:
-        condition: service_started
-      marketing-db:
-        condition: service_healthy
-    ports:
-      - "8030:8030"
-
-  projects-service:
-    container_name: ms-projects-service
-    environment:
-      PORT: 8040
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://projects:projects@projects-db:5432/projects
-    depends_on:
-      kafka:
-        condition: service_started
-      projects-db:
-        condition: service_healthy
-    ports:
-      - "8040:8040"
-
-  calendar-service:
-    container_name: ms-calendar-service
-    environment:
-      PORT: 8050
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://calendar:calendar@calendar-db:5432/calendar
-    depends_on:
-      kafka:
-        condition: service_started
-      calendar-db:
-        condition: service_healthy
-    ports:
-      - "8050:8050"
-
-  pos-service:
-    container_name: ms-pos-service
-    environment:
-      PORT: 7100
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://pos:pos@pos-db:5432/pos
-    depends_on:
-      kafka:
-        condition: service_started
-      pos-db:
-        condition: service_healthy
-    ports:
-      - "7100:7100"
-
-  automation-service:
-    container_name: ms-automation-service
-    environment:
-      PORT: 7110
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://automation:automation@automation-db:5432/automation
-    depends_on:
-      kafka:
-        condition: service_started
-      automation-db:
-        condition: service_healthy
-    ports:
-      - "7110:7110"
-
-  device-service:
-    container_name: ms-device-service
-    environment:
-      PORT: 7120
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://device:device@device-db:5432/device
-    depends_on:
-      kafka:
-        condition: service_started
-      device-db:
-        condition: service_healthy
-    ports:
-      - "7120:7120"
-
-  file-service:
-    container_name: ms-file-service
-    environment:
-      PORT: 7130
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://file:file@file-db:5432/file
-    depends_on:
-      kafka:
-        condition: service_started
-      file-db:
-        condition: service_healthy
-    ports:
-      - "7130:7130"
-
   integrations-service:
     container_name: ms-integrations-service
     environment:
       PORT: 7140
       KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://integrations:integrations@integrations-db:5432/integrations
+      DATABASE_URL: postgres://integrations:integrations@integrations-db:5432/integrations
+      MAGENTO_INTEGRATION_SERVICE_URL: http://magento-integration-service:7190
+      ODOO_INTEGRATION_SERVICE_URL: http://odoo-integration-service:7200
     depends_on:
       kafka:
         condition: service_started
       integrations-db:
         condition: service_healthy
+      magento-integration-service:
+        condition: service_started
+      odoo-integration-service:
+        condition: service_started
     ports:
       - "7140:7140"
 
@@ -268,6 +67,10 @@ services:
       MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-}
       MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
       MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
+      DATABASE_URL: postgres://magento_integration:magento_integration@magento-integration-db:5432/magento_integration
+    depends_on:
+      magento-integration-db:
+        condition: service_healthy
     ports:
       - "7190:7190"
 
@@ -281,41 +84,14 @@ services:
       ODOO_PASSWORD: ${ODOO_PASSWORD:-}
       ODOO_API_KEY: ${ODOO_API_KEY:-}
       MAGENTO_API_BASE_URL: http://magento-integration-service:7190
+      DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
     depends_on:
       magento-integration-service:
         condition: service_started
+      odoo-integration-db:
+        condition: service_healthy
     ports:
       - "7200:7200"
-
-  scoring-service:
-    container_name: ms-scoring-service
-    environment:
-      PORT: 7180
-      DATABASE_URL: postgres://scoring:scoring@scoring-db:5432/scoring
-      CORS_ORIGINS: http://localhost:3034,http://localhost:3000
-      ODOO_SERVICE_URL: http://odoo-integration-service:7200
-      DEAL_SERVICE_URL: http://deal-service:7150
-    depends_on:
-      scoring-db:
-        condition: service_healthy
-      odoo-integration-service:
-        condition: service_started
-    ports:
-      - "7180:7180"
-
-  deal-service:
-    container_name: ms-deal-service
-    environment:
-      PORT: 7150
-      DATABASE_URL: postgres://deal:deal@deal-db:5432/deal_service
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_REALM: mymanager
-      KEYCLOAK_CLIENT_ID: crm-api
-    depends_on:
-      deal-db:
-        condition: service_healthy
-    ports:
-      - "7150:7150"
 
   email-sync-service:
     container_name: ms-email-sync-service
