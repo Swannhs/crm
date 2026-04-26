@@ -17,10 +17,19 @@ import type {
 const ODOO_API_BASE = '/api/odoo';
 
 type HttpErrorLike = { status?: number; message?: string; error?: string; details?: string };
+type AxiosLikeError = {
+  response?: {
+    status?: number;
+    data?: HttpErrorLike;
+  };
+  message?: string;
+};
 
 function normalizeApiError(error: unknown): Error {
+  const axiosError = (error ?? {}) as AxiosLikeError;
   const payload = (error ?? {}) as HttpErrorLike;
-  const status = payload?.status;
+  const responsePayload = (axiosError.response?.data ?? {}) as HttpErrorLike;
+  const status = axiosError.response?.status ?? payload?.status;
 
   if (status === 401 || status === 403) {
     return new Error('You do not have permission to access Odoo integration.');
@@ -32,7 +41,14 @@ function normalizeApiError(error: unknown): Error {
     return new Error('Odoo integration is temporarily unavailable.');
   }
 
-  const message = payload?.message || payload?.error || payload?.details;
+  const message =
+    responsePayload?.message ||
+    responsePayload?.error ||
+    responsePayload?.details ||
+    payload?.message ||
+    payload?.error ||
+    payload?.details ||
+    axiosError?.message;
   return new Error(message || 'Unexpected Odoo integration error.');
 }
 
@@ -104,13 +120,19 @@ export async function getOdooInventory(params?: OdooListParams): Promise<OdooInv
 }
 
 export async function syncMagentoCustomersToOdoo(options?: OdooSyncOptions): Promise<OdooSyncResult> {
-  return request<OdooSyncResult>(() => axios.post(`${ODOO_API_BASE}/sync/magento/customers`, { dryRun: true, ...options }));
+  return request<OdooSyncResult>(() =>
+    axios.post(`${ODOO_API_BASE}/sync/magento/customers`, { ...options, dryRun: options?.dryRun ?? true })
+  );
 }
 
 export async function syncMagentoOrdersToOdoo(options?: OdooSyncOptions): Promise<OdooSyncResult> {
-  return request<OdooSyncResult>(() => axios.post(`${ODOO_API_BASE}/sync/magento/orders`, { dryRun: true, ...options }));
+  return request<OdooSyncResult>(() =>
+    axios.post(`${ODOO_API_BASE}/sync/magento/orders`, { ...options, dryRun: options?.dryRun ?? true })
+  );
 }
 
 export async function syncMagentoAllToOdoo(options?: OdooSyncOptions): Promise<OdooSyncResult> {
-  return request<OdooSyncResult>(() => axios.post(`${ODOO_API_BASE}/sync/magento/all`, { dryRun: true, ...options }));
+  return request<OdooSyncResult>(() =>
+    axios.post(`${ODOO_API_BASE}/sync/magento/all`, { ...options, dryRun: options?.dryRun ?? true })
+  );
 }

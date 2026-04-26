@@ -46,36 +46,49 @@ function makeListQuery<T>(key: readonly unknown[], queryFn: () => Promise<T>, en
   return useQuery({ queryKey: key, queryFn, staleTime: DEFAULT_STALE_TIME, enabled });
 }
 
+function useOdooConnected() {
+  const connection = useOdooConnection();
+  return connection.data?.connected ?? false;
+}
+
 export function useOdooContacts(params?: OdooListParams) {
-  return makeListQuery(odooKeys.contacts(params), () => getOdooContacts(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.contacts(params), () => getOdooContacts(params), connected);
 }
 
 export function useOdooCompanies(params?: OdooListParams) {
-  return makeListQuery(odooKeys.companies(params), () => getOdooCompanies(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.companies(params), () => getOdooCompanies(params), connected);
 }
 
 export function useOdooLeads(params?: OdooListParams) {
-  return makeListQuery(odooKeys.leads(params), () => getOdooLeads(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.leads(params), () => getOdooLeads(params), connected);
 }
 
 export function useOdooOpportunities(params?: OdooListParams) {
-  return makeListQuery(odooKeys.opportunities(params), () => getOdooOpportunities(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.opportunities(params), () => getOdooOpportunities(params), connected);
 }
 
 export function useOdooSalesOrders(params?: OdooListParams) {
-  return makeListQuery(odooKeys.salesOrders(params), () => getOdooSalesOrders(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.salesOrders(params), () => getOdooSalesOrders(params), connected);
 }
 
 export function useOdooInvoices(params?: OdooListParams) {
-  return makeListQuery(odooKeys.invoices(params), () => getOdooInvoices(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.invoices(params), () => getOdooInvoices(params), connected);
 }
 
 export function useOdooProducts(params?: OdooListParams) {
-  return makeListQuery(odooKeys.products(params), () => getOdooProducts(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.products(params), () => getOdooProducts(params), connected);
 }
 
 export function useOdooInventory(params?: OdooListParams) {
-  return makeListQuery(odooKeys.inventory(params), () => getOdooInventory(params));
+  const connected = useOdooConnected();
+  return makeListQuery(odooKeys.inventory(params), () => getOdooInventory(params), connected);
 }
 
 export function useConnectOdooMutation() {
@@ -101,7 +114,8 @@ export function useDisconnectOdooMutation() {
 export function useSyncMagentoCustomersToOdooMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (options?: OdooSyncOptions) => syncMagentoCustomersToOdoo({ dryRun: true, ...options }),
+    mutationFn: (options?: OdooSyncOptions) =>
+      syncMagentoCustomersToOdoo({ ...options, dryRun: options?.dryRun ?? true }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: odooKeys.sync() });
     },
@@ -111,7 +125,7 @@ export function useSyncMagentoCustomersToOdooMutation() {
 export function useSyncMagentoOrdersToOdooMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (options?: OdooSyncOptions) => syncMagentoOrdersToOdoo({ dryRun: true, ...options }),
+    mutationFn: (options?: OdooSyncOptions) => syncMagentoOrdersToOdoo({ ...options, dryRun: options?.dryRun ?? true }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: odooKeys.sync() });
     },
@@ -121,7 +135,7 @@ export function useSyncMagentoOrdersToOdooMutation() {
 export function useSyncMagentoAllToOdooMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (options?: OdooSyncOptions) => syncMagentoAllToOdoo({ dryRun: true, ...options }),
+    mutationFn: (options?: OdooSyncOptions) => syncMagentoAllToOdoo({ ...options, dryRun: options?.dryRun ?? true }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: odooKeys.sync() });
     },
