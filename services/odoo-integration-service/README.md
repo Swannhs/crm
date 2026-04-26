@@ -63,6 +63,10 @@ Connect/disconnect/sync endpoints allow:
 ## Security notes
 
 - Credentials are env-backed, with optional in-memory org-level override via `/connect`.
+- `/connect` in this version stores org credentials in process memory only.
+- In-memory credentials are plaintext in RAM, not persisted, and are lost on restart.
+- This is not production-safe credential storage; use encrypted secret storage before production use.
+- Prefer env-only credentials in deployed environments.
 - The service never returns Odoo password or API key.
 - Do not log sensitive credentials.
 - TODO: Production must not trust public user-supplied `X-User-Id`/`X-Org-Id`; verified auth layer must set trusted identity headers.

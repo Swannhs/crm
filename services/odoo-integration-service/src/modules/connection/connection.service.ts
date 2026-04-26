@@ -27,6 +27,8 @@ export type OdooConnectionView = {
   credentialSource: 'env-only' | 'memory';
 };
 
+// NOTE: Temporary first-version storage only.
+// Credentials in this map are kept in process memory and are not production-safe.
 const inMemoryConnections = new Map<string, OdooConnectionInput>();
 
 export function setConnection(orgId: string, input: OdooConnectionInput) {

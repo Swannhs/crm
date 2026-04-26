@@ -11,6 +11,16 @@ export type MagentoSyncOptions = {
 export class MagentoClient {
   constructor(private readonly baseUrl: string) {}
 
+  private unwrapItems(payload: any): any[] {
+    const first = payload?.data ?? payload;
+    const second = first?.data ?? first;
+    if (Array.isArray(second?.items)) return second.items;
+    if (Array.isArray(first?.items)) return first.items;
+    if (Array.isArray(second)) return second;
+    if (Array.isArray(first)) return first;
+    return [];
+  }
+
   async getCustomers(identity: Identity, options: MagentoSyncOptions = {}): Promise<any[]> {
     const query = new URLSearchParams();
     if (options.page) query.set('currentPage', String(options.page));
@@ -25,7 +35,7 @@ export class MagentoClient {
       },
     });
 
-    return Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+    return this.unwrapItems(data);
   }
 
   async getOrders(identity: Identity, options: MagentoSyncOptions = {}): Promise<any[]> {
@@ -42,6 +52,6 @@ export class MagentoClient {
       },
     });
 
-    return Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+    return this.unwrapItems(data);
   }
 }

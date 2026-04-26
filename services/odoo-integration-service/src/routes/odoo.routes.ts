@@ -70,10 +70,14 @@ odooRoutes.get('/contacts', readAccess, async (req: Request, res: Response) => {
     const domain: unknown[] = search
       ? [
           '&',
-          ['|', ['customer_rank', '>', 0], ['is_company', '=', false]],
-          ['|', ['name', 'ilike', search], ['email', 'ilike', search]],
+          '|',
+          ['customer_rank', '>', 0],
+          ['is_company', '=', false],
+          '|',
+          ['name', 'ilike', search],
+          ['email', 'ilike', search],
         ]
-      : [['|', ['customer_rank', '>', 0], ['is_company', '=', false]]];
+      : ['|', ['customer_rank', '>', 0], ['is_company', '=', false]];
 
     const client = createOdooClient(identity.orgId);
     const rows = await client.searchRead(
@@ -101,7 +105,7 @@ odooRoutes.get('/companies', readAccess, async (req: Request, res: Response) => 
     const search = parseSearch(req.query.search);
 
     const domain: unknown[] = search
-      ? [['is_company', '=', true], ['|', ['name', 'ilike', search], ['email', 'ilike', search]]]
+      ? ['&', ['is_company', '=', true], '|', ['name', 'ilike', search], ['email', 'ilike', search]]
       : [['is_company', '=', true]];
 
     const client = createOdooClient(identity.orgId);
@@ -130,7 +134,7 @@ odooRoutes.get('/leads', readAccess, async (req: Request, res: Response) => {
     const search = parseSearch(req.query.search);
 
     const domain: unknown[] = search
-      ? [['type', '=', 'lead'], ['|', ['name', 'ilike', search], ['email_from', 'ilike', search]]]
+      ? ['&', ['type', '=', 'lead'], '|', ['name', 'ilike', search], ['email_from', 'ilike', search]]
       : [['type', '=', 'lead']];
 
     const client = createOdooClient(identity.orgId);
@@ -156,7 +160,7 @@ odooRoutes.get('/opportunities', readAccess, async (req: Request, res: Response)
     const search = parseSearch(req.query.search);
 
     const domain: unknown[] = search
-      ? [['type', '=', 'opportunity'], ['|', ['name', 'ilike', search], ['email_from', 'ilike', search]]]
+      ? ['&', ['type', '=', 'opportunity'], '|', ['name', 'ilike', search], ['email_from', 'ilike', search]]
       : [['type', '=', 'opportunity']];
 
     const client = createOdooClient(identity.orgId);
@@ -223,7 +227,7 @@ odooRoutes.get('/products', readAccess, async (req: Request, res: Response) => {
     const pageSize = parsePageSize(req.query.pageSize);
     const search = parseSearch(req.query.search);
 
-    const domain: unknown[] = search ? [['|', ['name', 'ilike', search], ['default_code', 'ilike', search]]] : [];
+    const domain: unknown[] = search ? ['|', ['name', 'ilike', search], ['default_code', 'ilike', search]] : [];
 
     const client = createOdooClient(identity.orgId);
     const rows = await client.searchRead(
