@@ -93,6 +93,12 @@ Or use the unified manager and include local Magento:
 ./manage.sh dev up --with-magento
 ```
 
+Run the full local project stack with Magento and Odoo addons:
+
+```bash
+./manage.sh dev up --with-all
+```
+
 When enabled, Magento and its local infrastructure are exposed at:
 
 - `http://localhost:8088`

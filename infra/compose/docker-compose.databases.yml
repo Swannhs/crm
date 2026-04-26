@@ -52,23 +52,6 @@ services:
       timeout: 5s
       retries: 5
 
-  crm-db:
-    image: postgres:17-alpine
-    container_name: ms-crm-db
-    environment:
-      POSTGRES_DB: crm
-      POSTGRES_USER: crm
-      POSTGRES_PASSWORD: crm
-    ports:
-      - "5434:5432"
-    volumes:
-      - ../data/postgres/crm-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U crm -d crm"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   organization-db:
     image: postgres:17-alpine
     container_name: ms-organization-db
@@ -82,23 +65,6 @@ services:
       - ../data/postgres/organization-db:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U organization -d organization"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  billing-db:
-    image: postgres:17-alpine
-    container_name: ms-billing-db
-    environment:
-      POSTGRES_DB: billing
-      POSTGRES_USER: billing
-      POSTGRES_PASSWORD: billing
-    ports:
-      - "5436:5432"
-    volumes:
-      - ../data/postgres/billing-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U billing -d billing"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -3,9 +3,6 @@ services:
     command: ["start", "--http-enabled=true", "--hostname-strict=false", "--import-realm"]
     restart: unless-stopped
 
-  monolith:
-    restart: unless-stopped
-
   organization-service:
     restart: unless-stopped
 
