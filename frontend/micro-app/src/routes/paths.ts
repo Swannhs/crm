@@ -117,6 +117,7 @@ export const paths = {
     settings: `${ROOTS.DASHBOARD}/settings`,
     settingsTab: (tab: string) => `${ROOTS.DASHBOARD}/settings/${tab}`,
     magentoIntegration: `${ROOTS.DASHBOARD}/integrations/magento`,
+    odooIntegration: `${ROOTS.DASHBOARD}/integrations/odoo`,
     community: `${ROOTS.DASHBOARD}/community`,
     // Omnichannel
     omni: {
@@ -161,6 +162,7 @@ export const paths = {
     mobileMenu: '/menu',
     uberEatsCallback: '/integrations/uber-eats/callback',
     magentoIntegration: '/integrations/magento',
+    odooIntegration: '/integrations/odoo',
     booking: (link: string) => `/booking/${link}`,
     bookingLanding: (link: string) => `/booking-details/landing/${link}`,
     documentPreview: (hashcode: string) => `/document/preview/${hashcode}`,

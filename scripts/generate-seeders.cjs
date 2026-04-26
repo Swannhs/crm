@@ -3,13 +3,11 @@ const path = require('path');
 
 const services = [
   { name: 'organization-service', port: 7010, path: '/v1/organizations', data: { name: 'Dev Corp', plan: 'pro' } },
-  { name: 'billing-service', port: 7020, path: '/v1/invoices', data: { amount: 1200, status: 'paid' } },
   { name: 'booking-service', port: 7040, path: '/v1/booking-types', data: { name: 'Consultation', duration: 60 } },
   { name: 'community-service', port: 7050, path: '/v1/posts', data: { title: 'Hello World', content: 'First post!' } },
   { name: 'commerce-service', port: 7060, path: '/v1/products', data: { name: 'Pro Subscription', price: 99 } },
   { name: 'employees-service', port: 7070, path: '/v1/employees', data: { firstName: 'John', lastName: 'Doe', email: 'john@dev.com' } },
   { name: 'documents-service', port: 7080, path: '/v1/documents', data: { title: 'Contract.pdf', type: 'pdf' } },
-  { name: 'crm-service', port: 8010, path: '/v1/contacts', data: { fullName: 'Jane Smith', email: 'jane@smith.com' } },
   { name: 'marketing-service', port: 8030, path: '/v1/campaigns', data: { title: 'Spring Sale', status: 'active' } },
   { name: 'calendar-service', port: 8050, path: '/v1/events', data: { title: 'Standup', start: new Date().toISOString() } }
 ];

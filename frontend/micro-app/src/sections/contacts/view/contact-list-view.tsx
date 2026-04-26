@@ -106,7 +106,8 @@ export function ContactListView() {
         router.push(paths.dashboard.contactView(createdId, 'overview'));
       }
     } catch (error) {
-      console.error(error);
+      const message = error instanceof Error ? error.message : 'Failed to create contact';
+      showToast({ message, severity: 'warning' });
     }
   });
 

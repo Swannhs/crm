@@ -11,8 +11,6 @@ resources:
 images:
   - name: ghcr.io/mymanager/organization-service
     newTag: staging
-  - name: ghcr.io/mymanager/billing-service
-    newTag: staging
 
 patches:
   - path: replicas-patch.yaml

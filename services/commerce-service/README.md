@@ -1,19 +1,15 @@
-# Commerce Service (Legacy / Deprecated Direction)
+# Deprecated: commerce-service
 
-This service remains in the repository for backward compatibility and migration safety.
+This service is deprecated.
 
-## Important
+Magento is now the source of truth for:
+- catalog
+- cart
+- checkout
+- online orders
+- promotions
+- commerce inventory
 
-Magento is the eCommerce source of truth for this platform.
-
-Do not add new catalog, cart, checkout, order, payment, inventory, shipping, tax, or promotion logic here.
-
-Use:
-
-- `services/magento-integration-service` for CRM/admin integration workflows
-- Magento storefront/GraphQL APIs for public storefront commerce
-
-## Migration note
-
-Legacy `/api/shop/*` usage should migrate to canonical `/api/magento/*` for admin integration,
-and public storefront traffic should move to Magento storefront APIs directly.
+Replacement:
+- `magento-integration-service`
+- `/api/magento/*`

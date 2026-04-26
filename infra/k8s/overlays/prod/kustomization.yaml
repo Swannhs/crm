@@ -11,8 +11,6 @@ resources:
 images:
   - name: ghcr.io/mymanager/organization-service
     newTag: stable
-  - name: ghcr.io/mymanager/billing-service
-    newTag: stable
 
 patches:
   - path: replicas-patch.yaml

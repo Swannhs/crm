@@ -2,7 +2,10 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypt
 import { CustomerRepository } from '../repositories/customer.repository.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'local-dev-token-secret';
-const CRM_SERVICE_URL = process.env.CRM_SERVICE_URL || 'http://crm-service:8010';
+const CONTACT_PROFILE_SERVICE_URL =
+  process.env.CONTACT_PROFILE_SERVICE_URL ||
+  process.env.ODOO_SERVICE_URL ||
+  'http://odoo-integration-service:7200';
 
 function hashPassword(password: string) {
   const salt = randomBytes(16).toString('hex');
@@ -52,12 +55,10 @@ export class AuthService {
       throw new Error('Customer already exists');
     }
 
-    // 2. Create contact in CRM service via HTTP
-    // Laravel route might be /api/contacts or similar.
-    // Based on legacy, let's assume a standard POST /api/contacts
+    // 2. Create contact profile via integration service
     let contactId: string;
     try {
-      const crmResponse = await fetch(`${CRM_SERVICE_URL}/api/contacts`, {
+      const profileResponse = await fetch(`${CONTACT_PROFILE_SERVICE_URL}/v1/odoo/contacts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,14 +71,17 @@ export class AuthService {
           org_id: orgId,
         }),
       });
-      if (!crmResponse.ok) {
-        throw new Error(`CRM request failed with ${crmResponse.status}`);
+      if (!profileResponse.ok) {
+        throw new Error(`Contact profile request failed with ${profileResponse.status}`);
       }
-      const crmData = await crmResponse.json();
-      contactId = crmData.data.id;
+      const profileData = await profileResponse.json();
+      contactId = profileData?.data?.id;
+      if (!contactId) {
+        throw new Error('Contact profile id missing in response');
+      }
     } catch (err: any) {
-      console.error('CRM Contact Creation Failed:', err.message);
-      throw new Error('Failed to create customer profile in CRM');
+      console.error('Contact Profile Creation Failed:', err.message);
+      throw new Error('Failed to create customer profile');
     }
 
     // 3. Hash password

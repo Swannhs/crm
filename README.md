@@ -55,12 +55,12 @@ Legacy `/api/integrations/magento/*` naming is also deprecated and now aliases t
 | Shipping | Magento |
 | Tax | Magento |
 | Promotions/coupons | Magento |
-| Contacts | CRM |
-| Companies | CRM |
-| Sales activities | CRM |
-| Customer notes/timeline | CRM |
+| Contacts | Odoo |
+| Companies | Odoo |
+| Sales activities | Odoo |
+| Customer notes/timeline | Odoo |
 | Organization users/roles | Organization service |
-| Billing summaries/reporting | Billing service / synced Magento references |
+| Billing summaries/reporting | Odoo accounting/invoice data |
 | Magento connection and sync state | Magento integration service |
 
 ## Docker Modes
@@ -175,8 +175,7 @@ Smoke tests:
 
 Services live under `microservices/services/*`.
 
-- `crm-service` (Laravel): contacts and CRM primitives (multi-tenant via `X-Org-Id`)
 - `organization-service` (Node/Express): org metadata and settings
-- `billing-service` (Node/Express): invoices and billing events
+- `odoo-integration-service` (Node/TypeScript): Odoo ERP/CRM/accounting bridge
 - `notification-service` (Node worker): consumes events and delivers notifications
 - `realtime-service` (Node + Socket.IO): real-time updates channel (event fanout)

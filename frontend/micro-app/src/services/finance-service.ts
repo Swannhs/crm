@@ -1,4 +1,4 @@
-import axiosInstance from 'src/utils/axios';
+import { billingService } from 'src/services/billing-service';
 
 // ----------------------------------------------------------------------
 
@@ -16,42 +16,31 @@ export type RevenueStats = {
   totalRevenue: number;
   paid: number;
   outstanding: number;
-  byStatus: any[];
+  byStatus: Record<string, number>;
   invoiceCount: number;
 };
 
 export async function getRevenueStats(): Promise<RevenueStats> {
   try {
-    const response = await axiosInstance.get('/api/invoice/statistics/income');
-    
-    const stats = response.data?.data ?? response.data ?? [];
-
-    if (stats && !Array.isArray(stats)) {
-      const processed = {
-        totalRevenue: toNumber((stats as any).totalRevenue),
-        paid: toNumber((stats as any).paid),
-        outstanding: toNumber((stats as any).outstanding),
-        byStatus: Array.isArray((stats as any).byStatus) ? (stats as any).byStatus : [],
-        invoiceCount: toNumber((stats as any).invoiceCount),
-      };
-      return processed;
+    const invoices = await billingService.getInvoices();
+    if (!Array.isArray(invoices)) {
+      return { totalRevenue: 0, paid: 0, outstanding: 0, byStatus: {}, invoiceCount: 0 };
     }
 
-  if (!Array.isArray(stats)) {
-    return { totalRevenue: 0, paid: 0, outstanding: 0, byStatus: [], invoiceCount: 0 };
-  }
-
-  const totalRevenue = stats.reduce((sum: number, item: any) => sum + toNumber(item?._sum?.total_cents), 0) / 100;
-  const paid = stats
-    .filter((item: any) => String(item?.status).toLowerCase() === 'paid')
-    .reduce((sum: number, item: any) => sum + toNumber(item?._sum?.total_cents), 0) / 100;
+    const totalRevenue = invoices.reduce((sum: number, item: any) => sum + toNumber(item?.totalAmount ?? item?.totalDue), 0);
+    const paid = invoices.reduce((sum: number, item: any) => sum + toNumber(item?.paidAmount), 0);
+    const byStatus = invoices.reduce((acc: Record<string, number>, item: any) => {
+      const key = String(item?.status || 'unknown').toLowerCase();
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
 
     return {
       totalRevenue,
       paid,
       outstanding: Math.max(totalRevenue - paid, 0),
-      byStatus: stats,
-      invoiceCount: stats.reduce((sum: number, item: any) => sum + toNumber(item?._count?.status || item?._count?._all || 0), 0),
+      byStatus,
+      invoiceCount: invoices.length,
     };
   } catch (error) {
     console.error('[FinanceService] Failed to fetch revenue stats:', error);
@@ -60,13 +49,21 @@ export async function getRevenueStats(): Promise<RevenueStats> {
 }
 
 export async function getPaymentsHistory() {
-  const response = await axiosInstance.get('/api/payments');
-  return response.data?.data ?? response.data;
+  const invoices = await billingService.getInvoices();
+  return invoices
+    .filter((item: any) => toNumber(item?.paidAmount) > 0)
+    .map((item: any) => ({
+      id: item.id,
+      description: item.no || item.id,
+      amount: toNumber(item.paidAmount),
+      status: item.deliveryStatus || item.status,
+      customerName: item.customerName,
+      date: item.createdAt || item.dueDate,
+    }));
 }
 
 export async function getInvoices() {
-  const response = await axiosInstance.get('/api/invoice');
-  return response.data?.data ?? response.data;
+  return billingService.getInvoices();
 }
 
 export const financeService = {

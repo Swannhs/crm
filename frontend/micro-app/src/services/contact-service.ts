@@ -14,85 +14,80 @@ export type IContact = {
   createdAt: string;
 };
 
-const normalizeContact = (contact: any): IContact => {
-  const id = contact?._id ?? contact?.id ?? '';
-  const derivedName = [contact?.first_name, contact?.last_name].filter(Boolean).join(' ').trim();
-  const fullName = contact?.fullName ?? contact?.name ?? (derivedName || 'Unnamed contact');
+const ODOO_WRITE_DEPRECATED_MESSAGE = 'Odoo now owns this workflow. Manage it in Odoo.';
 
+const normalizeOdooContact = (contact: any): IContact => {
+  const id = String(contact?.id ?? contact?._id ?? '');
   return {
-    ...contact,
     _id: id,
     id,
-    fullName,
+    fullName: contact?.name ?? contact?.fullName ?? 'Unnamed contact',
     email: contact?.email ?? '',
-    phone: contact?.phone ?? '',
-    status: contact?.status ?? 'active',
-    contactType: Array.isArray(contact?.contactType)
-      ? contact.contactType
-      : contact?.type
-        ? [contact.type]
-        : ['Client'],
-    createdAt: contact?.createdAt ?? contact?.created_at ?? new Date().toISOString(),
+    phone: contact?.phone ?? contact?.mobile ?? '',
+    status: 'active',
+    contactType: [contact?.isCompany ? 'Company' : 'Client'],
+    createdAt: contact?.createdAt ?? contact?.create_date ?? new Date().toISOString(),
   };
 };
 
-const toContactPayload = (data: any) => ({
-  name: data?.fullName ?? data?.name ?? '',
-  email: data?.email ?? '',
-  phone: data?.phone ?? '',
-  status: data?.status ?? 'active',
-});
-
 export const contactService = {
   getContacts: async (params?: any) => {
-    const response = await axios.get('/api/crm/v1/contacts', {
+    const response = await axios.get('/api/odoo/contacts', {
       params: {
-        q: params?.search ?? params?.q ?? '',
-        ...params,
+        page: params?.page,
+        pageSize: params?.pageSize,
+        search: params?.search ?? params?.q ?? '',
       },
     });
-    const contacts = Array.isArray(response.data)
-      ? response.data
-      : response.data?.data ?? response.data?.contacts ?? [];
-    return contacts.map(normalizeContact);
+    const contacts = Array.isArray(response.data?.data) ? response.data.data : [];
+    return contacts.map(normalizeOdooContact);
   },
 
   getContact: async (id: string) => {
-    const response = await axios.get(`/api/crm/v1/contacts/${id}`);
-    return normalizeContact(response.data?.data ?? response.data?.contact ?? response.data);
+    const response = await axios.get('/api/odoo/contacts', {
+      params: {
+        page: 1,
+        pageSize: 1,
+        search: id,
+      },
+    });
+    const [contact] = Array.isArray(response.data?.data) ? response.data.data : [];
+    return contact ? normalizeOdooContact(contact) : null;
   },
 
   getContactsByType: async (type: string, id?: string, params?: any) => {
-    if (id) {
-      const response = await axios.get(`/api/crm/v1/contacts`, {
-        params: { q: params?.search ?? params?.q ?? '', ...params, type, contactTypeId: id },
+    if (type === 'company' || type === 'vendor') {
+      const response = await axios.get('/api/odoo/companies', {
+        params: {
+          page: params?.page,
+          pageSize: params?.pageSize,
+          search: id || params?.search || params?.q || '',
+        },
       });
-      const contacts = response.data?.data ?? response.data?.contacts ?? response.data ?? [];
-      return contacts.map(normalizeContact);
+      const contacts = Array.isArray(response.data?.data) ? response.data.data : [];
+      return contacts.map(normalizeOdooContact);
     }
 
-    const response = await axios.get('/api/crm/v1/contacts', {
-      params: { q: params?.search ?? params?.q ?? '', ...params, type },
+    const response = await axios.get('/api/odoo/contacts', {
+      params: {
+        page: params?.page,
+        pageSize: params?.pageSize,
+        search: id || params?.search || params?.q || '',
+      },
     });
-    const contacts = response.data?.data ?? response.data?.contacts ?? response.data ?? [];
-    return contacts.map(normalizeContact);
+    const contacts = Array.isArray(response.data?.data) ? response.data.data : [];
+    return contacts.map(normalizeOdooContact);
   },
 
-  createContact: async (data: any) => {
-    const response = await axios.post('/api/crm/v1/contacts', toContactPayload(data));
-    return normalizeContact(response.data?.data ?? response.data?.contact ?? response.data);
+  createContact: async (_data: any) => {
+    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
   },
 
-  updateContact: async (id: string, data: any) => {
-    const response = await axios.patch(`/api/crm/v1/contacts/${id}`, toContactPayload(data));
-    return normalizeContact(response.data?.data ?? response.data?.contact ?? response.data);
+  updateContact: async (_id: string, _data: any) => {
+    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
   },
 
-  deleteContact: async (ids: string[]) => {
-    const [firstId] = ids;
-    const response = await axios.delete(`/crm/v1/contacts/${ids[0]}`);
-    return response.data ?? { status: 'ok', deletedId: firstId };
+  deleteContact: async (_ids: string[]) => {
+    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
   },
-
-  normalizeContact,
 };

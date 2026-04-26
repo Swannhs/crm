@@ -1,27 +1,5 @@
 # Application services (microservices only).
 services:
-  crm-service:
-    container_name: ms-crm-service
-    environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-      APP_KEY: base64:zQ2EhlbMUt1iZc8g1/Rr4qOfjROp+oJjwt6vszci3gM=
-      APP_URL: http://localhost:8010
-      LOG_CHANNEL: stderr
-      DB_CONNECTION: pgsql
-      DB_HOST: crm-db
-      DB_PORT: 5432
-      DB_DATABASE: crm
-      DB_USERNAME: crm
-      DB_PASSWORD: crm
-    ports:
-      - "8010:8010"
-    depends_on:
-      crm-db:
-        condition: service_healthy
-    volumes:
-      - ../../services/crm-service:/app
-
   organization-service:
     container_name: ms-organization-service
     environment:
@@ -35,20 +13,6 @@ services:
         condition: service_healthy
     ports:
       - "7010:7010"
-
-  billing-service:
-    container_name: ms-billing-service
-    environment:
-      PORT: 7020
-      KAFKA_BROKERS: kafka:9092
-      DB_URL: postgres://billing:billing@billing-db:5432/billing
-    depends_on:
-      kafka:
-        condition: service_started
-      billing-db:
-        condition: service_healthy
-    ports:
-      - "7020:7020"
 
   booking-service:
     container_name: ms-booking-service
@@ -299,20 +263,29 @@ services:
     container_name: ms-magento-integration-service
     environment:
       PORT: 7190
-      CRM_SERVICE_URL: http://crm-service:8010
-      BILLING_SERVICE_URL: http://billing-service:7020
       # Magento itself runs in a separate docker project/stack.
       # Set this to a reachable Magento base URL, e.g. http://host.docker.internal:8088
       MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-}
       MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
       MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
-    depends_on:
-      crm-service:
-        condition: service_started
-      billing-service:
-        condition: service_started
     ports:
       - "7190:7190"
+
+  odoo-integration-service:
+    container_name: ms-odoo-integration-service
+    environment:
+      PORT: 7200
+      ODOO_BASE_URL: ${ODOO_BASE_URL:-http://odoo:8069}
+      ODOO_DB: ${ODOO_DB:-}
+      ODOO_USERNAME: ${ODOO_USERNAME:-}
+      ODOO_PASSWORD: ${ODOO_PASSWORD:-}
+      ODOO_API_KEY: ${ODOO_API_KEY:-}
+      MAGENTO_API_BASE_URL: http://magento-integration-service:7190
+    depends_on:
+      magento-integration-service:
+        condition: service_started
+    ports:
+      - "7200:7200"
 
   scoring-service:
     container_name: ms-scoring-service
@@ -320,12 +293,12 @@ services:
       PORT: 7180
       DATABASE_URL: postgres://scoring:scoring@scoring-db:5432/scoring
       CORS_ORIGINS: http://localhost:3034,http://localhost:3000
-      CRM_SERVICE_URL: http://crm-service:8010
+      ODOO_SERVICE_URL: http://odoo-integration-service:7200
       DEAL_SERVICE_URL: http://deal-service:7150
     depends_on:
       scoring-db:
         condition: service_healthy
-      crm-service:
+      odoo-integration-service:
         condition: service_started
     ports:
       - "7180:7180"

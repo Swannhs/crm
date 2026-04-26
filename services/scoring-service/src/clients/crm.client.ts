@@ -34,23 +34,55 @@ async function request<T>(path: string, headers: Record<string, string>): Promis
 
 export class CrmClient {
   async getContact(orgId: string, userId: string, contactId: string): Promise<CrmContact | null> {
-    const payload = await request<{ data?: CrmContact }>(`/api/v1/contacts/${contactId}`, {
+    const payload = await request<{ data?: Array<Record<string, unknown>> }>(
+      `/v1/odoo/contacts?page=1&pageSize=1&search=${encodeURIComponent(contactId)}`,
+      {
       'X-Org-Id': orgId,
       'X-User-Id': userId,
+      Authorization: 'Bearer scoring-service-internal',
       Accept: 'application/json'
     });
 
-    return payload.data ?? null;
+    const raw = Array.isArray(payload.data) ? payload.data[0] : null;
+    if (!raw) return null;
+
+    return {
+      id: String(raw.id ?? ''),
+      name: typeof raw.name === 'string' ? raw.name : undefined,
+      email: typeof raw.email === 'string' ? raw.email : undefined,
+      phone: typeof raw.phone === 'string' ? raw.phone : undefined,
+      city: typeof raw.city === 'string' ? raw.city : undefined,
+      country: typeof raw.country === 'string' ? raw.country : undefined,
+      status: 'active',
+      type: typeof raw.type === 'string' ? raw.type : 'contact',
+      company_name: typeof raw.company === 'string' ? raw.company : undefined,
+      created_at: typeof raw.createdAt === 'string' ? raw.createdAt : undefined,
+      updated_at: typeof raw.updatedAt === 'string' ? raw.updatedAt : undefined
+    };
   }
 
   async listContacts(orgId: string, userId: string): Promise<CrmContact[]> {
-    const payload = await request<{ data?: CrmContact[] }>('/api/v1/contacts', {
+    const payload = await request<{ data?: Array<Record<string, unknown>> }>('/v1/odoo/contacts?page=1&pageSize=200', {
       'X-Org-Id': orgId,
       'X-User-Id': userId,
+      Authorization: 'Bearer scoring-service-internal',
       Accept: 'application/json'
     });
 
-    return payload.data ?? [];
+    const rows = Array.isArray(payload.data) ? payload.data : [];
+    return rows.map((raw) => ({
+      id: String(raw.id ?? ''),
+      name: typeof raw.name === 'string' ? raw.name : undefined,
+      email: typeof raw.email === 'string' ? raw.email : undefined,
+      phone: typeof raw.phone === 'string' ? raw.phone : undefined,
+      city: typeof raw.city === 'string' ? raw.city : undefined,
+      country: typeof raw.country === 'string' ? raw.country : undefined,
+      status: 'active',
+      type: typeof raw.type === 'string' ? raw.type : 'contact',
+      company_name: typeof raw.company === 'string' ? raw.company : undefined,
+      created_at: typeof raw.createdAt === 'string' ? raw.createdAt : undefined,
+      updated_at: typeof raw.updatedAt === 'string' ? raw.updatedAt : undefined
+    }));
   }
 }
 

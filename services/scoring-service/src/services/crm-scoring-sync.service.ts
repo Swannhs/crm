@@ -62,7 +62,7 @@ export class CrmScoringSyncService {
   async recalculateContactFromSource(orgId: string, userId: string, contactId: string, modelId?: string) {
     const contact = await crmClient.getContact(orgId, userId, contactId);
     if (!contact) {
-      throw new Error('Contact not found in CRM service');
+      throw new Error('Contact not found in Odoo contact source');
     }
 
     const deals = await dealClient.listDealsForContact(orgId, userId, contactId);

@@ -100,7 +100,8 @@ export function BillingListView() {
         showToast({ message: 'Invoice deleted successfully.', severity: 'success' });
       }
     } catch (error) {
-      console.error(error);
+      const message = error instanceof Error ? error.message : 'Failed to delete invoice';
+      showToast({ message, severity: 'warning' });
     }
     confirmDelete.onFalse();
     handleCloseMenu();

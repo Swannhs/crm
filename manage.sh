@@ -217,8 +217,6 @@ case $CMD in
             -w /repo \
             -e SEED_ORG_HOST=ms-organization-service \
             -e SEED_PROJECTS_HOST=ms-projects-service \
-            -e SEED_CRM_HOST=ms-crm-service \
-            -e SEED_BILLING_HOST=ms-billing-service \
             -e SEED_DEAL_HOST=ms-deal-service \
             -e SEED_EMAIL_SYNC_HOST=ms-email-sync-service \
             -e SEED_CALENDAR_HOST=ms-calendar-service \

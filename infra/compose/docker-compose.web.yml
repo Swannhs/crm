@@ -10,8 +10,6 @@ services:
       - "8081:8081"
     depends_on:
       - organization-service
-      - crm-service
-      - billing-service
       - projects-service
       - calendar-service
       - documents-service
@@ -23,11 +21,11 @@ services:
       - marketing-service
       - integrations-service
       - magento-integration-service
+      - odoo-integration-service
       - realtime-service
       - deal-service
       - email-sync-service
       - scoring-service
-      - commerce-service
       - api-router-service
 
   frontend:

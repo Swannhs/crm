@@ -12,9 +12,9 @@ Your current system has **22 microservices** with solid foundations in contacts,
 
 | Service | Status | Key Features | Gaps |
 |---------|--------|--------------|------|
-| **crm-service** (Laravel) | ✅ Active | Contacts, Pipelines, Stages, Activities | No deals/opportunities, no email sync, no lead scoring |
+| **Odoo CRM domain** | ✅ Active | Contacts, Pipelines, Stages, Activities | No deals/opportunities, no email sync, no lead scoring |
 | **organization-service** | ✅ Active | Multi-tenant orgs + locations | No org hierarchy, no teams |
-| **billing-service** | ✅ Active | Invoices, Payments | No subscriptions, no recurring billing |
+| **Odoo accounting domain** | ✅ Active | Invoices, Payments | No subscriptions, no recurring billing |
 | **booking-service** | ✅ Active | Appointments, Booking types, Slots | No calendar sync, no reminders |
 | **marketing-service** | ✅ Active | Campaigns, Email, Automations, Forms | No journey builder, no A/B testing |
 | **projects-service** | ✅ Active | Boards, Cards, Tasks, Comments | No time tracking, no Gantt charts |
@@ -51,7 +51,7 @@ Your current system has **22 microservices** with solid foundations in contacts,
 
 **Goal**: Build features that directly impact sales conversion and revenue.
 
-### 1.1 Advanced Deal Management (crm-service enhancement)
+### 1.1 Advanced Deal Management (CRM domain enhancement)
 
 **Why**: Deals/opportunities are the heart of any CRM. Your current pipeline_contacts table is basic.
 
@@ -764,7 +764,7 @@ model ConversationTranscript {
 ## 🚀 Next Steps (This Week)
 
 1. **Create email-sync-service** with Gmail OAuth
-2. **Enhance crm-service** with Deal model
+2. **Enhance CRM domain** with Deal model
 3. **Build analytics-service** with pre-built dashboards
 4. **Implement scoring-service** with basic rules engine
 5. **Design visual workflow builder** UI mockups

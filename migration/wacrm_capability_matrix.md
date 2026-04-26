@@ -50,9 +50,9 @@ This matrix tracks the migration of operational features from `wacrm/` to the My
 ## Domain 6: CRM & Contacts
 | Endpoint | Method | Auth | DB Tables | Target Service | Status |
 |----------|--------|------|-----------|----------------|--------|
-| `/api/phonebook/add` | POST | User | `phonebook` | `crm-service` | `missing` |
-| `/api/phonebook/import_contacts` | POST | User | `contact` | `crm-service` | `missing` |
-| `/api/phonebook/get_uid_contacts` | GET | User | `contact` | `crm-service` | `missing` |
+| `/api/phonebook/add` | POST | User | `phonebook` | `legacy-crm` | `missing` |
+| `/api/phonebook/import_contacts` | POST | User | `contact` | `legacy-crm` | `missing` |
+| `/api/phonebook/get_uid_contacts` | GET | User | `contact` | `legacy-crm` | `missing` |
 
 ## Domain 7: Outbound API & AI
 | Endpoint | Method | Auth | DB Tables | Target Service | Status |

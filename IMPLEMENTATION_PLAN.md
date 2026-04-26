@@ -211,7 +211,7 @@ Your MyManager CRM platform demonstrates **strong architectural foundations** wi
 
 #### Schema Enhancements
 ```prisma
-// Add to crm-service or new services
+// Add to Odoo integration domain or new services
 
 model Deal {
   id              String   @id @default(uuid())

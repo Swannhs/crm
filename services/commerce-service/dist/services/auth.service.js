@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import axios from 'axios';
 import { CustomerRepository } from '../repositories/customer.repository.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'local-dev-token-secret';
-const CRM_SERVICE_URL = process.env.CRM_SERVICE_URL || 'http://crm-service:8010';
+const CONTACT_PROFILE_SERVICE_URL = process.env.CONTACT_PROFILE_SERVICE_URL || process.env.ODOO_SERVICE_URL || 'http://odoo-integration-service:7200';
 export class AuthService {
     customerRepo = new CustomerRepository();
     async signup(orgId, data) {
@@ -13,12 +13,10 @@ export class AuthService {
         if (existing) {
             throw new Error('Customer already exists');
         }
-        // 2. Create contact in CRM service via HTTP
-        // Laravel route might be /api/contacts or similar.
-        // Based on legacy, let's assume a standard POST /api/contacts
+        // 2. Create contact profile via integration service
         let contactId;
         try {
-            const crmResponse = await axios.post(`${CRM_SERVICE_URL}/api/contacts`, {
+            const profileResponse = await axios.post(`${CONTACT_PROFILE_SERVICE_URL}/v1/odoo/contacts`, {
                 name,
                 email,
                 phone,
@@ -26,11 +24,14 @@ export class AuthService {
             }, {
                 headers: { 'X-Org-Id': orgId }
             });
-            contactId = crmResponse.data.data.id;
+            contactId = profileResponse.data?.data?.id;
+            if (!contactId) {
+                throw new Error('Contact profile id missing in response');
+            }
         }
         catch (err) {
-            console.error('CRM Contact Creation Failed:', err.response?.data || err.message);
-            throw new Error('Failed to create customer profile in CRM');
+            console.error('Contact Profile Creation Failed:', err.response?.data || err.message);
+            throw new Error('Failed to create customer profile');
         }
         // 3. Hash password
         const passwordHash = await bcrypt.hash(password, 10);
