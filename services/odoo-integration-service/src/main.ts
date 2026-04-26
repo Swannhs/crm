@@ -19,8 +19,8 @@ async function bootstrap() {
     .setTitle('Odoo Integration Service')
     .setDescription('Industrial Odoo API for MyManager')
     .setVersion('1.0')
-    .addHeader('x-user-id', 'User ID')
-    .addHeader('x-org-id', 'Organization ID')
+    .addApiKey({ type: 'apiKey', name: 'x-user-id', in: 'header' }, 'x-user-id')
+    .addApiKey({ type: 'apiKey', name: 'x-org-id', in: 'header' }, 'x-org-id')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

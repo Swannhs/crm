@@ -70,9 +70,10 @@ export function JwtSignInView() {
       await checkUserSession?.();
 
       router.refresh();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setErrorMsg(error instanceof Error ? error.message : error);
+      const message = error?.message || (typeof error === 'string' ? error : JSON.stringify(error));
+      setErrorMsg(message);
     }
   });
 

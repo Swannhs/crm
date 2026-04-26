@@ -78,19 +78,38 @@ axiosInstance.interceptors.response.use(
         });
         window.dispatchEvent(new CustomEvent('auth-unauthorized'));
       }
-    } else if (typeof window !== 'undefined') {
-      const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
-        'Something went wrong!';
+    }
 
+    let message = 'Something went wrong!';
+
+    if (error?.response?.data) {
+      const data = error.response.data;
+      if (typeof data.message === 'string') {
+        message = data.message;
+      } else if (Array.isArray(data.message) && typeof data.message[0] === 'string') {
+        message = data.message[0];
+      } else if (typeof data.error === 'string') {
+        message = data.error;
+      } else if (typeof data === 'string') {
+        message = data;
+      }
+    } else if (error?.message) {
+      message = error.message;
+    }
+
+    if (typeof window !== 'undefined') {
       showToast({
         message,
         severity: 'error',
       });
     }
-    return Promise.reject((error.response && error.response.data) || 'Something went wrong!');
+
+    const finalError = new Error(message);
+    (finalError as any).response = error.response;
+    (finalError as any).statusCode = error.response?.status;
+    (finalError as any).data = error.response?.data;
+
+    return Promise.reject(finalError);
   }
 );
 

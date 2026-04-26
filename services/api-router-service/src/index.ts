@@ -111,6 +111,55 @@ async function handleApiCompat(req: Request, res: Response) {
     return res.json({ data: [], total: 0 });
   }
 
+  if (module === "auth") {
+    if (req.method === "POST" && rest === "/sign-in") {
+      try {
+        const { email, password } = req.body;
+        const keycloakUrl = "http://keycloak:8080/realms/mymanager/protocol/openid-connect/token";
+        const body = new URLSearchParams({
+          grant_type: "password",
+          client_id: "mymanager-web",
+          username: email,
+          password: password,
+          scope: "openid profile email"
+        });
+
+        const response = await fetch(keycloakUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString()
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          return res.status(response.status).json(errorData);
+        }
+
+        const data = await response.json();
+        return res.json({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+          expiresIn: data.expires_in
+        });
+      } catch (err) {
+        logger.error({ err }, "Auth sign-in failed");
+        return res.status(500).json({ message: "Internal Auth Error" });
+      }
+    }
+
+    if (req.method === "GET" && rest === "/me") {
+       const ident = identityOr401(req, res);
+       if (!ident) return;
+       return res.json({ 
+         user: { 
+           id: ident.userId, 
+           email: "owner@example.com", // Fallback or extract from token
+           role: "admin" 
+         } 
+       });
+    }
+  }
+
   const ident = identityOr401(req, res);
   if (!ident) return;
 

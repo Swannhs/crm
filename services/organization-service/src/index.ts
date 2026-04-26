@@ -25,7 +25,11 @@ const managerUp = requireOrgRoles(['org_owner', 'org_admin', 'org_manager']) as 
 
 // --- Organizations ---
 app.get("/v1/organizations", identityMiddleware as any, attachRoleContext as any, (req, res) => orgCtrl.get(cast(req), res));
+app.get("/v1/details", identityMiddleware as any, attachRoleContext as any, (req, res) => orgCtrl.get(cast(req), res));
 app.put("/v1/organizations", identityMiddleware as any, attachRoleContext as any, ownerOrAdmin, (req, res) =>
+  orgCtrl.update(cast(req), res)
+);
+app.put("/v1/details", identityMiddleware as any, attachRoleContext as any, ownerOrAdmin, (req, res) =>
   orgCtrl.update(cast(req), res)
 );
 
