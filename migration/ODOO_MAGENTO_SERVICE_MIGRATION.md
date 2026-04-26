@@ -1,4 +1,4 @@
-# Odoo + Magento Service Migration (Phase 1-3)
+# Odoo + Magento Service Migration (Breaking Cutover Pass)
 
 ## Scope
 
@@ -6,8 +6,8 @@ This pass covers:
 - full repo reference audit
 - architecture ownership documentation
 - deprecation banners for overlapping services
-
-No active services are removed in this phase.
+- removal of deprecated CRM/Billing service runtime wiring
+- removal of deprecated compatibility routes after Odoo cutover
 
 ## Audit method
 
@@ -55,8 +55,8 @@ Search terms used:
 | frontend invoice client | frontend API client (reads now from `/api/odoo/invoices`; writes blocked) | Odoo | keep Odoo reads, keep legacy writes disabled with migration message | medium user-facing impact (write actions intentionally disabled) | in-progress |
 | `frontend/micro-app/src/services/finance-service.ts` | frontend finance aggregation now reads through Odoo-backed billing client | Odoo | completed migration from `/api/invoice*`; keep monitoring payout/report parity | medium | done |
 | `frontend/micro-app/src/services/commerce-service.ts` | frontend API client calling `/api/magento/*` | Magento | keep as thin Magento integration client | low | active |
-| `infra/compose/docker-compose.apps.yml` | compose runtime declarations | Custom platform | keep deprecated services for now; do not add Odoo/Magento runtime containers in this migration task | medium | active |
-| `infra/compose/docker-compose.dev.yml` / `docker-compose.prod.yml` | compose build declarations | Custom platform | keep deprecated services for compatibility until explicit cutover | medium | active |
+| `infra/compose/docker-compose.apps.yml` | compose runtime declarations | Custom platform | removed deprecated CRM/Billing runtime services; kept canonical Magento/Odoo bridges | medium | done |
+| `infra/compose/docker-compose.dev.yml` / `docker-compose.prod.yml` | compose build declarations | Custom platform | removed deprecated CRM/Billing service build entries | medium | done |
 | `infra/compose/docker-compose*.yml` (CRM/Billing runtime wiring) | compose runtime/build wiring | Odoo | removed from compose stacks after Odoo cutover | medium (legacy callers must use Odoo canonical APIs) | done |
 | `infra/k8s/base/gateway/nginx.conf` | k8s gateway manifest | Custom platform | keep route parity with Docker gateway (`/api/magento/*`, `/api/odoo/*`) | medium | active |
 | Removed billing manifest path + overlay refs | k8s manifest | Odoo | removed deprecated billing manifests and overlay references | medium | done |
@@ -67,7 +67,7 @@ Search terms used:
 
 ## Classification summary
 
-- runtime service: `commerce-service`, `magento-integration-service`, `odoo-integration-service` (CRM/Billing services retained in repo only)
+- runtime service: `commerce-service`, `magento-integration-service`, `odoo-integration-service` (CRM/Billing service directories removed)
 - frontend API client: `contact-service.ts`, invoice client, `commerce-service.ts`
 - frontend page: multiple `frontend/micro-app/src/sections/**` usage paths for contact/billing/commerce flows
 - gateway route: `gateway/nginx/nginx.conf`
@@ -76,11 +76,11 @@ Search terms used:
 - documentation: `README.md`, service READMEs
 - migration tracker: `migration/TRACKER.md`
 - test/demo code: e2e and parity docs under `frontend/micro-app/docs` and `cypress`
-- deprecated legacy code: `/api/shop/*` alias, old route mappings in compatibility router
+- deprecated legacy code: old route mappings in compatibility router
 
-## Phase 1 outcome
+## Cutover outcome
 
-- No service deletions.
-- Overlapping services are explicitly deprecated.
+- CRM/Billing service directories were removed after migration cutover.
+- Overlapping services are explicitly deprecated or replaced by canonical Magento/Odoo routes.
 - Ownership is documented as Magento + Odoo first.
-- Existing compatibility routes remain to avoid runtime breakage.
+- Legacy compatibility routes removed in gateway/router must be treated as breaking for external consumers.

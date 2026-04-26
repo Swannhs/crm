@@ -35,10 +35,12 @@ CRM integrates with Magento through:
 Magento runs as a separate Docker stack/project by default.
 
 For local development, you can opt in to a full local Magento Open Source addon (Magento app + MySQL + OpenSearch) with this repository's orchestrator script.
+That addon is for local dev/demo only and is not the production CRM runtime model.
+
+Odoo is also expected to run as an external system in normal environments.
 
 Canonical gateway route is `/api/magento/*`.
-Legacy `/api/shop/*` routes are deprecated compatibility aliases and should be migrated.
-Legacy `/api/integrations/magento/*` naming is also deprecated and now aliases to `/api/magento/*`.
+Legacy `/api/shop/*` and `/api/integrations/magento/*` compatibility aliases were removed in this branch.
 
 ### Capability ownership
 
@@ -62,6 +64,13 @@ Legacy `/api/integrations/magento/*` naming is also deprecated and now aliases t
 | Organization users/roles | Organization service |
 | Billing summaries/reporting | Odoo accounting/invoice data |
 | Magento connection and sync state | Magento integration service |
+
+### Remaining service scope notes
+
+- `services/commerce-service`: deprecated legacy compatibility only, no new business features.
+- `services/finance-service`: platform-specific reporting/aggregation only, not accounting source of truth.
+- `services/payments-service`: platform payment integration/orchestration only, not accounting source of truth.
+- `services/pos-service`: pending ownership decision; treat as legacy until Odoo POS replacement/cutover is finalized.
 
 ## Docker Modes
 
