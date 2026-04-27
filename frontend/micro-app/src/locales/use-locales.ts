@@ -3,7 +3,8 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { allLangs, defaultLang } from './all-langs.js';
+import { allLangs, defaultLang } from './all-langs';
+
 
 // ----------------------------------------------------------------------
 

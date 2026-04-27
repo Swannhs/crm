@@ -72,6 +72,11 @@ services:
     environment:
       # Internal URL used by the integration service when this addon is enabled.
       MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-http://magento}
+      MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
+      # Use either MAGENTO_ACCESS_TOKEN directly, or admin credentials for automatic token resolution.
+      MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
+      MAGENTO_ADMIN_USERNAME: ${MAGENTO_ADMIN_USERNAME:-admin}
+      MAGENTO_ADMIN_PASSWORD: ${MAGENTO_ADMIN_PASSWORD:-admin123}
     depends_on:
       magento:
         condition: service_started

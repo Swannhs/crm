@@ -8,7 +8,9 @@ set -euo pipefail
 # Configuration
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_DIR="$ROOT_DIR/infra/compose"
-BASE_FILE="$COMPOSE_DIR/docker-compose.yml"
+DEV_STACK_FILE="$COMPOSE_DIR/dev/docker-compose.yml"
+TEST_STACK_FILE="$COMPOSE_DIR/test/docker-compose.yml"
+PROD_STACK_FILE="$COMPOSE_DIR/prod/docker-compose.yml"
 
 # Helper for colorful output
 info() { echo -e "\033[0;34m[INFO]\033[0m $1"; }
@@ -87,15 +89,15 @@ set -- "${FILTERED_ARGS[@]}"
 case $ENV in
     dev)
         ENV_FILE="$(pick_env_file "$ROOT_DIR/.env.docker.dev" "$ROOT_DIR/.env.docker.dev.example" || true)"
-        FILES="-f $BASE_FILE -f $COMPOSE_DIR/docker-compose.dev.yml"
+        FILES="-f $DEV_STACK_FILE"
         ;;
     prod)
         ENV_FILE="$(pick_env_file "$ROOT_DIR/.env.docker.prod" || true)"
-        FILES="-f $BASE_FILE -f $COMPOSE_DIR/docker-compose.prod.yml"
+        FILES="-f $PROD_STACK_FILE"
         ;;
     test)
         ENV_FILE="$(pick_env_file "$ROOT_DIR/.env.docker.web-test" "$ROOT_DIR/.env.docker.web-test.example" || true)"
-        FILES="-f $BASE_FILE -f $COMPOSE_DIR/docker-compose.prod.yml -f $COMPOSE_DIR/docker-compose.web-test.yml"
+        FILES="-f $TEST_STACK_FILE"
         ;;
     *)
         error "Unknown environment: $ENV"

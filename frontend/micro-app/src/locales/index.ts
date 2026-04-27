@@ -1,3 +1,4 @@
-export * from './use-locales.js';
-export * from './all-langs.js';
-export { default } from './config-locales.js';
+export * from './use-locales';
+export * from './all-langs';
+export { default } from './config-locales';
+

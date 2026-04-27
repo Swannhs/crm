@@ -25,6 +25,8 @@ Public storefront commerce should use Magento storefront/GraphQL APIs.
 - `PORT` (default: `7190`)
 - `MAGENTO_BASE_URL` (optional default Magento URL)
 - `MAGENTO_ACCESS_TOKEN` (optional default Magento admin token)
+- `MAGENTO_ADMIN_USERNAME` (optional; used to resolve token automatically when `MAGENTO_ACCESS_TOKEN` is not set)
+- `MAGENTO_ADMIN_PASSWORD` (optional; used to resolve token automatically when `MAGENTO_ACCESS_TOKEN` is not set)
 - `MAGENTO_STORE_CODE` (default: `default`)
 
 ## Main routes

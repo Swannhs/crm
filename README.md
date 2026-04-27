@@ -82,12 +82,7 @@ The Docker stack now supports three intended modes:
 
 ### Local development
 
-```bash
-cd microservices
-./compose-dev.sh
-```
-
-Or use the unified manager and include local Magento:
+Use the unified manager:
 
 ```bash
 ./manage.sh dev up --with-magento
@@ -135,8 +130,7 @@ This mode keeps the current repo-mounted workflow:
 ### Web testing with dummy data
 
 ```bash
-cd microservices
-./compose-web-test.sh
+./manage.sh test up
 ```
 
 This mode layers `infra/compose/docker-compose.web-test.yml` on top of the base stack:
@@ -153,14 +147,13 @@ The dummy seeder reads Docker-friendly env vars from:
 1. Copy the example env file and replace placeholders:
 
 ```bash
-cd microservices
 cp .env.docker.prod.example .env.docker.prod
 ```
 
 2. Start the production-oriented stack:
 
 ```bash
-./compose-prod.sh
+./manage.sh prod up
 ```
 
 This mode layers `infra/compose/docker-compose.prod.yml` on top of the base stack:
@@ -176,7 +169,7 @@ This is intended as the repo’s “real user” compose entrypoint until a full
 Start the platform stack:
 
 ```bash
-docker compose -f microservices/infra/compose/docker-compose.yml up --build
+docker compose -f microservices/infra/compose/dev/docker-compose.yml up --build
 ```
 
 Key endpoints (defaults):

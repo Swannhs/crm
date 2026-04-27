@@ -1,0 +1,10 @@
+# Web-test stack entrypoint
+# Purpose: production-style runtime plus seeded dummy data.
+include:
+  - ../docker-compose.platform.yml
+  - ../docker-compose.databases.yml
+  - ../docker-compose.apps.yml
+  - ../docker-compose.web.yml
+  - ../docker-compose.prod.yml
+  - ../docker-compose.web-test.yml
+

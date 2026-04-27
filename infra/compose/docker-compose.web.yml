@@ -18,8 +18,17 @@ services:
       - api-router-service
 
   frontend:
+    build:
+      context: ../../frontend/micro-app
+      dockerfile: docker/Dockerfile.dev
     container_name: ms-frontend
+    volumes:
+      - ../../frontend/micro-app:/app
+      - /app/node_modules
     ports:
       - "3034:3034"
+
+
+
     depends_on:
       - nginx

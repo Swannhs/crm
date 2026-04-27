@@ -49,14 +49,34 @@ async function resolveToken(baseUrl: string, input: ConnectInput): Promise<strin
   return token;
 }
 
-function fromEnv(): MagentoConnection | null {
+async function fromEnv(): Promise<MagentoConnection | null> {
   const baseUrl = process.env.MAGENTO_BASE_URL;
   const accessToken = process.env.MAGENTO_ACCESS_TOKEN;
-  if (!baseUrl || !accessToken) return null;
+  const username = process.env.MAGENTO_ADMIN_USERNAME;
+  const password = process.env.MAGENTO_ADMIN_PASSWORD;
+  const normalizedBaseUrl = baseUrl ? normalizeBaseUrl(baseUrl) : "";
+
+  if (!normalizedBaseUrl) return null;
+
+  if (accessToken) {
+    return {
+      baseUrl: normalizedBaseUrl,
+      accessToken,
+      storeCode: process.env.MAGENTO_STORE_CODE || "default",
+      connectedAt: "env",
+    };
+  }
+
+  if (!username || !password) return null;
+
+  const resolvedToken = await resolveToken(normalizedBaseUrl, {
+    username,
+    password,
+  });
 
   return {
-    baseUrl: normalizeBaseUrl(baseUrl),
-    accessToken,
+    baseUrl: normalizedBaseUrl,
+    accessToken: resolvedToken,
     storeCode: process.env.MAGENTO_STORE_CODE || "default",
     connectedAt: "env",
   };
@@ -102,7 +122,7 @@ export async function getMagentoConnection(identity: Identity): Promise<MagentoC
       connectedAt: saved.createdAt.toISOString(),
     };
   }
-  return fromEnv();
+  return await fromEnv();
 }
 
 export async function disconnectMagento(identity: Identity): Promise<boolean> {

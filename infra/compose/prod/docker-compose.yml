@@ -1,0 +1,9 @@
+# Production stack entrypoint
+# Purpose: production configuration and runtime settings.
+include:
+  - ../docker-compose.platform.yml
+  - ../docker-compose.databases.yml
+  - ../docker-compose.apps.yml
+  - ../docker-compose.web.yml
+  - ../docker-compose.prod.yml
+

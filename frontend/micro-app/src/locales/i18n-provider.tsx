@@ -1,6 +1,7 @@
 'use client';
 
-import './config-locales.js';
+import './config-locales';
+
 import { ReactNode } from 'react';
 
 // ----------------------------------------------------------------------

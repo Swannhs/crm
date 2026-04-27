@@ -1,0 +1,9 @@
+# Development stack entrypoint
+# Purpose: local development with bind mounts and watch-mode services.
+include:
+  - ../docker-compose.platform.yml
+  - ../docker-compose.databases.yml
+  - ../docker-compose.apps.yml
+  - ../docker-compose.web.yml
+  - ../docker-compose.dev.yml
+
