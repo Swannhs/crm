@@ -55,6 +55,51 @@ type SummaryCardsProps = {
 };
 
 export function CommerceSummaryCards({ products, orders, cartItems, topProducts }: SummaryCardsProps & { topProducts?: any[] }) {
+  const grossRevenueCents = orders.reduce((sum, item) => sum + (item.totalAmountCents || 0), 0);
+  const paidOrders = orders.filter((item) =>
+    ['paid', 'complete', 'completed'].includes(String(item.paymentStatus || '').toLowerCase())
+  );
+  const paidRevenueCents = paidOrders.reduce((sum, item) => sum + (item.totalAmountCents || 0), 0);
+  const avgOrderCents = orders.length ? Math.round(grossRevenueCents / orders.length) : 0;
+  const uniqueCustomers = new Set(
+    orders
+      .map((item) => {
+        const shipping = item.shippingAddress as Record<string, any> | undefined;
+        const email = shipping?.email ? String(shipping.email).toLowerCase() : '';
+        const fallbackName = shipping?.customerName ? String(shipping.customerName).toLowerCase() : '';
+        return email || fallbackName || '';
+      })
+      .filter(Boolean)
+  ).size;
+  const activeProducts = products.filter((product) => product.status === 'active').length;
+
+  const statusGroups = [
+    {
+      label: 'Pending',
+      color: 'warning' as const,
+      count: orders.filter((item) => ['pending', 'new', 'pending_payment'].includes(item.status.toLowerCase())).length,
+    },
+    {
+      label: 'Processing',
+      color: 'info' as const,
+      count: orders.filter((item) => ['processing'].includes(item.status.toLowerCase())).length,
+    },
+    {
+      label: 'Completed',
+      color: 'success' as const,
+      count: orders.filter((item) => ['complete', 'completed', 'paid'].includes(item.status.toLowerCase())).length,
+    },
+    {
+      label: 'Cancelled',
+      color: 'error' as const,
+      count: orders.filter((item) => ['cancelled', 'closed', 'canceled', 'failed'].includes(item.status.toLowerCase())).length,
+    },
+  ];
+
+  const recentOrders = [...orders]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+
   return (
     <Stack spacing={3}>
       <Grid container spacing={3}>
@@ -63,22 +108,40 @@ export function CommerceSummaryCards({ products, orders, cartItems, topProducts 
             label: 'Products',
             value: products.length,
             icon: 'solar:box-bold-duotone',
-            helper: `${products.filter((product) => product.status === 'active').length} active listings`,
+            helper: `${activeProducts} active listings`,
           },
           {
             label: 'Orders',
             value: orders.length,
             icon: 'solar:cart-large-bold-duotone',
-            helper: `${orders.filter((item) => item.paymentStatus === 'paid').length} paid`,
+            helper: `${paidOrders.length} paid orders`,
           },
           {
-            label: 'Revenue',
-            value: fCurrency(orders.reduce((sum, item) => sum + (item.totalAmountCents || 0), 0) / 100),
+            label: 'Gross Revenue',
+            value: fCurrency(grossRevenueCents / 100),
             icon: 'solar:wad-of-money-bold-duotone',
             helper: `${cartItems.length} items currently in cart`,
           },
+          {
+            label: 'Paid Revenue',
+            value: fCurrency(paidRevenueCents / 100),
+            icon: 'solar:wallet-money-bold-duotone',
+            helper: `${orders.length - paidOrders.length} not fully paid`,
+          },
+          {
+            label: 'Average Order',
+            value: fCurrency(avgOrderCents / 100),
+            icon: 'solar:chart-2-bold-duotone',
+            helper: 'Magento order average',
+          },
+          {
+            label: 'Customers',
+            value: uniqueCustomers,
+            icon: 'solar:users-group-two-rounded-bold-duotone',
+            helper: 'Distinct shoppers in current data',
+          },
         ].map((item) => (
-          <Grid item xs={12} md={4} key={item.label}>
+          <Grid item xs={12} md={6} xl={4} key={item.label}>
             <Card sx={{ p: 3 }}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Box
@@ -107,6 +170,73 @@ export function CommerceSummaryCards({ products, orders, cartItems, topProducts 
             </Card>
           </Grid>
         ))}
+      </Grid>
+
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Order Pipeline
+            </Typography>
+            <Stack spacing={2}>
+              {statusGroups.map((group) => {
+                const percentage = orders.length ? Math.round((group.count / orders.length) * 100) : 0;
+                return (
+                  <Stack key={group.label} spacing={0.75}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">{group.label}</Typography>
+                      <Chip size="small" color={group.color} label={`${group.count} (${percentage}%)`} variant="soft" />
+                    </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={percentage}
+                      color={group.color === 'error' ? 'error' : group.color === 'success' ? 'success' : 'primary'}
+                    />
+                  </Stack>
+                );
+              })}
+            </Stack>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Recent Magento Orders
+            </Typography>
+            <Stack spacing={1.5}>
+              {recentOrders.length === 0 ? (
+                <Alert severity="info">No orders available yet.</Alert>
+              ) : (
+                recentOrders.map((order) => (
+                  <Stack
+                    key={order.id}
+                    direction="row"
+                    spacing={1.5}
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 1.5,
+                      bgcolor: 'background.neutral',
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="subtitle2">{String(order.id).slice(0, 12)}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {new Date(order.createdAt).toLocaleString()}
+                      </Typography>
+                    </Box>
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                      <Chip size="small" label={order.status} color={orderStatusColor(order.status)} variant="outlined" />
+                      <Typography variant="subtitle2">{fCurrency((order.totalAmountCents || 0) / 100)}</Typography>
+                    </Stack>
+                  </Stack>
+                ))
+              )}
+            </Stack>
+          </Card>
+        </Grid>
       </Grid>
 
       {topProducts && topProducts.length > 0 && (

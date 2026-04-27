@@ -11,8 +11,6 @@ resources:
 images:
   - name: ghcr.io/mymanager/organization-service
     newTag: dev
-  - name: ghcr.io/mymanager/billing-service
-    newTag: dev
 
 patches:
   - path: keycloak-dev-patch.yaml

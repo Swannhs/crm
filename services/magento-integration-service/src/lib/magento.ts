@@ -1,4 +1,5 @@
 import type { Identity } from "../middleware/identity.js";
+import { db } from "./prisma.js";
 
 export interface MagentoConnection {
   baseUrl: string;
@@ -14,8 +15,6 @@ export interface ConnectInput {
   password?: string;
   storeCode?: string;
 }
-
-const connectionStore = new Map<string, MagentoConnection>();
 
 function normalizeBaseUrl(baseUrl: string): string {
   return baseUrl.replace(/\/+$/, "");
@@ -70,23 +69,49 @@ export async function connectMagento(identity: Identity, input: ConnectInput): P
   }
 
   const accessToken = await resolveToken(baseUrl, input);
-  const connection: MagentoConnection = {
+  const storeCode = input.storeCode || process.env.MAGENTO_STORE_CODE || "default";
+
+  const data = {
+    orgUserId: storeKey(identity),
     baseUrl,
     accessToken,
-    storeCode: input.storeCode || process.env.MAGENTO_STORE_CODE || "default",
-    connectedAt: new Date().toISOString(),
+    storeCode,
   };
 
-  connectionStore.set(storeKey(identity), connection);
-  return connection;
+  const saved = await db.magentoConnection.upsert({
+    where: { orgUserId: data.orgUserId },
+    update: data,
+    create: data,
+  });
+
+  return {
+    baseUrl: saved.baseUrl,
+    accessToken: saved.accessToken,
+    storeCode: saved.storeCode,
+    connectedAt: saved.createdAt.toISOString(),
+  };
 }
 
-export function getMagentoConnection(identity: Identity): MagentoConnection | null {
-  return connectionStore.get(storeKey(identity)) || fromEnv();
+export async function getMagentoConnection(identity: Identity): Promise<MagentoConnection | null> {
+  const saved = await db.magentoConnection.findUnique({ where: { orgUserId: storeKey(identity) } });
+  if (saved) {
+    return {
+      baseUrl: saved.baseUrl,
+      accessToken: saved.accessToken,
+      storeCode: saved.storeCode,
+      connectedAt: saved.createdAt.toISOString(),
+    };
+  }
+  return fromEnv();
 }
 
-export function disconnectMagento(identity: Identity): boolean {
-  return connectionStore.delete(storeKey(identity));
+export async function disconnectMagento(identity: Identity): Promise<boolean> {
+  try {
+    await db.magentoConnection.delete({ where: { orgUserId: storeKey(identity) } });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function publicConnection(connection: MagentoConnection) {

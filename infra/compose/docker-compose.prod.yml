@@ -9,30 +9,10 @@ services:
   redis:
     restart: unless-stopped
 
-  mongo:
-    restart: unless-stopped
-
-  monolith:
-    image: node:16-alpine
-    working_dir: /app
-    volumes:
-      - ../../../server:/app
-    environment:
-      NODE_ENV: production
-      PORT: ${MONOLITH_PORT:-5000}
-    command: sh -c "yarn install --frozen-lockfile || yarn install && node index.js"
-    restart: unless-stopped
-
-  crm-service:
-    build:
-      context: ../../services/crm-service
-      dockerfile: docker/Dockerfile.prod
-    restart: unless-stopped
-
   organization-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/organization-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: organization-service
         SERVICE_PORT: 7010
@@ -41,22 +21,10 @@ services:
       PORT: ${ORGANIZATION_SERVICE_PORT:-7010}
     restart: unless-stopped
 
-  billing-service:
-    build:
-      context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
-      args:
-        SERVICE_NAME: billing-service
-        SERVICE_PORT: 7020
-    environment:
-      NODE_ENV: production
-      PORT: ${BILLING_SERVICE_PORT:-7020}
-    restart: unless-stopped
-
   booking-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/booking-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: booking-service
         SERVICE_PORT: 7040
@@ -68,7 +36,7 @@ services:
   finance-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/finance-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: finance-service
         SERVICE_PORT: 7170
@@ -80,7 +48,7 @@ services:
   api-router-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/api-router-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: api-router-service
         SERVICE_PORT: 7001
@@ -92,7 +60,7 @@ services:
   community-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/community-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: community-service
         SERVICE_PORT: 7050
@@ -104,7 +72,7 @@ services:
   commerce-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/commerce-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: commerce-service
         SERVICE_PORT: 7060
@@ -116,7 +84,7 @@ services:
   documents-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/documents-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: documents-service
         SERVICE_PORT: 7080
@@ -128,7 +96,7 @@ services:
   payments-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/payments-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: payments-service
         SERVICE_PORT: 7090
@@ -140,7 +108,7 @@ services:
   notification-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/notification-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: notification-service
         SERVICE_PORT: 8000
@@ -152,7 +120,7 @@ services:
   employees-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/employees-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: employees-service
         SERVICE_PORT: 7070
@@ -164,7 +132,7 @@ services:
   realtime-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/realtime-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: realtime-service
         SERVICE_PORT: 7030
@@ -176,7 +144,7 @@ services:
   marketing-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/marketing-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: marketing-service
         SERVICE_PORT: 8030
@@ -188,7 +156,7 @@ services:
   projects-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/projects-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: projects-service
         SERVICE_PORT: 8040
@@ -200,7 +168,7 @@ services:
   calendar-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/calendar-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: calendar-service
         SERVICE_PORT: 8050
@@ -212,7 +180,7 @@ services:
   pos-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/pos-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: pos-service
         SERVICE_PORT: 7100
@@ -224,7 +192,7 @@ services:
   automation-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/automation-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: automation-service
         SERVICE_PORT: 7110
@@ -236,7 +204,7 @@ services:
   device-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/device-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: device-service
         SERVICE_PORT: 7120
@@ -248,7 +216,7 @@ services:
   file-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/file-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: file-service
         SERVICE_PORT: 7130
@@ -260,7 +228,7 @@ services:
   integrations-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/integrations-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: integrations-service
         SERVICE_PORT: 7140
@@ -272,24 +240,37 @@ services:
   magento-integration-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/magento-integration-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: magento-integration-service
         SERVICE_PORT: 7190
     environment:
       NODE_ENV: production
       PORT: ${MAGENTO_INTEGRATION_SERVICE_PORT:-7190}
-      CRM_SERVICE_URL: ${MAGENTO_CRM_SERVICE_URL:-http://crm-service:8010}
-      BILLING_SERVICE_URL: ${MAGENTO_BILLING_SERVICE_URL:-http://billing-service:7020}
       MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-}
       MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
       MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
     restart: unless-stopped
 
+  odoo-integration-service:
+    build:
+      context: ../..
+      dockerfile: services/odoo-integration-service/docker/Dockerfile.prod
+    environment:
+      NODE_ENV: production
+      PORT: ${ODOO_INTEGRATION_SERVICE_PORT:-7200}
+      ODOO_BASE_URL: ${ODOO_BASE_URL:-http://odoo:8069}
+      ODOO_DB: ${ODOO_DB:-}
+      ODOO_USERNAME: ${ODOO_USERNAME:-}
+      ODOO_PASSWORD: ${ODOO_PASSWORD:-}
+      ODOO_API_KEY: ${ODOO_API_KEY:-}
+      MAGENTO_API_BASE_URL: ${MAGENTO_API_BASE_URL:-http://magento-integration-service:7190}
+    restart: unless-stopped
+
   scoring-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/scoring-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: scoring-service
         SERVICE_PORT: 7180
@@ -301,7 +282,7 @@ services:
   deal-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/deal-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: deal-service
         SERVICE_PORT: 7150
@@ -313,7 +294,7 @@ services:
   email-sync-service:
     build:
       context: ../..
-      dockerfile: infra/docker/node-service/Dockerfile.prod
+      dockerfile: services/email-sync-service/docker/Dockerfile.prod
       args:
         SERVICE_NAME: email-sync-service
         SERVICE_PORT: 7160

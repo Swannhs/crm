@@ -34,6 +34,8 @@ usage() {
     echo ""
     echo "Optional flags:"
     echo "  --with-magento   Include local Magento Open Source stack addon (app + DB + search)"
+    echo "  --with-odoo      Include local Odoo stack addon (Odoo + Postgres)"
+    echo "  --with-all       Shortcut for --with-magento --with-odoo"
     echo ""
     echo "Example:"
     echo "  $0 dev up"
@@ -60,13 +62,24 @@ CMD=$2
 shift 2
 
 WITH_MAGENTO=false
+WITH_ODOO=false
 FILTERED_ARGS=()
 for arg in "$@"; do
-    if [ "$arg" = "--with-magento" ]; then
-        WITH_MAGENTO=true
-    else
-        FILTERED_ARGS+=("$arg")
-    fi
+    case "$arg" in
+        --with-magento)
+            WITH_MAGENTO=true
+            ;;
+        --with-odoo)
+            WITH_ODOO=true
+            ;;
+        --with-all)
+            WITH_MAGENTO=true
+            WITH_ODOO=true
+            ;;
+        *)
+            FILTERED_ARGS+=("$arg")
+            ;;
+    esac
 done
 set -- "${FILTERED_ARGS[@]}"
 
@@ -92,6 +105,11 @@ esac
 if [ "$WITH_MAGENTO" = true ]; then
     FILES="$FILES -f $COMPOSE_DIR/docker-compose.magento.yml"
     info "Magento addon enabled via docker-compose.magento.yml"
+fi
+
+if [ "$WITH_ODOO" = true ]; then
+    FILES="$FILES -f $COMPOSE_DIR/docker-compose.odoo.yml"
+    info "Odoo addon enabled via docker-compose.odoo.yml"
 fi
 
 # Configure compose env arguments
@@ -157,10 +175,8 @@ case $CMD in
         info "Starting $ENV environment..."
         if [ "$ENV" = "dev" ] && [ "$#" -eq 0 ]; then
             DB_SERVICES=(
-                keycloak-db community-db commerce-db crm-db organization-db billing-db booking-db
-                finance-db documents-db payments-db notification-db employees-db marketing-db projects-db
-                calendar-db pos-db automation-db device-db file-db integrations-db realtime-db
-                scoring-db deal-db email-sync-db
+                keycloak-db organization-db integrations-db realtime-db
+                email-sync-db odoo-integration-db magento-integration-db
             )
             CORE_SERVICES=(kafka redis api-router-service)
             APP_SERVICES=()
@@ -171,12 +187,8 @@ case $CMD in
             info "Waiting for databases to become healthy..."
             wait_for_services_ready 180 "${DB_SERVICES[@]}"
 
-            # Skip legacy monolith/mongo in default dev startup to keep the microservices
-            # stack fast and avoid unrelated failures.
             while IFS= read -r service; do
-                if [ "$service" != "mongo" ] && [ "$service" != "monolith" ]; then
-                    APP_SERVICES+=("$service")
-                fi
+                APP_SERVICES+=("$service")
             done < <(compose config --services)
 
             compose up -d --build "${APP_SERVICES[@]}"
@@ -216,17 +228,7 @@ case $CMD in
             -v "$ROOT_DIR:/repo" \
             -w /repo \
             -e SEED_ORG_HOST=ms-organization-service \
-            -e SEED_PROJECTS_HOST=ms-projects-service \
-            -e SEED_CRM_HOST=ms-crm-service \
-            -e SEED_BILLING_HOST=ms-billing-service \
-            -e SEED_DEAL_HOST=ms-deal-service \
             -e SEED_EMAIL_SYNC_HOST=ms-email-sync-service \
-            -e SEED_CALENDAR_HOST=ms-calendar-service \
-            -e SEED_DOCUMENTS_HOST=ms-documents-service \
-            -e SEED_EMPLOYEES_HOST=ms-employees-service \
-            -e SEED_POS_HOST=ms-pos-service \
-            -e SEED_NOTIFICATION_HOST=ms-notification-service \
-            -e SEED_SCORING_HOST=ms-scoring-service \
             -e KEYCLOAK_URL=http://ms-keycloak:8080 \
             node:24-alpine \
             sh -c "node scripts/seed-keycloak.cjs && node scripts/seed.cjs"

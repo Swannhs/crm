@@ -99,6 +99,26 @@ export async function deleteCard(id: string) {
   return response.data;
 }
 
+export async function getWorklogs(taskId: string) {
+  const response = await axiosInstance.get(`/api/projects/v1/tasks/${taskId}/worklogs`);
+  return response.data?.data ?? response.data ?? [];
+}
+
+export async function logWork(taskId: string, data: any) {
+  const response = await axiosInstance.post(`/api/projects/v1/tasks/${taskId}/worklogs`, data);
+  return response.data;
+}
+
+export async function getSubtasks(taskId: string) {
+  const response = await axiosInstance.get(`/api/projects/v1/tasks/${taskId}/subtasks`);
+  return response.data?.data ?? response.data ?? [];
+}
+
+export async function createSubtask(taskId: string, data: any) {
+  const response = await axiosInstance.post(`/api/projects/v1/tasks/${taskId}/subtasks`, data);
+  return response.data;
+}
+
 export const projectService = {
   getProjects,
   getProject,

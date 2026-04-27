@@ -1,0 +1,13 @@
+FROM node:24-alpine
+
+ENV NODE_ENV=development
+ENV PORT=7200
+
+WORKDIR /workspace/services/odoo-integration-service
+
+RUN corepack enable
+
+EXPOSE 7200
+
+# Host handles dependencies via bind mount
+CMD ["npm", "run", "start:dev"]

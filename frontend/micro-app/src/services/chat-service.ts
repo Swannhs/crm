@@ -3,7 +3,9 @@ import axiosInstance from 'src/utils/axios';
 // ----------------------------------------------------------------------
 
 export async function getContacts() {
-  const response = await axiosInstance.get('/api/contact/get', { params: { search: '' } });
+  const response = await axiosInstance.get('/api/odoo/contacts', {
+    params: { page: 1, pageSize: 200, search: '' },
+  });
   const contacts = Array.isArray(response.data)
     ? response.data
     : Array.isArray(response.data?.data)
@@ -14,9 +16,14 @@ export async function getContacts() {
 
   return contacts.map((contact: any) => ({
     id: contact.id || contact._id,
-    fullName: contact.fullName || contact.name || [contact.firstName, contact.lastName].filter(Boolean).join(' ') || contact.email || 'Unknown contact',
+    fullName:
+      contact.fullName ||
+      contact.name ||
+      [contact.firstName, contact.lastName].filter(Boolean).join(' ') ||
+      contact.email ||
+      'Unknown contact',
     email: contact.email || null,
-    phone: contact.phone || null,
+    phone: contact.phone || contact.mobile || null,
     avatar: contact.photo || contact.avatar || null,
     channelId: null,
     lastMessage: null,

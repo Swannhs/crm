@@ -4,8 +4,6 @@ const CONFIG = {
   services: {
     organization: { host: process.env.SEED_ORG_HOST || 'localhost', port: 7010 },
     projects: { host: process.env.SEED_PROJECTS_HOST || 'localhost', port: 8040 },
-    crm: { host: process.env.SEED_CRM_HOST || 'localhost', port: 8010 },
-    billing: { host: process.env.SEED_BILLING_HOST || 'localhost', port: 7020 },
     deal: { host: process.env.SEED_DEAL_HOST || 'localhost', port: 7150 },
     emailSync: { host: process.env.SEED_EMAIL_SYNC_HOST || 'localhost', port: 7160 },
     calendar: { host: process.env.SEED_CALENDAR_HOST || 'localhost', port: 8050 },
@@ -39,10 +37,6 @@ const DUMMY_DATA = {
   deals: [
     { name: 'Cloud Migration Contract', amount: 85000, stage: 'proposal' },
     { name: 'Security Audit Service', amount: 12000, stage: 'qualification' }
-  ],
-  contacts: [
-    { firstName: 'John', lastName: 'Doe', email: 'john@client.com', phone: '555-1111' },
-    { firstName: 'Jane', lastName: 'Smith', email: 'jane@partner.org', phone: '555-2222' }
   ],
   events: [
     { title: 'Weekly Sync', description: 'Team update meeting', startTime: new Date().toISOString(), duration: 60 },
@@ -182,9 +176,8 @@ async function seed() {
     }
   }
 
-  // 3. CRM & DEALS
-  console.log('--- CRM & Deals ---');
-  for (const c of DUMMY_DATA.contacts) await request('crm', 'POST', '/api/v1/contacts', c, { 'X-User-Id': staff.id });
+  // 3. Deals
+  console.log('--- Deals ---');
   for (const d of DUMMY_DATA.deals) await request('deal', 'POST', '/api/v1/deals', d, { 'X-User-Id': staff.id });
 
   // 4. CALENDAR
@@ -199,10 +192,9 @@ async function seed() {
   console.log('--- Documents ---');
   for (const doc of DUMMY_DATA.documents) await request('documents', 'POST', '/v1/documents', doc, { 'X-User-Id': staff.id });
 
-  // 7. POS & BILLING
-  console.log('--- POS & Billing ---');
+  // 7. POS
+  console.log('--- POS ---');
   await request('pos', 'POST', '/v1/transactions', { amount: 150.50, items: [{ name: 'License', price: 150.50 }] }, { 'X-User-Id': staff.id });
-  await request('billing', 'POST', '/v1/invoices', { amount_cents: 15050, status: 'paid' }, { 'X-User-Id': owner.id });
 
   console.log('\n✅ Comprehensive Seeding Completed!');
 }

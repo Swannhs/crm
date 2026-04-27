@@ -95,6 +95,15 @@ export interface VoiceIntegrationInput {
   isActive?: boolean;
 }
 
+export interface OdooIntegrationInput {
+  baseUrl: string;
+  db: string;
+  username: string;
+  password?: string;
+  apiKey?: string;
+  isActive?: boolean;
+}
+
 export type IntegrationProvider = 
   | 'google' 
   | 'facebook' 
@@ -104,6 +113,7 @@ export type IntegrationProvider =
   | 'zoom' 
   | 'shopify' 
   | 'magento'
+  | 'odoo'
   | 'uber' 
   | 'uber-eats' 
   | 'easypost'

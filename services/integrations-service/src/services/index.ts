@@ -27,8 +27,12 @@ import type {
   VoiceIntegrationInput,
   WhatsAppInstanceInput,
   TelegramSessionInput,
-  OmniMessageReceivedEvent
+  OmniMessageReceivedEvent,
+  OdooIntegrationInput
 } from '../types/index.js';
+
+const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL || 'http://ms-magento-integration-service:7190';
+const ODOO_SERVICE_URL = process.env.ODOO_INTEGRATION_SERVICE_URL || 'http://ms-odoo-integration-service:7200';
 
 export class IntegrationConnectionService {
   private repo = new IntegrationConnectionRepository();
@@ -294,147 +298,131 @@ export class ShopifyIntegrationService {
   }
 }
 
+import type { Identity } from '../middleware/identity.js';
+
 export class MagentoIntegrationService {
   private connRepo = new IntegrationConnectionRepository();
 
-  private normalizeBaseUrl(baseUrl: string) {
-    return baseUrl.replace(/\/+$/, "");
-  }
-
-  private async resolveAccessToken(input: MagentoIntegrationInput) {
-    if (input.accessToken) return input.accessToken;
-    if (!input.username || !input.password) {
-      throw new Error("Either accessToken or username/password is required");
+  private async request(identity: Identity, path: string, method = 'GET', body?: any, query?: any) {
+    const url = new URL(`${MAGENTO_SERVICE_URL}${path}`);
+    if (query) {
+      Object.entries(query).forEach(([k, v]) => url.searchParams.set(k, String(v)));
     }
 
-    const baseUrl = this.normalizeBaseUrl(input.baseUrl);
-    const response = await fetch(`${baseUrl}/rest/V1/integration/admin/token`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ username: input.username, password: input.password }),
-    });
-    if (!response.ok) {
-      throw new Error(`Magento auth failed (${response.status})`);
-    }
-    const token = await response.json();
-    if (!token || typeof token !== "string") {
-      throw new Error("Magento auth returned invalid token");
-    }
-    return token;
-  }
-
-  private async requestMagento(
-    baseUrl: string,
-    accessToken: string,
-    path: string,
-    query: Record<string, string | number | undefined> = {}
-  ) {
-    const url = new URL(`${this.normalizeBaseUrl(baseUrl)}${path}`);
-    for (const [key, value] of Object.entries(query)) {
-      if (value === undefined || value === null || value === "") continue;
-      url.searchParams.set(key, String(value));
-    }
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+    const res = await fetch(url.toString(), {
+      method,
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-User-Id': identity.userId,
+        'X-Org-Id': identity.orgId || '',
       },
+      body: body ? JSON.stringify(body) : undefined,
     });
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Magento API error (${response.status}): ${text.slice(0, 300)}`);
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: 'Unknown error' }));
+      throw new Error(`Magento Service error: ${error.message || res.statusText}`);
     }
-    return response.json();
+    return res.json();
   }
 
-  async connect(userId: string, organizationId: string | undefined, data: MagentoIntegrationInput) {
-    const baseUrl = this.normalizeBaseUrl(data.baseUrl);
-    const accessToken = await this.resolveAccessToken(data);
-    const storeCode = data.storeCode || "default";
-
-    const connection = await this.connRepo.upsertByUserProvider(userId, "magento", {
-      organizationId,
-      accessToken,
-      accountId: baseUrl,
-      accountName: `Magento (${storeCode})`,
-      metadata: {
-        baseUrl,
-        storeCode,
-      },
+  async connect(identity: Identity, data: MagentoIntegrationInput) {
+    const result = await this.request(identity, '/v1/magento/connect', 'POST', data);
+    const connection = await this.connRepo.upsertByUserProvider(identity.userId, 'magento', {
+      organizationId: identity.orgId,
+      accessToken: result.data?.accessToken,
+      accountId: data.baseUrl,
+      accountName: `Magento (${data.storeCode || 'default'})`,
+      metadata: { baseUrl: data.baseUrl, storeCode: data.storeCode },
       isActive: true,
     });
-
     return connection;
   }
 
   async getConnection(userId: string) {
-    return this.connRepo.findByUserAndProvider(userId, "magento");
+    return this.connRepo.findByUserAndProvider(userId, 'magento');
   }
 
-  async disconnect(userId: string) {
-    return this.connRepo.deactivate(userId, "magento");
+  async disconnect(identity: Identity) {
+    await this.request(identity, '/v1/magento/disconnect', 'POST');
+    return this.connRepo.deactivate(identity.userId, 'magento');
   }
 
-  private async getConnectionOrThrow(userId: string) {
-    const connection = await this.connRepo.findByUserAndProvider(userId, "magento");
-    if (!connection || !connection.accessToken) {
-      throw new Error("Magento connection not found");
+  async getStores(identity: Identity) {
+    return this.request(identity, '/v1/magento/stores');
+  }
+
+  async getProducts(identity: Identity, pageSize = 50, currentPage = 1, search = '') {
+    return this.request(identity, '/v1/magento/products', 'GET', undefined, { pageSize, currentPage, search });
+  }
+
+  async getOrders(identity: Identity, pageSize = 50, currentPage = 1) {
+    return this.request(identity, '/v1/magento/orders', 'GET', undefined, { pageSize, currentPage });
+  }
+
+  async getCustomers(identity: Identity, pageSize = 50, currentPage = 1) {
+    return this.request(identity, '/v1/magento/customers', 'GET', undefined, { pageSize, currentPage });
+  }
+}
+
+export class OdooIntegrationService {
+  private connRepo = new IntegrationConnectionRepository();
+
+  private async request(identity: Identity, path: string, method = 'GET', body?: any, query?: any) {
+    const url = new URL(`${ODOO_SERVICE_URL}${path}`);
+    if (query) {
+      Object.entries(query).forEach(([k, v]) => url.searchParams.set(k, String(v)));
     }
-    const metadata = (connection.metadata || {}) as { baseUrl?: string; storeCode?: string };
-    if (!metadata.baseUrl) throw new Error("Magento connection baseUrl is missing");
-    return {
-      baseUrl: this.normalizeBaseUrl(metadata.baseUrl),
-      accessToken: connection.accessToken,
-      storeCode: metadata.storeCode || "default",
-    };
-  }
 
-  async getStores(userId: string) {
-    const connection = await this.getConnectionOrThrow(userId);
-    return this.requestMagento(connection.baseUrl, connection.accessToken, "/rest/all/V1/store/storeConfigs");
-  }
-
-  async getProducts(userId: string, pageSize = 50, currentPage = 1, search = "") {
-    const connection = await this.getConnectionOrThrow(userId);
-    const query: Record<string, string | number | undefined> = {
-      "searchCriteria[pageSize]": pageSize,
-      "searchCriteria[currentPage]": currentPage,
-    };
-    if (search) {
-      query["searchCriteria[filter_groups][0][filters][0][field]"] = "name";
-      query["searchCriteria[filter_groups][0][filters][0][value]"] = `%${search}%`;
-      query["searchCriteria[filter_groups][0][filters][0][condition_type]"] = "like";
-    }
-    return this.requestMagento(
-      connection.baseUrl,
-      connection.accessToken,
-      `/rest/${connection.storeCode}/V1/products`,
-      query
-    );
-  }
-
-  async getOrders(userId: string, pageSize = 50, currentPage = 1) {
-    const connection = await this.getConnectionOrThrow(userId);
-    return this.requestMagento(connection.baseUrl, connection.accessToken, `/rest/${connection.storeCode}/V1/orders`, {
-      "searchCriteria[pageSize]": pageSize,
-      "searchCriteria[currentPage]": currentPage,
-      "searchCriteria[sortOrders][0][field]": "created_at",
-      "searchCriteria[sortOrders][0][direction]": "DESC",
+    const res = await fetch(url.toString(), {
+      method,
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-User-Id': identity.userId,
+        'X-Org-Id': identity.orgId || '',
+      },
+      body: body ? JSON.stringify(body) : undefined,
     });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: 'Unknown error' }));
+      throw new Error(`Odoo Service error: ${error.message || res.statusText}`);
+    }
+    return res.json();
   }
 
-  async getCustomers(userId: string, pageSize = 50, currentPage = 1) {
-    const connection = await this.getConnectionOrThrow(userId);
-    return this.requestMagento(
-      connection.baseUrl,
-      connection.accessToken,
-      `/rest/${connection.storeCode}/V1/customers/search`,
-      {
-        "searchCriteria[pageSize]": pageSize,
-        "searchCriteria[currentPage]": currentPage,
-      }
-    );
+  async connect(identity: Identity, data: OdooIntegrationInput) {
+    const result = await this.request(identity, '/v1/odoo/connect', 'POST', data);
+    const connection = await this.connRepo.upsertByUserProvider(identity.userId, 'odoo', {
+      organizationId: identity.orgId,
+      accessToken: data.apiKey || data.password,
+      accountId: data.baseUrl,
+      accountName: `Odoo (${data.db})`,
+      metadata: { baseUrl: data.baseUrl, db: data.db, username: data.username },
+      isActive: true,
+    });
+    return connection;
+  }
+
+  async getConnection(userId: string) {
+    return this.connRepo.findByUserAndProvider(userId, 'odoo');
+  }
+
+  async disconnect(identity: Identity) {
+    await this.request(identity, '/v1/odoo/disconnect', 'POST');
+    return this.connRepo.deactivate(identity.userId, 'odoo');
+  }
+
+  async getContacts(identity: Identity, page = 1, pageSize = 50, search = '') {
+    return this.request(identity, '/v1/odoo/contacts', 'GET', undefined, { page, pageSize, search });
+  }
+
+  async getInvoices(identity: Identity, page = 1, pageSize = 50) {
+    return this.request(identity, '/v1/odoo/invoices', 'GET', undefined, { page, pageSize });
+  }
+
+  async syncMagento(identity: Identity, options: { dryRun?: boolean; limit?: number; push?: boolean }) {
+    return this.request(identity, '/v1/odoo/sync/magento/all', 'POST', options);
   }
 }
 

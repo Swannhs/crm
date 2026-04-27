@@ -35,10 +35,12 @@ CRM integrates with Magento through:
 Magento runs as a separate Docker stack/project by default.
 
 For local development, you can opt in to a full local Magento Open Source addon (Magento app + MySQL + OpenSearch) with this repository's orchestrator script.
+That addon is for local dev/demo only and is not the production CRM runtime model.
+
+Odoo is also expected to run as an external system in normal environments.
 
 Canonical gateway route is `/api/magento/*`.
-Legacy `/api/shop/*` routes are deprecated compatibility aliases and should be migrated.
-Legacy `/api/integrations/magento/*` naming is also deprecated and now aliases to `/api/magento/*`.
+Legacy `/api/shop/*` and `/api/integrations/magento/*` compatibility aliases were removed in this branch.
 
 ### Capability ownership
 
@@ -55,13 +57,20 @@ Legacy `/api/integrations/magento/*` naming is also deprecated and now aliases t
 | Shipping | Magento |
 | Tax | Magento |
 | Promotions/coupons | Magento |
-| Contacts | CRM |
-| Companies | CRM |
-| Sales activities | CRM |
-| Customer notes/timeline | CRM |
+| Contacts | Odoo |
+| Companies | Odoo |
+| Sales activities | Odoo |
+| Customer notes/timeline | Odoo |
 | Organization users/roles | Organization service |
-| Billing summaries/reporting | Billing service / synced Magento references |
+| Billing summaries/reporting | Odoo accounting/invoice data |
 | Magento connection and sync state | Magento integration service |
+
+### Remaining service scope notes
+
+- `services/commerce-service`: deprecated legacy compatibility only, no new business features.
+- `services/finance-service`: platform-specific reporting/aggregation only, not accounting source of truth.
+- `services/payments-service`: platform payment integration/orchestration only, not accounting source of truth.
+- `services/pos-service`: pending ownership decision; treat as legacy until Odoo POS replacement/cutover is finalized.
 
 ## Docker Modes
 
@@ -82,6 +91,12 @@ Or use the unified manager and include local Magento:
 
 ```bash
 ./manage.sh dev up --with-magento
+```
+
+Run the full local project stack with Magento and Odoo addons:
+
+```bash
+./manage.sh dev up --with-all
 ```
 
 When enabled, Magento and its local infrastructure are exposed at:
@@ -175,8 +190,7 @@ Smoke tests:
 
 Services live under `microservices/services/*`.
 
-- `crm-service` (Laravel): contacts and CRM primitives (multi-tenant via `X-Org-Id`)
 - `organization-service` (Node/Express): org metadata and settings
-- `billing-service` (Node/Express): invoices and billing events
+- `odoo-integration-service` (Node/TypeScript): Odoo ERP/CRM/accounting bridge
 - `notification-service` (Node worker): consumes events and delivers notifications
 - `realtime-service` (Node + Socket.IO): real-time updates channel (event fanout)

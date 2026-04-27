@@ -111,6 +111,55 @@ async function handleApiCompat(req: Request, res: Response) {
     return res.json({ data: [], total: 0 });
   }
 
+  if (module === "auth") {
+    if (req.method === "POST" && rest === "/sign-in") {
+      try {
+        const { email, password } = req.body;
+        const keycloakUrl = "http://keycloak:8080/realms/mymanager/protocol/openid-connect/token";
+        const body = new URLSearchParams({
+          grant_type: "password",
+          client_id: "mymanager-web",
+          username: email,
+          password: password,
+          scope: "openid profile email"
+        });
+
+        const response = await fetch(keycloakUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString()
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          return res.status(response.status).json(errorData);
+        }
+
+        const data = await response.json();
+        return res.json({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+          expiresIn: data.expires_in
+        });
+      } catch (err) {
+        logger.error({ err }, "Auth sign-in failed");
+        return res.status(500).json({ message: "Internal Auth Error" });
+      }
+    }
+
+    if (req.method === "GET" && rest === "/me") {
+       const ident = identityOr401(req, res);
+       if (!ident) return;
+       return res.json({ 
+         user: { 
+           id: ident.userId, 
+           email: "owner@example.com", // Fallback or extract from token
+           role: "admin" 
+         } 
+       });
+    }
+  }
+
   const ident = identityOr401(req, res);
   if (!ident) return;
 
@@ -148,39 +197,19 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "contact") {
-      if (req.method === "GET" && rest === "/get") return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: "/api/v1/contacts" });
-      if (req.method === "POST" && rest === "/add") return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: "/api/v1/contacts" });
-      if (req.method === "GET" && rest.startsWith("/getById/")) {
-        const id = rest.split("/").pop();
-        return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: `/api/v1/contacts/${id}` });
-      }
-      if ((req.method === "PATCH" || req.method === "PUT") && rest.startsWith("/update/")) {
-        const id = rest.split("/").pop();
-        return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: `/api/v1/contacts/${id}` });
-      }
-      if (req.method === "DELETE" && rest === "/delete") {
-        const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
-        const firstId = ids[0];
-        if (!firstId) {
-          return res.status(400).json({ message: "Contact id is required for delete." });
-        }
-        return proxyTo(req, res, { baseUrl: "http://crm-service:8010", targetPath: `/api/v1/contacts/${firstId}` });
-      }
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: GET /get, POST /add, GET /getById/:id, PATCH /update/:id, DELETE /delete" });
+      return res.status(410).json({
+        message: "Deprecated CRM compatibility module.",
+        module,
+        canonical: "/api/odoo/contacts",
+      });
     }
 
     if (module === "invoice") {
-      if (req.method === "GET" && (rest === "" || rest === "/")) return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices" });
-      if (req.method === "POST" && (rest === "" || rest === "/")) return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices" });
-      if (req.method === "GET" && rest === "/stats") {
-        return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices/stats" });
-      }
-      if (req.method === "GET" && rest === "/statistics/income") {
-        const qs = new URLSearchParams(req.query as Record<string, string>).toString();
-        const targetPath = qs ? `/v1/invoices/finance-statistics?${qs}` : "/v1/invoices/finance-statistics";
-        return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath });
-      }
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: GET /, POST /" });
+      return res.status(410).json({
+        message: "Deprecated billing compatibility module.",
+        module,
+        canonical: "/api/odoo/invoices",
+      });
     }
 
     if (module === "booking") {
@@ -233,10 +262,11 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "business") {
-      if (rest === "/income-report" || rest === "/tax-report" || rest === "/income-statistics") {
-        return proxyTo(req, res, { baseUrl: "http://billing-service:7020", targetPath: "/v1/invoices/finance-statistics" });
-      }
-      return res.json({ data: [] }); // Fallback for other business reports
+      return res.status(410).json({
+        message: "Deprecated business-report compatibility module.",
+        module,
+        canonical: "/api/odoo/invoices (derive reporting from Odoo data)",
+      });
     }
 
     if (module === "lead") {

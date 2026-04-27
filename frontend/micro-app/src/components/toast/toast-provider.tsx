@@ -53,7 +53,7 @@ export function ToastProvider() {
   const alert = useMemo(
     () => (
       <Alert onClose={handleClose} severity={severity} variant="filled" sx={{ width: '100%' }}>
-        {message}
+        {typeof message === 'string' ? message : JSON.stringify(message)}
       </Alert>
     ),
     [handleClose, message, severity]

@@ -55,6 +55,14 @@ app.post("/v1/omni/messages", auth, route(omniMsgCtrl.addMessage.bind(omniMsgCtr
 app.post("/v1/omni/ai/translate", auth, route(omniAICtrl.translate.bind(omniAICtrl)));
 app.post("/v1/omni/ai/suggest-reply", auth, route(omniAICtrl.suggestReply.bind(omniAICtrl)));
 
+// --- Notifications (Dummy) ---
+app.get("/v1/notifications", auth, (req, res) => res.json({ data: [], total: 0 }));
+app.get("/v1/notifications/total", auth, (req, res) => res.json({ data: { all: 0, unread: 0, archived: 0, categories: [] } }));
+app.post("/v1/notifications/read", auth, (req, res) => res.json({ success: true }));
+app.post("/v1/notifications/archive", auth, (req, res) => res.json({ success: true }));
+app.post("/v1/notifications/unarchive", auth, (req, res) => res.json({ success: true }));
+app.post("/v1/notifications/mark-seen/:id/:userId", auth, (req, res) => res.json({ success: true }));
+
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: { origin: "*" }

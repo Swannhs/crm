@@ -8,16 +8,12 @@ import {
   magentoRequest,
   publicConnection,
 } from "./lib/magento.js";
-import { getHealth, postJson } from "./lib/downstream.js";
 
 const { app, logger } = createServiceApp({
   serviceName: "magento-integration-service",
   jsonLimit: "10mb",
   enableCors: false,
 });
-
-const CRM_SERVICE_URL = (process.env.CRM_SERVICE_URL || "http://crm-service:8010").replace(/\/+$/, "");
-const BILLING_SERVICE_URL = (process.env.BILLING_SERVICE_URL || "http://billing-service:7020").replace(/\/+$/, "");
 
 const auth = identityMiddleware as any;
 
@@ -42,16 +38,115 @@ function asError(res: Response, error: unknown) {
   return res.status(500).json({ success: false, message });
 }
 
-function requireConnection(req: IdentityRequest, res: Response) {
-  const connection = getMagentoConnection(req.identity);
-  if (!connection) {
-    res.status(400).json({
-      success: false,
-      message: "Magento is not connected for this identity. Call POST /v1/magento/connect first.",
-    });
-    return null;
-  }
-  return connection;
+const MOCK_PRODUCTS = [
+  {
+    id: 1001,
+    sku: "MM-CUP-12OZ",
+    name: "MyManager Branded Cup 12oz",
+    price: 12.99,
+    status: 1,
+    custom_attributes: [{ attribute_code: "description", value: "Reusable insulated cup for daily office use." }],
+  },
+  {
+    id: 1002,
+    sku: "MM-NOTE-A5",
+    name: "A5 Workflow Notebook",
+    price: 9.5,
+    status: 1,
+    custom_attributes: [{ attribute_code: "description", value: "Premium notebook for meeting notes and sprint planning." }],
+  },
+  {
+    id: 1003,
+    sku: "MM-HOODIE-BLK",
+    name: "Team Hoodie (Black)",
+    price: 49.0,
+    status: 1,
+    custom_attributes: [{ attribute_code: "description", value: "Soft fleece hoodie with embroidered MyManager logo." }],
+  },
+  {
+    id: 1004,
+    sku: "MM-STICKER-PACK",
+    name: "Sticker Pack Vol. 1",
+    price: 4.99,
+    status: 1,
+    custom_attributes: [{ attribute_code: "description", value: "Set of 12 matte stickers for laptops and notebooks." }],
+  },
+];
+
+const MOCK_ORDERS = [
+  {
+    entity_id: 91001,
+    increment_id: "000091001",
+    base_grand_total: 58.49,
+    status: "processing",
+    state: "processing",
+    created_at: "2026-04-24T14:22:00Z",
+    customer_firstname: "Olivia",
+    customer_lastname: "Bennett",
+    customer_email: "olivia.bennett@example.com",
+    billing_address: { telephone: "+1-555-0101" },
+    items: [
+      { item_id: 1, name: "Team Hoodie (Black)", qty_ordered: 1, price: 49.0 },
+      { item_id: 2, name: "Sticker Pack Vol. 1", qty_ordered: 1, price: 4.99 },
+    ],
+  },
+  {
+    entity_id: 91002,
+    increment_id: "000091002",
+    base_grand_total: 25.98,
+    status: "complete",
+    state: "complete",
+    created_at: "2026-04-23T10:05:00Z",
+    customer_firstname: "Marcus",
+    customer_lastname: "Lee",
+    customer_email: "marcus.lee@example.com",
+    billing_address: { telephone: "+1-555-0102" },
+    items: [{ item_id: 3, name: "MyManager Branded Cup 12oz", qty_ordered: 2, price: 12.99 }],
+  },
+  {
+    entity_id: 91003,
+    increment_id: "000091003",
+    base_grand_total: 19.0,
+    status: "pending_payment",
+    state: "new",
+    created_at: "2026-04-22T18:44:00Z",
+    customer_firstname: "Nina",
+    customer_lastname: "Patel",
+    customer_email: "nina.patel@example.com",
+    billing_address: { telephone: "+1-555-0103" },
+    items: [{ item_id: 4, name: "A5 Workflow Notebook", qty_ordered: 2, price: 9.5 }],
+  },
+];
+
+const MOCK_CUSTOMERS = [
+  { id: 7001, firstname: "Olivia", lastname: "Bennett", email: "olivia.bennett@example.com" },
+  { id: 7002, firstname: "Marcus", lastname: "Lee", email: "marcus.lee@example.com" },
+  { id: 7003, firstname: "Nina", lastname: "Patel", email: "nina.patel@example.com" },
+];
+
+function mockCategoriesRoot() {
+  return {
+    id: 2,
+    name: "Default Category",
+    children_data: [
+      { id: 11, name: "Office Essentials", is_active: true },
+      { id: 12, name: "Apparel", is_active: true },
+      { id: 13, name: "Accessories", is_active: true },
+    ],
+  };
+}
+
+function paginate<T>(items: T[], pageSize: number, currentPage: number) {
+  const start = (currentPage - 1) * pageSize;
+  const pagedItems = items.slice(start, start + pageSize);
+  return {
+    items: pagedItems,
+    total_count: items.length,
+    search_criteria: {
+      page_size: pageSize,
+      current_page: currentPage,
+    },
+  };
 }
 
 app.post("/v1/magento/connect", auth, async (req, res) => {
@@ -65,7 +160,7 @@ app.post("/v1/magento/connect", auth, async (req, res) => {
 
 app.get("/v1/magento/connection", auth, async (req, res) => {
   try {
-    const connection = getMagentoConnection(withIdentity(req).identity);
+    const connection = await getMagentoConnection(withIdentity(req).identity);
     return res.json({ success: true, data: connection ? publicConnection(connection) : null });
   } catch (error) {
     return asError(res, error);
@@ -74,7 +169,7 @@ app.get("/v1/magento/connection", auth, async (req, res) => {
 
 app.post("/v1/magento/disconnect", auth, async (req, res) => {
   try {
-    const removed = disconnectMagento(withIdentity(req).identity);
+    const removed = await disconnectMagento(withIdentity(req).identity);
     return res.json({ success: true, data: { disconnected: removed } });
   } catch (error) {
     return asError(res, error);
@@ -83,8 +178,10 @@ app.post("/v1/magento/disconnect", auth, async (req, res) => {
 
 app.get("/v1/magento/stores", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
-    if (!connection) return;
+    const connection = await getMagentoConnection(withIdentity(req).identity);
+    if (!connection) {
+      return res.json({ success: true, data: [], meta: { connected: false } });
+    }
 
     const data = await magentoRequest(connection, "GET", "/rest/all/V1/store/storeConfigs");
     return res.json({ success: true, data });
@@ -95,12 +192,26 @@ app.get("/v1/magento/stores", auth, async (req, res) => {
 
 app.get("/v1/magento/products", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
-    if (!connection) return;
-
     const pageSize = parsePageSize(req.query.pageSize);
     const currentPage = parseCurrentPage(req.query.currentPage);
-    const search = String(req.query.search || "");
+    const search = String(req.query.search || "").trim().toLowerCase();
+
+    const connection = await getMagentoConnection(withIdentity(req).identity);
+    if (!connection) {
+      const filtered = search
+        ? MOCK_PRODUCTS.filter(
+            (item) =>
+              item.name.toLowerCase().includes(search) ||
+              item.sku.toLowerCase().includes(search) ||
+              String(item.id).includes(search)
+          )
+        : MOCK_PRODUCTS;
+      return res.json({
+        success: true,
+        data: paginate(filtered, pageSize, currentPage),
+        meta: { connected: false },
+      });
+    }
 
     const query: Record<string, unknown> = {
       "searchCriteria[pageSize]": pageSize,
@@ -122,11 +233,17 @@ app.get("/v1/magento/products", auth, async (req, res) => {
 
 app.get("/v1/magento/orders", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
-    if (!connection) return;
-
     const pageSize = parsePageSize(req.query.pageSize);
     const currentPage = parseCurrentPage(req.query.currentPage);
+
+    const connection = await getMagentoConnection(withIdentity(req).identity);
+    if (!connection) {
+      return res.json({
+        success: true,
+        data: paginate(MOCK_ORDERS, pageSize, currentPage),
+        meta: { connected: false },
+      });
+    }
 
     const data = await magentoRequest(connection, "GET", `/rest/${connection.storeCode}/V1/orders`, {
       "searchCriteria[pageSize]": pageSize,
@@ -143,11 +260,17 @@ app.get("/v1/magento/orders", auth, async (req, res) => {
 
 app.get("/v1/magento/customers", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
-    if (!connection) return;
-
     const pageSize = parsePageSize(req.query.pageSize);
     const currentPage = parseCurrentPage(req.query.currentPage);
+
+    const connection = await getMagentoConnection(withIdentity(req).identity);
+    if (!connection) {
+      return res.json({
+        success: true,
+        data: paginate(MOCK_CUSTOMERS, pageSize, currentPage),
+        meta: { connected: false },
+      });
+    }
 
     const data = await magentoRequest(connection, "GET", `/rest/${connection.storeCode}/V1/customers/search`, {
       "searchCriteria[pageSize]": pageSize,
@@ -163,8 +286,14 @@ app.get("/v1/magento/customers", auth, async (req, res) => {
 // Admin/integration use only. Public storefront traffic should hit Magento storefront APIs directly.
 app.post("/v1/magento/graphql", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
-    if (!connection) return;
+    const connection = await getMagentoConnection(withIdentity(req).identity);
+    if (!connection) {
+      return res.json({
+        success: true,
+        data: null,
+        meta: { connected: false },
+      });
+    }
 
     const { query, variables, operationName } = req.body || {};
     if (!query) {
@@ -181,13 +310,41 @@ app.post("/v1/magento/graphql", auth, async (req, res) => {
 // Security note: raw Magento proxy access must remain protected and allowlisted by caller policy.
 app.post("/v1/magento/rest", auth, async (req, res) => {
   try {
-    const connection = requireConnection(withIdentity(req), res);
-    if (!connection) return;
+    const connection = await getMagentoConnection(withIdentity(req).identity);
 
     const method = String(req.body?.method || "GET").toUpperCase();
     const path = String(req.body?.path || "");
     if (!path.startsWith("/")) {
       return res.status(400).json({ success: false, message: "path must start with /" });
+    }
+
+    if (!connection) {
+      if (path.includes("/categories")) {
+        return res.json({
+          success: true,
+          data: mockCategoriesRoot(),
+          meta: { connected: false },
+        });
+      }
+      if (path.includes("/products")) {
+        return res.json({
+          success: true,
+          data: paginate(MOCK_PRODUCTS, 50, 1),
+          meta: { connected: false },
+        });
+      }
+      if (path.includes("/orders")) {
+        return res.json({
+          success: true,
+          data: paginate(MOCK_ORDERS, 50, 1),
+          meta: { connected: false },
+        });
+      }
+      return res.json({
+        success: true,
+        data: {},
+        meta: { connected: false },
+      });
     }
 
     const data = await magentoRequest(connection, method, path, req.body?.query || {}, req.body?.body);
@@ -197,137 +354,20 @@ app.post("/v1/magento/rest", auth, async (req, res) => {
   }
 });
 
-app.get("/v1/magento/downstream/health", auth, async (_req, res) => {
-  try {
-    const [crm, billing] = await Promise.all([
-      getHealth(`${CRM_SERVICE_URL}/api/healthz`),
-      getHealth(`${BILLING_SERVICE_URL}/health`),
-    ]);
-
-    return res.json({ success: true, data: { crm, billing } });
-  } catch (error) {
-    return asError(res, error);
-  }
-});
-
-// Integration sync workflow: Magento customers -> CRM contacts.
 app.post("/v1/magento/sync/customers", auth, async (req, res) => {
-  try {
-    const request = withIdentity(req);
-    const connection = requireConnection(request, res);
-    if (!connection) return;
-
-    const pageSize = parsePageSize(req.body?.pageSize);
-    const currentPage = parseCurrentPage(req.body?.currentPage);
-    const dryRun = req.body?.dryRun !== false;
-
-    const result = await magentoRequest(connection, "GET", `/rest/${connection.storeCode}/V1/customers/search`, {
-      "searchCriteria[pageSize]": pageSize,
-      "searchCriteria[currentPage]": currentPage,
-    });
-
-    const customers = Array.isArray((result as any)?.items) ? (result as any).items : [];
-    const mapped = customers.map((item: any) => ({
-      firstName: item.firstname || "",
-      lastName: item.lastname || "",
-      email: item.email || undefined,
-      phone: item?.addresses?.[0]?.telephone || undefined,
-      metadata: {
-        source: "magento",
-        magentoCustomerId: item.id,
-      },
-    }));
-
-    if (dryRun) {
-      return res.json({ success: true, data: { dryRun: true, total: mapped.length, contacts: mapped } });
-    }
-
-    const created = [] as Array<{ ok: boolean; payload: unknown; error?: string }>;
-    for (const payload of mapped) {
-      try {
-        await postJson(`${CRM_SERVICE_URL}/api/v1/contacts`, payload, request.identity);
-        created.push({ ok: true, payload });
-      } catch (error) {
-        created.push({ ok: false, payload, error: error instanceof Error ? error.message : "Unknown error" });
-      }
-    }
-
-    return res.json({
-      success: true,
-      data: {
-        dryRun: false,
-        total: mapped.length,
-        created: created.filter((x) => x.ok).length,
-        failed: created.filter((x) => !x.ok).length,
-        results: created,
-      },
-    });
-  } catch (error) {
-    return asError(res, error);
-  }
+  return res.status(410).json({
+    success: false,
+    message:
+      "Deprecated endpoint. Use odoo-integration-service /v1/odoo/sync/magento/customers (via /api/odoo/sync/magento/customers).",
+  });
 });
 
-// Integration sync workflow: Magento orders -> billing references/summaries.
 app.post("/v1/magento/sync/orders", auth, async (req, res) => {
-  try {
-    const request = withIdentity(req);
-    const connection = requireConnection(request, res);
-    if (!connection) return;
-
-    const pageSize = parsePageSize(req.body?.pageSize);
-    const currentPage = parseCurrentPage(req.body?.currentPage);
-    const dryRun = req.body?.dryRun !== false;
-
-    const result = await magentoRequest(connection, "GET", `/rest/${connection.storeCode}/V1/orders`, {
-      "searchCriteria[pageSize]": pageSize,
-      "searchCriteria[currentPage]": currentPage,
-      "searchCriteria[sortOrders][0][field]": "created_at",
-      "searchCriteria[sortOrders][0][direction]": "DESC",
-    });
-
-    const orders = Array.isArray((result as any)?.items) ? (result as any).items : [];
-    const mapped = orders.map((order: any) => {
-      const total = Number(order.base_grand_total ?? order.grand_total ?? 0);
-      return {
-        amount_cents: Math.max(0, Math.round(total * 100)),
-        currency: String(order.order_currency_code || "USD"),
-        metadata: {
-          source: "magento",
-          magentoOrderId: order.entity_id,
-          magentoIncrementId: order.increment_id,
-          status: order.status,
-          customerEmail: order.customer_email,
-        },
-      };
-    });
-
-    if (dryRun) {
-      return res.json({ success: true, data: { dryRun: true, total: mapped.length, invoices: mapped } });
-    }
-
-    const created = [] as Array<{ ok: boolean; payload: unknown; error?: string }>;
-    for (const payload of mapped) {
-      try {
-        await postJson(`${BILLING_SERVICE_URL}/v1/invoices`, payload, request.identity);
-        created.push({ ok: true, payload });
-      } catch (error) {
-        created.push({ ok: false, payload, error: error instanceof Error ? error.message : "Unknown error" });
-      }
-    }
-
-    return res.json({
-      success: true,
-      data: {
-        dryRun: false,
-        total: mapped.length,
-        created: created.filter((x) => x.ok).length,
-        failed: created.filter((x) => !x.ok).length,
-        results: created,
-      },
-    });
-  } catch (error) {
-    return asError(res, error);
-  }
+  return res.status(410).json({
+    success: false,
+    message:
+      "Deprecated endpoint. Use odoo-integration-service /v1/odoo/sync/magento/orders (via /api/odoo/sync/magento/orders).",
+  });
 });
 
 app.get("/health", (_req, res) => {

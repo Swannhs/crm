@@ -12,10 +12,8 @@ Magento itself is the shop/eCommerce system. This service only bridges CRM/admin
 
 - testing Magento connection
 - fetching Magento stores/products/customers/orders
-- syncing Magento customers into CRM contacts
-- syncing Magento orders into CRM/billing records
+- exposing Magento read APIs for downstream Odoo sync workflows
 - exposing controlled admin integration APIs
-- checking downstream CRM/Billing health
 
 Do not implement catalog, cart, checkout, payment, inventory, shipping, tax, or promotion engines here.
 
@@ -28,8 +26,6 @@ Public storefront commerce should use Magento storefront/GraphQL APIs.
 - `MAGENTO_BASE_URL` (optional default Magento URL)
 - `MAGENTO_ACCESS_TOKEN` (optional default Magento admin token)
 - `MAGENTO_STORE_CODE` (default: `default`)
-- `CRM_SERVICE_URL` (default: `http://crm-service:8010`)
-- `BILLING_SERVICE_URL` (default: `http://billing-service:7020`)
 
 ## Main routes
 
@@ -45,11 +41,15 @@ Public storefront commerce should use Magento storefront/GraphQL APIs.
 - `POST /v1/magento/sync/customers`
 - `POST /v1/magento/sync/orders`
 
+`/v1/magento/sync/customers` and `/v1/magento/sync/orders` are deprecated and now return `410 Gone`.
+Use Odoo bridge endpoints instead:
+- `/api/odoo/sync/magento/customers`
+- `/api/odoo/sync/magento/orders`
+
 Gateway canonical route: `/api/magento/*`
 
 Deprecated aliases:
-- `/api/shop/*` (compat only)
-- `/api/integrations/magento/*` (compat only)
+- removed (use canonical `/api/magento/*`)
 
 ## Security notes
 

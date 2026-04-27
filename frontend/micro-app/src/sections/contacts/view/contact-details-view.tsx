@@ -109,7 +109,8 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
       setEditOpen(false);
       showToast({ message: 'Contact updated successfully.', severity: 'success' });
     } catch (error) {
-      console.error(error);
+      const message = error instanceof Error ? error.message : 'Failed to update contact';
+      showToast({ message, severity: 'warning' });
     } finally {
       setIsSaving(false);
     }

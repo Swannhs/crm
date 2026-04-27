@@ -28,91 +28,91 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
-function centsToCurrency(value: unknown): number {
-  return toNumber(value) / 100;
-}
-
 function formatInvoiceNumber(id?: string, index: number = 0) {
   if (!id) return `INV-${String(index + 1).padStart(4, '0')}`;
   return `INV-${id.slice(0, 8).toUpperCase()}`;
 }
 
-function normalizeInvoice(invoice: any, index: number = 0): IInvoice {
-  const amount =
-    invoice?.totalDue ??
-    invoice?.totalAmount ??
-    centsToCurrency(invoice?.total_cents ?? invoice?.amountCents ?? invoice?.amount_cents);
+const ODOO_WRITE_DEPRECATED_MESSAGE = 'Odoo now owns this workflow. Manage it in Odoo.';
 
-  const paid =
-    invoice?.paidAmount ??
-    centsToCurrency(invoice?.paidAmountCents ?? invoice?.paid_cents);
-
+function normalizeOdooInvoice(invoice: any, index: number = 0): IInvoice {
+  const id = String(invoice?.id ?? invoice?._id ?? `invoice-${index}`);
   return {
-    _id: invoice?._id ?? invoice?.id ?? `invoice-${index}`,
-    id: invoice?.id ?? invoice?._id ?? `invoice-${index}`,
-    no: invoice?.no ?? invoice?.invoiceNumber ?? invoice?.invoice_number ?? formatInvoiceNumber(invoice?.id, index),
-    customerName:
-      invoice?.customerName ??
-      invoice?.metadata?.customerName ??
-      invoice?.billTo ??
-      invoice?.contactName ??
-      invoice?.contact?.name ??
-      'Walk-in customer',
-    totalDue: amount,
-    totalAmount: amount,
-    paidAmount: paid,
-    status: invoice?.status ?? 'pending',
-    deliveryStatus: invoice?.deliveryStatus ?? invoice?.delivery_status ?? 'pending',
-    dueDate:
-      invoice?.dueDate ??
-      invoice?.metadata?.dueDate ??
-      invoice?.due_date ??
-      invoice?.createdAt ??
-      invoice?.created_at ??
-      '',
-    createdAt: invoice?.createdAt ?? invoice?.created_at ?? invoice?.dueDate ?? invoice?.due_date ?? '',
+    _id: id,
+    id,
+    no: invoice?.name ?? formatInvoiceNumber(id, index),
+    customerName: invoice?.partner ?? invoice?.customerName ?? 'Unknown customer',
+    totalDue: toNumber(invoice?.amountResidual ?? invoice?.amount_total ?? 0),
+    totalAmount: toNumber(invoice?.amountTotal ?? invoice?.amount_total ?? 0),
+    paidAmount: toNumber(invoice?.amountTotal ?? invoice?.amount_total ?? 0) - toNumber(invoice?.amountResidual ?? 0),
+    status: invoice?.state ?? invoice?.status ?? 'draft',
+    deliveryStatus: invoice?.paymentState ?? invoice?.payment_state ?? 'pending',
+    dueDate: invoice?.dueDate ?? invoice?.invoice_date_due ?? invoice?.invoiceDate ?? '',
+    createdAt: invoice?.createdAt ?? invoice?.create_date ?? '',
+    billTo: invoice?.partner ?? invoice?.billTo,
+    contactName: invoice?.partner ?? invoice?.contactName,
   };
 }
 
 function normalizeInvoicesResponse(payload: any): IInvoice[] {
   const invoices = Array.isArray(payload) ? payload : payload?.data;
   if (!Array.isArray(invoices)) return [];
-  return invoices.map((invoice, index) => normalizeInvoice(invoice, index));
+  return invoices.map((invoice, index) => normalizeOdooInvoice(invoice, index));
 }
 
 export const billingService = {
   getInvoices: async (params?: any) => {
-    const response = await axios.get('/api/invoice', { params });
+    const response = await axios.get('/api/odoo/invoices', {
+      params: {
+        page: params?.page,
+        pageSize: params?.pageSize,
+        search: params?.search,
+      },
+    });
     return normalizeInvoicesResponse(response.data);
   },
 
   getDueStats: async (params?: any) => {
-    const response = await axios.get('/api/invoice/due-stats', { params });
-    return response.data;
+    const invoices = await billingService.getInvoices(params);
+    const totalDue = invoices.reduce((sum, invoice) => sum + (invoice.totalDue || 0), 0);
+    const totalAmount = invoices.reduce((sum, invoice) => sum + (invoice.totalAmount || 0), 0);
+    const paidAmount = invoices.reduce((sum, invoice) => sum + (invoice.paidAmount || 0), 0);
+    return {
+      totalDue,
+      totalAmount,
+      paidAmount,
+      invoiceCount: invoices.length,
+    };
   },
 
   getInvoice: async (id: string) => {
-    const response = await axios.get(`/api/invoice/${id}`);
-    return normalizeInvoice(response.data?.data ?? response.data);
+    const response = await axios.get('/api/odoo/invoices', {
+      params: {
+        page: 1,
+        pageSize: 1,
+        search: id,
+      },
+    });
+    const [invoice] = Array.isArray(response.data?.data) ? response.data.data : [];
+    return invoice ? normalizeOdooInvoice(invoice) : null;
   },
 
   createInvoice: async (data: any) => {
-    const response = await axios.post('/api/invoice', data);
-    return response.data?.data ?? response.data;
+    const response = await axios.post('/api/odoo/invoices', data);
+    return response.data;
   },
 
   updateInvoice: async (id: string, data: any) => {
-    const response = await axios.put(`/api/invoice/update/${id}`, data);
-    return response.data?.data ?? response.data;
+    const response = await axios.put(`/api/odoo/invoices/${id}`, data);
+    return response.data;
   },
 
   deleteInvoice: async (id: string) => {
-    const response = await axios.delete(`/api/invoice/${id}`);
+    const response = await axios.delete(`/api/odoo/invoices/${id}`);
     return response.data;
   },
 
   getPayments: async () => {
-    const response = await axios.get('/api/payments');
-    return response.data?.data ?? response.data ?? [];
+    return [];
   },
 };
