@@ -73,4 +73,10 @@ export class MembershipRepository {
       update: data,
     });
   }
+
+  async delete(orgId: string, userId: string) {
+    return db.organizationMembership.delete({
+      where: { organizationId_userId: { organizationId: orgId, userId } },
+    });
+  }
 }

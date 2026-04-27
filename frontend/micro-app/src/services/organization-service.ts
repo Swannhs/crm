@@ -37,6 +37,44 @@ export async function upsertMembership(userId: string, data: any) {
   return response.data?.data ?? response.data;
 }
 
+export async function removeMembership(userId: string) {
+  const response = await axiosInstance.delete(`/org/v1/memberships/${userId}`);
+  return response.data?.data ?? response.data;
+}
+
+export async function getRbacCatalog() {
+  const response = await axiosInstance.get('/org/v1/rbac/catalog');
+  return response.data?.data ?? response.data ?? {};
+}
+
+export async function getAccessUsers(params?: { search?: string }) {
+  const response = await axiosInstance.get('/org/v1/users/access', {
+    params: {
+      search: params?.search || '',
+    },
+  });
+  return response.data?.data ?? [];
+}
+
+export async function searchKeycloakUsers(params?: { search?: string }) {
+  const response = await axiosInstance.get('/org/v1/keycloak/users', {
+    params: {
+      search: params?.search || '',
+    },
+  });
+  return response.data?.data ?? [];
+}
+
+export async function createKeycloakUser(data: any) {
+  const response = await axiosInstance.post('/org/v1/keycloak/users', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function syncMembershipToKeycloak(userId: string) {
+  const response = await axiosInstance.post(`/org/v1/memberships/${userId}/sync-keycloak`);
+  return response.data?.data ?? response.data;
+}
+
 export const organizationService = {
   getOrganizationDetails,
   updateOrganization,
@@ -45,4 +83,10 @@ export const organizationService = {
   createLocation,
   getMyMembership,
   upsertMembership,
+  removeMembership,
+  getRbacCatalog,
+  getAccessUsers,
+  searchKeycloakUsers,
+  createKeycloakUser,
+  syncMembershipToKeycloak,
 };

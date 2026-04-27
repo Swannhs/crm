@@ -6,6 +6,10 @@ services:
       PORT: 7010
       KAFKA_BROKERS: kafka:9092
       DATABASE_URL: postgres://organization:organization@organization-db:5432/organization
+      KEYCLOAK_ADMIN_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mymanager
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
     depends_on:
       kafka:
         condition: service_started

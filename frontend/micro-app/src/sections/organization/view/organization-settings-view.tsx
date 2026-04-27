@@ -13,7 +13,7 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 import Link from 'next/link';
 
 import { paths } from 'src/routes/paths';
@@ -23,6 +23,7 @@ import { Iconify } from 'src/components/iconify';
 
 import { OmniIntegrationView } from '../omni-integration-view';
 import { IntegrationAdp } from '../integration-adp';
+import { OrganizationUserManagementView } from './organization-user-management-view';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +38,7 @@ export function OrganizationSettingsView() {
   if (isLoading) {
     return (
       <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
+        <LinearProgress />
       </Box>
     );
   }
@@ -106,6 +107,7 @@ export function OrganizationSettingsView() {
             </Grid>
          </Grid>
       )}
+      {currentTab === 'roles' && <OrganizationUserManagementView />}
       {currentTab === 'omni' && <OmniIntegrationView />}
       {currentTab === 'integrations' && (
         <Grid container spacing={3}>
