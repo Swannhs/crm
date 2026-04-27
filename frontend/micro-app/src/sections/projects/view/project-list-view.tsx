@@ -25,6 +25,8 @@ import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
@@ -134,11 +136,15 @@ export function ProjectListView() {
 
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 10 }}>
-                      <CircularProgress />
-                    </TableCell>
-                  </TableRow>
+                  [...Array(5)].map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell><Skeleton variant="text" width="60%" /></TableCell>
+                      <TableCell><Skeleton variant="text" width="80%" /></TableCell>
+                      <TableCell><Skeleton variant="text" width="40%" /></TableCell>
+                      <TableCell><Skeleton variant="text" width="40%" /></TableCell>
+                      <TableCell align="right"><Skeleton variant="circular" width={32} height={32} /></TableCell>
+                    </TableRow>
+                  ))
                 ) : (
                   <>
                     {projects.map((row: any) => (

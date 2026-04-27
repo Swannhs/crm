@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'src/routes/hooks';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -32,6 +33,7 @@ type Props = {
 };
 
 export function ContactRouteView({ type, id, mode }: Props) {
+  const router = useRouter();
   const isDetailMode = Boolean(mode && id);
 
   const title = useMemo(() => {
@@ -90,7 +92,7 @@ export function ContactRouteView({ type, id, mode }: Props) {
                     hover
                     sx={{ cursor: 'pointer' }}
                     onClick={() => {
-                      window.location.href = paths.dashboard.contactView(contact._id, 'overview');
+                      router.push(paths.dashboard.contactView(contact._id, 'overview'));
                     }}
                   >
                     <TableCell>{contact.fullName}</TableCell>

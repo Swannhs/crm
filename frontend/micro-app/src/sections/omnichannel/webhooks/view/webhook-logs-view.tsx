@@ -10,7 +10,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -34,7 +34,7 @@ export function WebhookLogsView() {
   });
 
   if (isLoading) {
-    return <Box sx={{ p: 5, textAlign: 'center' }}><CircularProgress /></Box>;
+    return <Box sx={{ p: 5, textAlign: 'center' }}><LinearProgress /></Box>;
   }
 
   return (

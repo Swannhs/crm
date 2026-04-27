@@ -10,7 +10,7 @@ import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { chatService } from 'src/services/chat-service';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -37,7 +37,7 @@ export function ChatView() {
   if (contactsLoading) {
     return (
       <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
+        <LinearProgress />
       </Box>
     );
   }
@@ -96,7 +96,7 @@ export function ChatView() {
               <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2 }}>
                  <Scrollbar>
                     <Stack spacing={2}>
-                      {messagesLoading && <CircularProgress size={24} />}
+                      {messagesLoading && <LinearProgress size={24} />}
                        {(messages || []).map((msg: any) => (
                          <Box key={msg.id} sx={{ display: 'flex', justifyContent: msg.senderType === 'user' ? 'flex-end' : 'flex-start' }}>
                             <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: msg.senderType === 'user' ? 'primary.main' : 'background.neutral', color: msg.senderType === 'user' ? 'primary.contrastText' : 'text.primary', maxWidth: '70%' }}>

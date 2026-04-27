@@ -1,0 +1,3 @@
+Name,Email,Phone,IsCompany
+Test User 1,test1@example.com,123456789,false
+Test Company 1,comp1@example.com,987654321,true

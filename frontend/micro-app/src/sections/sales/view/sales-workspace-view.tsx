@@ -10,8 +10,8 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
+import Skeleton from '@mui/material/Skeleton';
 import { useTheme, alpha } from '@mui/material/styles';
 
 import { fCurrency } from 'src/utils/format-number';
@@ -73,9 +73,7 @@ export function SalesWorkspaceView() {
         </Tabs>
 
         {dealsLoading ? (
-          <Box sx={{ py: 10, textAlign: 'center' }}>
-            <CircularProgress />
-          </Box>
+          <PipelineSkeleton />
         ) : (
           <>
             {activeTab === 'pipeline' && <SalesPipelineTab deals={deals} />}
@@ -132,6 +130,26 @@ function SalesPipelineTab({ deals }: { deals: any[] }) {
             </Box>
          );
        })}
+    </Box>
+  );
+}
+
+function PipelineSkeleton() {
+  return (
+    <Box sx={{ display: 'flex', gap: 3, overflowX: 'auto', pb: 3 }}>
+      {[...Array(5)].map((_, i) => (
+        <Box key={i} sx={{ minWidth: 280, width: 280, flexShrink: 0 }}>
+          <Stack spacing={2}>
+            <Skeleton variant="text" width="60%" height={32} />
+            {[...Array(3)].map((_, j) => (
+              <Card key={j} sx={{ p: 2 }}>
+                <Skeleton variant="text" width="80%" />
+                <Skeleton variant="text" width="40%" />
+              </Card>
+            ))}
+          </Stack>
+        </Box>
+      ))}
     </Box>
   );
 }

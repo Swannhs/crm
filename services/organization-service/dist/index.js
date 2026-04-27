@@ -1,28 +1,43 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
-import { OrganizationController, LocationController, OnboardingController, MembershipController, } from "./controllers/organization.controller.js";
+import { OrganizationController, LocationController, OnboardingController, MembershipController, UserAccessController, } from "./controllers/organization.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 import { attachRoleContext, requireOrgRoles } from "./middleware/authorization.js";
-const { app, logger } = createServiceApp({ serviceName: "organization-service", jsonLimit: "1mb" });
+const { app, logger } = createServiceApp({
+    serviceName: "organization-service",
+    jsonLimit: "1mb",
+    enableCors: false
+});
 const auth = [identityMiddleware, attachRoleContext];
 const cast = (req) => req;
 const orgCtrl = new OrganizationController();
 const locationCtrl = new LocationController();
 const onboardingCtrl = new OnboardingController();
 const membershipCtrl = new MembershipController();
+const userAccessCtrl = new UserAccessController();
 const ownerOrAdmin = requireOrgRoles(['org_owner', 'org_admin']);
+const ownerOnly = requireOrgRoles(['org_owner']);
 const managerUp = requireOrgRoles(['org_owner', 'org_admin', 'org_manager']);
 // --- Organizations ---
 app.get("/v1/organizations", identityMiddleware, attachRoleContext, (req, res) => orgCtrl.get(cast(req), res));
+app.get("/v1/details", identityMiddleware, attachRoleContext, (req, res) => orgCtrl.get(cast(req), res));
 app.put("/v1/organizations", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => orgCtrl.update(cast(req), res));
+app.put("/v1/details", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => orgCtrl.update(cast(req), res));
 // --- Locations ---
 app.get("/v1/locations", identityMiddleware, attachRoleContext, (req, res) => locationCtrl.list(cast(req), res));
 app.post("/v1/locations", identityMiddleware, attachRoleContext, managerUp, (req, res) => locationCtrl.create(cast(req), res));
 // --- Memberships ---
 app.get("/v1/memberships/resolve", identityMiddleware, attachRoleContext, (req, res) => membershipCtrl.resolve(cast(req), res));
 app.get("/v1/memberships/me", identityMiddleware, attachRoleContext, (req, res) => membershipCtrl.resolve(cast(req), res));
-app.get("/v1/memberships", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => membershipCtrl.list(cast(req), res));
-app.post("/v1/memberships", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => membershipCtrl.upsert(cast(req), res));
-app.patch("/v1/memberships/:userId", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => membershipCtrl.upsert(cast(req), res));
+app.get("/v1/memberships", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => membershipCtrl.list(cast(req), res));
+app.post("/v1/memberships", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => membershipCtrl.upsert(cast(req), res));
+app.patch("/v1/memberships/:userId", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => membershipCtrl.upsert(cast(req), res));
+app.delete("/v1/memberships/:userId", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => membershipCtrl.remove(cast(req), res));
+// --- RBAC / User Management ---
+app.get("/v1/rbac/catalog", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.catalog(cast(req), res));
+app.get("/v1/users/access", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.list(cast(req), res));
+app.get("/v1/keycloak/users", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.keycloakUsers(cast(req), res));
+app.post("/v1/keycloak/users", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.create(cast(req), res));
+app.post("/v1/memberships/:userId/sync-keycloak", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.sync(cast(req), res));
 // --- Onboarding ---
 app.get("/v1/onboarding/status", identityMiddleware, attachRoleContext, (req, res) => onboardingCtrl.list(cast(req), res));
 app.post("/v1/onboarding/status", identityMiddleware, attachRoleContext, (req, res) => onboardingCtrl.create(cast(req), res));

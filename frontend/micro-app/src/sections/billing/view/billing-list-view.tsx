@@ -23,7 +23,8 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
-import CircularProgress from '@mui/material/CircularProgress';
+import TablePagination from '@mui/material/TablePagination';
+import Skeleton from '@mui/material/Skeleton';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { billingService } from 'src/services/billing-service';
@@ -56,11 +57,20 @@ const TABLE_HEAD = [
 
 export function BillingListView() {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['invoices', search],
-    queryFn: () => billingService.getInvoices({ search }),
+  const { data: responseData, isLoading, refetch } = useQuery({
+    queryKey: ['invoices', search, page, rowsPerPage],
+    queryFn: () => billingService.getInvoices({ 
+      search, 
+      page: page + 1, 
+      pageSize: rowsPerPage 
+    }),
   });
+
+  const invoices = (responseData as any)?.data || [];
+  const totalInvoices = (responseData as any)?.total || 0;
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
@@ -106,8 +116,6 @@ export function BillingListView() {
     confirmDelete.onFalse();
     handleCloseMenu();
   };
-
-  const invoices = data || [];
 
   const totalAmount = invoices.reduce((acc: number, curr: any) => acc + curr.totalDue, 0);
 
@@ -184,15 +192,20 @@ export function BillingListView() {
 
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
-                      <CircularProgress />
-                    </TableCell>
-                  </TableRow>
+                  [...Array(5)].map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell><Skeleton variant="text" width={60} /></TableCell>
+                      <TableCell><Skeleton variant="text" width={140} /></TableCell>
+                      <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                      <TableCell><Skeleton variant="text" width={60} /></TableCell>
+                      <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                      <TableCell align="right"><Skeleton variant="circular" width={32} height={32} /></TableCell>
+                    </TableRow>
+                  ))
                 ) : (
                   <>
                     {invoices.map((row: any) => (
-                      <TableRow key={row._id} hover>
+                      <TableRow key={row.id} hover>
                         <TableCell>{row.no}</TableCell>
                         <TableCell>{row.customerName}</TableCell>
                         <TableCell>{fCurrency(row.totalDue)}</TableCell>
@@ -231,6 +244,19 @@ export function BillingListView() {
             </Table>
           </Scrollbar>
         </TableContainer>
+
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={totalInvoices}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(event, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(event) => {
+            setRowsPerPage(parseInt(event.target.value, 10));
+            setPage(0);
+          }}
+        />
       </Card>
       <Menu
         anchorEl={menuAnchorEl}

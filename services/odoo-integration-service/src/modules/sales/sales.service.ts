@@ -8,7 +8,7 @@ export class SalesService {
   private readonly model = 'sale.order';
   private readonly defaultFields = [
     'id', 'name', 'partner_id', 'date_order', 'amount_total', 
-    'amount_untaxed', 'amount_tax', 'state', 'invoice_status'
+    'amount_untaxed', 'amount_tax', 'state', 'invoice_status', 'order_line'
   ];
 
   constructor(private readonly odooClient: OdooClientService) {}

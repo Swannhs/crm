@@ -11,7 +11,7 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
@@ -33,9 +33,21 @@ export function ReputationView() {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
+      <DashboardContent maxWidth="xl">
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+          <Box><Skeleton variant="text" width={240} height={40} /><Skeleton variant="text" width={400} /></Box>
+          <Skeleton variant="rectangular" width={140} height={40} sx={{ borderRadius: 1 }} />
+        </Stack>
+        <Grid container spacing={3} sx={{ mb: 5 }}>
+          {[...Array(3)].map((_, i) => (
+            <Grid item xs={12} md={4} key={i}>
+              <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+            </Grid>
+          ))}
+        </Grid>
+        <Skeleton variant="rectangular" height={48} sx={{ mb: 5 }} />
+        <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />
+      </DashboardContent>
     );
   }
 

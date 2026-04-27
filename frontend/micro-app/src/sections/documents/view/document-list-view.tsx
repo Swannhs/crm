@@ -10,7 +10,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
-import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { documentService } from 'src/services/document-service';
@@ -60,9 +60,17 @@ export function DocumentListView() {
       </Box>
 
       {isLoading ? (
-        <Box sx={{ py: 10, textAlign: 'center' }}>
-          <CircularProgress />
-        </Box>
+        <Grid container spacing={3}>
+          {[...Array(8)].map((_, i) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+              <Card sx={{ p: 3, textAlign: 'center' }}>
+                <Skeleton variant="rectangular" height={64} sx={{ borderRadius: 1, mb: 2 }} />
+                <Skeleton variant="text" width="80%" sx={{ mx: 'auto' }} />
+                <Skeleton variant="text" width="40%" sx={{ mx: 'auto' }} />
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       ) : (
         <Grid container spacing={3}>
           {documents.map((file: any) => (

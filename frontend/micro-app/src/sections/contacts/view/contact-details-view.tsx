@@ -16,6 +16,8 @@ import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
+import LinearProgress from '@mui/material/LinearProgress';
 import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
@@ -31,6 +33,9 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { useContactRealtime } from 'src/hooks/use-contact-realtime';
+import AvatarGroup from '@mui/material/AvatarGroup';
+import Tooltip from '@mui/material/Tooltip';
 
 import {
   ContactOverviewTab,
@@ -38,6 +43,10 @@ import {
   ContactWorkHistoryTab,
   ContactPetsTab,
   ContactFilesTab,
+  ContactTimeline,
+  ContactOrdersTab,
+  ContactProjectsTab,
+  TasksTab,
 } from './contact-workspace-sections';
 
 // ----------------------------------------------------------------------
@@ -61,15 +70,81 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
     status: 'active',
   });
 
+  const { activeUsers, notifyUpdate } = useContactRealtime(id, 'org-123'); // Org ID should be dynamic
+
   const { data: contact, isLoading: contactLoading, refetch: refetchContact } = useQuery({
     queryKey: ['contact', id],
     queryFn: () => contactService.getContact(id),
+    staleTime: 60 * 1000,
   });
 
+  const [invoicesPage, setInvoicesPage] = useState(0);
+  const [invoicesPageSize, setInvoicesPageSize] = useState(5);
+
   const { data: invoices, isLoading: invoicesLoading } = useQuery({
-    queryKey: ['contact-invoices', id],
-    queryFn: () => billingService.getInvoices({ contactId: id }),
+    queryKey: ['contact-invoices', id, invoicesPage, invoicesPageSize],
+    queryFn: () => billingService.getInvoices({ 
+      contactId: id, 
+      page: invoicesPage + 1, 
+      pageSize: invoicesPageSize 
+    }),
     enabled: currentTab === 'billing' || currentTab === 'invoices',
+    staleTime: 60 * 1000,
+  });
+
+  const { data: odooOrders, isLoading: ordersLoading } = useQuery({
+    queryKey: ['contact-odoo-orders', id],
+    queryFn: () => contactService.getOrders(id),
+    enabled: currentTab === 'commerce',
+    staleTime: 60 * 1000,
+  });
+
+  const { data: odooProjects, isLoading: projectsLoading } = useQuery({
+    queryKey: ['contact-odoo-projects', id],
+    queryFn: () => contactService.getProjects(id),
+    enabled: currentTab === 'projects',
+    staleTime: 60 * 1000,
+  });
+
+  const { data: pets, isLoading: petsLoading, refetch: refetchPets } = useQuery({
+    queryKey: ['contact-pets', id],
+    queryFn: () => contactService.getPets(id),
+    enabled: currentTab === 'pets',
+    staleTime: 60 * 1000,
+  });
+
+  const { data: files, isLoading: filesLoading, refetch: refetchFiles } = useQuery({
+    queryKey: ['contact-files', id],
+    queryFn: () => contactService.getFiles(id),
+    enabled: currentTab === 'files',
+    staleTime: 60 * 1000,
+  });
+
+  const { data: tasks, isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
+    queryKey: ['contact-tasks', id],
+    queryFn: () => contactService.getTasks(id),
+    enabled: currentTab === 'tasks',
+    staleTime: 60 * 1000,
+  });
+
+  const { data: activities, isLoading: activitiesLoading, refetch: refetchActivities } = useQuery({
+    queryKey: ['contact-activities', id],
+    queryFn: () => contactService.getActivities(id),
+    enabled: currentTab === 'activity',
+    staleTime: 60 * 1000,
+  });
+
+  const [shiftsPage, setShiftsPage] = useState(0);
+  const [shiftsPageSize, setShiftsPageSize] = useState(5);
+
+  const { data: shifts, isLoading: shiftsLoading, refetch: refetchShifts } = useQuery({
+    queryKey: ['contact-shifts', id, shiftsPage, shiftsPageSize],
+    queryFn: () => contactService.getShifts(id, { 
+      page: shiftsPage + 1, 
+      pageSize: shiftsPageSize 
+    }),
+    enabled: currentTab === 'work-history',
+    staleTime: 60 * 1000,
   });
 
   useEffect(() => {
@@ -105,6 +180,7 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
     try {
       setIsSaving(true);
       await contactService.updateContact(id, editValues);
+      notifyUpdate(editValues);
       await refetchContact();
       setEditOpen(false);
       showToast({ message: 'Contact updated successfully.', severity: 'success' });
@@ -122,28 +198,116 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
         return <ContactOverviewTab contact={contact} />;
       case 'billing':
       case 'invoices':
-        return <ContactBillingTab invoices={invoices} loading={invoicesLoading} />;
+        return (
+          <ContactBillingTab 
+            invoices={invoices} 
+            loading={invoicesLoading} 
+            contactId={id} 
+            onPageChange={(page: number, size: number) => {
+              setInvoicesPage(page);
+              setInvoicesPageSize(size);
+            }}
+          />
+        );
       case 'work-history':
-        return <ContactWorkHistoryTab />;
+        return (
+          <ContactWorkHistoryTab 
+            shifts={shifts} 
+            loading={shiftsLoading} 
+            onClockIn={handleClockIn}
+            onClockOut={handleClockOut}
+            onPageChange={(page: number, size: number) => {
+              setShiftsPage(page);
+              setShiftsPageSize(size);
+            }}
+          />
+        );
       case 'pets':
-        return <ContactPetsTab />;
+        return <ContactPetsTab pets={pets} loading={petsLoading} refetch={refetchPets} contactId={id} />;
       case 'files':
-        return <ContactFilesTab />;
-      case 'notes':
-        return <NotesTab />;
+        return <ContactFilesTab files={files} loading={filesLoading} refetch={refetchFiles} contactId={id} />;
+      case 'activity':
+        return (
+          <ContactTimeline 
+            activities={activities} 
+            loading={activitiesLoading} 
+            refetch={refetchActivities}
+            contactId={id}
+          />
+        );
+      case 'commerce':
+        return <ContactOrdersTab orders={odooOrders} loading={ordersLoading} />;
+      case 'projects':
+        return <ContactProjectsTab projects={odooProjects} loading={projectsLoading} />;
       case 'tasks':
-        return <TasksTab />;
+        return <TasksTab tasks={tasks} loading={tasksLoading} refetch={refetchTasks} contactId={id} />;
       default:
         return <ContactOverviewTab contact={contact} />;
     }
   };
 
-  if (contactLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-        <CircularProgress />
-      </Box>
-    );
+  const handleAddPet = async () => {
+    try {
+      await contactService.createPet(id, { name: 'New Pet', breed: 'Unknown' });
+      refetchPets();
+      showToast({ message: 'Pet added successfully' });
+    } catch (error) {
+      showToast({ message: 'Failed to add pet', severity: 'warning' });
+    }
+  };
+
+  const handleUploadFile = async () => {
+    try {
+      await contactService.createFile(id, { name: 'New File.pdf', size: '1.0 MB', url: '#' });
+      refetchFiles();
+      showToast({ message: 'File uploaded successfully' });
+    } catch (error) {
+      showToast({ message: 'Failed to upload file', severity: 'warning' });
+    }
+  };
+
+  const handleAddTask = async () => {
+    try {
+      await contactService.createTask(id, { title: 'New Task', status: 'pending' });
+      refetchTasks();
+      showToast({ message: 'Task created successfully' });
+    } catch (error) {
+      showToast({ message: 'Failed to create task', severity: 'warning' });
+    }
+  };
+
+  const handleAddActivity = async (data: any) => {
+    try {
+      await contactService.createActivity(id, data);
+      refetchActivities();
+      showToast({ message: 'Activity logged successfully' });
+    } catch (error) {
+      showToast({ message: 'Failed to log activity', severity: 'warning' });
+    }
+  };
+
+  const handleClockIn = async () => {
+    try {
+      await contactService.clockIn(id);
+      refetchShifts();
+      showToast({ message: 'Clocked in successfully' });
+    } catch (error) {
+      showToast({ message: 'Failed to clock in', severity: 'warning' });
+    }
+  };
+
+  const handleClockOut = async (shiftId: string) => {
+    try {
+      await contactService.clockOut(shiftId);
+      refetchShifts();
+      showToast({ message: 'Clocked out successfully' });
+    } catch (error) {
+      showToast({ message: 'Failed to clock out', severity: 'warning' });
+    }
+  };
+
+  if (contactLoading && !contact) {
+    return <ContactSkeleton />;
   }
 
   if (!contact) {
@@ -163,7 +327,26 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
         >
           Back
         </Button>
-        <Typography variant="h4">{isEmployee ? 'Employee' : 'Contact'} Profile: {contact.fullName}</Typography>
+        <Typography variant="h4" sx={{ flexGrow: 1 }}>{isEmployee ? 'Employee' : 'Contact'} Profile: {contact.fullName}</Typography>
+        
+        {activeUsers.length > 0 && (
+          <AvatarGroup max={3} sx={{ mr: 2 }}>
+            {activeUsers.map((user) => (
+              <Tooltip key={user.userId} title={`${user.userName} is ${user.action}`}>
+                <Avatar 
+                  alt={user.userName} 
+                  sx={{ 
+                    width: 32, 
+                    height: 32, 
+                    border: (theme) => `2px solid ${user.action === 'editing' ? theme.palette.error.main : theme.palette.success.main}` 
+                  }}
+                >
+                  {user.userName.charAt(0)}
+                </Avatar>
+              </Tooltip>
+            ))}
+          </AvatarGroup>
+        )}
       </Box>
 
       <Grid container spacing={3}>
@@ -229,7 +412,9 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
               {isEmployee && <Tab label="Work History" value="work-history" />}
               {isClient && <Tab label="Pets" value="pets" />}
               <Tab label="Files" value="files" />
-              <Tab label="Notes" value="notes" />
+              <Tab label="Activity" value="activity" />
+              <Tab label="Commerce" value="commerce" />
+              <Tab label="Projects" value="projects" />
               <Tab label="Tasks" value="tasks" />
             </Tabs>
 
@@ -268,52 +453,36 @@ function ProfileInfoItem({ icon, text }: any) {
   );
 }
 
-function NotesTab() {
+function ContactSkeleton() {
   return (
-    <Stack spacing={3}>
-       <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">Contact Notes</Typography>
-          <Button variant="soft" size="small" startIcon={<Iconify icon="solar:pen-new-square-bold" />}>Add Note</Button>
-       </Stack>
-       <Stack spacing={2}>
-          {[
-             { id: 1, text: 'Customer is interested in the premium membership plan.', author: 'John Smith', date: '2 days ago' },
-             { id: 2, text: 'Followed up regarding the expiring contract.', author: 'Admin', date: '5 days ago' },
-          ].map(note => (
-             <Box key={note.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral' }}>
-                <Typography variant="body2" sx={{ mb: 1 }}>{note.text}</Typography>
-                <Typography variant="caption" color="text.secondary">{note.author} • {note.date}</Typography>
-             </Box>
-          ))}
-       </Stack>
-    </Stack>
-  );
-}
+    <DashboardContent maxWidth="xl">
+      <Stack direction="row" alignItems="center" sx={{ mb: 5 }}>
+        <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
+        <Skeleton variant="text" width={300} height={40} />
+      </Stack>
 
-function TasksTab() {
-  return (
-    <Stack spacing={3}>
-       <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">Assigned Tasks</Typography>
-          <Button variant="soft" size="small" startIcon={<Iconify icon="solar:add-circle-bold" />}>New Task</Button>
-       </Stack>
-       <Stack spacing={2}>
-          {[
-             { id: 1, title: 'Send contract renewal', dueDate: 'Tomorrow', priority: 'High' },
-             { id: 2, title: 'Birthday follow-up call', dueDate: 'Next Week', priority: 'Medium' },
-          ].map(task => (
-             <Box key={task.id} sx={{ p: 2, borderRadius: 2, border: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                   <Iconify icon="solar:check-square-bold" sx={{ color: 'text.secondary' }} />
-                   <Box>
-                      <Typography variant="subtitle2">{task.title}</Typography>
-                      <Typography variant="caption" color="text.secondary">Due {task.dueDate}</Typography>
-                   </Box>
-                </Stack>
-                <Label color={task.priority === 'High' ? 'error' : 'warning'}>{task.priority}</Label>
-             </Box>
-          ))}
-       </Stack>
-    </Stack>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 4 }}>
+            <Skeleton variant="circular" width={120} height={120} sx={{ mx: 'auto', mb: 3 }} />
+            <Skeleton variant="text" width="60%" sx={{ mx: 'auto', mb: 1 }} />
+            <Skeleton variant="text" width="40%" sx={{ mx: 'auto', mb: 3 }} />
+            <Stack spacing={2}>
+              <Skeleton variant="text" width="100%" />
+              <Skeleton variant="text" width="100%" />
+              <Skeleton variant="text" width="100%" />
+            </Stack>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={8}>
+          <Card>
+            <Skeleton variant="rectangular" height={48} />
+            <Box sx={{ p: 3 }}>
+              <Skeleton variant="rectangular" height={400} />
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
+    </DashboardContent>
   );
 }

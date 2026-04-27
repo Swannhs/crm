@@ -1,4 +1,4 @@
-import { OrganizationService, LocationService, OnboardingService, MembershipService, } from '../services/organization.service.js';
+import { OrganizationService, LocationService, OnboardingService, MembershipService, UserAccessService, } from '../services/organization.service.js';
 export class OrganizationController {
     svc = new OrganizationService();
     async get(req, res) {
@@ -105,6 +105,80 @@ export class MembershipController {
         catch (err) {
             if (err.message === 'Invalid organization role') {
                 return res.status(400).json({ message: err.message });
+            }
+            return res.status(500).json({ message: err.message });
+        }
+    }
+    async remove(req, res) {
+        try {
+            const userId = String(req.params.userId || '').trim();
+            if (!userId)
+                return res.status(400).json({ message: 'userId is required' });
+            const data = await this.svc.removeMembership(req.identity.orgId, req.identity.userId, userId);
+            return res.json({ data });
+        }
+        catch (err) {
+            if (err.message === 'Cannot remove the last organization owner') {
+                return res.status(400).json({ message: err.message });
+            }
+            return res.status(500).json({ message: err.message });
+        }
+    }
+}
+export class UserAccessController {
+    svc = new UserAccessService();
+    async catalog(req, res) {
+        try {
+            const data = await this.svc.getCatalog(req.identity.orgId, req.identity.userId);
+            return res.json({ data });
+        }
+        catch (err) {
+            return res.status(500).json({ message: err.message });
+        }
+    }
+    async list(req, res) {
+        try {
+            const search = String(req.query.search || '').trim();
+            const data = await this.svc.listUsers(req.identity.orgId, req.identity.userId, search || undefined);
+            return res.json({ data });
+        }
+        catch (err) {
+            return res.status(500).json({ message: err.message });
+        }
+    }
+    async keycloakUsers(req, res) {
+        try {
+            const search = String(req.query.search || '').trim();
+            const data = await this.svc.searchKeycloakUsers(req.identity.orgId, req.identity.userId, search || undefined);
+            return res.json({ data });
+        }
+        catch (err) {
+            return res.status(500).json({ message: err.message });
+        }
+    }
+    async create(req, res) {
+        try {
+            const data = await this.svc.createUser(req.identity.orgId, req.identity.userId, req.body || {});
+            return res.status(201).json({ data });
+        }
+        catch (err) {
+            if (err.message === 'email is required') {
+                return res.status(400).json({ message: err.message });
+            }
+            return res.status(500).json({ message: err.message });
+        }
+    }
+    async sync(req, res) {
+        try {
+            const userId = String(req.params.userId || req.body.userId || '').trim();
+            if (!userId)
+                return res.status(400).json({ message: 'userId is required' });
+            const data = await this.svc.syncKeycloak(req.identity.orgId, req.identity.userId, userId);
+            return res.json({ data });
+        }
+        catch (err) {
+            if (err.message === 'Membership not found') {
+                return res.status(404).json({ message: err.message });
             }
             return res.status(500).json({ message: err.message });
         }

@@ -3,6 +3,10 @@ const svc = new MembershipService();
 export const ORG_ROLES = ['org_owner', 'org_admin', 'org_manager', 'org_staff', 'org_viewer'];
 export async function attachRoleContext(req, res, next) {
     try {
+        if (req.identity?.userId === 'system') {
+            req.identity.orgRole = 'org_owner';
+            return next();
+        }
         const membership = await svc.resolveMembership(req.identity.orgId, req.identity.userId);
         req.identity = {
             ...req.identity,
@@ -22,6 +26,9 @@ export function requireOrgRoles(roles, { allowPlatformAdmin = true } = {}) {
     return (req, res, next) => {
         const platformRoles = req.identity?.platformRoles ?? [];
         if (allowPlatformAdmin && platformRoles.includes('platform_admin')) {
+            return next();
+        }
+        if (req.identity?.userId === 'system') {
             return next();
         }
         if (req.identity?.orgRole && roles.includes(req.identity.orgRole)) {

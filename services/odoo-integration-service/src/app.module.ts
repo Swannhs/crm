@@ -11,10 +11,13 @@ import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { PostsModule } from './modules/posts/posts.module.js';
 import { ProjectsModule } from './modules/projects/projects.module.js';
 import { PosModule } from './modules/pos/pos.module.js';
+import { MagentoCompatibilityModule } from './modules/magento-compatibility/magento-compatibility.module.js';
+import { PrismaModule } from './common/prisma/prisma.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
     ContactsModule,
     CrmModule,
     SalesModule,
@@ -26,6 +29,7 @@ import { PosModule } from './modules/pos/pos.module.js';
     PostsModule,
     ProjectsModule,
     PosModule,
+    MagentoCompatibilityModule,
   ],
 })
 export class AppModule {}

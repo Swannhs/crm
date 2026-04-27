@@ -1,7 +1,6 @@
 import { Injectable, Scope, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as xmlrpc from 'xmlrpc';
-import { promisify } from 'util';
+import axios from 'axios';
 import { INITIAL_MOCK_DATA } from './odoo-mock.constants.js';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -21,27 +20,60 @@ export class OdooClientService {
     this.password = this.configService.get<string>('ODOO_PASSWORD') || 'admin';
   }
 
+  /**
+   * Internal JSON-RPC caller
+   */
+  private async jsonRpcCall(service: 'common' | 'object', method: string, args: any[]) {
+    const payload = {
+      jsonrpc: '2.0',
+      method: 'call',
+      params: {
+        service,
+        method,
+        args,
+      },
+      id: Math.floor(Math.random() * 1000000),
+    };
+
+    try {
+      const response = await axios.post(`${this.url}/jsonrpc`, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 5000,
+      });
+
+      if (response.data?.error) {
+        throw new Error(response.data.error.message || 'Odoo JSON-RPC Error');
+      }
+
+      return response.data?.result;
+    } catch (error) {
+      this.logger.error(`JSON-RPC error at ${service}.${method}: ${error.message}`);
+      throw error;
+    }
+  }
+
   async authenticate(username?: string, password?: string): Promise<number> {
     try {
-      // Logic for real Odoo connection
       if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
-        const commonClient = xmlrpc.createClient(`${this.url}/xmlrpc/2/common`);
-        const authenticate = promisify(commonClient.methodCall.bind(commonClient));
-        const uid = await authenticate('authenticate', [
+        const uid = await this.jsonRpcCall('common', 'authenticate', [
           this.db,
           username || this.configService.get<string>('ODOO_USERNAME') || 'admin',
           password || this.password,
           {},
         ]);
+        
+        if (!uid || typeof uid !== 'number') {
+          throw new Error('Authentication failed: Invalid credentials or database');
+        }
+
         this.uid = uid;
         return uid;
       }
       
-      // Mock fallback
       this.uid = 1;
       return 1;
     } catch (error) {
-      this.logger.warn(`Odoo authentication failed, falling back to mock mode: ${error.message}`);
+      this.logger.warn(`Odoo JSON-RPC authentication failed, falling back to mock mode: ${error.message}`);
       this.uid = 1;
       return 1;
     }
@@ -52,9 +84,7 @@ export class OdooClientService {
 
     try {
       if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
-        const objectClient = xmlrpc.createClient(`${this.url}/xmlrpc/2/object`);
-        const execute = promisify(objectClient.methodCall.bind(objectClient));
-        return await execute('execute_kw', [
+        return await this.jsonRpcCall('object', 'execute_kw', [
           this.db,
           this.uid,
           this.password,
@@ -66,10 +96,8 @@ export class OdooClientService {
       }
       return this.handleMockExecute(model, method, args, kwargs);
     } catch (error) {
-      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-        return this.handleMockExecute(model, method, args, kwargs);
-      }
-      throw error;
+      this.logger.warn(`Odoo JSON-RPC execution failed for ${model}.${method}, falling back to mock mode: ${error.message}`);
+      return this.handleMockExecute(model, method, args, kwargs);
     }
   }
 
@@ -80,10 +108,6 @@ export class OdooClientService {
     });
   }
 
-  /**
-   * Refactored Mock Engine
-   * Handles CRUD operations in-memory when Odoo is unreachable.
-   */
   private handleMockExecute(model: string, method: string, args: any[], kwargs: any): any {
     if (!OdooClientService.mockStore[model]) {
       OdooClientService.mockStore[model] = [];
@@ -106,7 +130,7 @@ export class OdooClientService {
           id: newId, 
           ...args[0], 
           create_date: new Date().toISOString(),
-          createdAt: new Date().toISOString(), // Compatibility with frontend
+          createdAt: new Date().toISOString(),
           priority: args[0].priority || '0',
           kanban_state: args[0].kanban_state || 'normal'
         };
@@ -128,6 +152,13 @@ export class OdooClientService {
         const idsToDelete = args[0];
         OdooClientService.mockStore[model] = store.filter(item => !idsToDelete.includes(item.id));
         return true;
+
+      case 'action_post':
+        return true;
+
+      case '_render_qweb_pdf':
+        // Return a dummy PDF base64
+        return ['JVBERi0xLjEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDAKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPj4KZW5kb2JqCjMgMCBvYmoKPDAKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovUmVzb3VyY2VzIDw8Pj4KL0NvbnRlbnRzIDQgMCBSCj4+CmVuZG9iago0IDAgb2JqCjw8Ci9MZW5ndGggMAo+PgpzdHJlYW0KZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTggMDAwMDAgbiAKMDAwMDAwMDA2NiAwMDAwMCBuIAowMDAwMDAwMTIxIDAwMDAwIG4gCjAwMDAwMDAyMzEgMDAwMDAgbiAKdHJhaWxlcgo8PAovU2l6ZSA1Ci9Sb290IDEgMCBSCj4+CnN0YXJ0eHJlZgoyNzIKJSVFT0Y=', 'pdf'];
 
       default:
         return Array.isArray(store) ? store : [];

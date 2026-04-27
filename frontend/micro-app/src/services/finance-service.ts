@@ -22,7 +22,7 @@ export type RevenueStats = {
 
 export async function getRevenueStats(): Promise<RevenueStats> {
   try {
-    const invoices = await billingService.getInvoices();
+    const { data: invoices } = await billingService.getInvoices();
     if (!Array.isArray(invoices)) {
       return { totalRevenue: 0, paid: 0, outstanding: 0, byStatus: {}, invoiceCount: 0 };
     }
@@ -49,7 +49,7 @@ export async function getRevenueStats(): Promise<RevenueStats> {
 }
 
 export async function getPaymentsHistory() {
-  const invoices = await billingService.getInvoices();
+  const { data: invoices } = await billingService.getInvoices();
   return invoices
     .filter((item: any) => toNumber(item?.paidAmount) > 0)
     .map((item: any) => ({

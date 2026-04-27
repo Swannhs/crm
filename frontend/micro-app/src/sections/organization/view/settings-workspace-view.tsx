@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { paths } from 'src/routes/paths';
 import { organizationService } from 'src/services/organization-service';
@@ -33,7 +33,7 @@ export function SettingsWorkspaceView({ tab = 'general' }: Props) {
   if (orgQuery.isLoading || locationsQuery.isLoading) {
     return (
       <Box sx={{ py: 8, textAlign: 'center' }}>
-        <CircularProgress />
+        <LinearProgress />
       </Box>
     );
   }

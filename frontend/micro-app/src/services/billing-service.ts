@@ -67,13 +67,18 @@ export const billingService = {
         page: params?.page,
         pageSize: params?.pageSize,
         search: params?.search,
+        contactId: params?.contactId,
       },
     });
-    return normalizeInvoicesResponse(response.data);
+    const invoices = normalizeInvoicesResponse(response.data);
+    return {
+      data: invoices,
+      total: response.data?.total ?? invoices.length,
+    };
   },
 
   getDueStats: async (params?: any) => {
-    const invoices = await billingService.getInvoices(params);
+    const { data: invoices } = await billingService.getInvoices(params);
     const totalDue = invoices.reduce((sum, invoice) => sum + (invoice.totalDue || 0), 0);
     const totalAmount = invoices.reduce((sum, invoice) => sum + (invoice.totalAmount || 0), 0);
     const paidAmount = invoices.reduce((sum, invoice) => sum + (invoice.paidAmount || 0), 0);
@@ -110,6 +115,13 @@ export const billingService = {
   deleteInvoice: async (id: string) => {
     const response = await axios.delete(`/api/odoo/invoices/${id}`);
     return response.data;
+  },
+
+  downloadInvoice: async (id: string) => {
+    const response = await axios.get(`/api/odoo/invoices/${id}/download`, {
+      responseType: 'blob',
+    });
+    return response.data; // This will be a Blob
   },
 
   getPayments: async () => {

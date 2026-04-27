@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { AccountingService } from './accounting.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
+import { ContactsService } from '../contacts/contacts.service.js';
 import { InvoiceEntity } from './entities/invoice.entity.js';
 import { IdentityGuard } from '../../common/guards/identity.guard.js';
 
@@ -11,13 +13,23 @@ import { IdentityGuard } from '../../common/guards/identity.guard.js';
 @ApiHeader({ name: 'x-org-id', required: true })
 @Controller()
 export class AccountingController {
-  constructor(private readonly accountingService: AccountingService) {}
+  constructor(
+    private readonly accountingService: AccountingService,
+    private readonly contactsService: ContactsService,
+  ) {}
 
   @Get('invoices')
   @ApiOperation({ summary: 'List all invoices' })
   @ApiResponse({ status: 200, type: [InvoiceEntity] })
-  async findAllInvoices(@Query() paginationDto: PaginationDto) {
-    return this.accountingService.findAllInvoices(paginationDto);
+  async findAllInvoices(
+    @Query() paginationDto: PaginationDto,
+    @Query('contactId') contactId?: string,
+  ) {
+    let odooId: number | undefined;
+    if (contactId) {
+      odooId = /^\d+$/.test(contactId) ? Number(contactId) : (await this.contactsService.resolveUuid(contactId)) || undefined;
+    }
+    return this.accountingService.findAllInvoices(paginationDto, odooId);
   }
 
   @Get('invoices/:id')
@@ -49,5 +61,23 @@ export class AccountingController {
   @ApiOperation({ summary: 'Post (validate) an invoice' })
   async post(@Param('id', ParseIntPipe) id: number) {
     return this.accountingService.post(id);
+  }
+
+  @Get('invoices/:id/download')
+  @ApiOperation({ summary: 'Download invoice PDF' })
+  async download(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response,
+  ) {
+    const base64 = await this.accountingService.downloadInvoice(id);
+    const buffer = Buffer.from(base64, 'base64');
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=invoice_${id}.pdf`,
+      'Content-Length': buffer.length,
+    });
+
+    res.end(buffer);
   }
 }

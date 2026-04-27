@@ -27,7 +27,7 @@ export function ReputationReviews() {
   });
 
   if (isLoading) {
-    return <CircularProgress />;
+    return <LinearProgress />;
   }
 
   return (
@@ -139,4 +139,4 @@ function PlatformStatus({ provider, icon, isConnected }: any) {
   );
 }
 
-import { Grid, CircularProgress } from '@mui/material';
+import { Grid, LinearProgress, Skeleton } from '@mui/material';

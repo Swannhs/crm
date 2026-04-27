@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsEmail, IsBoolean } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
 export class CreateContactDto {
   @ApiProperty()
@@ -40,6 +40,11 @@ export class CreateContactDto {
   @IsOptional()
   @IsString()
   vat?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
 
-export class UpdateContactDto extends CreateContactDto {}
+export class UpdateContactDto extends PartialType(CreateContactDto) {}

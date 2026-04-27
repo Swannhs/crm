@@ -13,6 +13,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 import Grid from '@mui/material/Unstable_Grid2';
 
 import { paths } from 'src/routes/paths';
@@ -152,7 +153,7 @@ export function OverviewView() {
   const loading = results.every((query) => query.isLoading);
 
   const contacts = Array.isArray(contactsQuery.data) ? contactsQuery.data : [];
-  const invoices = Array.isArray(invoicesQuery.data) ? invoicesQuery.data : [];
+  const invoices = (invoicesQuery.data as any)?.data || [];
   const campaigns = Array.isArray(campaignsQuery.data) ? campaignsQuery.data : [];
   const automations = Array.isArray(automationsQuery.data) ? automationsQuery.data : [];
   const projects = Array.isArray(projectsQuery.data) ? projectsQuery.data : [];
@@ -219,9 +220,26 @@ export function OverviewView() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
+      <DashboardContent maxWidth="xl">
+        <Stack spacing={3}>
+          <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
+          <Grid container spacing={3}>
+            <Grid xs={12} md={8}>
+              <Stack spacing={3}>
+                <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />
+                <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
+              </Stack>
+            </Grid>
+            <Grid xs={12} md={4}>
+              <Stack spacing={3}>
+                <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 2 }} />
+                <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 2 }} />
+                <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 2 }} />
+              </Stack>
+            </Grid>
+          </Grid>
+        </Stack>
+      </DashboardContent>
     );
   }
 

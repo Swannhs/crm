@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
-import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 import Dialog, { dialogClasses } from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
@@ -153,11 +153,7 @@ export function ProjectDetailsView({ id }: Props) {
   });
 
   if (projectLoading || boardsLoading || columnsLoading) {
-    return (
-      <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <ProjectSkeleton />;
   }
 
   const columns = columnsData || [];
@@ -643,6 +639,30 @@ export function ProjectDetailsView({ id }: Props) {
           taskDrawer.onFalse();
         }}
       />
+    </DashboardContent>
+  );
+}
+
+function ProjectSkeleton() {
+  return (
+    <DashboardContent maxWidth={false}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+        <Box><Skeleton variant="text" width={300} height={40} /><Skeleton variant="text" width={200} /></Box>
+        <Skeleton variant="rectangular" width={120} height={40} sx={{ borderRadius: 1 }} />
+      </Stack>
+      <Skeleton variant="rectangular" height={48} sx={{ mb: 3 }} />
+      <Stack direction="row" spacing={3} sx={{ minHeight: '70vh' }}>
+        {[...Array(4)].map((_, i) => (
+          <Box key={i} sx={{ width: 320, flexShrink: 0 }}>
+            <Skeleton variant="rectangular" height={50} sx={{ borderRadius: 1.5, mb: 2 }} />
+            <Stack spacing={2}>
+              {[...Array(3)].map((_, j) => (
+                <Skeleton key={j} variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+              ))}
+            </Stack>
+          </Box>
+        ))}
+      </Stack>
     </DashboardContent>
   );
 }

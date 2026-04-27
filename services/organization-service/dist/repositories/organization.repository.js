@@ -60,4 +60,9 @@ export class MembershipRepository {
             update: data,
         });
     }
+    async delete(orgId, userId) {
+        return db.organizationMembership.delete({
+            where: { organizationId_userId: { organizationId: orgId, userId } },
+        });
+    }
 }

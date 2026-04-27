@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import Skeleton from '@mui/material/Skeleton';
 import LinearProgress from '@mui/material/LinearProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -32,9 +32,26 @@ export function FinanceOverviewView() {
 
   if (statsLoading || invoicesLoading) {
     return (
-      <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
+      <DashboardContent maxWidth="xl">
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+          <Box><Skeleton variant="text" width={240} height={40} /><Skeleton variant="text" width={400} /></Box>
+          <Stack direction="row" spacing={2}>
+            <Skeleton variant="rectangular" width={100} height={40} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rectangular" width={120} height={40} sx={{ borderRadius: 1 }} />
+          </Stack>
+        </Stack>
+        <Grid container spacing={3} sx={{ mb: 5 }}>
+          {[...Array(4)].map((_, i) => (
+            <Grid item xs={12} md={3} key={i}>
+              <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
+            </Grid>
+          ))}
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={8}><Skeleton variant="rectangular" height={500} sx={{ borderRadius: 2 }} /></Grid>
+          <Grid item xs={12} md={4}><Skeleton variant="rectangular" height={500} sx={{ borderRadius: 2 }} /></Grid>
+        </Grid>
+      </DashboardContent>
     );
   }
 
@@ -98,7 +115,7 @@ export function FinanceOverviewView() {
                   <Button size="small">View All</Button>
                </Stack>
                <Stack spacing={2}>
-                  {(invoices || []).slice(0, 6).map((inv: any) => (
+                  {((invoices as any)?.data || []).slice(0, 6).map((inv: any) => (
                      <Box key={inv.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Stack direction="row" spacing={2} alignItems="center">
                            <Box sx={{ width: 40, height: 40, borderRadius: 1, bgcolor: inv.status === 'paid' ? 'success.lighter' : 'warning.lighter', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
