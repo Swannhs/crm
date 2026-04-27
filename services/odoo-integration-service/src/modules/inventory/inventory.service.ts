@@ -21,12 +21,17 @@ export class InventoryService {
       ? ['|', ['name', 'ilike', search], ['default_code', 'ilike', search]]
       : [];
 
-    return this.odooClient.searchRead(
-      this.productModel,
-      domain,
-      this.productFields,
-      { offset: (page - 1) * pageSize, limit: pageSize, order: 'name asc' }
-    );
+    const [data, total] = await Promise.all([
+      this.odooClient.searchRead(
+        this.productModel,
+        domain,
+        this.productFields,
+        { offset: (page - 1) * pageSize, limit: pageSize, order: 'name asc' }
+      ),
+      this.odooClient.execute(this.productModel, 'search_count', [domain])
+    ]);
+
+    return { data, total };
   }
 
   async findProduct(id: number) {
@@ -36,5 +41,17 @@ export class InventoryService {
       this.productFields
     );
     return product;
+  }
+
+  async createProduct(data: any) {
+    return this.odooClient.execute(this.productModel, 'create', [data]);
+  }
+
+  async updateProduct(id: number, data: any) {
+    return this.odooClient.execute(this.productModel, 'write', [[id], data]);
+  }
+
+  async removeProduct(id: number) {
+    return this.odooClient.execute(this.productModel, 'unlink', [[id]]);
   }
 }

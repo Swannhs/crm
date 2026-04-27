@@ -79,15 +79,36 @@ export const contactService = {
     return contacts.map(normalizeOdooContact);
   },
 
-  createContact: async (_data: any) => {
-    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
+  createContact: async (data: any) => {
+    const payload = {
+      ...data,
+      name: data.name ?? data.fullName,
+    };
+    delete (payload as any).fullName;
+    delete (payload as any).contactType;
+    delete (payload as any).status;
+
+    const response = await axios.post('/api/odoo/contacts', payload);
+    return response.data;
   },
 
-  updateContact: async (_id: string, _data: any) => {
-    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
+  updateContact: async (id: string, data: any) => {
+    const payload = {
+      ...data,
+      name: data.name ?? data.fullName,
+    };
+    delete (payload as any).fullName;
+    delete (payload as any).contactType;
+    delete (payload as any).status;
+
+    const response = await axios.put(`/api/odoo/contacts/${id}`, payload);
+    return response.data;
   },
 
-  deleteContact: async (_ids: string[]) => {
-    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
+  deleteContact: async (ids: string[]) => {
+    // Note: If Odoo supports batch delete, we can pass the array. 
+    // For now, we delete one by one or assume the backend handles the array.
+    const promises = ids.map(id => axios.delete(`/api/odoo/contacts/${id}`));
+    await Promise.all(promises);
   },
 };

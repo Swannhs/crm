@@ -3,11 +3,11 @@ import { OdooClientService } from '../odoo-base/odoo-client.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
 @Injectable()
-export class CrmService {
-  private readonly model = 'crm.lead';
+export class PostsService {
+  private readonly model = 'blog.post';
   private readonly defaultFields = [
-    'id', 'name', 'partner_id', 'email_from', 'phone', 
-    'probability', 'planned_revenue', 'stage_id', 'type', 'description'
+    'id', 'name', 'subtitle', 'author_id', 'post_date', 
+    'website_published', 'blog_id', 'visits'
   ];
 
   constructor(private readonly odooClient: OdooClientService) {}
@@ -18,7 +18,7 @@ export class CrmService {
     const search = paginationDto.search;
     
     const domain: any[] = search
-      ? ['|', ['name', 'ilike', search], ['email_from', 'ilike', search]]
+      ? [['name', 'ilike', search]]
       : [];
 
     const [data, total] = await Promise.all([
@@ -26,7 +26,7 @@ export class CrmService {
         this.model,
         domain,
         this.defaultFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'create_date desc' }
+        { offset: (page - 1) * pageSize, limit: pageSize, order: 'post_date desc' }
       ),
       this.odooClient.execute(this.model, 'search_count', [domain])
     ]);
@@ -35,12 +35,12 @@ export class CrmService {
   }
 
   async findOne(id: number) {
-    const [lead] = await this.odooClient.searchRead(
+    const [post] = await this.odooClient.searchRead(
       this.model,
       [['id', '=', id]],
-      this.defaultFields
+      [...this.defaultFields, 'content']
     );
-    return lead;
+    return post;
   }
 
   async create(data: any) {
@@ -53,5 +53,13 @@ export class CrmService {
 
   async remove(id: number) {
     return this.odooClient.execute(this.model, 'unlink', [[id]]);
+  }
+
+  async publish(id: number) {
+    return this.odooClient.execute(this.model, 'write', [[id], { website_published: true }]);
+  }
+
+  async unpublish(id: number) {
+    return this.odooClient.execute(this.model, 'write', [[id], { website_published: false }]);
   }
 }

@@ -25,12 +25,17 @@ export class AccountingService {
       domain.push(['name', 'ilike', search]);
     }
 
-    return this.odooClient.searchRead(
-      this.model,
-      domain,
-      this.defaultFields,
-      { offset: (page - 1) * pageSize, limit: pageSize, order: 'invoice_date desc' }
-    );
+    const [data, total] = await Promise.all([
+      this.odooClient.searchRead(
+        this.model,
+        domain,
+        this.defaultFields,
+        { offset: (page - 1) * pageSize, limit: pageSize, order: 'invoice_date desc' }
+      ),
+      this.odooClient.execute(this.model, 'search_count', [domain])
+    ]);
+
+    return { data, total };
   }
 
   async findOne(id: number) {
@@ -40,5 +45,23 @@ export class AccountingService {
       [...this.defaultFields, 'invoice_line_ids']
     );
     return invoice;
+  }
+
+  async create(data: any) {
+    // Ensure move_type is set for invoices
+    const payload = { ...data, move_type: data.move_type || 'out_invoice' };
+    return this.odooClient.execute(this.model, 'create', [payload]);
+  }
+
+  async update(id: number, data: any) {
+    return this.odooClient.execute(this.model, 'write', [[id], data]);
+  }
+
+  async remove(id: number) {
+    return this.odooClient.execute(this.model, 'unlink', [[id]]);
+  }
+
+  async post(id: number) {
+    return this.odooClient.execute(this.model, 'action_post', [[id]]);
   }
 }

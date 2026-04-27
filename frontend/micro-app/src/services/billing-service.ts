@@ -97,16 +97,19 @@ export const billingService = {
     return invoice ? normalizeOdooInvoice(invoice) : null;
   },
 
-  createInvoice: async (_data: any) => {
-    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
+  createInvoice: async (data: any) => {
+    const response = await axios.post('/api/odoo/invoices', data);
+    return response.data;
   },
 
-  updateInvoice: async (_id: string, _data: any) => {
-    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
+  updateInvoice: async (id: string, data: any) => {
+    const response = await axios.put(`/api/odoo/invoices/${id}`, data);
+    return response.data;
   },
 
-  deleteInvoice: async (_id: string) => {
-    throw new Error(ODOO_WRITE_DEPRECATED_MESSAGE);
+  deleteInvoice: async (id: string) => {
+    const response = await axios.delete(`/api/odoo/invoices/${id}`);
+    return response.data;
   },
 
   getPayments: async () => {

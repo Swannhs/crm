@@ -19,12 +19,17 @@ export class SalesService {
     const search = paginationDto.search;
     const domain: any[] = search ? [['name', 'ilike', search]] : [];
 
-    return this.odooClient.searchRead(
-      this.model,
-      domain,
-      this.defaultFields,
-      { offset: (page - 1) * pageSize, limit: pageSize, order: 'date_order desc' }
-    );
+    const [data, total] = await Promise.all([
+      this.odooClient.searchRead(
+        this.model,
+        domain,
+        this.defaultFields,
+        { offset: (page - 1) * pageSize, limit: pageSize, order: 'date_order desc' }
+      ),
+      this.odooClient.execute(this.model, 'search_count', [domain])
+    ]);
+
+    return { data, total };
   }
 
   async findOne(id: number) {
@@ -51,5 +56,13 @@ export class SalesService {
 
   async createInvoice(id: number) {
     return this.odooClient.execute(this.model, 'action_create_invoices', [[id]]);
+  }
+
+  async update(id: number, data: any) {
+    return this.odooClient.execute(this.model, 'write', [[id], data]);
+  }
+
+  async remove(id: number) {
+    return this.odooClient.execute(this.model, 'unlink', [[id]]);
   }
 }

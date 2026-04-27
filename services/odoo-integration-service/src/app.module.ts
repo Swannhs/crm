@@ -8,6 +8,9 @@ import { InventoryModule } from './modules/inventory/inventory.module.js';
 import { SyncModule } from './modules/sync/sync.module.js';
 import { AnalyticsModule } from './modules/analytics/analytics.module.js';
 import { DashboardModule } from './modules/dashboard/dashboard.module.js';
+import { PostsModule } from './modules/posts/posts.module.js';
+import { ProjectsModule } from './modules/projects/projects.module.js';
+import { PosModule } from './modules/pos/pos.module.js';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { DashboardModule } from './modules/dashboard/dashboard.module.js';
     SyncModule,
     AnalyticsModule,
     DashboardModule,
+    PostsModule,
+    ProjectsModule,
+    PosModule,
   ],
 })
 export class AppModule {}

@@ -69,6 +69,8 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    const skipGlobalErrorToast = Boolean((error as any)?.config?.skipGlobalErrorToast);
+
     if (error.response && error.response.status === 401) {
       if (typeof window !== 'undefined') {
         clearStoredAccessTokens();
@@ -97,7 +99,7 @@ axiosInstance.interceptors.response.use(
       message = error.message;
     }
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !skipGlobalErrorToast) {
       showToast({
         message,
         severity: 'error',

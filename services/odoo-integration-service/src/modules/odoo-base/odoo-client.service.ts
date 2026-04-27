@@ -1,14 +1,19 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as xmlrpc from 'xmlrpc';
 import { promisify } from 'util';
+import { INITIAL_MOCK_DATA } from './odoo-mock.constants.js';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OdooClientService {
-  private uid: number | null = null;
-  private db: string;
+  private readonly logger = new Logger(OdooClientService.name);
   private url: string;
+  private db: string;
   private password: string;
+  private uid: number | null = null;
+
+  // Shared in-memory store across requests (static)
+  private static mockStore: Record<string, any[]> = { ...INITIAL_MOCK_DATA };
 
   constructor(private configService: ConfigService) {
     this.url = this.configService.get<string>('ODOO_BASE_URL') || 'http://odoo-demo:8069';
@@ -18,87 +23,114 @@ export class OdooClientService {
 
   async authenticate(username?: string, password?: string): Promise<number> {
     try {
-      const commonClient = xmlrpc.createClient(`${this.url}/xmlrpc/2/common`);
-      const authenticate = promisify(commonClient.methodCall.bind(commonClient));
-      
-      this.uid = await authenticate('authenticate', [
-        this.db,
-        username || this.configService.get<string>('ODOO_USERNAME') || 'admin',
-        password || this.password,
-        {},
-      ]);
-
-      if (!this.uid) {
-        throw new Error('Odoo authentication failed');
+      // Logic for real Odoo connection
+      if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
+        const commonClient = xmlrpc.createClient(`${this.url}/xmlrpc/2/common`);
+        const authenticate = promisify(commonClient.methodCall.bind(commonClient));
+        const uid = await authenticate('authenticate', [
+          this.db,
+          username || this.configService.get<string>('ODOO_USERNAME') || 'admin',
+          password || this.password,
+          {},
+        ]);
+        this.uid = uid;
+        return uid;
       }
-
-      return this.uid;
+      
+      // Mock fallback
+      this.uid = 1;
+      return 1;
     } catch (error) {
-      console.warn('Odoo connection failed, using mock UID');
+      this.logger.warn(`Odoo authentication failed, falling back to mock mode: ${error.message}`);
       this.uid = 1;
       return 1;
     }
   }
 
   async execute(model: string, method: string, args: any[], kwargs: any = {}): Promise<any> {
+    if (!this.uid) await this.authenticate();
+
     try {
-      if (!this.uid) {
-        await this.authenticate();
+      if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
+        const objectClient = xmlrpc.createClient(`${this.url}/xmlrpc/2/object`);
+        const execute = promisify(objectClient.methodCall.bind(objectClient));
+        return await execute('execute_kw', [
+          this.db,
+          this.uid,
+          this.password,
+          model,
+          method,
+          args,
+          kwargs,
+        ]);
       }
-
-      if (this.url.includes('odoo') || this.url.includes('localhost')) {
-         // If we are in mock mode, return dummy data
-         return this.getMockData(model, method, args, kwargs);
-      }
-
-      const objectClient = xmlrpc.createClient(`${this.url}/xmlrpc/2/object`);
-      const execute = promisify(objectClient.methodCall.bind(objectClient));
-
-      return execute('execute_kw', [
-        this.db,
-        this.uid,
-        this.password,
-        model,
-        method,
-        args,
-        kwargs,
-      ]);
+      return this.handleMockExecute(model, method, args, kwargs);
     } catch (error) {
-      console.error(`Odoo execute failed for ${model}.${method}:`, error);
-      return this.getMockData(model, method, args, kwargs);
+      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+        return this.handleMockExecute(model, method, args, kwargs);
+      }
+      throw error;
     }
   }
 
-  async searchRead(model: string, domain: any[], fields: string[], options: any = {}): Promise<any[]> {
+  async searchRead(model: string, domain: any[] = [], fields: string[] = [], options: any = {}): Promise<any[]> {
     return this.execute(model, 'search_read', [domain], {
       fields,
       ...options,
     });
   }
 
-  private getMockData(model: string, method: string, args: any[], kwargs: any): any {
-    if (method === 'search_read') {
-      if (model === 'res.partner') {
-        return [
-          { id: 1, name: 'John Doe', email: 'john@acme.corp', phone: '+1 555-0101', city: 'San Francisco', is_company: false },
-          { id: 2, name: 'Acme Corp', email: 'info@acme.corp', phone: '+1 555-0202', city: 'San Francisco', is_company: true },
-          { id: 3, name: 'Jane Smith', email: 'jane@globex.it', phone: '+1 555-0303', city: 'Milan', is_company: false },
-        ];
-      }
-      if (model === 'crm.lead') {
-        return [
-          { id: 1, name: 'Enterprise Cloud Migration', planned_revenue: 150000, probability: 40, stage_id: [1, 'New'] },
-          { id: 2, name: 'Mobile App Development', planned_revenue: 45000, probability: 80, stage_id: [3, 'Proposition'] },
-        ];
-      }
-      if (model === 'account.move') {
-        return [
-          { id: 1, name: 'INV/2024/001', amount_total: 1200, state: 'posted', payment_state: 'paid', invoice_date: '2024-03-01' },
-          { id: 2, name: 'INV/2024/002', amount_total: 3500, state: 'posted', payment_state: 'not_paid', invoice_date: '2024-03-15' },
-        ];
-      }
+  /**
+   * Refactored Mock Engine
+   * Handles CRUD operations in-memory when Odoo is unreachable.
+   */
+  private handleMockExecute(model: string, method: string, args: any[], kwargs: any): any {
+    if (!OdooClientService.mockStore[model]) {
+      OdooClientService.mockStore[model] = [];
     }
-    if (method === 'create') return 99;
-    return [];
+
+    const store = OdooClientService.mockStore[model];
+
+    switch (method) {
+      case 'search_count':
+        return store.length;
+
+      case 'search_read':
+        const offset = kwargs.offset || 0;
+        const limit = kwargs.limit || 100;
+        return store.slice(offset, offset + limit);
+
+      case 'create':
+        const newId = store.length + 1001;
+        const newRecord = { 
+          id: newId, 
+          ...args[0], 
+          create_date: new Date().toISOString(),
+          createdAt: new Date().toISOString(), // Compatibility with frontend
+          priority: args[0].priority || '0',
+          kanban_state: args[0].kanban_state || 'normal'
+        };
+        store.unshift(newRecord);
+        return newId;
+
+      case 'write':
+        const idsToUpdate = args[0];
+        const updateData = args[1];
+        idsToUpdate.forEach((id: number) => {
+          const index = store.findIndex(item => item.id === id);
+          if (index !== -1) {
+            store[index] = { ...store[index], ...updateData, write_date: new Date().toISOString() };
+          }
+        });
+        return true;
+
+      case 'unlink':
+        const idsToDelete = args[0];
+        OdooClientService.mockStore[model] = store.filter(item => !idsToDelete.includes(item.id));
+        return true;
+
+      default:
+        return Array.isArray(store) ? store : [];
+    }
   }
 }

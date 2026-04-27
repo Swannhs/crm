@@ -12,6 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
 import Dialog, { dialogClasses } from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -22,9 +23,14 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { projectService } from 'src/services/project-service';
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+
+import { TaskDetailDrawer } from '../components/task-detail-drawer';
+import { ProjectDashboardView } from './project-dashboard-view';
+import { Tab, Tabs } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -35,13 +41,14 @@ interface Props {
 export function ProjectDetailsView({ id }: Props) {
   const queryClient = useQueryClient();
   const columnDialog = useBoolean();
-  const taskDialog = useBoolean();
+  const taskDrawer = useBoolean();
   const confirmDeleteColumn = useBoolean();
   const confirmDeleteCard = useBoolean();
   
   const [columnName, setColumnName] = useState('');
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
+  const [taskPriority, setTaskPriority] = useState('0');
   
   const [activeColumnId, setActiveColumnId] = useState('');
   const [selectedColumn, setSelectedColumn] = useState<any>(null);
@@ -56,6 +63,11 @@ export function ProjectDetailsView({ id }: Props) {
   const [quickAddTaskTitle, setQuickAddTaskTitle] = useState('');
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const [editingColumnName, setEditingColumnName] = useState('');
+  const [currentTab, setCurrentTab] = useState('board');
+
+  const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
+    setCurrentTab(newValue);
+  }, []);
 
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ['project', id],
@@ -125,7 +137,7 @@ export function ProjectDetailsView({ id }: Props) {
     mutationFn: ({ id, data }: { id: string; data: any }) => projectService.updateCard(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['board-cards', activeBoard?.id] });
-      taskDialog.onFalse();
+      taskDrawer.onFalse();
       setTaskTitle('');
       setTaskDescription('');
       setSelectedCard(null);
@@ -181,10 +193,10 @@ export function ProjectDetailsView({ id }: Props) {
       if (selectedCard) {
         await updateCardMutation.mutateAsync({ 
           id: selectedCard.id, 
-          data: { title: taskTitle, description: taskDescription, columnId: activeColumnId } 
+          data: { title: taskTitle, description: taskDescription, columnId: activeColumnId, priority: taskPriority } 
         });
       } else if (activeColumnId) {
-        await addCardMutation.mutateAsync({ columnId: activeColumnId, title: taskTitle });
+        await addCardMutation.mutateAsync({ columnId: activeColumnId, title: taskTitle, priority: taskPriority });
       }
     }
   };
@@ -213,10 +225,11 @@ export function ProjectDetailsView({ id }: Props) {
 
   const handleEditCard = (card: any) => {
     setSelectedCard(card);
-    setTaskTitle(card.title);
+    setTaskTitle(card.title || card.name);
     setTaskDescription(card.description || '');
+    setTaskPriority(card.priority || '0');
     setActiveColumnId(card.columnId);
-    taskDialog.onTrue();
+    taskDrawer.onTrue();
   };
 
   const handleDeleteCard = () => {
@@ -272,22 +285,49 @@ export function ProjectDetailsView({ id }: Props) {
               <Iconify icon="solar:checklist-minimalistic-bold" sx={{ color: 'success.main' }} />
               <Typography variant="subtitle2">{cards.length} Tasks</Typography>
             </Stack>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {project?.description || 'Manage your tasks and workflow efficiently.'}
-            </Typography>
           </Stack>
         </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={columnDialog.onTrue}
-          disabled={addColumnMutation.isPending}
-        >
-           New Column
-        </Button>
+        
+        <Stack direction="row" spacing={1}>
+           {currentTab === 'board' && (
+             <Button 
+               variant="contained" 
+               startIcon={<Iconify icon="mingcute:add-line" />}
+               onClick={columnDialog.onTrue}
+               disabled={addColumnMutation.isPending}
+             >
+                New Column
+             </Button>
+           )}
+        </Stack>
       </Box>
 
-      <Scrollbar sx={{ pb: 3 }}>
+      <Tabs
+        value={currentTab}
+        onChange={handleChangeTab}
+        sx={{
+          mb: 3,
+          '& .MuiTab-root': { typography: 'subtitle2', textTransform: 'none' }
+        }}
+      >
+        <Tab 
+          value="board" 
+          label="Board" 
+          icon={<Iconify icon="solar:bill-list-bold" width={20} />} 
+          iconPosition="start" 
+        />
+        <Tab 
+          value="dashboard" 
+          label="Dashboard" 
+          icon={<Iconify icon="solar:chart-square-bold" width={20} />} 
+          iconPosition="start" 
+        />
+      </Tabs>
+
+      {currentTab === 'dashboard' ? (
+        <ProjectDashboardView id={id} />
+      ) : (
+        <Scrollbar sx={{ pb: 3 }}>
         <Stack direction="row" spacing={3} sx={{ minHeight: '70vh', alignItems: 'flex-start' }}>
           {columns.map((column: any) => (
             <Box 
@@ -355,34 +395,67 @@ export function ProjectDetailsView({ id }: Props) {
                       sx={{ 
                         p: 2, 
                         cursor: 'grab', 
-                        transition: (theme) => theme.transitions.create(['box-shadow', 'transform']),
-                        '&:active': { cursor: 'grabbing', transform: 'scale(1.02)' },
-                        '&:hover': { boxShadow: (theme) => theme.customShadows.z16 } 
+                        border: (theme) => `1px solid ${theme.palette.divider}`,
+                        boxShadow: (theme) => theme.customShadows.z1,
+                        transition: (theme) => theme.transitions.create(['box-shadow', 'transform', 'border-color']),
+                        '&:active': { cursor: 'grabbing', transform: 'rotate(2deg) scale(1.02)' },
+                        '&:hover': { 
+                          boxShadow: (theme) => theme.customShadows.z16,
+                          borderColor: 'primary.main'
+                        } 
                       }}
                     >
-                      <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 1 }}>
-                        <Typography variant="subtitle2">{card.title}</Typography>
-                        <IconButton 
-                          size="small" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenMenu(e, 'card', card);
-                          }}
+                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                        <Label
+                          variant="soft"
+                          color={
+                            (card.priority === '1' && 'error') ||
+                            (card.kanban_state === 'done' && 'success') ||
+                            (card.kanban_state === 'blocked' && 'warning') ||
+                            'default'
+                          }
                         >
-                          <Iconify icon="eva:more-vertical-fill" width={16} />
-                        </IconButton>
+                          {card.priority === '1' ? 'High' : 'Normal'}
+                        </Label>
+                        {card.kanban_state === 'blocked' && (
+                          <Label variant="filled" color="error">Blocked</Label>
+                        )}
                       </Stack>
 
+                      <Typography variant="subtitle2" sx={{ mb: 1 }}>{card.name || card.title}</Typography>
+
                       {card.description && (
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2 }}>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: 'text.secondary', 
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            mb: 2 
+                          }}
+                        >
                           {card.description}
                         </Typography>
                       )}
+
                       <Stack direction="row" alignItems="center" justifyContent="space-between">
-                         <Iconify icon="solar:chat-round-line-bold" sx={{ color: 'text.disabled', width: 16 }} />
-                         <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-                             {new Date(card.createdAt).toLocaleDateString()}
-                         </Typography>
+                         <Stack direction="row" spacing={-0.75}>
+                            <Avatar 
+                              src="/assets/images/avatar/avatar_1.jpg" 
+                              sx={{ width: 24, height: 24, border: (theme) => `solid 2px ${theme.palette.background.paper}` }} 
+                            />
+                         </Stack>
+
+                         <Stack direction="row" alignItems="center" spacing={1.5} sx={{ color: 'text.disabled' }}>
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                               <Iconify icon="solar:calendar-date-bold" width={16} />
+                               <Typography variant="caption">
+                                 {card.createdAt ? new Date(card.createdAt).toLocaleDateString() : 'N/A'}
+                               </Typography>
+                            </Stack>
+                         </Stack>
                       </Stack>
                     </Card>
                   ))}
@@ -456,6 +529,7 @@ export function ProjectDetailsView({ id }: Props) {
           )}
         </Stack>
       </Scrollbar>
+      )}
 
       {/* Shared Menu */}
       <Menu
@@ -555,55 +629,20 @@ export function ProjectDetailsView({ id }: Props) {
         </DialogActions>
       </Dialog>
 
-      {/* Task Dialog */}
-      <Dialog open={taskDialog.value} onClose={taskDialog.onFalse} fullWidth maxWidth="sm">
-        <DialogTitle>{selectedCard ? 'Edit Task' : 'New Task'}</DialogTitle>
-        <DialogContent sx={{ pt: 1 }}>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              autoFocus
-              fullWidth
-              label="Task Title"
-              value={taskTitle}
-              onChange={(e) => setTaskTitle(e.target.value)}
-            />
-
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="Description"
-              value={taskDescription}
-              onChange={(e) => setTaskDescription(e.target.value)}
-            />
-
-            <TextField
-              select
-              fullWidth
-              label="Column"
-              value={activeColumnId}
-              onChange={(e) => setActiveColumnId(e.target.value)}
-              SelectProps={{ native: true }}
-            >
-              {columns.map((col: any) => (
-                <option key={col.id} value={col.id}>
-                  {col.name || col.title}
-                </option>
-              ))}
-            </TextField>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" color="inherit" onClick={taskDialog.onFalse}>Cancel</Button>
-          <Button 
-            variant="contained" 
-            onClick={handleAddTask} 
-            disabled={!taskTitle.trim() || addCardMutation.isPending || updateCardMutation.isPending}
-          >
-             {addCardMutation.isPending || updateCardMutation.isPending ? 'Saving...' : 'Save'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Task Detail Drawer */}
+      <TaskDetailDrawer
+        open={taskDrawer.value}
+        onClose={taskDrawer.onFalse}
+        task={selectedCard}
+        columns={columns}
+        onUpdate={async (data) => {
+          await updateCardMutation.mutateAsync({ id: selectedCard.id, data });
+        }}
+        onDelete={() => {
+          confirmDeleteCard.onTrue();
+          taskDrawer.onFalse();
+        }}
+      />
     </DashboardContent>
   );
 }

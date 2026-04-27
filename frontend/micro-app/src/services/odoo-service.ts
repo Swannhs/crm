@@ -119,6 +119,132 @@ export async function getOdooInventory(params?: OdooListParams): Promise<OdooInv
   return request<OdooInventory[]>(() => axios.get(`${ODOO_API_BASE}/inventory`, { params: toListParams(params) }));
 }
 
+// --- Write Operations ---
+
+export async function createOdooContact(data: any): Promise<number> {
+  const payload = {
+    ...data,
+    name: data.name ?? data.fullName,
+    is_company: data.is_company ?? data.isCompany,
+  };
+  delete (payload as any).fullName;
+  delete (payload as any).isCompany;
+  delete (payload as any).status;
+
+  return request<number>(() => axios.post(`${ODOO_API_BASE}/contacts`, payload));
+}
+
+export async function updateOdooContact(id: number | string, data: any): Promise<boolean> {
+  const payload = {
+    ...data,
+    name: data.name ?? data.fullName,
+    is_company: data.is_company ?? data.isCompany,
+  };
+  delete (payload as any).fullName;
+  delete (payload as any).isCompany;
+  delete (payload as any).status;
+
+  return request<boolean>(() => axios.put(`${ODOO_API_BASE}/contacts/${id}`, payload));
+}
+
+export async function deleteOdooContact(id: number | string): Promise<boolean> {
+  return request<boolean>(() => axios.delete(`${ODOO_API_BASE}/contacts/${id}`));
+}
+
+export async function createOdooLead(data: any): Promise<number> {
+  const payload = {
+    ...data,
+    contact_name: data.contact_name ?? data.contactName,
+    expected_revenue: data.expected_revenue ?? data.expectedRevenue,
+  };
+  delete (payload as any).contactName;
+  delete (payload as any).expectedRevenue;
+
+  return request<number>(() => axios.post(`${ODOO_API_BASE}/leads`, payload));
+}
+
+export async function updateOdooLead(id: number | string, data: any): Promise<boolean> {
+  const payload = {
+    ...data,
+    contact_name: data.contact_name ?? data.contactName,
+    expected_revenue: data.expected_revenue ?? data.expectedRevenue,
+  };
+  delete (payload as any).contactName;
+  delete (payload as any).expectedRevenue;
+
+  return request<boolean>(() => axios.put(`${ODOO_API_BASE}/leads/${id}`, payload));
+}
+
+export async function deleteOdooLead(id: number | string): Promise<boolean> {
+  return request<boolean>(() => axios.delete(`${ODOO_API_BASE}/leads/${id}`));
+}
+
+export async function createOdooInvoice(data: any): Promise<number> {
+  const payload = {
+    ...data,
+    invoice_date: data.invoice_date ?? data.invoiceDate,
+    invoice_date_due: data.invoice_date_due ?? data.dueDate,
+    amount_total: data.amount_total ?? data.amountTotal,
+    payment_state: data.payment_state ?? data.paymentState,
+  };
+  delete (payload as any).invoiceDate;
+  delete (payload as any).dueDate;
+  delete (payload as any).amountTotal;
+  delete (payload as any).paymentState;
+  delete (payload as any).status;
+  delete (payload as any).deliveryStatus;
+
+  return request<number>(() => axios.post(`${ODOO_API_BASE}/invoices`, payload));
+}
+
+export async function updateOdooInvoice(id: number | string, data: any): Promise<boolean> {
+  const payload = {
+    ...data,
+    invoice_date: data.invoice_date ?? data.invoiceDate,
+    invoice_date_due: data.invoice_date_due ?? data.dueDate,
+    amount_total: data.amount_total ?? data.amountTotal,
+    payment_state: data.payment_state ?? data.paymentState,
+  };
+  delete (payload as any).invoiceDate;
+  delete (payload as any).dueDate;
+  delete (payload as any).amountTotal;
+  delete (payload as any).paymentState;
+  delete (payload as any).status;
+  delete (payload as any).deliveryStatus;
+
+  return request<boolean>(() => axios.put(`${ODOO_API_BASE}/invoices/${id}`, payload));
+}
+
+export async function deleteOdooInvoice(id: number | string): Promise<boolean> {
+  return request<boolean>(() => axios.delete(`${ODOO_API_BASE}/invoices/${id}`));
+}
+
+export async function createOdooProduct(data: any): Promise<number> {
+  const payload = {
+    ...data,
+    name: data.name ?? data.title,
+  };
+  delete (payload as any).title;
+
+  return request<number>(() => axios.post(`${ODOO_API_BASE}/products`, payload));
+}
+
+export async function updateOdooProduct(id: number | string, data: any): Promise<boolean> {
+  const payload = {
+    ...data,
+    name: data.name ?? data.title,
+  };
+  delete (payload as any).title;
+
+  return request<boolean>(() => axios.put(`${ODOO_API_BASE}/products/${id}`, payload));
+}
+
+export async function deleteOdooProduct(id: number | string): Promise<boolean> {
+  return request<boolean>(() => axios.delete(`${ODOO_API_BASE}/products/${id}`));
+}
+
+// --- Sync Operations ---
+
 export async function syncMagentoCustomersToOdoo(options?: OdooSyncOptions): Promise<OdooSyncResult> {
   return request<OdooSyncResult>(() =>
     axios.post(`${ODOO_API_BASE}/sync/magento/customers`, { ...options, dryRun: options?.dryRun ?? true })

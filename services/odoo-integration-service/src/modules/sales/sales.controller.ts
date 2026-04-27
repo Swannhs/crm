@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { SalesService } from './sales.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
@@ -44,5 +44,17 @@ export class SalesController {
   @ApiOperation({ summary: 'Generate an invoice from a sales order' })
   async createInvoice(@Param('id', ParseIntPipe) id: number) {
     return this.salesService.createInvoice(id);
+  }
+
+  @Put('orders/:id')
+  @ApiOperation({ summary: 'Update a sales order' })
+  async update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.salesService.update(id, data);
+  }
+
+  @Delete('orders/:id')
+  @ApiOperation({ summary: 'Delete a sales order' })
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.salesService.remove(id);
   }
 }

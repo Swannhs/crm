@@ -9,8 +9,16 @@ ENV NODE_ENV=development
 
 WORKDIR /workspace/services/${SERVICE_NAME}
 
-RUN corepack enable
+RUN apk add --no-cache openssl libc6-compat \
+  && corepack enable
 
 EXPOSE ${SERVICE_PORT}
 
-CMD ["npm", "run", "dev"]
+ENV SHARED_INSTALL_TIMEOUT_SECONDS=1800
+ENV SHARED_INSTALL_STALE_SECONDS=180
+ENV SHARED_INSTALL_POLL_SECONDS=2
+
+COPY services/${SERVICE_NAME}/docker/entrypoint.dev.sh /usr/local/bin/node-service-dev-entrypoint.sh
+RUN chmod +x /usr/local/bin/node-service-dev-entrypoint.sh
+
+CMD ["/usr/local/bin/node-service-dev-entrypoint.sh"]

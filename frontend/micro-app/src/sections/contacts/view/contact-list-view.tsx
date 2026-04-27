@@ -42,7 +42,7 @@ import { contactService } from 'src/services/contact-service';
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-import { Form, RHFTextField } from 'src/components/hook-form';
+import { Form, RHFTextField, RHFSwitch } from 'src/components/hook-form';
 import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
@@ -59,6 +59,11 @@ export const NewContactSchema = zod.object({
   fullName: zod.string().min(1, { message: 'Full name is required!' }),
   email: zod.string().min(1, { message: 'Email is required!' }).email({ message: 'Email must be a valid email address!' }),
   phone: zod.string().min(1, { message: 'Phone number is required!' }),
+  mobile: zod.string().optional(),
+  isCompany: zod.boolean().default(false),
+  street: zod.string().optional(),
+  city: zod.string().optional(),
+  vat: zod.string().optional(),
 });
 
 // ----------------------------------------------------------------------
@@ -84,6 +89,11 @@ export function ContactListView() {
       fullName: '',
       email: '',
       phone: '',
+      mobile: '',
+      isCompany: false,
+      street: '',
+      city: '',
+      vat: '',
     },
   });
 
@@ -91,7 +101,11 @@ export function ContactListView() {
     handleSubmit,
     reset,
     formState: { isSubmitting },
+    watch,
+    setValue,
   } = methods;
+
+  const isCompany = watch('isCompany');
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -222,7 +236,7 @@ export function ContactListView() {
                            </Stack>
                         </TableCell>
                         <TableCell>
-                           <Label variant="soft" color="info">
+                           <Label variant="soft" color={row.contactType?.[0] === 'Company' ? 'primary' : 'info'}>
                               {row.contactType?.[0] || 'Client'}
                            </Label>
                         </TableCell>
@@ -281,17 +295,36 @@ export function ContactListView() {
           <DialogTitle>New Contact</DialogTitle>
 
           <DialogContent>
-            <Box
-              rowGap={3}
-              columnGap={2}
-              display="grid"
-              gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)' }}
-              sx={{ p: 3 }}
-            >
-              <RHFTextField name="fullName" label="Full Name" />
-              <RHFTextField name="email" label="Email Address" />
-              <RHFTextField name="phone" label="Phone Number" />
-            </Box>
+            <Stack spacing={3} sx={{ p: 3 }}>
+              <Box
+                display="grid"
+                rowGap={3}
+                columnGap={2}
+                gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)' }}
+              >
+                <RHFTextField name="fullName" label={isCompany ? "Company Name" : "Full Name"} />
+                <RHFTextField name="email" label="Email Address" />
+                <RHFTextField name="phone" label="Phone" />
+                <RHFTextField name="mobile" label="Mobile" />
+              </Box>
+
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body2">Individual</Typography>
+                <RHFSwitch name="isCompany" label="" sx={{ m: 0 }} />
+                <Typography variant="body2">Company</Typography>
+              </Stack>
+
+              <Box
+                display="grid"
+                rowGap={3}
+                columnGap={2}
+                gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)' }}
+              >
+                <RHFTextField name="street" label="Street" />
+                <RHFTextField name="city" label="City" />
+                <RHFTextField name="vat" label="Tax ID (VAT)" />
+              </Box>
+            </Stack>
           </DialogContent>
 
           <DialogActions>
@@ -300,7 +333,7 @@ export function ContactListView() {
             </Button>
 
             <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-              Create
+              Create Contact
             </LoadingButton>
           </DialogActions>
         </Form>

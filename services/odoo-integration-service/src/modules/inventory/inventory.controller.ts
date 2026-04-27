@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
@@ -25,5 +25,23 @@ export class InventoryController {
   @ApiResponse({ status: 200, type: ProductEntity })
   async findProduct(@Param('id', ParseIntPipe) id: number) {
     return this.inventoryService.findProduct(id);
+  }
+
+  @Post('products')
+  @ApiOperation({ summary: 'Create a new product' })
+  async create(@Body() data: any) {
+    return this.inventoryService.createProduct(data);
+  }
+
+  @Put('products/:id')
+  @ApiOperation({ summary: 'Update a product' })
+  async update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.inventoryService.updateProduct(id, data);
+  }
+
+  @Delete('products/:id')
+  @ApiOperation({ summary: 'Delete a product' })
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.inventoryService.removeProduct(id);
   }
 }

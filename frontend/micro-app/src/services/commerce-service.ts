@@ -178,11 +178,19 @@ const fileToDataUrl = (file: File) =>
     reader.readAsDataURL(file);
   });
 
+const BEST_EFFORT_AXIOS_CONFIG = { skipGlobalErrorToast: true } as const;
+
 export type ICommerceOrder = {
   id: string;
   totalAmountCents: number;
   status: string;
   paymentStatus: string;
+  createdAt?: string;
+  shippingAddress?: {
+    customerName?: string;
+    email?: string;
+    phone?: string;
+  };
   items?: Array<{
     id: string;
     productName: string;
@@ -195,18 +203,25 @@ export const commerceService = {
   // Canonical admin commerce route is /api/magento/*.
   // This client is kept for UI compatibility while Magento is the eCommerce source of truth.
   getProducts: async (orgId?: string) => {
-    const response = await axios.get('/api/magento/products', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
-    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
-    return rows.map((item: any) =>
-      normalizeProduct({
-        id: item?.id,
-        name: item?.name,
-        sku: item?.sku,
-        description: item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'description')?.value,
-        priceCents: Math.round(Number(item?.price ?? 0) * 100),
-        status: Number(item?.status) === 1 ? 'active' : 'disabled',
-      })
-    );
+    try {
+      const response = await axios.get('/api/magento/products', {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+        headers: orgId ? { 'X-Org-Id': orgId } : {},
+      });
+      const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
+      return rows.map((item: any) =>
+        normalizeProduct({
+          id: item?.id,
+          name: item?.name,
+          sku: item?.sku,
+          description: item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'description')?.value,
+          priceCents: Math.round(Number(item?.price ?? 0) * 100),
+          status: Number(item?.status) === 1 ? 'active' : 'disabled',
+        })
+      );
+    } catch {
+      return [];
+    }
   },
 
   createProduct: async (orgId: string, data: any) => {
@@ -222,22 +237,38 @@ export const commerceService = {
   },
 
   getOrders: async (orgId?: string) => {
-    const response = await axios.get('/api/magento/orders', { headers: orgId ? { 'X-Org-Id': orgId } : {} });
-    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
-    return rows.map((order: any) => ({
-      id: String(order?.entity_id || order?.increment_id || ''),
-      totalAmountCents: Math.round(Number(order?.base_grand_total ?? order?.grand_total ?? 0) * 100),
-      status: String(order?.status || 'unknown'),
-      paymentStatus: String(order?.state || order?.status || 'unknown'),
-      items: Array.isArray(order?.items)
-        ? order.items.map((item: any) => ({
+    try {
+      const response = await axios.get('/api/magento/orders', {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+        headers: orgId ? { 'X-Org-Id': orgId } : {},
+      });
+      const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
+      return rows.map((order: any) => ({
+        id: String(order?.entity_id || order?.increment_id || ''),
+        totalAmountCents: Math.round(Number(order?.base_grand_total ?? order?.grand_total ?? 0) * 100),
+        status: String(order?.status || 'unknown'),
+        paymentStatus: String(order?.state || order?.status || 'unknown'),
+        createdAt: order?.created_at ? String(order.created_at) : undefined,
+        shippingAddress: {
+          customerName:
+            [order?.customer_firstname, order?.customer_lastname].filter(Boolean).join(' ').trim() || undefined,
+          email: order?.customer_email ? String(order.customer_email) : undefined,
+          phone: order?.billing_address?.telephone
+            ? String(order.billing_address.telephone)
+            : undefined,
+        },
+        items: Array.isArray(order?.items)
+          ? order.items.map((item: any) => ({
             id: String(item?.item_id || ''),
             productName: String(item?.name || ''),
             quantity: Number(item?.qty_ordered ?? 0),
-            unitPriceCents: Math.round(Number(item?.price ?? 0) * 100),
-          }))
-        : [],
-    }));
+              unitPriceCents: Math.round(Number(item?.price ?? 0) * 100),
+            }))
+          : [],
+      }));
+    } catch {
+      return [];
+    }
   },
 
   createOrder: async (orgId: string, data: any) => {
@@ -245,23 +276,30 @@ export const commerceService = {
   },
 
   getCategories: async (orgId?: string) => {
-    const response = await axios.post(
-      '/api/magento/rest',
-      {
-        method: 'GET',
-        path: '/rest/all/V1/categories',
-      },
-      { headers: orgId ? { 'X-Org-Id': orgId } : {} }
-    );
-    const root = response.data?.data ?? {};
-    const rows = Array.isArray(root?.children_data) ? root.children_data : [];
-    return rows.map((item: any) =>
-      normalizeCategory({
-        id: item?.id,
-        name: item?.name,
-        isActive: item?.is_active,
-      })
-    );
+    try {
+      const response = await axios.post(
+        '/api/magento/rest',
+        {
+          method: 'GET',
+          path: '/rest/all/V1/categories',
+        },
+        {
+          ...BEST_EFFORT_AXIOS_CONFIG,
+          headers: orgId ? { 'X-Org-Id': orgId } : {},
+        }
+      );
+      const root = response.data?.data ?? {};
+      const rows = Array.isArray(root?.children_data) ? root.children_data : [];
+      return rows.map((item: any) =>
+        normalizeCategory({
+          id: item?.id,
+          name: item?.name,
+          isActive: item?.is_active,
+        })
+      );
+    } catch {
+      return [];
+    }
   },
 
   createCategory: async (orgId: string, data: any) => {
@@ -277,7 +315,7 @@ export const commerceService = {
   },
 
   getCoupons: async (orgId?: string) => {
-    throw new Error('Coupon/promotion data is owned by Magento and should be managed there.');
+    return [];
   },
 
   createCoupon: async (orgId: string, data: any) => {

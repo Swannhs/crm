@@ -10,6 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -116,9 +117,13 @@ export function CommerceWorkspaceView({
   const resolvedOrgId =
     (user as any)?.org_id || (user as any)?.orgId || (user as any)?.organizationId || '';
   const resolvedShopKey = shopId || shopPath || resolvedOrgId || 'shop';
+  const posRouteShopId = shopId || resolvedOrgId || resolvedShopKey || 'shop';
   const checkoutRouteKey = shopPath || shopId || resolvedShopKey;
+  const isKnownSection = section
+    ? COMMERCE_DASHBOARD_MODULES.some((module) => module.value === section)
+    : false;
   const currentModule: CommerceDashboardModule =
-    section && COMMERCE_DASHBOARD_MODULES.includes(section as CommerceDashboardModule)
+    isKnownSection
       ? (section as CommerceDashboardModule)
       : resolveInitialModule(mode);
 
@@ -1128,6 +1133,94 @@ export function CommerceWorkspaceView({
             />
           }
           customersTable={<CommerceCustomersTable customers={customers} />}
+          membershipsTable={
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h5">Memberships</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                Membership analytics are being consolidated into Magento-backed customer segments.
+              </Typography>
+              <Alert severity="info" sx={{ mt: 2 }}>
+                Use the Customers tab for active buyer insights while membership sync is finalized.
+              </Alert>
+            </Card>
+          }
+          posPanel={
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h5">POS Operations</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                Launch the POS surfaces for this shop context.
+              </Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2 }}>
+                <Button variant="contained" href={paths.dashboard.pos(posRouteShopId)}>
+                  Open POS
+                </Button>
+                <Button color="inherit" variant="outlined" href={paths.dashboard.posOrders(posRouteShopId)}>
+                  Orders
+                </Button>
+                <Button color="inherit" variant="outlined" href={paths.dashboard.posSettings(posRouteShopId)}>
+                  Settings
+                </Button>
+              </Stack>
+            </Card>
+          }
+          kdsPanel={
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h5">Kitchen Display System</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5, mb: 2 }}>
+                Open the KDS view for live kitchen ticket handling.
+              </Typography>
+              <Button variant="contained" href={paths.dashboard.posKds(posRouteShopId)}>
+                Open KDS
+              </Button>
+            </Card>
+          }
+          cfdPanel={
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h5">Customer-Facing Display</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5, mb: 2 }}>
+                Launch the customer display surface for checkout visibility.
+              </Typography>
+              <Button variant="contained" href={paths.dashboard.posCfd(posRouteShopId)}>
+                Open CFD
+              </Button>
+            </Card>
+          }
+          kioskPanel={
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h5">Kiosk Mode</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5, mb: 2 }}>
+                Launch self-service kiosk ordering for this shop.
+              </Typography>
+              <Button variant="contained" href={paths.dashboard.posKiosk(posRouteShopId)}>
+                Open Kiosk
+              </Button>
+            </Card>
+          }
+          inventoryPanel={
+            <CommerceProductsTable
+              filteredProducts={filteredProducts}
+              categories={catalogCategories}
+              resolvedShopKey={resolvedShopKey}
+              search={search}
+              categoryFilter={productCategoryFilter}
+              onCreate={openCreateProductDialog}
+              onSearchChange={setSearch}
+              onCategoryFilterChange={setProductCategoryFilter}
+              onEdit={handleProductEdit}
+              onDelete={(id) => deleteProductMutation.mutate(id)}
+            />
+          }
+          designerPanel={
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h5">Designer</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                POS layout designer tools are queued for the next parity iteration.
+              </Typography>
+              <Alert severity="info" sx={{ mt: 2 }}>
+                Use Tables for operational floor setup today.
+              </Alert>
+            </Card>
+          }
           tablesPanel={
             <CommerceTablesPanel
               tables={tableLayouts}

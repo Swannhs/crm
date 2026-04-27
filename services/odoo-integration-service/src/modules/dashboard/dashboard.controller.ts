@@ -21,18 +21,6 @@ export class DashboardController {
     return { data: [], total: 0 };
   }
 
-  @Get('projects/v1/projects')
-  @ApiOperation({ summary: 'Get mock projects' })
-  async getProjects() {
-    return { data: [], total: 0 };
-  }
-
-  @Get('projects/v1/tasks')
-  @ApiOperation({ summary: 'Get mock tasks' })
-  async getTasks() {
-    return { data: [], total: 0 };
-  }
-
   @Get('calendar/v1/events')
   @ApiOperation({ summary: 'Get mock events' })
   async getEvents() {
@@ -40,11 +28,6 @@ export class DashboardController {
   }
 
   // Fallbacks for non-versioned calls
-  @Get('projects')
-  async getProjectsLegacy() {
-    return { data: [], total: 0 };
-  }
-
   @Get('events')
   async getEventsLegacy() {
     return { data: [], total: 0 };

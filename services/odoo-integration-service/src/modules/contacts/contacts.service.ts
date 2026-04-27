@@ -18,12 +18,17 @@ export class ContactsService {
       ? ['|', ['name', 'ilike', search], ['email', 'ilike', search]]
       : [];
 
-    return this.odooClient.searchRead(
-      this.model,
-      domain,
-      this.defaultFields,
-      { offset: (page - 1) * pageSize, limit: pageSize, order: 'write_date desc' }
-    );
+    const [data, total] = await Promise.all([
+      this.odooClient.searchRead(
+        this.model,
+        domain,
+        this.defaultFields,
+        { offset: (page - 1) * pageSize, limit: pageSize, order: 'write_date desc' }
+      ),
+      this.odooClient.execute(this.model, 'search_count', [domain])
+    ]);
+
+    return { data, total };
   }
 
   async findOne(id: number) {
