@@ -119,3 +119,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  booking-db:
+    image: postgres:17-alpine
+    container_name: ms-booking-db
+    environment:
+      POSTGRES_DB: booking
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+    ports:
+      - "5459:5432"
+    volumes:
+      - ../data/postgres/booking-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+

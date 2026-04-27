@@ -13,14 +13,45 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { bookingService } from 'src/services/booking-service';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useState } from 'react';
+import { BookingTypeDialog } from '../booking-type-dialog';
+import { AppointmentsTab } from '../appointments-tab';
+import { showToast } from 'src/components/toast';
+import { useLocales } from 'src/locales';
+
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 // ----------------------------------------------------------------------
 
 export function BookingListView() {
+  const { t } = useLocales();
+  const dialog = useBoolean();
+  const [selectedType, setSelectedType] = useState<any>(null);
+  const [currentTab, setCurrentTab] = useState('types');
+
+
   const { data: bookingTypes, isLoading } = useQuery({
     queryKey: ['booking-types'],
     queryFn: () => bookingService.getBookingTypes(),
   });
+
+  const { data: appointments, isLoading: appointmentsLoading } = useQuery({
+    queryKey: ['appointments'],
+    queryFn: () => bookingService.getAppointments(),
+    enabled: currentTab === 'appointments',
+  });
+
+  const handleEdit = (type: any) => {
+    setSelectedType(type);
+    dialog.onTrue();
+  };
+
+  const handleNew = () => {
+    setSelectedType(null);
+    dialog.onTrue();
+  };
 
   if (isLoading) {
     return (
@@ -33,55 +64,93 @@ export function BookingListView() {
   return (
     <DashboardContent maxWidth="xl">
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="h4">Bookings & Appointments</Typography>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-        >
-          New Booking Type
-        </Button>
+        <Typography variant="h4">{t('booking.title')}</Typography>
+        {currentTab === 'types' && (
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={handleNew}
+          >
+            {t('booking.new_type')}
+          </Button>
+        )}
       </Box>
 
-      <Grid container spacing={3}>
-        {(bookingTypes || []).map((type: any) => (
-          <Grid item xs={12} sm={6} md={4} key={type.id}>
-            <Card sx={{ p: 3 }}>
-              <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-                <Box sx={{ width: 12, height: 40, borderRadius: 1, bgcolor: type.color || 'primary.main' }} />
-                <Box>
-                  <Typography variant="subtitle1">{type.title}</Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {type.duration_minutes} mins • {type.meeting_type}
-                  </Typography>
-                </Box>
-              </Stack>
-              
-              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-                {type.description || 'No description provided.'}
+
+      <Tabs
+        value={currentTab}
+        onChange={(e, v) => setCurrentTab(v)}
+        sx={{ mb: 5, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
+      >
+        <Tab value="types" label={t('booking.title')} />
+        <Tab value="appointments" label={t('booking.appointments')} />
+      </Tabs>
+
+
+      {currentTab === 'types' ? (
+        <Grid container spacing={3}>
+          {(bookingTypes || []).map((type: any) => (
+            <Grid item xs={12} sm={6} md={4} key={type.id}>
+              <Card sx={{ p: 3 }}>
+                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                  <Box sx={{ width: 12, height: 40, borderRadius: 1, bgcolor: type.color || 'primary.main' }} />
+                  <Box>
+                    <Typography variant="subtitle1">{type.title}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {type.durationMinutes} mins • {type.slug}
+                    </Typography>
+                  </Box>
+                </Stack>
+                
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+                  {type.description || 'No description provided.'}
+                </Typography>
+
+                <Divider sx={{ borderStyle: 'dashed', my: 2 }} />
+
+                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                  <Button 
+                    variant="soft" 
+                    color="info" 
+                    size="small" 
+                    startIcon={<Iconify icon="eva:link-2-fill" />}
+                    onClick={() => {
+                      const url = `${window.location.origin}/booking/${type.slug}`;
+                      navigator.clipboard.writeText(url);
+                      showToast({ message: t('booking.copy_link_success') || 'Link copied!' });
+                    }}
+                  >
+                    {t('booking.copy_link')}
+                  </Button>
+                  <Button variant="soft" size="small" startIcon={<Iconify icon="eva:edit-fill" />} onClick={() => handleEdit(type)}>
+                    {t('booking.edit')}
+                  </Button>
+
+                </Stack>
+              </Card>
+            </Grid>
+          ))}
+
+          {bookingTypes?.length === 0 && (
+            <Box sx={{ textAlign: 'center', py: 10, width: '100%' }}>
+              <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+                {t('booking.no_types')}
               </Typography>
+            </Box>
+          )}
 
-              <Divider sx={{ borderStyle: 'dashed', my: 2 }} />
+        </Grid>
+      ) : (
+        <AppointmentsTab appointments={appointments} loading={appointmentsLoading} />
+      )}
 
-              <Stack direction="row" spacing={1} justifyContent="flex-end">
-                <Button variant="soft" color="info" size="small" startIcon={<Iconify icon="eva:link-2-fill" />}>
-                  Copy Link
-                </Button>
-                <Button variant="soft" size="small" startIcon={<Iconify icon="eva:edit-fill" />}>
-                  Edit
-                </Button>
-              </Stack>
-            </Card>
-          </Grid>
-        ))}
 
-        {bookingTypes?.length === 0 && (
-          <Box sx={{ textAlign: 'center', py: 10, width: '100%' }}>
-            <Typography variant="h6" sx={{ color: 'text.secondary' }}>
-              No booking types found.
-            </Typography>
-          </Box>
-        )}
-      </Grid>
+      <BookingTypeDialog 
+        open={dialog.value} 
+        onClose={dialog.onFalse} 
+        bookingType={selectedType} 
+      />
     </DashboardContent>
   );
 }
+

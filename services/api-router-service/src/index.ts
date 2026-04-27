@@ -67,6 +67,79 @@ function withQuery(req: Request, targetPath: string) {
   return query ? `${targetPath}?${query}` : targetPath;
 }
 
+type CompatEmployeeRow = {
+  _id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  totalShifts: number;
+  displaySummary: string;
+  categories: Array<{ _id: string; name: string }>;
+};
+
+function toCompatEmployeeRow(raw: any): CompatEmployeeRow {
+  const id = String(raw?.uuid ?? raw?.id ?? "");
+  const contactTypes = Array.isArray(raw?.contactType)
+    ? raw.contactType
+    : (raw?.contactType ? [raw.contactType] : []);
+
+  return {
+    _id: id,
+    fullName: String(raw?.fullName ?? raw?.name ?? "Unnamed employee"),
+    email: String(raw?.email ?? ""),
+    phone: String(raw?.phone ?? ""),
+    totalShifts: 0,
+    displaySummary: "0 shifts",
+    categories: contactTypes.map((name: string, idx: number) => ({
+      _id: `${id}-cat-${idx}`,
+      name: String(name),
+    })),
+  };
+}
+
+async function getCompatEmployeesFromOdoo(req: Request): Promise<CompatEmployeeRow[]> {
+  const headers = {
+    Authorization: req.header("Authorization") ?? "",
+    "X-Org-Id": req.header("X-Org-Id") ?? "",
+    "X-User-Id": req.header("X-User-Id") ?? "",
+  };
+
+  let page = 1;
+  let totalPages = 1;
+  const rows: any[] = [];
+
+  do {
+    const query = new URLSearchParams({
+      page: String(page),
+      pageSize: "200",
+      type: "employee",
+      search: String(req.query.search ?? ""),
+    });
+
+    const upstream = await fetch(`http://odoo-integration-service:7200/v1/odoo/contacts?${query.toString()}`, {
+      method: "GET",
+      headers,
+    });
+
+    if (!upstream.ok) {
+      throw new Error(`Odoo contacts compat failed with status ${upstream.status}`);
+    }
+
+    const payload = await upstream.json();
+    const batch = Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload)
+        ? payload
+        : [];
+
+    rows.push(...batch);
+    totalPages = Number(payload?.totalPages ?? 1);
+    page += 1;
+  } while (page <= totalPages);
+
+  return rows.map(toCompatEmployeeRow);
+}
+
 const domainRoutes: Record<string, string> = {
   "community": "http://community-service:7030",
   "community-group": "http://community-service:7030",
@@ -192,6 +265,17 @@ async function handleApiCompat(req: Request, res: Response) {
       });
     }
 
+    if (module === "employee-schedule" && req.method === "GET") {
+      if (rest === "/get-contacts-with-categories-and-shifts" || rest === "/get-employee-category-schedule-data") {
+        const data = await getCompatEmployeesFromOdoo(req);
+        return res.json({ data, total: data.length });
+      }
+
+      if (rest === "/get-all") {
+        return res.json({ data: [], total: 0 });
+      }
+    }
+
     if (domainRoutes[module]) {
       return proxyTo(req, res, { baseUrl: domainRoutes[module], targetPath: `/api/${module}${rest}` });
     }
@@ -215,8 +299,17 @@ async function handleApiCompat(req: Request, res: Response) {
     if (module === "booking") {
       if (req.method === "GET" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/booking-types" });
       if (req.method === "POST" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/booking-types" });
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "booking-types (scaffold)" });
+      if (req.method === "GET" && rest === "/appointments") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/appointments" });
+      if (req.method === "POST" && rest === "/appointments") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/appointments" });
+      if (req.method === "POST" && rest === "/appointments/user") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/appointments/public" });
+      if (req.method === "GET" && rest === "/available-slots") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: `/v1/appointments/available-slots?${new URLSearchParams(req.query as any).toString()}` });
+      if (req.method === "DELETE" && rest.startsWith("/appointments/")) {
+        const id = rest.split("/").pop();
+        return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: `/v1/appointments/${id}` });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "booking-types & appointments" });
     }
+
 
     if (module === "scoring") {
       if (req.method === "GET" && (rest === "/models" || rest === "/hot-leads")) {

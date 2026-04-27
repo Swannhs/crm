@@ -10,23 +10,22 @@ import IconButton from '@mui/material/IconButton';
 import { varHover } from 'src/components/animate';
 import { FlagIcon } from 'src/components/iconify';
 import { usePopover, CustomPopover } from 'src/components/custom-popover';
+import { useLocales } from 'src/locales';
 
 // ----------------------------------------------------------------------
 
-export function LanguagePopover({ data = [], sx, ...other }) {
+export function LanguagePopover({ sx, ...other }) {
   const popover = usePopover();
-
-  const [locale, setLocale] = useState(data[0].value);
-
-  const currentLang = data.find((lang) => lang.value === locale);
+  const { allLangs, currentLang, onChangeLang } = useLocales();
 
   const handleChangeLang = useCallback(
     (newLang) => {
-      setLocale(newLang);
+      onChangeLang(newLang);
       popover.onClose();
     },
-    [popover]
+    [onChangeLang, popover]
   );
+
 
   return (
     <>
@@ -50,18 +49,19 @@ export function LanguagePopover({ data = [], sx, ...other }) {
 
       <CustomPopover open={popover.open} anchorEl={popover.anchorEl} onClose={popover.onClose}>
         <MenuList sx={{ width: 160, minHeight: 72 }}>
-          {data?.map((option) => (
+          {allLangs?.map((option) => (
             <MenuItem
               key={option.value}
               selected={option.value === currentLang?.value}
               onClick={() => handleChangeLang(option.value)}
             >
-              <FlagIcon code={option.countryCode} />
+              <FlagIcon code={option.countryCode} sx={{ mr: 1 }} />
               {option.label}
             </MenuItem>
           ))}
         </MenuList>
       </CustomPopover>
+
     </>
   );
 }

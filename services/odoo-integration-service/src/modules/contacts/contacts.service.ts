@@ -241,7 +241,7 @@ export class ContactsService {
       this.getOrders(id),
       this.getTasks(id),
       this.getActivities(id),
-      this.getShifts(id)
+      this.getShifts(id, { page: 1, pageSize: 1 } as PaginationDto)
     ]);
 
     const totalSpent = orders
@@ -251,7 +251,7 @@ export class ContactsService {
     const completedTasks = tasks.filter((t: any) => t.status === 'done').length;
     const engagement = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
 
-    const lastActivity = activities[0]?.createdAt || shifts[0]?.clockIn || contact.write_date || contact.create_date;
+    const lastActivity = activities[0]?.createdAt || shifts.data?.[0]?.clockIn || contact.write_date || contact.create_date;
 
     return {
       ...contact,

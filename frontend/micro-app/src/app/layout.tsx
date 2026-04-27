@@ -17,8 +17,10 @@ import { detectSettings } from 'src/components/settings/server';
 import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/components/settings';
 
 import { AuthProvider } from 'src/auth/context/auth-provider';
+import { I18nProvider } from 'src/locales/i18n-provider';
 
 import { dancingScript } from 'src/theme/fonts';
+
 
 // ----------------------------------------------------------------------
 
@@ -51,8 +53,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   <ProgressBar />
                   <ToastProvider />
                   <SettingsDrawer />
-                  {children}
+                  <I18nProvider>{children}</I18nProvider>
                 </MotionLazy>
+
               </ThemeProvider>
             </SettingsProvider>
           </QueryProvider>

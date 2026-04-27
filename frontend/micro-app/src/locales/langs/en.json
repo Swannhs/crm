@@ -1,0 +1,21 @@
+{
+  "demo": {
+    "title": "English Translation",
+    "introduction": "Welcome to MyManager"
+  },
+  "booking": {
+    "title": "Bookings & Appointments",
+    "new_type": "New Booking Type",
+    "copy_link": "Copy Link",
+    "copy_link_success": "Link copied to clipboard!",
+    "edit": "Edit",
+
+    "no_types": "No booking types found.",
+    "appointments": "Appointments"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "booking": "Booking",
+    "contacts": "Contacts"
+  }
+}

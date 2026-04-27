@@ -55,6 +55,7 @@ export const navData: NavSection[] = [
     items: [
       { title: 'Overview', path: paths.dashboard.overview, icon: ICONS.dashboard },
       { title: 'Contacts', path: paths.dashboard.contacts, icon: ICONS.user },
+      { title: 'Sales', path: paths.dashboard.sales, icon: ICONS.analytics },
       { title: 'Billing', path: paths.dashboard.billing, icon: ICONS.invoice },
       { title: 'Finance', path: paths.dashboard.financeSection('overview'), icon: ICONS.banking, roles: ['org_manager', 'org_admin', 'org_owner', 'platform_admin'] },
       { title: 'Projects', path: paths.dashboard.projects, icon: ICONS.kanban },

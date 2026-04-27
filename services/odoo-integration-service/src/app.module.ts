@@ -13,6 +13,8 @@ import { ProjectsModule } from './modules/projects/projects.module.js';
 import { PosModule } from './modules/pos/pos.module.js';
 import { MagentoCompatibilityModule } from './modules/magento-compatibility/magento-compatibility.module.js';
 import { PrismaModule } from './common/prisma/prisma.module.js';
+import { EmployeesModule } from './modules/employees/employees.module.js';
+import { BookingModule } from './modules/booking/booking.module.js';
 
 @Module({
   imports: [
@@ -29,7 +31,10 @@ import { PrismaModule } from './common/prisma/prisma.module.js';
     PostsModule,
     ProjectsModule,
     PosModule,
+    EmployeesModule,
+    BookingModule,
     MagentoCompatibilityModule,
   ],
 })
+
 export class AppModule {}

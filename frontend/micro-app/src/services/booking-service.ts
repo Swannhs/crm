@@ -22,6 +22,12 @@ export async function createBookingType(data: any) {
   return response.data?.data ?? response.data;
 }
 
+export async function updateBookingType(id: string, data: any) {
+  const response = await axiosInstance.patch(`/api/booking/booking-types/${id}`, data);
+  return response.data?.data ?? response.data;
+}
+
+
 export async function createAppointment(data: any) {
   const response = await axiosInstance.post('/api/booking/appointments/user', data);
   return response.data?.data ?? response.data;
@@ -37,6 +43,8 @@ export const bookingService = {
   getAppointments,
   getBookingTypeByLink,
   createBookingType,
+  updateBookingType,
   createAppointment,
   cancelAppointment,
+
 };

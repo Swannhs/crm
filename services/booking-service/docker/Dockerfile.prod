@@ -1,0 +1,28 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+COPY services/booking-service/package.json ./services/booking-service/
+
+RUN yarn install --frozen-lockfile
+
+COPY services/booking-service ./services/booking-service
+COPY common ./common
+
+WORKDIR /app/services/booking-service
+RUN npx prisma generate
+RUN npm run build
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/services/booking-service/package.json ./
+COPY --from=builder /app/services/booking-service/dist ./dist
+COPY --from=builder /app/services/booking-service/node_modules ./node_modules
+COPY --from=builder /app/services/booking-service/prisma ./prisma
+
+EXPOSE 7040
+
+CMD ["node", "dist/main"]

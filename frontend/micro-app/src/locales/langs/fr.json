@@ -1,0 +1,21 @@
+{
+  "demo": {
+    "title": "Traduction Française",
+    "introduction": "Bienvenue sur MyManager"
+  },
+  "booking": {
+    "title": "Réservations & Rendez-vous",
+    "new_type": "Nouveau Type de Réservation",
+    "copy_link": "Copier le Lien",
+    "copy_link_success": "Lien copié dans le presse-papier !",
+    "edit": "Modifier",
+
+    "no_types": "Aucun type de réservation trouvé.",
+    "appointments": "Rendez-vous"
+  },
+  "nav": {
+    "dashboard": "Tableau de Bord",
+    "booking": "Réservation",
+    "contacts": "Contacts"
+  }
+}
