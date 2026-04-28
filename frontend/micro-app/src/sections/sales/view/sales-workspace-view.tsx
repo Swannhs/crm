@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -18,7 +18,9 @@ import Typography from '@mui/material/Typography';
 
 import { fCurrency } from 'src/utils/format-number';
 
+import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
+import { syncMagentoAllToOdoo } from 'src/services/odoo-service';
 import { useSalesLeads, useSalesOrders, useSalesSummary } from 'src/hooks/use-sales-dashboard';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
@@ -26,6 +28,8 @@ import type { SalesLeadRow, SalesSummary, SalesOrderRow } from 'src/services/sal
 
 export function SalesWorkspaceView() {
   const [activeTab, setActiveTab] = useState('pipeline');
+  const [syncing, setSyncing] = useState(false);
+
   const summaryQuery = useSalesSummary();
   const ordersQuery = useSalesOrders();
   const leadsQuery = useSalesLeads();
@@ -34,6 +38,22 @@ export function SalesWorkspaceView() {
   const summary = summaryQuery.data;
   const orders = ordersQuery.data ?? [];
   const leads = leadsQuery.data ?? [];
+
+  const handleSync = useCallback(async () => {
+    try {
+      setSyncing(true);
+      const result = await syncMagentoAllToOdoo({ dryRun: false });
+      toast.success(`Successfully integrated: ${result.syncedOrders ?? 0} orders synced to Odoo CRM.`);
+
+      summaryQuery.refetch();
+      ordersQuery.refetch();
+      leadsQuery.refetch();
+    } catch (error) {
+      toast.error(error.message || 'Sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  }, [summaryQuery, ordersQuery, leadsQuery]);
 
   const TABS = [
     { value: 'pipeline', label: 'Sales Pipeline', icon: 'solar:graph-up-bold' },
@@ -52,13 +72,29 @@ export function SalesWorkspaceView() {
         { href: '#', label: `Opportunities: ${summary?.opportunities ?? 0}` },
       ]}
       action={
-        <Button variant="contained" color="primary" startIcon={<Iconify icon="solar:refresh-bold" />} onClick={() => {
-          summaryQuery.refetch();
-          ordersQuery.refetch();
-          leadsQuery.refetch();
-        }}>
-          Refresh Data
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="soft"
+            color="warning"
+            loading={syncing}
+            startIcon={<Iconify icon="solar:round-transfer-horizontal-bold" />}
+            onClick={handleSync}
+          >
+            Sync Magento to Odoo
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Iconify icon="solar:refresh-bold" />}
+            onClick={() => {
+              summaryQuery.refetch();
+              ordersQuery.refetch();
+              leadsQuery.refetch();
+            }}
+          >
+            Refresh Data
+          </Button>
+        </Stack>
       }
     >
       <Grid container spacing={2} sx={{ mt: 0.5 }}>

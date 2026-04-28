@@ -1,25 +1,31 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { addMinutes, format, parse, startOfDay, endOfDay, isBefore, isAfter, eachMinuteOfInterval } from 'date-fns';
+import { addMinutes, format, startOfDay, endOfDay, isBefore, isAfter } from 'date-fns';
 
 @Injectable()
 export class AppointmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(orgId: string, data: any) {
+    if (!orgId) throw new UnauthorizedException('Missing X-Org-Id header');
+
     // Basic validation
     const bookingType = await this.prisma.bookingType.findUnique({
       where: { id: data.bookingTypeId }
     });
 
     if (!bookingType) throw new NotFoundException('Booking type not found');
+    if (bookingType.orgId !== orgId) {
+      throw new BadRequestException('Booking type does not belong to the authenticated organization');
+    }
 
     const startTime = new Date(data.startTime);
     const endTime = addMinutes(startTime, bookingType.durationMinutes);
+    const { orgId: _ignoredOrgId, ...safeData } = data;
 
     return this.prisma.appointment.create({
       data: {
-        ...data,
+        ...safeData,
         orgId,
         startTime,
         endTime,
@@ -27,7 +33,34 @@ export class AppointmentsService {
     });
   }
 
+  async createPublic(data: any) {
+    if (!data?.bookingTypeId) {
+      throw new BadRequestException('bookingTypeId is required for public booking');
+    }
+
+    const bookingType = await this.prisma.bookingType.findUnique({
+      where: { id: data.bookingTypeId }
+    });
+
+    if (!bookingType) throw new NotFoundException('Booking type not found');
+    if (!bookingType.isActive) throw new BadRequestException('Booking type is not active');
+
+    const startTime = new Date(data.startTime);
+    const endTime = addMinutes(startTime, bookingType.durationMinutes);
+    const { orgId: _ignoredOrgId, ...safeData } = data;
+
+    return this.prisma.appointment.create({
+      data: {
+        ...safeData,
+        orgId: bookingType.orgId,
+        startTime,
+        endTime,
+      },
+    });
+  }
+
   async findAll(orgId: string, contactId?: string) {
+    if (!orgId) throw new UnauthorizedException('Missing X-Org-Id header');
     const where: any = { orgId };
     if (contactId) where.contactId = contactId;
 
@@ -40,18 +73,27 @@ export class AppointmentsService {
     });
   }
 
-  async findOne(id: string) {
-    return this.prisma.appointment.findUnique({
-      where: { id },
+  async findOne(orgId: string, id: string) {
+    if (!orgId) throw new UnauthorizedException('Missing X-Org-Id header');
+
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id, orgId },
       include: { bookingType: true }
     });
+
+    if (!appointment) throw new NotFoundException(`Appointment ${id} not found`);
+    return appointment;
   }
 
-  async update(id: string, data: any) {
-    return this.prisma.appointment.update({
-      where: { id },
-      data
+  async update(orgId: string, id: string, data: any) {
+    if (!orgId) throw new UnauthorizedException('Missing X-Org-Id header');
+    const { count } = await this.prisma.appointment.updateMany({
+      where: { id, orgId },
+      data,
     });
+
+    if (count === 0) throw new NotFoundException(`Appointment ${id} not found`);
+    return this.findOne(orgId, id);
   }
 
   async getAvailableSlots(bookingTypeId: string, dateStr: string) {

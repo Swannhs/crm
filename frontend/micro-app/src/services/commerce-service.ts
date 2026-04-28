@@ -79,6 +79,26 @@ export type ICommerceCoupon = {
   updatedAt?: string;
 };
 
+export type ICommerceProductPage = {
+  items: ICommerceProduct[];
+  total: number;
+  currentPage: number;
+  pageSize: number;
+};
+
+export type IPosCheckoutInput = {
+  email: string;
+  firstname: string;
+  lastname: string;
+  telephone: string;
+  street: string;
+  city: string;
+  region: string;
+  postcode: string;
+  countryId: string;
+  items: Array<{ sku: string; qty: number }>;
+};
+
 const normalizeProduct = (item: any): ICommerceProduct => ({
   id: String(item?.id || ''),
   name: String(item?.name || 'Untitled product'),
@@ -170,6 +190,31 @@ const normalizeCoupon = (item: any): ICommerceCoupon => ({
   updatedAt: item?.updatedAt ? String(item.updatedAt) : undefined,
 });
 
+const parseCategoryIds = (value: unknown): string[] => {
+  if (Array.isArray(value)) return value.map((v) => String(v));
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const pickPrimaryStock = (data: any): number => {
+  if (Array.isArray(data?.variants) && data.variants.length > 0) {
+    const stock = Number(data.variants[0]?.stock ?? 0);
+    if (Number.isFinite(stock)) return Math.max(0, stock);
+  }
+  const threshold = Number(data?.lowStockThreshold ?? 0);
+  return Number.isFinite(threshold) ? Math.max(0, threshold) : 0;
+};
+
+const pickInventorySourceCode = (data: any): string => {
+  const code = String(data?.inventorySourceCode ?? 'default').trim();
+  return code || 'default';
+};
+
 const fileToDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -177,6 +222,58 @@ const fileToDataUrl = (file: File) =>
     reader.onerror = () => reject(new Error(`Unable to read ${file.name}`));
     reader.readAsDataURL(file);
   });
+
+const dataUrlToBase64 = (dataUrl: string): string => {
+  const commaIndex = dataUrl.indexOf(',');
+  if (commaIndex === -1) return dataUrl;
+  return dataUrl.slice(commaIndex + 1);
+};
+
+const isDataUrl = (value: string): boolean => /^data:[^;]+;base64,/.test(value);
+
+const detectMimeFromDataUrl = (value: string): string => {
+  const match = value.match(/^data:([^;]+);base64,/);
+  return match?.[1] || 'image/jpeg';
+};
+
+const buildMediaEntriesFromPhotos = (photos: unknown): any[] => {
+  if (!Array.isArray(photos)) return [];
+  return photos
+    .map((raw, index) => String(raw || ''))
+    .filter((url) => isDataUrl(url))
+    .map((url, index) => ({
+      media_type: 'image',
+      label: `Image ${index + 1}`,
+      position: index + 1,
+      disabled: false,
+      types: index === 0 ? ['image', 'small_image', 'thumbnail'] : [],
+      content: {
+        base64_encoded_data: dataUrlToBase64(url),
+        type: detectMimeFromDataUrl(url),
+        name: `product-${Date.now()}-${index + 1}.jpg`,
+      },
+    }));
+};
+
+const flattenMagentoCategories = (nodes: any[]): ICommerceCategory[] => {
+  const out: ICommerceCategory[] = [];
+  const walk = (list: any[]) => {
+    list.forEach((node) => {
+      out.push(
+        normalizeCategory({
+          id: node?.id,
+          name: node?.name,
+          isActive: node?.is_active,
+        })
+      );
+      if (Array.isArray(node?.children_data) && node.children_data.length > 0) {
+        walk(node.children_data);
+      }
+    });
+  };
+  walk(nodes);
+  return out;
+};
 
 const BEST_EFFORT_AXIOS_CONFIG = { skipGlobalErrorToast: true } as const;
 
@@ -202,26 +299,62 @@ export type ICommerceOrder = {
 export const commerceService = {
   // Canonical admin commerce route is /api/magento/*.
   // This client is kept for UI compatibility while Magento is the eCommerce source of truth.
-  getProducts: async (orgId?: string) => {
+  getProductsPage: async (orgId?: string, params?: { currentPage?: number; pageSize?: number; search?: string }): Promise<ICommerceProductPage> => {
     try {
+      const categories = await commerceService.getCategories(orgId);
+      const categoryMap = new Map(categories.map((cat) => [String(cat.id), cat.name]));
       const response = await axios.get('/api/magento/products', {
         ...BEST_EFFORT_AXIOS_CONFIG,
         headers: orgId ? { 'X-Org-Id': orgId } : {},
+        params: {
+          currentPage: params?.currentPage ?? 1,
+          pageSize: params?.pageSize ?? 20,
+          search: params?.search ?? '',
+        },
       });
       const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
-      return rows.map((item: any) =>
-        normalizeProduct({
-          id: item?.id,
+      const readCustomAttr = (item: any, code: string) =>
+        item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === code)?.value;
+
+      const items = rows.map((item: any) => {
+        const categoryAttr = item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'category_ids')?.value;
+        const categoryIds = parseCategoryIds(categoryAttr);
+        const firstCategoryId = categoryIds[0];
+        return normalizeProduct({
+          id: item?.sku || item?.id,
           name: item?.name,
           sku: item?.sku,
-          description: item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'description')?.value,
+          description: readCustomAttr(item, 'description'),
+          categoryId: firstCategoryId,
+          categoryName: firstCategoryId ? categoryMap.get(String(firstCategoryId)) : undefined,
           priceCents: Math.round(Number(item?.price ?? 0) * 100),
-          status: Number(item?.status) === 1 ? 'active' : 'disabled',
-        })
-      );
+          status: Number(item?.status) === 1 ? 'active' : 'archived',
+          variants: [
+            {
+              id: `${item?.sku || item?.id}-default`,
+              name: 'Default',
+              sku: item?.sku,
+              priceCents: Math.round(Number(item?.price ?? 0) * 100),
+              stock: Number(item?.extension_attributes?.stock_item?.qty ?? 0),
+              options: {},
+            },
+          ],
+        });
+      });
+      return {
+        items,
+        total: Number(response.data?.data?.total_count ?? items.length),
+        currentPage: Number(params?.currentPage ?? 1),
+        pageSize: Number(params?.pageSize ?? 20),
+      };
     } catch {
-      return [];
+      return { items: [], total: 0, currentPage: Number(params?.currentPage ?? 1), pageSize: Number(params?.pageSize ?? 20) };
     }
+  },
+
+  getProducts: async (orgId?: string) => {
+    const page = await commerceService.getProductsPage(orgId, { currentPage: 1, pageSize: 200 });
+    return page.items;
   },
 
   createProduct: async (orgId: string, data: any) => {
@@ -230,6 +363,9 @@ export const commerceService = {
       throw new Error('SKU is required to create a Magento product.');
     }
 
+    const categoryIds = parseCategoryIds(data?.categoryId);
+    const qty = pickPrimaryStock(data);
+    const sourceCode = pickInventorySourceCode(data);
     const payload = {
       product: {
         sku,
@@ -242,33 +378,60 @@ export const commerceService = {
         weight: 1,
         extension_attributes: {
           stock_item: {
-            qty: Number(data?.variants?.[0]?.stock ?? data?.lowStockThreshold ?? 0),
-            is_in_stock: true,
+            qty,
+            is_in_stock: qty > 0,
           },
         },
         custom_attributes: [
           { attribute_code: 'description', value: String(data?.description || '') },
+          { attribute_code: 'category_ids', value: categoryIds },
         ],
+        media_gallery_entries: buildMediaEntriesFromPhotos(data?.photos),
       },
     };
 
-    const response = await axios.post(
-      '/api/magento/rest',
-      { method: 'POST', path: '/rest/all/V1/products', payload },
-      {
-        ...BEST_EFFORT_AXIOS_CONFIG,
-        headers: orgId ? { 'X-Org-Id': orgId } : {},
-      }
-    );
+    const response = await axios.post('/api/magento/rest/all/V1/products', { payload }, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+
+    // Best effort MSI source-level stock initialization.
+    try {
+      await axios.post(
+        '/api/magento/rest/all/V1/inventory/source-items',
+        {
+          payload: {
+            sourceItems: [
+              {
+                sku,
+                source_code: sourceCode,
+                quantity: qty,
+                status: qty > 0 ? 1 : 0,
+              },
+            ],
+          },
+        },
+        {
+          ...BEST_EFFORT_AXIOS_CONFIG,
+          headers: orgId ? { 'X-Org-Id': orgId } : {},
+        }
+      );
+    } catch {
+      // fallback stock item was already set; ignore MSI sync errors
+    }
+
     return response.data?.data ?? response.data;
   },
 
   updateProduct: async (orgId: string, id: string, data: any) => {
-    const sku = String(data?.sku || '').trim();
+    const sku = String(data?.sku || id || '').trim();
     if (!sku) {
       throw new Error('SKU is required to update a Magento product.');
     }
 
+    const categoryIds = parseCategoryIds(data?.categoryId);
+    const qty = pickPrimaryStock(data);
+    const sourceCode = pickInventorySourceCode(data);
     const payload = {
       product: {
         sku,
@@ -279,23 +442,60 @@ export const commerceService = {
         type_id: 'simple',
         custom_attributes: [
           { attribute_code: 'description', value: String(data?.description || '') },
+          { attribute_code: 'category_ids', value: categoryIds },
         ],
+        media_gallery_entries: buildMediaEntriesFromPhotos(data?.photos),
       },
       saveOptions: true,
     };
 
-    const response = await axios.post(
-      '/api/magento/rest',
+    const response = await axios.put(`/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}`, { payload }, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+
+    // Keep stock changes persistent on the default stock item.
+    await axios.put(
+      `/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}/stockItems/1`,
       {
-        method: 'PUT',
-        path: `/rest/all/V1/products/${encodeURIComponent(sku)}`,
-        payload,
+        payload: {
+          stockItem: {
+            qty,
+            is_in_stock: qty > 0,
+          },
+        },
       },
       {
         ...BEST_EFFORT_AXIOS_CONFIG,
         headers: orgId ? { 'X-Org-Id': orgId } : {},
       }
     );
+
+    // Magento MSI source-level stock update (best effort).
+    try {
+      await axios.post(
+        '/api/magento/rest/all/V1/inventory/source-items',
+        {
+          payload: {
+            sourceItems: [
+              {
+                sku,
+                source_code: sourceCode,
+                quantity: qty,
+                status: qty > 0 ? 1 : 0,
+              },
+            ],
+          },
+        },
+        {
+          ...BEST_EFFORT_AXIOS_CONFIG,
+          headers: orgId ? { 'X-Org-Id': orgId } : {},
+        }
+      );
+    } catch {
+      // stock item endpoint already updated; ignore MSI sync errors
+    }
+
     return response.data?.data ?? response.data;
   },
 
@@ -305,18 +505,76 @@ export const commerceService = {
       throw new Error('SKU is required to delete a Magento product.');
     }
 
-    const response = await axios.post(
-      '/api/magento/rest',
+    const response = await axios.delete(`/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}`, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
+  },
+
+  bulkUpdateProductStatus: async (orgId: string, skus: string[], status: 'active' | 'archived' | 'draft') => {
+    const targetStatus = status === 'active' ? 1 : 2;
+    await Promise.all(
+      skus.map((sku) =>
+        axios.put(
+          `/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}`,
+          {
+            payload: {
+              product: {
+                sku,
+                status: targetStatus,
+              },
+              saveOptions: true,
+            },
+          },
+          {
+            ...BEST_EFFORT_AXIOS_CONFIG,
+            headers: orgId ? { 'X-Org-Id': orgId } : {},
+          }
+        )
+      )
+    );
+    return { success: true, count: skus.length };
+  },
+
+  updateProductInventory: async (orgId: string, sku: string, quantity: number, sourceCode = 'default') => {
+    const qty = Number.isFinite(quantity) ? Math.max(0, quantity) : 0;
+    await axios.put(
+      `/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}/stockItems/1`,
       {
-        method: 'DELETE',
-        path: `/rest/all/V1/products/${encodeURIComponent(sku)}`,
+        payload: {
+          stockItem: {
+            qty,
+            is_in_stock: qty > 0,
+          },
+        },
       },
       {
         ...BEST_EFFORT_AXIOS_CONFIG,
         headers: orgId ? { 'X-Org-Id': orgId } : {},
       }
     );
-    return response.data?.data ?? response.data;
+
+    await axios.post(
+      '/api/magento/rest/all/V1/inventory/source-items',
+      {
+        payload: {
+          sourceItems: [
+            {
+              sku,
+              source_code: sourceCode,
+              quantity: qty,
+              status: qty > 0 ? 1 : 0,
+            },
+          ],
+        },
+      },
+      {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+        headers: orgId ? { 'X-Org-Id': orgId } : {},
+      }
+    );
+    return { success: true };
   },
 
   getOrders: async (orgId?: string) => {
@@ -358,28 +616,122 @@ export const commerceService = {
     throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
+  createPosOrderFromCart: async (orgId: string, input: IPosCheckoutInput) => {
+    const headers = orgId ? { 'X-Org-Id': orgId } : {};
+
+    const guestCartRes = await axios.post(
+      '/api/magento/rest/all/V1/guest-carts',
+      { payload: {} },
+      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+    );
+    const cartId = String(guestCartRes.data?.data ?? guestCartRes.data ?? '').trim();
+    if (!cartId) throw new Error('Unable to create Magento guest cart.');
+
+    const validItems = (Array.isArray(input.items) ? input.items : []).filter(
+      (line) => Boolean(line?.sku) && Number(line?.qty) > 0
+    );
+    await Promise.all(
+      validItems.map((line) =>
+        axios.post(
+          `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/items`,
+          {
+            payload: {
+              cartItem: {
+                quote_id: cartId,
+                sku: line.sku,
+                qty: Number(line.qty),
+              },
+            },
+          },
+          { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+        )
+      )
+    );
+
+    const address = {
+      email: input.email,
+      firstname: input.firstname,
+      lastname: input.lastname,
+      telephone: input.telephone,
+      street: [input.street],
+      city: input.city,
+      region: input.region,
+      postcode: input.postcode,
+      country_id: input.countryId || 'US',
+    };
+
+    let shippingMethod = { carrier_code: 'flatrate', method_code: 'flatrate' };
+    try {
+      const estimateRes = await axios.post(
+        `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/estimate-shipping-methods`,
+        { payload: { address } },
+        { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+      );
+      const methods = Array.isArray(estimateRes.data?.data) ? estimateRes.data.data : Array.isArray(estimateRes.data) ? estimateRes.data : [];
+      if (methods.length > 0) {
+        shippingMethod = {
+          carrier_code: String(methods[0]?.carrier_code || 'flatrate'),
+          method_code: String(methods[0]?.method_code || 'flatrate'),
+        };
+      }
+    } catch {
+      // fallback to flatrate defaults
+    }
+
+    await axios.post(
+      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/shipping-information`,
+      {
+        payload: {
+          addressInformation: {
+            shipping_address: address,
+            billing_address: address,
+            shipping_carrier_code: shippingMethod.carrier_code,
+            shipping_method_code: shippingMethod.method_code,
+          },
+        },
+      },
+      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+    );
+
+    let paymentMethod = 'checkmo';
+    try {
+      const paymentRes = await axios.get(
+        `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/payment-methods`,
+        { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+      );
+      const methods = Array.isArray(paymentRes.data?.data) ? paymentRes.data.data : Array.isArray(paymentRes.data) ? paymentRes.data : [];
+      if (methods.length > 0 && methods[0]?.code) {
+        paymentMethod = String(methods[0].code);
+      }
+    } catch {
+      // fallback to checkmo
+    }
+
+    const placeOrderRes = await axios.post(
+      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/payment-information`,
+      {
+        payload: {
+          email: input.email,
+          paymentMethod: { method: paymentMethod },
+          billing_address: address,
+        },
+      },
+      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+    );
+    const orderId = String(placeOrderRes.data?.data ?? placeOrderRes.data ?? '').trim();
+    if (!orderId) throw new Error('Magento order placement failed.');
+    return { orderId };
+  },
+
   getCategories: async (orgId?: string) => {
     try {
-      const response = await axios.post(
-        '/api/magento/rest',
-        {
-          method: 'GET',
-          path: '/rest/all/V1/categories',
-        },
-        {
-          ...BEST_EFFORT_AXIOS_CONFIG,
-          headers: orgId ? { 'X-Org-Id': orgId } : {},
-        }
-      );
+      const response = await axios.get('/api/magento/rest/all/V1/categories', {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+        headers: orgId ? { 'X-Org-Id': orgId } : {},
+      });
       const root = response.data?.data ?? {};
       const rows = Array.isArray(root?.children_data) ? root.children_data : [];
-      return rows.map((item: any) =>
-        normalizeCategory({
-          id: item?.id,
-          name: item?.name,
-          isActive: item?.is_active,
-        })
-      );
+      return flattenMagentoCategories(rows);
     } catch {
       return [];
     }
@@ -425,8 +777,49 @@ export const commerceService = {
     }
   },
 
-  uploadProductImage: async (file: File) => {
+  uploadProductImage: async (file: File, opts?: { sku?: string; orgId?: string }) => {
     const dataUrl = await fileToDataUrl(file);
+    const base64 = dataUrlToBase64(dataUrl);
+
+    if (opts?.sku) {
+      const payload = {
+        entry: {
+          media_type: 'image',
+          label: file.name,
+          position: 1,
+          disabled: false,
+          types: ['image', 'small_image', 'thumbnail'],
+          content: {
+            base64_encoded_data: base64,
+            type: file.type || 'image/jpeg',
+            name: file.name,
+          },
+        },
+      };
+
+      const response = await axios.post(
+        `/api/magento/rest/all/V1/products/${encodeURIComponent(opts.sku)}/media`,
+        { payload },
+        {
+          ...BEST_EFFORT_AXIOS_CONFIG,
+          headers: opts.orgId ? { 'X-Org-Id': opts.orgId } : {},
+        }
+      );
+
+      const mediaId = response.data?.data ?? response.data;
+      return normalizeImageAsset({
+        id: String(mediaId || `magento-media-${Date.now()}`),
+        name: file.name,
+        url: dataUrl,
+        thumbnail: dataUrl,
+        mimeType: file.type || 'image/*',
+        size: file.size,
+        category: 'commerce-product',
+        tags: ['shop-product', 'magento-media'],
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     try {
       const response = await axios.post('/api/image-library', {
         name: file.name,

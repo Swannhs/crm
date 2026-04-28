@@ -21,7 +21,7 @@ class MagentoController extends Controller
             $data = $this->magentoClient->restGet('/rest/all/V1/store/storeConfigs');
             return response()->json([
                 'status' => 'ok',
-                'service' => 'magento-inegration-service',
+                'service' => 'magento-integration-service',
                 'connected' => true,
                 'storesCount' => is_array($data) ? count($data) : 0,
                 'magentoBaseUrl' => config('services.magento.base_url'),
@@ -30,7 +30,7 @@ class MagentoController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => 'degraded',
-                'service' => 'magento-inegration-service',
+                'service' => 'magento-integration-service',
                 'connected' => false,
                 'magentoBaseUrl' => config('services.magento.base_url'),
                 'authMode' => config('services.magento.access_token') ? 'access_token' : 'admin_credentials',

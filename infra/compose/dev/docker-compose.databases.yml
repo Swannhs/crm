@@ -155,7 +155,7 @@ services:
       retries: 20
 
   magento-db:
-    image: mysql:8.4
+    image: mysql:8.0
     container_name: magento-db
     profiles: ["magento"]
     environment:

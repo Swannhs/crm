@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useSocket } from './use-socket';
 import { useQueryClient } from '@tanstack/react-query';
-
-// Mock user info for now, should be replaced with actual auth state
-const USER_ID = 'user-123';
-const USER_NAME = 'Swann';
+import { useAuthContext } from 'src/auth/hooks';
 
 export function useContactRealtime(contactId: string, orgId: string) {
   const socket = useSocket(orgId);
   const queryClient = useQueryClient();
+  const { user } = useAuthContext();
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
+  const userId = user?.id ? String(user.id) : '';
+  const userName = (user?.fullName || user?.username || user?.email || '').trim();
 
   useEffect(() => {
-    if (!socket || !contactId) return;
+    if (!socket || !contactId || !userId || !userName) return;
 
     // Join the contact room
     socket.emit('join-contact', {
       contactId,
-      userId: USER_ID,
-      userName: USER_NAME,
+      userId,
+      userName,
     });
 
     // Listen for presence events
@@ -49,23 +49,23 @@ export function useContactRealtime(contactId: string, orgId: string) {
       socket.off('contact:presence', handlePresence);
       socket.off('contact:updated', handleUpdated);
     };
-  }, [socket, contactId, queryClient]);
+  }, [socket, contactId, queryClient, userId, userName]);
 
   const notifyEditing = () => {
-    if (socket && contactId) {
+    if (socket && contactId && userId && userName) {
       socket.emit('contact:editing', {
         contactId,
-        userId: USER_ID,
-        userName: USER_NAME,
+        userId,
+        userName,
       });
     }
   };
 
   const notifyUpdate = (updates: any) => {
-    if (socket && contactId) {
+    if (socket && contactId && userId && userName) {
       socket.emit('contact:update', {
         contactId,
-        userId: USER_ID,
+        userId,
         updates,
       });
     }

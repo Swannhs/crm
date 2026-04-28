@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_DIR="/var/www/html"
 MAGENTO_GIT_URL="${MAGENTO_GIT_URL:-https://github.com/magento/magento2.git}"
-MAGENTO_GIT_REF="${MAGENTO_GIT_REF:-2.4-develop}"
+MAGENTO_GIT_REF="${MAGENTO_GIT_REF:-2.4.7-p3}"
 MAGENTO_BASE_URL="${MAGENTO_BASE_URL:-http://localhost:8088}"
 MAGENTO_BACKEND_FRONTNAME="${MAGENTO_BACKEND_FRONTNAME:-admin}"
 
@@ -24,7 +24,7 @@ OPENSEARCH_PORT="${OPENSEARCH_PORT:-9200}"
 
 wait_for_db() {
   echo "Waiting for MySQL at ${DB_HOST}:${DB_PORT}..."
-  until mysqladmin ping -h"${DB_HOST}" -P"${DB_PORT}" -u"${DB_USER}" -p"${DB_PASS}" --silent; do
+  until mysql --protocol=TCP --ssl=0 -h"${DB_HOST}" -P"${DB_PORT}" -u"${DB_USER}" -p"${DB_PASS}" -e "SELECT 1" >/dev/null 2>&1; do
     sleep 2
   done
 }
@@ -46,7 +46,8 @@ install_magento_if_needed() {
 
   echo "Installing Magento dependencies..."
   cd "${APP_DIR}"
-  composer install --no-interaction --prefer-dist
+  git config --global --add safe.directory "${APP_DIR}" || true
+  composer install --no-interaction --prefer-dist --no-dev
 
   echo "Running bin/magento setup:install..."
   php -d memory_limit=-1 bin/magento setup:install \

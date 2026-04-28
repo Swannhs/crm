@@ -14,6 +14,10 @@ import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
@@ -26,6 +30,7 @@ import Typography from '@mui/material/Typography';
 import { paths } from 'src/routes/paths';
 import { useAuthContext } from 'src/auth/hooks';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { commerceService } from 'src/services/commerce-service';
 import { posService } from 'src/services/pos-service';
 import { organizationService } from 'src/services/organization-service';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
@@ -37,6 +42,7 @@ import { showToast } from 'src/components/toast';
 // ----------------------------------------------------------------------
 
 const SHOP_CONTEXT_STORAGE_KEY = 'pos-tables:selected-shop-id';
+const POS_RETAIL_CART_STORAGE_KEY_PREFIX = 'pos-retail-cart';
 
 const TableSchema = zod.object({
   shopId: zod.string().min(1, 'Shop id is required'),
@@ -148,6 +154,14 @@ type PosCustomerRecord = {
   totalOrders?: number;
 };
 
+type RetailCartLine = {
+  productId: string;
+  sku: string;
+  name: string;
+  price: number;
+  qty: number;
+};
+
 const getSeatCount = (table: PosTableRecord) => (Array.isArray(table.seats) && table.seats.length ? table.seats.length : 1);
 
 const buildSeatLayout = (count: number) =>
@@ -224,6 +238,77 @@ function getOperationalState(order?: PosTableOrderRecord, tableMode?: PosTableMo
   return { label: 'Available', color: 'default' as const };
 }
 
+function openReceiptPrintWindow(order: PosTableOrderRecord | null) {
+  if (!order || typeof window === 'undefined') return;
+
+  const title = `Receipt ${order.ticketNo || order.id}`;
+  const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString() : new Date().toLocaleString();
+  const rows = [
+    ['Order', order.ticketNo || order.id],
+    ['Customer', order.customerName || 'Walk-in'],
+    ['Status', order.orderStatus || 'open'],
+    ['Channel', order.channel || 'ecommerce'],
+    ['Total', `$${Number(order.totalAmount || 0).toFixed(2)}`],
+    ['Paid', `$${Number(order.paidAmount || 0).toFixed(2)}`],
+    ['Due', `$${Number(order.balanceDue || 0).toFixed(2)}`],
+  ];
+
+  const html = `
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${title}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; padding: 16px; color: #111; }
+      .receipt { max-width: 320px; margin: 0 auto; }
+      h1 { font-size: 18px; margin: 0 0 6px; text-align: center; }
+      .meta { font-size: 12px; color: #444; text-align: center; margin-bottom: 12px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      td { padding: 6px 0; vertical-align: top; }
+      td:first-child { color: #555; width: 42%; }
+      td:last-child { text-align: right; font-weight: 600; }
+      .line { border-top: 1px dashed #999; margin: 10px 0; }
+      .footer { text-align: center; font-size: 12px; color: #555; margin-top: 12px; }
+      @media print {
+        body { padding: 0; }
+        .receipt { max-width: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="receipt">
+      <h1>POS RECEIPT</h1>
+      <div class="meta">${createdAt}</div>
+      <div class="line"></div>
+      <table>
+        ${rows
+          .map(
+            ([label, value]) =>
+              `<tr><td>${String(label)}</td><td>${String(value)}</td></tr>`
+          )
+          .join('')}
+      </table>
+      <div class="line"></div>
+      <div class="footer">Thank you for your purchase</div>
+    </div>
+    <script>
+      window.onload = function () {
+        window.focus();
+        window.print();
+        setTimeout(function(){ window.close(); }, 150);
+      };
+    </script>
+  </body>
+</html>`;
+
+  const printWindow = window.open('', '_blank', 'width=420,height=640');
+  if (!printWindow) return;
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+}
+
 export function PosWorkspaceView({
   shopId = '',
   mode = 'pos',
@@ -241,6 +326,17 @@ export function PosWorkspaceView({
   const [activeShopId, setActiveShopId] = useState(shopId || '');
   const [selectedShop, setSelectedShop] = useState<ShopOption | null>(null);
   const [tableSearch, setTableSearch] = useState('');
+  const [productSearch, setProductSearch] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('all');
+  const [barcodeInput, setBarcodeInput] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState('walk-in');
+  const [retailCart, setRetailCart] = useState<RetailCartLine[]>([]);
+  const [lastPlacedOrderId, setLastPlacedOrderId] = useState<string | null>(null);
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [orderDetailDialogOpen, setOrderDetailDialogOpen] = useState(false);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [selectedOrderForAction, setSelectedOrderForAction] = useState<PosTableOrderRecord | null>(null);
+  const [refundAmountInput, setRefundAmountInput] = useState('');
   const [editingTableId, setEditingTableId] = useState<string | null>(null);
   const [settingsForm, setSettingsForm] = useState({
     numberPadFirstValue: '',
@@ -378,6 +474,17 @@ export function PosWorkspaceView({
     queryKey: ['pos-order-analytics', activeShopId],
     queryFn: () => posService.getOrderAnalytics(activeShopId, 30),
     enabled: Boolean(activeShopId) && ['orders', 'settings', 'pos'].includes(mode),
+  });
+
+  const magentoProductsQuery = useQuery({
+    queryKey: ['pos-magento-products', activeShopId, productSearch],
+    enabled: Boolean(activeShopId) && mode === 'pos',
+    queryFn: () =>
+      commerceService.getProductsPage(activeShopId, {
+        currentPage: 1,
+        pageSize: 60,
+        search: productSearch.trim(),
+      }),
   });
 
   useEffect(() => {
@@ -534,8 +641,8 @@ export function PosWorkspaceView({
   });
 
   const addOrderItemMutation = useMutation({
-    mutationFn: (orderId: string) =>
-      posService.addOrderItem(orderId, {
+    mutationFn: (targetOrderId: string) =>
+      posService.addOrderItem(targetOrderId, {
         name: 'Chef Special',
         quantity: 1,
         unitPrice: 14.5,
@@ -545,8 +652,8 @@ export function PosWorkspaceView({
   });
 
   const addOrderPaymentMutation = useMutation({
-    mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
-      posService.addOrderPayment(orderId, {
+    mutationFn: ({ orderId: targetOrderId, amount }: { orderId: string; amount: number }) =>
+      posService.addOrderPayment(targetOrderId, {
         method: 'cash',
         amount,
       }),
@@ -554,14 +661,14 @@ export function PosWorkspaceView({
   });
 
   const assignOrderCustomerMutation = useMutation({
-    mutationFn: ({ orderId, customerId }: { orderId: string; customerId: string }) =>
-      posService.assignOrderCustomer(orderId, { customerId }),
+    mutationFn: ({ orderId: targetOrderId, customerId }: { orderId: string; customerId: string }) =>
+      posService.assignOrderCustomer(targetOrderId, { customerId }),
     onSuccess: invalidatePosTableQueries,
   });
 
   const updateOrderFulfillmentMutation = useMutation({
     mutationFn: ({
-      orderId,
+      orderId: targetOrderId,
       fulfillmentStatus,
       orderStatus,
     }: {
@@ -569,13 +676,13 @@ export function PosWorkspaceView({
       fulfillmentStatus: 'draft' | 'sent_to_kitchen' | 'ready_for_pickup' | 'out_for_delivery' | 'completed';
       orderStatus?: 'open' | 'sent' | 'paid';
     }) =>
-      posService.updateOrderFulfillment(orderId, { fulfillmentStatus, orderStatus }),
+      posService.updateOrderFulfillment(targetOrderId, { fulfillmentStatus, orderStatus }),
     onSuccess: invalidatePosTableQueries,
   });
 
   const refundOrderMutation = useMutation({
-    mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
-      posService.refundOrder(orderId, { amount, reason: 'Dashboard quick refund', restock: true }),
+    mutationFn: ({ orderId: targetOrderId, amount }: { orderId: string; amount: number }) =>
+      posService.refundOrder(targetOrderId, { amount, reason: 'Dashboard quick refund', restock: true }),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['pos-table-orders', activeShopId] }),
@@ -638,6 +745,39 @@ export function PosWorkspaceView({
       showToast({ message: 'Maintenance incident logged.', severity: 'success' });
     },
   });
+  const posCheckoutMutation = useMutation({
+    mutationFn: async () => {
+      if (!activeShopId) throw new Error('Shop context is missing.');
+      if (retailCart.length === 0) throw new Error('Cart is empty.');
+      const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId);
+      const customerName = selectedCustomer?.name || 'Walk In';
+      const [firstName = 'Walk', ...restName] = customerName.split(' ');
+      const lastName = restName.join(' ') || 'Customer';
+      const email = selectedCustomer?.email || `walkin+${Date.now()}@local.pos`;
+      const phone = selectedCustomer?.phone || '0000000000';
+
+      return commerceService.createPosOrderFromCart(activeShopId, {
+        email,
+        firstname: firstName,
+        lastname: lastName,
+        telephone: phone,
+        street: 'POS Counter',
+        city: 'Local',
+        region: 'N/A',
+        postcode: '00000',
+        countryId: 'US',
+        items: retailCart.map((line) => ({ sku: line.sku, qty: line.qty })),
+      });
+    },
+    onSuccess: (result) => {
+      setRetailCart([]);
+      setBarcodeInput('');
+      setLastPlacedOrderId(String(result.orderId));
+      setReceiptDialogOpen(true);
+      showToast({ message: `Order placed successfully. Magento order #${result.orderId}`, severity: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['pos-table-orders', activeShopId] });
+    },
+  });
 
   const isLoading =
     settingsQuery.isLoading ||
@@ -665,6 +805,21 @@ export function PosWorkspaceView({
     () => (Array.isArray(tableOrdersQuery.data) ? tableOrdersQuery.data.map(toTableOrderRecord) : []),
     [tableOrdersQuery.data]
   );
+  const posRecentOrders = useMemo(
+    () =>
+      tableOrders
+        .slice()
+        .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+        .slice(0, 6),
+    [tableOrders]
+  );
+  const selectedOrderResolved = useMemo(
+    () =>
+      selectedOrderForAction
+        || posRecentOrders.find((item) => item.id === lastPlacedOrderId || item.ticketNo === lastPlacedOrderId)
+        || null,
+    [lastPlacedOrderId, posRecentOrders, selectedOrderForAction]
+  );
 
   const customers = useMemo<PosCustomerRecord[]>(
     () =>
@@ -689,6 +844,26 @@ export function PosWorkspaceView({
     byChannel: { dine_in: 0, takeaway: 0, delivery: 0, ecommerce: 0 },
     topItems: [],
   };
+  const magentoProducts = useMemo(
+    () => (Array.isArray(magentoProductsQuery.data?.items) ? magentoProductsQuery.data.items : []),
+    [magentoProductsQuery.data?.items]
+  );
+  const posCategoryOptions = useMemo(() => {
+    const names = Array.from(
+      new Set(
+        magentoProducts
+          .map((product: any) => String(product?.categoryName || '').trim())
+          .filter(Boolean)
+      )
+    );
+    return names.sort((a, b) => a.localeCompare(b));
+  }, [magentoProducts]);
+  const filteredPosProducts = useMemo(() => {
+    if (productCategoryFilter === 'all') return magentoProducts;
+    return magentoProducts.filter(
+      (product: any) => String(product?.categoryName || '').trim() === productCategoryFilter
+    );
+  }, [magentoProducts, productCategoryFilter]);
 
   const tableModeLookup = useMemo(
     () => new Map(tableModes.map((item) => [item.tableNo.toLowerCase(), item])),
@@ -883,6 +1058,77 @@ export function PosWorkspaceView({
     updateKdsLineStatusMutation.mutate({ lineId: line.lineId, status: nextStatus });
   };
 
+  const addToRetailCart = (product: any) => {
+    const sku = String(product?.sku || product?.id || '');
+    if (!sku) return;
+    const price = Number(product?.priceCents ?? 0) / 100;
+    setRetailCart((prev) => {
+      const exists = prev.find((line) => line.sku === sku);
+      if (exists) {
+        return prev.map((line) => (line.sku === sku ? { ...line, qty: line.qty + 1 } : line));
+      }
+      return [
+        ...prev,
+        {
+          productId: String(product?.id || sku),
+          sku,
+          name: String(product?.name || 'Unnamed Product'),
+          price,
+          qty: 1,
+        },
+      ];
+    });
+  };
+
+  const updateRetailQty = (sku: string, qty: number) => {
+    if (qty <= 0) {
+      setRetailCart((prev) => prev.filter((line) => line.sku !== sku));
+      return;
+    }
+    setRetailCart((prev) => prev.map((line) => (line.sku === sku ? { ...line, qty } : line)));
+  };
+
+  const retailSubtotal = useMemo(
+    () => retailCart.reduce((sum, line) => sum + line.price * line.qty, 0),
+    [retailCart]
+  );
+  const retailTaxRate = Number(settingsQuery.data?.taxRate ?? 0);
+  const retailTaxAmount = useMemo(() => retailSubtotal * retailTaxRate, [retailSubtotal, retailTaxRate]);
+  const retailTotal = useMemo(() => retailSubtotal + retailTaxAmount, [retailSubtotal, retailTaxAmount]);
+
+  useEffect(() => {
+    if (!activeShopId || typeof window === 'undefined') return;
+    const key = `${POS_RETAIL_CART_STORAGE_KEY_PREFIX}:${activeShopId}`;
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setRetailCart(parsed);
+      }
+    } catch {
+      // ignore malformed cache
+    }
+  }, [activeShopId]);
+
+  useEffect(() => {
+    if (!activeShopId || typeof window === 'undefined') return;
+    const key = `${POS_RETAIL_CART_STORAGE_KEY_PREFIX}:${activeShopId}`;
+    window.localStorage.setItem(key, JSON.stringify(retailCart));
+  }, [activeShopId, retailCart]);
+
+  const handleBarcodeAdd = () => {
+    const sku = barcodeInput.trim();
+    if (!sku) return;
+    const matched = magentoProducts.find((product: any) => String(product?.sku || '').toLowerCase() === sku.toLowerCase());
+    if (!matched) {
+      showToast({ message: `No product found for SKU ${sku}`, severity: 'warning' });
+      return;
+    }
+    addToRetailCart(matched);
+    setBarcodeInput('');
+  };
+
   const kdsQueue = useMemo<KdsQueueItem[]>(
     () => (Array.isArray(kdsQueueQuery.data?.queue) ? kdsQueueQuery.data.queue : []),
     [kdsQueueQuery.data]
@@ -900,6 +1146,8 @@ export function PosWorkspaceView({
           <Typography variant="h6" sx={{ mb: 2 }}>
             {mode === 'settings'
               ? 'POS Settings'
+              : mode === 'pos'
+                ? 'Retail POS'
               : mode === 'orders' || mode === 'deliver' || mode === 'table-join-approve'
                 ? 'POS Orders'
                 : mode === 'kds'
@@ -1025,7 +1273,126 @@ export function PosWorkspaceView({
               </>
             )}
 
-            {mode === 'orders' || mode === 'deliver' || mode === 'table-join-approve'
+            {mode === 'pos' ? (
+              <>
+                <Stack
+                  direction={{ xs: 'column', md: 'row' }}
+                  spacing={1.25}
+                  alignItems={{ xs: 'stretch', md: 'center' }}
+                  sx={{
+                    p: 1.25,
+                    borderRadius: 2,
+                    bgcolor: 'background.neutral',
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
+                  }}
+                >
+                  <TextField
+                    size="small"
+                    label="Search products, SKU, category"
+                    value={productSearch}
+                    onChange={(event) => setProductSearch(event.target.value)}
+                    fullWidth
+                    placeholder="Type product name or SKU"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Iconify icon="solar:magnifer-bold-duotone" width={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{ flex: { md: 2.2 } }}
+                  />
+                  <TextField
+                    size="small"
+                    label="SKU"
+                    value={barcodeInput}
+                    onChange={(event) => setBarcodeInput(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        handleBarcodeAdd();
+                      }
+                    }}
+                    placeholder="Scan barcode / enter SKU"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Iconify icon="solar:barcode-bold-duotone" width={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{ flex: { md: 1.1 }, minWidth: { md: 210 } }}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handleBarcodeAdd}
+                    startIcon={<Iconify icon="solar:add-circle-bold-duotone" width={18} />}
+                    sx={{ minWidth: { md: 120 }, height: 40, whiteSpace: 'nowrap' }}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => magentoProductsQuery.refetch()}
+                    disabled={magentoProductsQuery.isFetching}
+                    startIcon={<Iconify icon="solar:restart-bold-duotone" width={18} />}
+                    sx={{ minWidth: { md: 124 }, height: 40, whiteSpace: 'nowrap' }}
+                  >
+                    {magentoProductsQuery.isFetching ? 'Syncing' : 'Sync'}
+                  </Button>
+                </Stack>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }} useFlexGap>
+                  <Chip
+                    label={`All (${magentoProducts.length})`}
+                    color={productCategoryFilter === 'all' ? 'primary' : 'default'}
+                    variant={productCategoryFilter === 'all' ? 'filled' : 'outlined'}
+                    onClick={() => setProductCategoryFilter('all')}
+                  />
+                  {posCategoryOptions.map((category) => {
+                    const count = magentoProducts.filter((product: any) => String(product?.categoryName || '').trim() === category).length;
+                    return (
+                      <Chip
+                        key={category}
+                        label={`${category} (${count})`}
+                        color={productCategoryFilter === category ? 'primary' : 'default'}
+                        variant={productCategoryFilter === category ? 'filled' : 'outlined'}
+                        onClick={() => setProductCategoryFilter(category)}
+                      />
+                    );
+                  })}
+                </Stack>
+                <Grid container spacing={2}>
+                  {filteredPosProducts.map((product: any) => {
+                    const unitPrice = Number(product.priceCents || 0) / 100;
+                    return (
+                      <Grid item xs={12} sm={6} lg={4} key={product.id}>
+                        <Card variant="outlined" sx={{ p: 2, height: '100%' }}>
+                          <Stack spacing={1.5} sx={{ height: '100%' }}>
+                            <Typography variant="subtitle2">{product.name}</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                              SKU: {product.sku || 'N/A'}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                              {product.categoryName || 'Uncategorized'}
+                            </Typography>
+                            <Typography variant="h6">${unitPrice.toFixed(2)}</Typography>
+                            <Box sx={{ mt: 'auto' }}>
+                              <Button fullWidth size="small" variant="contained" onClick={() => addToRetailCart(product)}>
+                                Add
+                              </Button>
+                            </Box>
+                          </Stack>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+                {magentoProductsQuery.isFetching ? <Alert severity="info">Loading Magento catalog...</Alert> : null}
+                {filteredPosProducts.length === 0 && !magentoProductsQuery.isFetching ? (
+                  <Alert severity="warning">No Magento products found for this shop context.</Alert>
+                ) : null}
+              </>
+            ) : mode === 'orders' || mode === 'deliver' || mode === 'table-join-approve'
               ? (
                   <>
                     <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
@@ -1209,7 +1576,7 @@ export function PosWorkspaceView({
                           </Button>
                         </>
                       )
-                    : (mode === 'table-side' || mode === 'table-register'
+                : (mode === 'table-side' || mode === 'table-register'
                         ? tableModeQuery.data || []
                         : tablesQuery.data || []
                       ).map((item: any) => (
@@ -1227,87 +1594,283 @@ export function PosWorkspaceView({
       </Grid>
 
       <Grid item xs={12} md={4}>
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Typography variant="h6">Operations Snapshot</Typography>
-            <Typography variant="body2">
-              Shop: {selectedShop?.name || (activeShopId ? `Shop ${activeShopId.slice(0, 8)}` : 'Not selected')}
-            </Typography>
-            <Typography variant="body2">
-              Active shift: {settingsQuery.data?.activeShift?.name || 'No active shift'}
-            </Typography>
-            <Typography variant="body2">30d orders: {Number(analytics.orderCount || 0)}</Typography>
-            <Typography variant="body2">30d revenue: ${Number(analytics.revenue || 0).toFixed(2)}</Typography>
-            <Typography variant="body2">30d refunds: ${Number(analytics.refundAmount || 0).toFixed(2)}</Typography>
-            <Typography variant="body2">
-              Open tickets: {tableOrders.filter((order) => !['paid', 'closed', 'cancelled'].includes(String(order.orderStatus || '').toLowerCase())).length}
-            </Typography>
-            <Typography variant="body2">
-              Revenue in view: ${tableOrders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0).toFixed(2)}
-            </Typography>
-            <Typography variant="body2">
-              Average ticket: $
-              {(
-                (tableOrders.length
-                  ? tableOrders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0) / tableOrders.length
-                  : 0)
-              ).toFixed(2)}
-            </Typography>
-            <Typography variant="body2">
-              Occupancy: {tableMetrics.occupiedTables}/{tableMetrics.totalTables} tables
-            </Typography>
-            <Typography variant="body2">Known customers: {customers.length}</Typography>
-            <Typography variant="body2">
-              Top channels: Dine-in ${Number(analytics.byChannel?.dine_in || 0).toFixed(0)} | Ecommerce $
-              {Number(analytics.byChannel?.ecommerce || 0).toFixed(0)}
-            </Typography>
-            {Array.isArray(analytics.topItems) && analytics.topItems.length > 0 ? (
-              <Alert severity="success">
-                Best seller: {analytics.topItems[0]?.name} ({analytics.topItems[0]?.quantity} sold)
-              </Alert>
-            ) : null}
-            {mode === 'kds' && (
-              <Alert severity="info">
-                Queue: {kdsQueue.length} tickets • queued {kdsQueueQuery.data?.totals?.queued ?? 0} • preparing{' '}
-                {kdsQueueQuery.data?.totals?.preparing ?? 0} • ready {kdsQueueQuery.data?.totals?.ready ?? 0}
-              </Alert>
-            )}
-            {mode === 'cfd' && (
-              <Alert severity="info">
-                Open tickets: {cfdSnapshot.aggregate?.totalOpenTickets ?? 0} • total due $
-                {Number(cfdSnapshot.aggregate?.totalDue ?? 0).toFixed(2)}
-              </Alert>
-            )}
-            {['kiosk', 'stock-manager'].includes(mode) && (
-              <Alert severity="info">
-                Odoo-style operations are active: inventory alerts, maintenance incidents, and fulfillment telemetry are live for this shop.
-              </Alert>
-            )}
-            {['kds', 'stock-manager'].includes(mode) && (
-              <>
-                <Typography variant="body2">
-                  Devices online:{' '}
-                  {
-                    (Array.isArray(maintenanceDevicesQuery.data) ? maintenanceDevicesQuery.data : []).filter(
-                      (device: any) => String(device.status || '').toLowerCase() === 'online'
-                    ).length
-                  }
-                  /
-                  {(Array.isArray(maintenanceDevicesQuery.data) ? maintenanceDevicesQuery.data : []).length}
+        {mode === 'pos' ? (
+          <Card sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Typography variant="h6">Checkout</Typography>
+              <TextField
+                select
+                size="small"
+                label="Customer"
+                value={selectedCustomerId}
+                onChange={(event) => setSelectedCustomerId(event.target.value)}
+              >
+                <MenuItem value="walk-in">Walk-in customer</MenuItem>
+                {customers.map((customer) => (
+                  <MenuItem key={customer.id} value={customer.id}>
+                    {customer.name} {customer.phone ? `(${customer.phone})` : ''}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <Divider />
+              <Typography variant="subtitle2">Cart Items</Typography>
+              {retailCart.length === 0 ? (
+                <Alert severity="info">Cart is empty. Add products to begin checkout.</Alert>
+              ) : (
+                <Stack spacing={1}>
+                  {retailCart.map((line) => (
+                    <Stack key={line.sku} direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="body2" noWrap>{line.name}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {line.sku} • ${line.price.toFixed(2)}
+                        </Typography>
+                      </Box>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <IconButton size="small" onClick={() => updateRetailQty(line.sku, line.qty - 1)}>
+                          <Iconify icon="solar:minus-circle-outline" width={16} />
+                        </IconButton>
+                        <Typography variant="body2">{line.qty}</Typography>
+                        <IconButton size="small" onClick={() => updateRetailQty(line.sku, line.qty + 1)}>
+                          <Iconify icon="solar:add-circle-outline" width={16} />
+                        </IconButton>
+                      </Stack>
+                    </Stack>
+                  ))}
+                </Stack>
+              )}
+              <Divider />
+              <Stack spacing={0.75}>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2">Subtotal</Typography>
+                  <Typography variant="body2">${retailSubtotal.toFixed(2)}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="body2">Tax</Typography>
+                  <Typography variant="body2">${retailTaxAmount.toFixed(2)}</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography variant="subtitle2">Total</Typography>
+                  <Typography variant="subtitle2">${retailTotal.toFixed(2)}</Typography>
+                </Stack>
+              </Stack>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    if (!activeShopId || typeof window === 'undefined') return;
+                    window.localStorage.setItem(`${POS_RETAIL_CART_STORAGE_KEY_PREFIX}:${activeShopId}`, JSON.stringify(retailCart));
+                    showToast({ message: 'Cart parked.', severity: 'success' });
+                  }}
+                  disabled={retailCart.length === 0}
+                >
+                  Park
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    if (!activeShopId || typeof window === 'undefined') return;
+                    const raw = window.localStorage.getItem(`${POS_RETAIL_CART_STORAGE_KEY_PREFIX}:${activeShopId}`);
+                    if (!raw) return;
+                    try {
+                      const parsed = JSON.parse(raw);
+                      if (Array.isArray(parsed)) setRetailCart(parsed);
+                    } catch {
+                      // ignore invalid
+                    }
+                  }}
+                >
+                  Resume
+                </Button>
+                <Button fullWidth color="warning" variant="outlined" onClick={() => setRetailCart([])}>
+                  Clear
+                </Button>
+              </Stack>
+              <Button
+                variant="contained"
+                size="large"
+                disabled={retailCart.length === 0 || !activeShopId || posCheckoutMutation.isPending}
+                onClick={() => posCheckoutMutation.mutate()}
+              >
+                {posCheckoutMutation.isPending ? 'Placing Order...' : 'Checkout'}
+              </Button>
+              <Button
+                variant="text"
+                size="small"
+                disabled={retailCart.length === 0 || !activeShopId}
+                component={Link}
+                href={activeShopId ? paths.public.shop(activeShopId) : '#'}
+              >
+                Open Storefront Checkout
+              </Button>
+              <Divider />
+              <Typography variant="subtitle2">Recent Orders</Typography>
+              {posRecentOrders.length === 0 ? (
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  No recent orders yet.
                 </Typography>
-                <Typography variant="body2">
-                  Open incidents:{' '}
-                  {
-                    (Array.isArray(maintenanceIncidentsQuery.data) ? maintenanceIncidentsQuery.data : []).filter(
-                      (incident: any) => ['open', 'in_progress'].includes(String(incident.status || '').toLowerCase())
-                    ).length
-                  }
-                </Typography>
-              </>
-            )}
-          </Stack>
-        </Card>
+              ) : (
+                <Stack spacing={1}>
+                  {posRecentOrders.map((order) => (
+                    <Stack key={order.id} spacing={0.5} sx={{ p: 1.25, borderRadius: 1.5, bgcolor: 'background.neutral' }}>
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="body2" noWrap>{order.ticketNo || order.id}</Typography>
+                        <Typography variant="body2">${Number(order.totalAmount || 0).toFixed(2)}</Typography>
+                      </Stack>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {order.customerName || 'Walk-in'} • {order.orderStatus || 'open'}
+                      </Typography>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setSelectedOrderForAction(order);
+                            setOrderDetailDialogOpen(true);
+                          }}
+                        >
+                          Details
+                        </Button>
+                        <Button
+                          size="small"
+                          color="warning"
+                          variant="outlined"
+                          onClick={() => {
+                            const amount = Number(order.paidAmount || order.totalAmount || 0);
+                            if (amount <= 0) {
+                              showToast({ message: 'No paid amount available to refund.', severity: 'info' });
+                              return;
+                            }
+                            setSelectedOrderForAction(order);
+                            setRefundAmountInput(amount.toFixed(2));
+                            setRefundDialogOpen(true);
+                          }}
+                          disabled={refundOrderMutation.isPending}
+                        >
+                          Refund
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  ))}
+                </Stack>
+              )}
+            </Stack>
+          </Card>
+        ) : (
+          <Card sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Typography variant="h6">Operations Snapshot</Typography>
+              <Typography variant="body2">
+                Shop: {selectedShop?.name || (activeShopId ? `Shop ${activeShopId.slice(0, 8)}` : 'Not selected')}
+              </Typography>
+              <Typography variant="body2">
+                Active shift: {settingsQuery.data?.activeShift?.name || 'No active shift'}
+              </Typography>
+              <Typography variant="body2">30d orders: {Number(analytics.orderCount || 0)}</Typography>
+              <Typography variant="body2">30d revenue: ${Number(analytics.revenue || 0).toFixed(2)}</Typography>
+              <Typography variant="body2">30d refunds: ${Number(analytics.refundAmount || 0).toFixed(2)}</Typography>
+              <Typography variant="body2">Known customers: {customers.length}</Typography>
+            </Stack>
+          </Card>
+        )}
       </Grid>
+      <Dialog open={receiptDialogOpen} onClose={() => setReceiptDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>POS Receipt</DialogTitle>
+        <DialogContent>
+          {(() => {
+            const order = selectedOrderResolved;
+            if (!order) {
+              return (
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  Order details are syncing. You can view the full record in Orders.
+                </Typography>
+              );
+            }
+            return (
+              <Stack spacing={1.25} sx={{ mt: 1 }}>
+                <Typography variant="body2">Order: <strong>{order.ticketNo || order.id}</strong></Typography>
+                <Typography variant="body2">Customer: <strong>{order.customerName || 'Walk-in'}</strong></Typography>
+                <Typography variant="body2">Status: <strong>{order.orderStatus || 'open'}</strong></Typography>
+                <Typography variant="body2">Total: <strong>${Number(order.totalAmount || 0).toFixed(2)}</strong></Typography>
+                <Typography variant="body2">Paid: <strong>${Number(order.paidAmount || 0).toFixed(2)}</strong></Typography>
+                <Typography variant="body2">Due: <strong>${Number(order.balanceDue || 0).toFixed(2)}</strong></Typography>
+              </Stack>
+            );
+          })()}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              openReceiptPrintWindow(selectedOrderResolved);
+            }}
+          >
+            Print
+          </Button>
+          <Button onClick={() => setReceiptDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={orderDetailDialogOpen} onClose={() => setOrderDetailDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Order Details</DialogTitle>
+        <DialogContent>
+          {selectedOrderResolved ? (
+            <Stack spacing={1.25} sx={{ mt: 1 }}>
+              <Typography variant="body2">Order: <strong>{selectedOrderResolved.ticketNo || selectedOrderResolved.id}</strong></Typography>
+              <Typography variant="body2">Customer: <strong>{selectedOrderResolved.customerName || 'Walk-in'}</strong></Typography>
+              <Typography variant="body2">Channel: <strong>{selectedOrderResolved.channel || 'ecommerce'}</strong></Typography>
+              <Typography variant="body2">Status: <strong>{selectedOrderResolved.orderStatus || 'open'}</strong></Typography>
+              <Typography variant="body2">Total: <strong>${Number(selectedOrderResolved.totalAmount || 0).toFixed(2)}</strong></Typography>
+              <Typography variant="body2">Paid: <strong>${Number(selectedOrderResolved.paidAmount || 0).toFixed(2)}</strong></Typography>
+              <Typography variant="body2">Due: <strong>${Number(selectedOrderResolved.balanceDue || 0).toFixed(2)}</strong></Typography>
+            </Stack>
+          ) : (
+            <Typography variant="body2" sx={{ mt: 1 }}>No order selected.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOrderDetailDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={refundDialogOpen} onClose={() => setRefundDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Confirm Refund</DialogTitle>
+        <DialogContent>
+          <Stack spacing={1.5} sx={{ mt: 1 }}>
+            <Typography variant="body2">
+              {selectedOrderResolved
+                ? `Order ${selectedOrderResolved.ticketNo || selectedOrderResolved.id}`
+                : 'Selected order'}
+            </Typography>
+            <TextField
+              size="small"
+              label="Refund Amount"
+              value={refundAmountInput}
+              onChange={(event) => setRefundAmountInput(event.target.value)}
+              type="number"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRefundDialogOpen(false)}>Cancel</Button>
+          <Button
+            color="warning"
+            variant="contained"
+            disabled={refundOrderMutation.isPending || !selectedOrderResolved}
+            onClick={() => {
+              if (!selectedOrderResolved) return;
+              const amount = Number(refundAmountInput || 0);
+              if (!Number.isFinite(amount) || amount <= 0) {
+                showToast({ message: 'Enter a valid refund amount.', severity: 'warning' });
+                return;
+              }
+              refundOrderMutation.mutate({ orderId: selectedOrderResolved.id, amount });
+              setRefundDialogOpen(false);
+            }}
+          >
+            {refundOrderMutation.isPending ? 'Refunding...' : 'Confirm Refund'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 
@@ -1701,7 +2264,7 @@ export function PosWorkspaceView({
             <Button component={Link} href={paths.dashboard.posTables} variant="soft" color="inherit">Tables</Button>
           </Stack>
         </Box>
-        {mode === 'pos' ? tablesContent : nonTableContent}
+        {mode === 'pos' ? nonTableContent : mode === 'tables' ? tablesContent : nonTableContent}
       </DashboardContent>
     );
   }

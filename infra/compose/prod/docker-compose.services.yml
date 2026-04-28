@@ -61,6 +61,19 @@ services:
     environment:
       NODE_ENV: production
       PORT: ${API_ROUTER_SERVICE_PORT:-7001}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      ODOO_INTEGRATION_BASE_URL: ${ODOO_INTEGRATION_BASE_URL}
+      MAGENTO_INTEGRATION_BASE_URL: ${MAGENTO_INTEGRATION_BASE_URL}
+      BOOKING_SERVICE_BASE_URL: ${BOOKING_SERVICE_BASE_URL}
+      SCORING_SERVICE_BASE_URL: ${SCORING_SERVICE_BASE_URL}
+      COMMUNITY_SERVICE_BASE_URL: ${COMMUNITY_SERVICE_BASE_URL}
+      DOCUMENTS_SERVICE_BASE_URL: ${DOCUMENTS_SERVICE_BASE_URL}
+      PAYMENTS_SERVICE_BASE_URL: ${PAYMENTS_SERVICE_BASE_URL}
+      EMPLOYEES_SERVICE_BASE_URL: ${EMPLOYEES_SERVICE_BASE_URL}
+      INTEGRATIONS_SERVICE_BASE_URL: ${INTEGRATIONS_SERVICE_BASE_URL}
+      FINANCE_SERVICE_BASE_URL: ${FINANCE_SERVICE_BASE_URL}
+      MONOLITH_BASE_URL: ${MONOLITH_BASE_URL}
     restart: unless-stopped
 
   community-service:
@@ -324,18 +337,6 @@ services:
       PORT: ${SCORING_SERVICE_PORT:-7180}
     restart: unless-stopped
 
-  deal-service:
-    build:
-      context: ../../..
-      dockerfile: services/deal-service/docker/Dockerfile.prod
-      args:
-        SERVICE_NAME: deal-service
-        SERVICE_PORT: 7150
-    environment:
-      NODE_ENV: production
-      PORT: ${DEAL_SERVICE_PORT:-7150}
-    restart: unless-stopped
-
   email-sync-service:
     build:
       context: ../../..
@@ -354,4 +355,3 @@ services:
       email-sync-db:
         condition: service_healthy
     restart: unless-stopped
-

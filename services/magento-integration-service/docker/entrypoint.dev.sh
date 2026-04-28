@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-APP_DIR="/workspace/services/magento-inegration-service"
+APP_DIR="/workspace/services/magento-integration-service"
 
 cd "$APP_DIR"
 

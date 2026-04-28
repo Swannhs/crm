@@ -1,4 +1,5 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
+import { API_ROUTER_CONFIG } from "./config.js";
 
 const { app, logger } = createServiceApp({
   serviceName: "api-router-service",
@@ -116,7 +117,7 @@ async function getCompatEmployeesFromOdoo(req: Request): Promise<CompatEmployeeR
       search: String(req.query.search ?? ""),
     });
 
-    const upstream = await fetch(`http://odoo-integration-service:7200/v1/odoo/contacts?${query.toString()}`, {
+    const upstream = await fetch(toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/contacts?${query.toString()}`), {
       method: "GET",
       headers,
     });
@@ -170,8 +171,13 @@ async function fetchUpstreamJsonSafe(req: Request, url: string) {
   }
 }
 
+function toAbsoluteUrl(baseUrl: string, pathOrUrl: string) {
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) return pathOrUrl;
+  return new URL(pathOrUrl, baseUrl).toString();
+}
+
 async function odooWriteInvoice(req: Request, invoiceId: number, payload: Record<string, unknown>) {
-  const upstream = await fetch(`http://odoo-integration-service:7200/v1/odoo/invoices/${invoiceId}`, {
+  const upstream = await fetch(toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/invoices/${invoiceId}`), {
     method: "PUT",
     headers: {
       ...getForwardHeaders(req),
@@ -199,7 +205,7 @@ async function fetchAllOdooInvoicesForGraph(req: Request, opts?: { months?: numb
       page: String(page),
       pageSize: String(pageSize),
     });
-    const upstream = await fetchUpstreamJsonSafe(req, `http://odoo-integration-service:7200/v1/odoo/invoices?${query.toString()}`);
+    const upstream = await fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/invoices?${query.toString()}`));
     if (!upstream.ok) break;
 
     const batch = Array.isArray(upstream.data?.data) ? upstream.data.data : [];
@@ -222,7 +228,7 @@ async function fetchAllOdooInvoicesForGraph(req: Request, opts?: { months?: numb
 }
 
 async function fetchMagentoOrders(req: Request, query: URLSearchParams = new URLSearchParams()) {
-  const base = new URL("http://magento-inegration-service:7210/api/v1/magento/orders");
+  const base = new URL("/api/v1/magento/orders", API_ROUTER_CONFIG.magentoIntegrationBaseUrl);
   query.forEach((value, key) => base.searchParams.set(key, value));
   return fetchUpstreamJsonSafe(req, base.toString());
 }
@@ -240,30 +246,30 @@ function invoiceTotals(invoices: any[]) {
 }
 
 const domainRoutes: Record<string, string> = {
-  "community": "http://community-service:7030",
-  "community-group": "http://community-service:7030",
-  "community-members": "http://community-service:7030",
-  "community-post": "http://community-service:7030",
-  "community-profile": "http://community-service:7030",
-  "community-settings": "http://community-service:7030",
-  "community-events": "http://community-service:7030",
-  "community-badges": "http://community-service:7030",
-  "community-activity": "http://community-service:7030",
-  "community-points": "http://community-service:7030",
-  "document": "http://documents-service:7080",
-  "documents": "http://documents-service:7080",
-  "document-recipient": "http://documents-service:7080",
-  "document-signature": "http://documents-service:7080",
-  "upload": "http://documents-service:7080",
-  "payment": "http://payments-service:7090",
-  "payments": "http://payments-service:7090",
-  "payment-cards": "http://payments-service:7090",
-  "deposit": "http://payments-service:7090",
-  "employee": "http://employees-service:7070",
-  "employees": "http://employees-service:7070",
-  "employee-schedule": "http://employees-service:7070",
-  "employee-timeoff-request": "http://employees-service:7070",
-  "employee-attendance": "http://employees-service:7070"
+  "community": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-group": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-members": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-post": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-profile": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-settings": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-events": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-badges": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-activity": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-points": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "document": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "documents": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "document-recipient": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "document-signature": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "upload": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "payment": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "payments": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "payment-cards": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "deposit": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "employee": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employees": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employee-schedule": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employee-timeoff-request": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employee-attendance": API_ROUTER_CONFIG.employeesServiceBaseUrl
 };
 
 const deprecatedCommerceModules = new Set([
@@ -280,23 +286,27 @@ async function handleApiCompat(req: Request, res: Response) {
   const rest = req.params[0] ? `/${req.params[0]}` : "";
 
   if (module === "public" && req.method === "GET" && rest === "/help-center/articles") {
-    return res.json({ data: [], total: 0 });
+    return notImplemented(res, {
+      module,
+      method: req.method,
+      path: rest,
+      hint: "Public help-center articles endpoint has no upstream implementation.",
+    });
   }
 
   if (module === "auth") {
     if (req.method === "POST" && rest === "/sign-in") {
       try {
         const { email, password } = req.body;
-        const keycloakUrl = "http://keycloak:8080/realms/mymanager/protocol/openid-connect/token";
         const body = new URLSearchParams({
           grant_type: "password",
-          client_id: "mymanager-web",
+          client_id: API_ROUTER_CONFIG.keycloakClientId,
           username: email,
           password: password,
           scope: "openid profile email"
         });
 
-        const response = await fetch(keycloakUrl, {
+        const response = await fetch(API_ROUTER_CONFIG.keycloakTokenUrl, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: body.toString()
@@ -320,15 +330,24 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (req.method === "GET" && rest === "/me") {
-       const ident = identityOr401(req, res);
-       if (!ident) return;
-       return res.json({ 
-         user: { 
-           id: ident.userId, 
-           email: "owner@example.com", // Fallback or extract from token
-           role: "admin" 
-         } 
-       });
+      const userId = req.header("X-User-Id") || "";
+      const orgId = req.header("X-Org-Id") || "";
+      if (!userId || !orgId) {
+        return res.status(501).json({
+          message: "Authenticated identity headers are required for /auth/me",
+          requiredHeaders: ["X-User-Id", "X-Org-Id"],
+        });
+      }
+
+      return res.json({
+        user: {
+          id: userId,
+          orgId,
+          email: req.header("X-User-Email") || null,
+          name: req.header("X-User-Name") || null,
+          role: req.header("X-User-Role") || null,
+        },
+      });
     }
   }
 
@@ -337,22 +356,15 @@ async function handleApiCompat(req: Request, res: Response) {
 
   try {
     if (module === "form-builder" && req.method === "GET" && (rest === "/forms" || rest === "/templates")) {
-      return res.json({ data: [] });
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Form builder compatibility endpoint has no upstream implementation." });
     }
 
     if (module === "webbuilder" && req.method === "GET" && (rest === "" || rest === "/")) {
-      return res.json({ data: [] });
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Webbuilder compatibility endpoint has no upstream implementation." });
     }
 
     if (module === "reputation" && req.method === "GET" && rest === "/dashboard-stats") {
-      return res.json({
-        data: {
-          reviews: 0,
-          averageRating: 0,
-          responseRate: 0,
-          mentions: 0,
-        },
-      });
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Reputation dashboard compatibility endpoint has no upstream implementation." });
     }
 
     if (deprecatedCommerceModules.has(module)) {
@@ -371,7 +383,7 @@ async function handleApiCompat(req: Request, res: Response) {
       }
 
       if (rest === "/get-all") {
-        return res.json({ data: [], total: 0 });
+        return notImplemented(res, { module, method: req.method, path: rest, hint: "Employee schedule list compatibility endpoint has no upstream implementation." });
       }
     }
 
@@ -389,20 +401,20 @@ async function handleApiCompat(req: Request, res: Response) {
 
     if (module === "odoo") {
       const targetPath = withQuery(req, `/v1/odoo${rest}`);
-      return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
     }
 
     if (module === "image-library") {
       if (req.method === "GET" && (rest === "" || rest === "/")) {
         return proxyTo(req, res, {
-          baseUrl: "http://integrations-service:7140",
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
           targetPath: withQuery(req, "/v1/image-library"),
         });
       }
 
       if (req.method === "POST" && (rest === "" || rest === "/")) {
         return proxyTo(req, res, {
-          baseUrl: "http://integrations-service:7140",
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
           targetPath: "/v1/image-library",
         });
       }
@@ -410,7 +422,7 @@ async function handleApiCompat(req: Request, res: Response) {
       if (req.method === "DELETE" && /^\/[^/]+$/.test(rest)) {
         const id = rest.slice(1);
         return proxyTo(req, res, {
-          baseUrl: "http://integrations-service:7140",
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
           targetPath: `/v1/image-library/${id}`,
         });
       }
@@ -468,7 +480,7 @@ async function handleApiCompat(req: Request, res: Response) {
         });
 
         const [odooInvoicesRes, magentoOrdersRes] = await Promise.all([
-          fetchUpstreamJsonSafe(req, `http://odoo-integration-service:7200/v1/odoo/invoices?${query.toString()}`),
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/invoices?${query.toString()}`)),
           fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
         ]);
 
@@ -502,36 +514,36 @@ async function handleApiCompat(req: Request, res: Response) {
       }
 
       if (req.method === "GET" && rest === "/invoices") {
-        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: withQuery(req, "/v1/odoo/invoices") });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: withQuery(req, "/v1/odoo/invoices") });
       }
 
       if (req.method === "POST" && rest === "/invoices") {
-        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: "/v1/odoo/invoices" });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: "/v1/odoo/invoices" });
       }
 
       if (req.method === "GET" && /^\/invoices\/\d+$/.test(rest)) {
         const id = rest.split("/")[2];
-        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}` });
       }
 
       if (req.method === "PUT" && /^\/invoices\/\d+$/.test(rest)) {
         const id = rest.split("/")[2];
-        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}` });
       }
 
       if (req.method === "DELETE" && /^\/invoices\/\d+$/.test(rest)) {
         const id = rest.split("/")[2];
-        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}` });
       }
 
       if (req.method === "POST" && /^\/invoices\/\d+\/post$/.test(rest)) {
         const id = rest.split("/")[2];
-        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}/post` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}/post` });
       }
 
       if (req.method === "GET" && /^\/invoices\/\d+\/download$/.test(rest)) {
         const id = rest.split("/")[2];
-        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}/download` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}/download` });
       }
 
       if (req.method === "GET" && rest === "/magento/orders") {
@@ -543,7 +555,7 @@ async function handleApiCompat(req: Request, res: Response) {
       if (req.method === "GET" && /^\/magento\/orders\/[^/]+$/.test(rest)) {
         const id = rest.split("/")[3];
         return proxyTo(req, res, {
-          baseUrl: "http://magento-inegration-service:7210",
+          baseUrl: API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
           targetPath: `/api/v1/magento/rest/V1/orders/${id}`,
         });
       }
@@ -558,14 +570,14 @@ async function handleApiCompat(req: Request, res: Response) {
           "searchCriteria[filter_groups][0][filters][0][condition_type]": "eq",
         });
         return proxyTo(req, res, {
-          baseUrl: "http://magento-inegration-service:7210",
+          baseUrl: API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
           targetPath: `/api/v1/magento/rest/default/V1/orders?${query.toString()}`,
         });
       }
 
       if (req.method === "GET" && rest === "/reconciliation") {
         const [odooInvoicesRes, magentoOrdersRes] = await Promise.all([
-          fetchUpstreamJsonSafe(req, "http://odoo-integration-service:7200/v1/odoo/invoices?page=1&pageSize=200"),
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
           fetchMagentoOrders(req, new URLSearchParams({ pageSize: "200", currentPage: "1" })),
         ]);
         const invoices = Array.isArray(odooInvoicesRes.data?.data) ? odooInvoicesRes.data.data : [];
@@ -664,15 +676,15 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "booking") {
-      if (req.method === "GET" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/booking-types" });
-      if (req.method === "POST" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/booking-types" });
-      if (req.method === "GET" && rest === "/appointments") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/appointments" });
-      if (req.method === "POST" && rest === "/appointments") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/appointments" });
-      if (req.method === "POST" && rest === "/appointments/user") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/appointments/public" });
-      if (req.method === "GET" && rest === "/available-slots") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: `/v1/appointments/available-slots?${new URLSearchParams(req.query as any).toString()}` });
+      if (req.method === "GET" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/booking-types" });
+      if (req.method === "POST" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/booking-types" });
+      if (req.method === "GET" && rest === "/appointments") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments" });
+      if (req.method === "POST" && rest === "/appointments") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments" });
+      if (req.method === "POST" && rest === "/appointments/user") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments/public" });
+      if (req.method === "GET" && rest === "/available-slots") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: `/v1/appointments/available-slots?${new URLSearchParams(req.query as any).toString()}` });
       if (req.method === "DELETE" && rest.startsWith("/appointments/")) {
         const id = rest.split("/").pop();
-        return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: `/v1/appointments/${id}` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: `/v1/appointments/${id}` });
       }
       return notImplemented(res, { module, method: req.method, path: rest, hint: "booking-types & appointments" });
     }
@@ -684,24 +696,24 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = rest === "/models"
           ? "/api/v1/scoring/models"
           : `/api/v1/scoring/leads/hot${query ? `?${query}` : ""}`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       if (req.method === "POST" && rest === "/models") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/models" });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: "/api/v1/scoring/models" });
       }
 
       if (req.method === "POST" && rest === "/calculate") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/calculate" });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: "/api/v1/scoring/calculate" });
       }
 
       if (req.method === "POST" && rest === "/sync") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/sync" });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: "/api/v1/scoring/sync" });
       }
 
       if (req.method === "POST" && rest.startsWith("/sync/contacts/")) {
         const contactId = rest.split("/").pop();
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: `/api/v1/scoring/sync/contacts/${contactId}` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: `/api/v1/scoring/sync/contacts/${contactId}` });
       }
 
       if (req.method === "GET" && rest.startsWith("/contacts/") && rest.endsWith("/score")) {
@@ -710,7 +722,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
           : `/api/v1/scoring/contacts/${contactId}/score`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       return notImplemented(res, {
@@ -735,7 +747,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/leads/hot?${query}`
           : "/api/v1/scoring/leads/hot";
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       if (req.method === "GET" && rest.startsWith("/score/")) {
@@ -744,7 +756,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
           : `/api/v1/scoring/contacts/${contactId}/score`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       return notImplemented(res, {
@@ -756,25 +768,28 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "finance-category") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-category${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/finance-category${rest}`) });
     }
 
     if (module === "finance-dashboard") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-dashboard${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/finance-dashboard${rest}`) });
     }
 
     if (module === "finance-kanban") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-kanban${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/finance-kanban${rest}`) });
     }
 
     if (module === "super-admin-finance") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/super-admin-finance${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/super-admin-finance${rest}`) });
     }
 
     if (module === "sales-dashboard") {
-      const magentoOrdersUrl = "http://magento-inegration-service:7210/api/v1/magento/orders?pageSize=100&currentPage=1";
-      const odooOrdersUrl = "http://odoo-integration-service:7200/v1/odoo/sales/orders?pageSize=100&page=1";
-      const odooCrmUrl = "http://odoo-integration-service:7200/v1/odoo/crm?pageSize=100&page=1";
+      const magentoOrdersUrl = toAbsoluteUrl(
+        API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
+        "/api/v1/magento/orders?pageSize=100&currentPage=1"
+      );
+      const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
+      const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
 
       if (req.method === "GET" && rest === "/summary") {
         const [magentoRes, odooRes, crmRes] = await Promise.all([
@@ -895,7 +910,7 @@ async function handleApiCompat(req: Request, res: Response) {
     // Fallback: proxy to legacy monolith
     const path = `/api/${module}${rest}`;
     logger.info({ module, path }, "Proxying unmigrated route to legacy monolith");
-    return proxyTo(req, res, { baseUrl: "http://monolith:5000", targetPath: path });
+    return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.monolithBaseUrl, targetPath: path });
   } catch (err) {
     logger.error({ err, module, rest }, "api-router-service failed");
     res.status(502).json({ message: "Upstream error", module, path: rest });

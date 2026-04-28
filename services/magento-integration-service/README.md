@@ -10,7 +10,7 @@ This service proxies Magento REST/GraphQL through Laravel and is reachable via g
 
 ## Environment
 
-Set these in `services/magento-inegration-service/.env` (or via Docker compose env):
+Set these in `services/magento-integration-service/.env` (or via Docker compose env):
 
 - `MAGENTO_BASE_URL=http://magento`
 - `MAGENTO_STORE_CODE=default`

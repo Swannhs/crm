@@ -19,8 +19,7 @@ export class AppointmentsController {
   @Post('public')
   @ApiOperation({ summary: 'Create a new appointment from public landing page' })
   createPublic(@Body() createAppointmentDto: any) {
-    // OrgId should be included in the DTO for public bookings
-    return this.appointmentsService.create(createAppointmentDto.orgId, createAppointmentDto);
+    return this.appointmentsService.createPublic(createAppointmentDto);
   }
 
   @Get()
@@ -43,19 +42,19 @@ export class AppointmentsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific appointment' })
-  findOne(@Param('id') id: string) {
-    return this.appointmentsService.findOne(id);
+  findOne(@Headers('X-Org-Id') orgId: string, @Param('id') id: string) {
+    return this.appointmentsService.findOne(orgId, id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update an appointment status' })
-  update(@Param('id') id: string, @Body() updateAppointmentDto: any) {
-    return this.appointmentsService.update(id, updateAppointmentDto);
+  update(@Headers('X-Org-Id') orgId: string, @Param('id') id: string, @Body() updateAppointmentDto: any) {
+    return this.appointmentsService.update(orgId, id, updateAppointmentDto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Cancel an appointment' })
-  remove(@Param('id') id: string) {
-    return this.appointmentsService.update(id, { status: 'CANCELLED' });
+  remove(@Headers('X-Org-Id') orgId: string, @Param('id') id: string) {
+    return this.appointmentsService.update(orgId, id, { status: 'CANCELLED' });
   }
 }

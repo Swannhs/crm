@@ -35,8 +35,15 @@ import type {
   ImageAssetInput
 } from '../types/index.js';
 
-const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL || 'http://magento-inegration-service:7210/api/v1/magento';
-const ODOO_SERVICE_URL = process.env.ODOO_INTEGRATION_SERVICE_URL || 'http://odoo-integration-service:7200';
+const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL;
+const ODOO_SERVICE_URL = process.env.ODOO_INTEGRATION_SERVICE_URL;
+
+if (!MAGENTO_SERVICE_URL) {
+  throw new Error('Missing MAGENTO_INTEGRATION_SERVICE_URL');
+}
+if (!ODOO_SERVICE_URL) {
+  throw new Error('Missing ODOO_INTEGRATION_SERVICE_URL');
+}
 
 export class IntegrationConnectionService {
   private repo = new IntegrationConnectionRepository();

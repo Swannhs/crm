@@ -51,13 +51,15 @@ class MagentoClient implements MagentoClientContract
             $password = (string) $this->config('admin_password', 'admin123');
 
             $response = Http::timeout($this->timeout())
+                ->acceptJson()
+                ->asJson()
                 ->post("{$this->baseUrl()}/rest/V1/integration/admin/token", [
                     'username' => $username,
                     'password' => $password,
                 ]);
 
             if (!$response->ok()) {
-                throw new RuntimeException("Failed to get Magento admin token ({$response->status()})");
+                throw new RuntimeException("Failed to get Magento admin token ({$response->status()}): " . $response->body());
             }
 
             $token = trim((string) $response->body(), "\" \n\r\t");

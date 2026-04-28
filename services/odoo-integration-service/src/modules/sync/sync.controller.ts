@@ -24,4 +24,16 @@ export class SyncController {
   async syncOrders(@CurrentUser() user: Identity) {
     return this.syncService.syncMagentoOrders(user.orgId);
   }
+
+  @Post('magento/all')
+  @ApiOperation({ summary: 'Sync everything from Magento to Odoo' })
+  async syncAll(@CurrentUser() user: Identity) {
+    const customers = await this.syncService.syncMagentoCustomers(user.orgId);
+    const orders = await this.syncService.syncMagentoOrders(user.orgId);
+    return {
+      customers,
+      orders,
+      syncedOrders: orders.synced,
+    };
+  }
 }

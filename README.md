@@ -28,7 +28,7 @@ The CRM platform does not implement a separate shop-service for these responsibi
 
 CRM integrates with Magento through:
 
-- `services/magento-inegration-service`
+- `services/magento-integration-service`
 - Nginx route: `/api/magento/*`
 - Magento REST/GraphQL APIs
 

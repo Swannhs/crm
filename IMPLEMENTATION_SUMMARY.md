@@ -2,54 +2,7 @@
 
 ## ✅ Successfully Implemented Services
 
-### 1. **Deal Service** (Port 7150) - PRODUCTION READY ✅
-
-Complete sales pipeline and opportunity management system.
-
-#### Core Features:
-- **Deal Management**: Full CRUD operations for opportunities
-- **Pipeline Visualization**: Customizable sales stages with auto-probability
-- **Revenue Forecasting**: Best case, commit, and pipeline totals
-- **Activity Tracking**: Calls, emails, meetings linked to deals
-- **Task Management**: Prioritized tasks with due dates
-- **Notes System**: Pinnable notes for important information
-- **Multi-tenancy**: Complete org isolation
-
-#### Technical Stack:
-- Node.js + TypeScript + Express
-- Prisma ORM with PostgreSQL
-- 8 database models with proper relations
-- RESTful API with identity propagation
-- Docker containerization ready
-- Comprehensive seed data included
-
-#### Database Schema:
-```prisma
-Deal           # Opportunities with amounts, stages, probabilities
-Pipeline       # Customizable sales workflows  
-Contact        # People linked to deals
-Company        # Organizations linked to deals
-User           # Deal owners
-Activity       # Interactions (calls, emails, meetings)
-Note           # Pinnable annotations
-Task           # Action items with priorities
-```
-
-#### API Endpoints (8 total):
-```
-GET    /api/v1/deals              # List with filters
-GET    /api/v1/deals/:id          # Get single
-POST   /api/v1/deals              # Create
-PUT    /api/v1/deals/:id          # Update
-PATCH  /api/v1/deals/:id/stage    # Move stage (auto-probability)
-DELETE /api/v1/deals/:id          # Delete
-GET    /api/v1/deals/stats        # Pipeline analytics
-GET    /api/v1/deals/forecast     # Revenue forecast
-```
-
----
-
-### 2. **Email Sync Service** (Port 7160) - SKELETON READY 🚧
+### 1. **Email Sync Service** (Port 7160) - SKELETON READY 🚧
 
 Foundation laid for Gmail/Outlook integration and email automation.
 
@@ -100,24 +53,16 @@ POST   /api/v1/email/sequences         # Create sequence
 
 | Service | Status | Completeness | Priority |
 |---------|--------|--------------|----------|
-| Deal Service | ✅ Complete | 100% | P0 |
 | Email Sync | 🚧 Skeleton | 40% | P0 |
 | Analytics | ⏳ Not Started | 0% | P1 |
 | Lead Scoring | ⏳ Not Started | 0% | P1 |
 | Support Ticketing | ⏳ Not Started | 0% | P2 |
 
-**Total Core Features**: 20% complete (2/10 planned services)
+**Total Core Features**: 10% complete (1/10 planned services)
 
 ---
 
 ## 🎯 Business Value Delivered
-
-### Immediate Benefits (Deal Service):
-1. **Revenue Visibility**: Track $67,500+ in sample pipeline
-2. **Sales Process**: Standardized 6-stage methodology
-3. **Forecasting**: Data-driven revenue predictions
-4. **Activity Management**: Complete interaction history
-5. **Team Collaboration**: Shared context on all deals
 
 ### Future Benefits (Email Sync - when complete):
 1. **Time Savings**: 5+ hours/week per rep on manual entry
@@ -129,10 +74,10 @@ POST   /api/v1/email/sequences         # Create sequence
 
 ## 🚀 Quick Start Guide
 
-### Running Deal Service:
+### Running Email Sync Service:
 
 ```bash
-cd /workspace/services/deal-service
+cd /workspace/services/email-sync-service
 
 # 1. Install dependencies
 npm install
@@ -147,40 +92,11 @@ npx prisma generate
 # 4. Run migrations
 npx prisma migrate dev --name init
 
-# 5. Seed database
-npm run db:seed
-
-# 6. Start service
+# 5. Start service
 npm run dev
 ```
 
-Access at: `http://localhost:7150`
-
-### Sample API Calls:
-
-```bash
-# Get JWT token from Keycloak first
-TOKEN="your-jwt-token"
-
-# List all deals
-curl -H "Authorization: Bearer $TOKEN" \
-     http://localhost:7150/api/v1/deals
-
-# Create new deal
-curl -X POST http://localhost:7150/api/v1/deals \
-     -H "Authorization: Bearer $TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "name": "Enterprise Deal",
-       "amount": 100000,
-       "stage": "prospect",
-       "ownerId": "user-123"
-     }'
-
-# Get sales forecast
-curl -H "Authorization: Bearer $TOKEN" \
-     http://localhost:7150/api/v1/deals/forecast
-```
+Access at: `http://localhost:7160`
 
 ---
 
@@ -209,7 +125,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 3. Add behavioral scoring
 4. Build email engagement tracking
 5. Create scoring dashboard
-6. Integrate with deal service
+6. Integrate with Odoo CRM
 
 ### Week 4: Support Service (Port 7190)
 1. Design ticketing schema
@@ -228,15 +144,6 @@ curl -H "Authorization: Bearer $TOKEN" \
 Add these services:
 
 ```yaml
-deal-service:
-  build: ../../services/deal-service
-  ports:
-    - "7150:7150"
-  environment:
-    - DATABASE_URL=postgresql://postgres:postgres@postgres-deal:5432/deal_service
-  depends_on:
-    - postgres-deal
-
 email-sync-service:
   build: ../../services/email-sync-service
   ports:
@@ -247,12 +154,6 @@ email-sync-service:
     - postgres-email
 
 # Add PostgreSQL databases
-postgres-deal:
-  image: postgres:17-alpine
-  environment:
-    - POSTGRES_DB=deal_service
-    - POSTGRES_PASSWORD=postgres
-    
 postgres-email:
   image: postgres:17-alpine
   environment:
@@ -266,12 +167,12 @@ Add endpoint configurations:
 
 ```json
 {
-  "endpoint": "/api/v1/deals/*",
+  "endpoint": "/api/v1/email/*",
   "method": "ANY",
   "backend": [
     {
       "url_pattern": "/__param/*",
-      "host": ["http://deal-service:7150"]
+      "host": ["http://email-sync-service:7160"]
     }
   ]
 }

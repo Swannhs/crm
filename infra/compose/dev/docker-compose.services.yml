@@ -45,6 +45,19 @@ services:
       - ../../../yarn.lock:/workspace/yarn.lock
     environment:
       PORT: 7001
+      KEYCLOAK_TOKEN_URL: http://keycloak:8080/realms/mymanager/protocol/openid-connect/token
+      KEYCLOAK_CLIENT_ID: mymanager-web
+      ODOO_INTEGRATION_BASE_URL: http://odoo-integration-service:7200
+      MAGENTO_INTEGRATION_BASE_URL: http://magento-integration-service:7210
+      BOOKING_SERVICE_BASE_URL: http://booking-service:7040
+      SCORING_SERVICE_BASE_URL: http://scoring-service:7180
+      COMMUNITY_SERVICE_BASE_URL: http://community-service:7030
+      DOCUMENTS_SERVICE_BASE_URL: http://documents-service:7080
+      PAYMENTS_SERVICE_BASE_URL: http://payments-service:7090
+      EMPLOYEES_SERVICE_BASE_URL: http://employees-service:7070
+      INTEGRATIONS_SERVICE_BASE_URL: http://integrations-service:7140
+      FINANCE_SERVICE_BASE_URL: http://finance-service:7170
+      MONOLITH_BASE_URL: http://monolith:5000
     ports:
       - "7001:7001"
 
@@ -95,7 +108,7 @@ services:
       PORT: 7140
       KAFKA_BROKERS: kafka:9092
       DATABASE_URL: postgres://integrations:integrations@integrations-db:5432/integrations
-      MAGENTO_INTEGRATION_SERVICE_URL: http://magento-inegration-service:7210/api
+      MAGENTO_INTEGRATION_SERVICE_URL: http://magento-integration-service:7210/api
       ODOO_INTEGRATION_SERVICE_URL: http://odoo-integration-service:7200
     depends_on:
       kafka:
@@ -107,14 +120,14 @@ services:
     ports:
       - "7140:7140"
 
-  magento-inegration-service:
+  magento-integration-service:
     build:
       context: ../../..
-      dockerfile: services/magento-inegration-service/docker/Dockerfile.dev
-    container_name: magento-inegration-service
+      dockerfile: services/magento-integration-service/docker/Dockerfile.dev
+    container_name: magento-integration-service
     profiles: ["magento"]
     volumes:
-      - ../../../services/magento-inegration-service:/workspace/services/magento-inegration-service
+      - ../../../services/magento-integration-service:/workspace/services/magento-integration-service
     environment:
       PORT: 7210
       APP_ENV: local
@@ -122,7 +135,7 @@ services:
       MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-http://magento}
       MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
       MAGENTO_ADMIN_USERNAME: ${MAGENTO_ADMIN_USERNAME:-admin}
-      MAGENTO_ADMIN_PASSWORD: ${MAGENTO_ADMIN_PASSWORD:-admin123}
+      MAGENTO_ADMIN_PASSWORD: ${MAGENTO_ADMIN_PASSWORD:-Admin123!}
       MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
       MAGENTO_TIMEOUT_SECONDS: 20
     depends_on:
@@ -158,7 +171,7 @@ services:
       ODOO_USERNAME: ${ODOO_USERNAME:-admin}
       ODOO_PASSWORD: ${ODOO_PASSWORD:-admin}
       ODOO_API_KEY: ${ODOO_API_KEY:-}
-      MAGENTO_API_BASE_URL: http://magento-inegration-service:7210/api
+      MAGENTO_API_BASE_URL: http://magento-integration-service:7210/api
       DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
     depends_on:
       odoo-integration-db:
