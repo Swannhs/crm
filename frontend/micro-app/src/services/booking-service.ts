@@ -13,8 +13,20 @@ export async function getAppointments() {
 }
 
 export async function getBookingTypeByLink(link: string) {
-  const response = await axiosInstance.get(`/api/booking/booking-types/${link}`);
-  return response.data?.data ?? response.data;
+  try {
+    const response = await axiosInstance.get(`/api/booking/public/booking-types/${encodeURIComponent(link)}`);
+    return response.data?.data ?? response.data;
+  } catch {
+    const response = await axiosInstance.get(`/api/booking/booking-types/${encodeURIComponent(link)}`);
+    return response.data?.data ?? response.data;
+  }
+}
+
+export async function getAvailableSlots(bookingTypeId: string, date: string) {
+  const response = await axiosInstance.get('/api/booking/available-slots', {
+    params: { bookingTypeId, date },
+  });
+  return Array.isArray(response.data?.data) ? response.data.data : response.data;
 }
 
 export async function createBookingType(data: any) {
@@ -42,6 +54,7 @@ export const bookingService = {
   getBookingTypes,
   getAppointments,
   getBookingTypeByLink,
+  getAvailableSlots,
   createBookingType,
   updateBookingType,
   createAppointment,

@@ -240,17 +240,24 @@ function getOperationalState(order?: PosTableOrderRecord, tableMode?: PosTableMo
 
 function openReceiptPrintWindow(order: PosTableOrderRecord | null) {
   if (!order || typeof window === 'undefined') return;
+  const escapeHtml = (value: unknown) =>
+    String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
 
-  const title = `Receipt ${order.ticketNo || order.id}`;
-  const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString() : new Date().toLocaleString();
+  const title = escapeHtml(`Receipt ${order.ticketNo || order.id}`);
+  const createdAt = escapeHtml(order.createdAt ? new Date(order.createdAt).toLocaleString() : new Date().toLocaleString());
   const rows = [
-    ['Order', order.ticketNo || order.id],
-    ['Customer', order.customerName || 'Walk-in'],
-    ['Status', order.orderStatus || 'open'],
-    ['Channel', order.channel || 'ecommerce'],
-    ['Total', `$${Number(order.totalAmount || 0).toFixed(2)}`],
-    ['Paid', `$${Number(order.paidAmount || 0).toFixed(2)}`],
-    ['Due', `$${Number(order.balanceDue || 0).toFixed(2)}`],
+    ['Order', escapeHtml(order.ticketNo || order.id)],
+    ['Customer', escapeHtml(order.customerName || 'Walk-in')],
+    ['Status', escapeHtml(order.orderStatus || 'open')],
+    ['Channel', escapeHtml(order.channel || 'ecommerce')],
+    ['Total', escapeHtml(`$${Number(order.totalAmount || 0).toFixed(2)}`)],
+    ['Paid', escapeHtml(`$${Number(order.paidAmount || 0).toFixed(2)}`)],
+    ['Due', escapeHtml(`$${Number(order.balanceDue || 0).toFixed(2)}`)],
   ];
 
   const html = `
@@ -285,7 +292,7 @@ function openReceiptPrintWindow(order: PosTableOrderRecord | null) {
         ${rows
           .map(
             ([label, value]) =>
-              `<tr><td>${String(label)}</td><td>${String(value)}</td></tr>`
+              `<tr><td>${escapeHtml(label)}</td><td>${escapeHtml(value)}</td></tr>`
           )
           .join('')}
       </table>
@@ -619,7 +626,11 @@ export function PosWorkspaceView({
   });
 
   const openShiftMutation = useMutation({
-    mutationFn: () => posService.openShift({ shopId: activeShopId, name: 'General Shift', openingCash: 200 }),
+    mutationFn: () => {
+      const shiftName = String(selectedShop?.name || activeShopId || '').trim();
+      if (!shiftName) throw new Error('Select a shop before opening a shift.');
+      return posService.openShift({ shopId: activeShopId, name: `${shiftName} Shift` });
+    },
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['pos-settings', activeShopId] }),
@@ -643,10 +654,9 @@ export function PosWorkspaceView({
   const addOrderItemMutation = useMutation({
     mutationFn: (targetOrderId: string) =>
       posService.addOrderItem(targetOrderId, {
-        name: 'Chef Special',
+        name: 'POS Item',
         quantity: 1,
-        unitPrice: 14.5,
-        note: 'Added from dashboard',
+        unitPrice: 0,
       }),
     onSuccess: invalidatePosTableQueries,
   });
@@ -682,26 +692,13 @@ export function PosWorkspaceView({
 
   const refundOrderMutation = useMutation({
     mutationFn: ({ orderId: targetOrderId, amount }: { orderId: string; amount: number }) =>
-      posService.refundOrder(targetOrderId, { amount, reason: 'Dashboard quick refund', restock: true }),
+      posService.refundOrder(targetOrderId, { amount, reason: 'POS refund', restock: true }),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['pos-table-orders', activeShopId] }),
         queryClient.invalidateQueries({ queryKey: ['pos-inventory', activeShopId] }),
         queryClient.invalidateQueries({ queryKey: ['pos-order-analytics', activeShopId] }),
       ]);
-    },
-  });
-
-  const seedDemoOrdersMutation = useMutation({
-    mutationFn: () => posService.seedDemoEcommerceOrders({ shopId: activeShopId, count: 8 }),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['pos-table-orders', activeShopId] }),
-        queryClient.invalidateQueries({ queryKey: ['pos-kds-queue', activeShopId] }),
-        queryClient.invalidateQueries({ queryKey: ['pos-cfd-snapshot', activeShopId] }),
-        queryClient.invalidateQueries({ queryKey: ['pos-order-analytics', activeShopId] }),
-      ]);
-      showToast({ message: 'Demo ecommerce orders generated.', severity: 'success' });
     },
   });
 
@@ -733,13 +730,15 @@ export function PosWorkspaceView({
   });
 
   const createMaintenanceIncidentMutation = useMutation({
-    mutationFn: () =>
-      posService.createMaintenanceIncident({
+    mutationFn: () => {
+      const shopLabel = String(selectedShop?.name || activeShopId || 'shop');
+      return posService.createMaintenanceIncident({
         shopId: activeShopId,
-        title: 'POS terminal health-check required',
+        title: `POS maintenance required (${shopLabel})`,
         severity: 'medium',
-        description: 'Generated from POS workspace maintenance quick action.',
-      }),
+        description: `Created from POS workspace at ${new Date().toISOString()}.`,
+      });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['pos-maintenance-incidents', activeShopId] });
       showToast({ message: 'Maintenance incident logged.', severity: 'success' });
@@ -751,21 +750,24 @@ export function PosWorkspaceView({
       if (retailCart.length === 0) throw new Error('Cart is empty.');
       const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId);
       const customerName = selectedCustomer?.name || 'Walk In';
-      const [firstName = 'Walk', ...restName] = customerName.split(' ');
-      const lastName = restName.join(' ') || 'Customer';
-      const email = selectedCustomer?.email || `walkin+${Date.now()}@local.pos`;
-      const phone = selectedCustomer?.phone || '0000000000';
+      const [firstName = '', ...restName] = customerName.split(' ');
+      const lastName = restName.join(' ');
+      const email = String(selectedCustomer?.email || '').trim();
+      const phone = String(selectedCustomer?.phone || '').trim();
+      if (!firstName || !lastName || !email || !phone) {
+        throw new Error('Select a customer with full name, email, and phone before POS checkout.');
+      }
 
       return commerceService.createPosOrderFromCart(activeShopId, {
         email,
         firstname: firstName,
         lastname: lastName,
         telephone: phone,
-        street: 'POS Counter',
-        city: 'Local',
-        region: 'N/A',
-        postcode: '00000',
-        countryId: 'US',
+        street: String(selectedShop?.subtitle || '').trim(),
+        city: String(selectedShop?.subtitle || '').split(',')[0]?.trim() || '',
+        region: '',
+        postcode: '',
+        countryId: '',
         items: retailCart.map((line) => ({ sku: line.sku, qty: line.qty })),
       });
     },
@@ -1388,6 +1390,11 @@ export function PosWorkspaceView({
                   })}
                 </Grid>
                 {magentoProductsQuery.isFetching ? <Alert severity="info">Loading Magento catalog...</Alert> : null}
+                {magentoProductsQuery.isError ? (
+                  <Alert severity="error">
+                    Failed to load Magento products. Check Magento integration connectivity and credentials.
+                  </Alert>
+                ) : null}
                 {filteredPosProducts.length === 0 && !magentoProductsQuery.isFetching ? (
                   <Alert severity="warning">No Magento products found for this shop context.</Alert>
                 ) : null}
@@ -1396,13 +1403,6 @@ export function PosWorkspaceView({
               ? (
                   <>
                     <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
-                      <Button
-                        variant="contained"
-                        onClick={() => seedDemoOrdersMutation.mutate()}
-                        disabled={seedDemoOrdersMutation.isPending}
-                      >
-                        Generate ecommerce day
-                      </Button>
                       <Button
                         variant="outlined"
                         onClick={() => queryClient.invalidateQueries({ queryKey: ['pos-table-orders', activeShopId] })}

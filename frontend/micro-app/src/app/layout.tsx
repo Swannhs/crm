@@ -40,6 +40,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={dancingScript.variable} suppressHydrationWarning>
+        {/* TODO(locale): derive <html lang> from active locale when server-side locale wiring is available. */}
         {getInitColorSchemeScript}
 
         <AuthProvider>

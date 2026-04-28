@@ -300,56 +300,52 @@ export const commerceService = {
   // Canonical admin commerce route is /api/magento/*.
   // This client is kept for UI compatibility while Magento is the eCommerce source of truth.
   getProductsPage: async (orgId?: string, params?: { currentPage?: number; pageSize?: number; search?: string }): Promise<ICommerceProductPage> => {
-    try {
-      const categories = await commerceService.getCategories(orgId);
-      const categoryMap = new Map(categories.map((cat) => [String(cat.id), cat.name]));
-      const response = await axios.get('/api/magento/products', {
-        ...BEST_EFFORT_AXIOS_CONFIG,
-        headers: orgId ? { 'X-Org-Id': orgId } : {},
-        params: {
-          currentPage: params?.currentPage ?? 1,
-          pageSize: params?.pageSize ?? 20,
-          search: params?.search ?? '',
-        },
-      });
-      const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
-      const readCustomAttr = (item: any, code: string) =>
-        item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === code)?.value;
+    const categories = await commerceService.getCategories(orgId);
+    const categoryMap = new Map(categories.map((cat) => [String(cat.id), cat.name]));
+    const response = await axios.get('/api/magento/products', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+      params: {
+        currentPage: params?.currentPage ?? 1,
+        pageSize: params?.pageSize ?? 20,
+        search: params?.search ?? '',
+      },
+    });
+    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
+    const readCustomAttr = (item: any, code: string) =>
+      item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === code)?.value;
 
-      const items = rows.map((item: any) => {
-        const categoryAttr = item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'category_ids')?.value;
-        const categoryIds = parseCategoryIds(categoryAttr);
-        const firstCategoryId = categoryIds[0];
-        return normalizeProduct({
-          id: item?.sku || item?.id,
-          name: item?.name,
-          sku: item?.sku,
-          description: readCustomAttr(item, 'description'),
-          categoryId: firstCategoryId,
-          categoryName: firstCategoryId ? categoryMap.get(String(firstCategoryId)) : undefined,
-          priceCents: Math.round(Number(item?.price ?? 0) * 100),
-          status: Number(item?.status) === 1 ? 'active' : 'archived',
-          variants: [
-            {
-              id: `${item?.sku || item?.id}-default`,
-              name: 'Default',
-              sku: item?.sku,
-              priceCents: Math.round(Number(item?.price ?? 0) * 100),
-              stock: Number(item?.extension_attributes?.stock_item?.qty ?? 0),
-              options: {},
-            },
-          ],
-        });
+    const items = rows.map((item: any) => {
+      const categoryAttr = item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'category_ids')?.value;
+      const categoryIds = parseCategoryIds(categoryAttr);
+      const firstCategoryId = categoryIds[0];
+      return normalizeProduct({
+        id: item?.sku || item?.id,
+        name: item?.name,
+        sku: item?.sku,
+        description: readCustomAttr(item, 'description'),
+        categoryId: firstCategoryId,
+        categoryName: firstCategoryId ? categoryMap.get(String(firstCategoryId)) : undefined,
+        priceCents: Math.round(Number(item?.price ?? 0) * 100),
+        status: Number(item?.status) === 1 ? 'active' : 'archived',
+        variants: [
+          {
+            id: `${item?.sku || item?.id}-default`,
+            name: 'Default',
+            sku: item?.sku,
+            priceCents: Math.round(Number(item?.price ?? 0) * 100),
+            stock: Number(item?.extension_attributes?.stock_item?.qty ?? 0),
+            options: {},
+          },
+        ],
       });
-      return {
-        items,
-        total: Number(response.data?.data?.total_count ?? items.length),
-        currentPage: Number(params?.currentPage ?? 1),
-        pageSize: Number(params?.pageSize ?? 20),
-      };
-    } catch {
-      return { items: [], total: 0, currentPage: Number(params?.currentPage ?? 1), pageSize: Number(params?.pageSize ?? 20) };
-    }
+    });
+    return {
+      items,
+      total: Number(response.data?.data?.total_count ?? items.length),
+      currentPage: Number(params?.currentPage ?? 1),
+      pageSize: Number(params?.pageSize ?? 20),
+    };
   },
 
   getProducts: async (orgId?: string) => {
@@ -578,38 +574,34 @@ export const commerceService = {
   },
 
   getOrders: async (orgId?: string) => {
-    try {
-      const response = await axios.get('/api/magento/orders', {
-        ...BEST_EFFORT_AXIOS_CONFIG,
-        headers: orgId ? { 'X-Org-Id': orgId } : {},
-      });
-      const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
-      return rows.map((order: any) => ({
-        id: String(order?.entity_id || order?.increment_id || ''),
-        totalAmountCents: Math.round(Number(order?.base_grand_total ?? order?.grand_total ?? 0) * 100),
-        status: String(order?.status || 'unknown'),
-        paymentStatus: String(order?.state || order?.status || 'unknown'),
-        createdAt: order?.created_at ? String(order.created_at) : undefined,
-        shippingAddress: {
-          customerName:
-            [order?.customer_firstname, order?.customer_lastname].filter(Boolean).join(' ').trim() || undefined,
-          email: order?.customer_email ? String(order.customer_email) : undefined,
-          phone: order?.billing_address?.telephone
-            ? String(order.billing_address.telephone)
-            : undefined,
-        },
-        items: Array.isArray(order?.items)
-          ? order.items.map((item: any) => ({
-            id: String(item?.item_id || ''),
-            productName: String(item?.name || ''),
-            quantity: Number(item?.qty_ordered ?? 0),
-              unitPriceCents: Math.round(Number(item?.price ?? 0) * 100),
-            }))
-          : [],
-      }));
-    } catch {
-      return [];
-    }
+    const response = await axios.get('/api/magento/orders', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
+    return rows.map((order: any) => ({
+      id: String(order?.entity_id || order?.increment_id || ''),
+      totalAmountCents: Math.round(Number(order?.base_grand_total ?? order?.grand_total ?? 0) * 100),
+      status: String(order?.status || 'unknown'),
+      paymentStatus: String(order?.state || order?.status || 'unknown'),
+      createdAt: order?.created_at ? String(order.created_at) : undefined,
+      shippingAddress: {
+        customerName:
+          [order?.customer_firstname, order?.customer_lastname].filter(Boolean).join(' ').trim() || undefined,
+        email: order?.customer_email ? String(order.customer_email) : undefined,
+        phone: order?.billing_address?.telephone
+          ? String(order.billing_address.telephone)
+          : undefined,
+      },
+      items: Array.isArray(order?.items)
+        ? order.items.map((item: any) => ({
+          id: String(item?.item_id || ''),
+          productName: String(item?.name || ''),
+          quantity: Number(item?.qty_ordered ?? 0),
+            unitPriceCents: Math.round(Number(item?.price ?? 0) * 100),
+          }))
+        : [],
+    }));
   },
 
   createOrder: async (orgId: string, data: any) => {
@@ -657,26 +649,29 @@ export const commerceService = {
       city: input.city,
       region: input.region,
       postcode: input.postcode,
-      country_id: input.countryId || 'US',
+      country_id: String(input.countryId || '').trim(),
     };
-
-    let shippingMethod = { carrier_code: 'flatrate', method_code: 'flatrate' };
-    try {
-      const estimateRes = await axios.post(
-        `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/estimate-shipping-methods`,
-        { payload: { address } },
-        { ...BEST_EFFORT_AXIOS_CONFIG, headers }
-      );
-      const methods = Array.isArray(estimateRes.data?.data) ? estimateRes.data.data : Array.isArray(estimateRes.data) ? estimateRes.data : [];
-      if (methods.length > 0) {
-        shippingMethod = {
-          carrier_code: String(methods[0]?.carrier_code || 'flatrate'),
-          method_code: String(methods[0]?.method_code || 'flatrate'),
-        };
-      }
-    } catch {
-      // fallback to flatrate defaults
+    if (!address.country_id) {
+      throw new Error('countryId is required for POS checkout.');
     }
+
+    const estimateRes = await axios.post(
+      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/estimate-shipping-methods`,
+      { payload: { address } },
+      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+    );
+    const methods = Array.isArray(estimateRes.data?.data)
+      ? estimateRes.data.data
+      : Array.isArray(estimateRes.data)
+        ? estimateRes.data
+        : [];
+    if (methods.length === 0 || !methods[0]?.carrier_code || !methods[0]?.method_code) {
+      throw new Error('No Magento shipping method available for the provided address.');
+    }
+    const shippingMethod = {
+      carrier_code: String(methods[0].carrier_code),
+      method_code: String(methods[0].method_code),
+    };
 
     await axios.post(
       `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/shipping-information`,
@@ -693,19 +688,19 @@ export const commerceService = {
       { ...BEST_EFFORT_AXIOS_CONFIG, headers }
     );
 
-    let paymentMethod = 'checkmo';
-    try {
-      const paymentRes = await axios.get(
-        `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/payment-methods`,
-        { ...BEST_EFFORT_AXIOS_CONFIG, headers }
-      );
-      const methods = Array.isArray(paymentRes.data?.data) ? paymentRes.data.data : Array.isArray(paymentRes.data) ? paymentRes.data : [];
-      if (methods.length > 0 && methods[0]?.code) {
-        paymentMethod = String(methods[0].code);
-      }
-    } catch {
-      // fallback to checkmo
+    const paymentRes = await axios.get(
+      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/payment-methods`,
+      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+    );
+    const paymentMethods = Array.isArray(paymentRes.data?.data)
+      ? paymentRes.data.data
+      : Array.isArray(paymentRes.data)
+        ? paymentRes.data
+        : [];
+    if (paymentMethods.length === 0 || !paymentMethods[0]?.code) {
+      throw new Error('No Magento payment method available for checkout.');
     }
+    const paymentMethod = String(paymentMethods[0].code);
 
     const placeOrderRes = await axios.post(
       `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/payment-information`,
@@ -724,17 +719,13 @@ export const commerceService = {
   },
 
   getCategories: async (orgId?: string) => {
-    try {
-      const response = await axios.get('/api/magento/rest/all/V1/categories', {
-        ...BEST_EFFORT_AXIOS_CONFIG,
-        headers: orgId ? { 'X-Org-Id': orgId } : {},
-      });
-      const root = response.data?.data ?? {};
-      const rows = Array.isArray(root?.children_data) ? root.children_data : [];
-      return flattenMagentoCategories(rows);
-    } catch {
-      return [];
-    }
+    const response = await axios.get('/api/magento/rest/all/V1/categories', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    const root = response.data?.data ?? {};
+    const rows = Array.isArray(root?.children_data) ? root.children_data : [];
+    return flattenMagentoCategories(rows);
   },
 
   createCategory: async (orgId: string, data: any) => {

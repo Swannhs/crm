@@ -28,11 +28,6 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
-function formatInvoiceNumber(id?: string, index: number = 0) {
-  if (!id) return `INV-${String(index + 1).padStart(4, '0')}`;
-  return `INV-${id.slice(0, 8).toUpperCase()}`;
-}
-
 function normalizeOdooInvoice(invoice: any, index: number = 0): IInvoice {
   const id = String(invoice?.id ?? invoice?._id ?? `invoice-${index}`);
   const partnerName = Array.isArray(invoice?.partner_id)
@@ -44,7 +39,7 @@ function normalizeOdooInvoice(invoice: any, index: number = 0): IInvoice {
   return {
     _id: id,
     id,
-    no: invoice?.name ?? formatInvoiceNumber(id, index),
+    no: String(invoice?.name ?? '').trim() || 'Unnumbered invoice',
     customerName: partnerName || 'Unknown customer',
     totalDue: amountResidual,
     totalAmount: amountTotal,

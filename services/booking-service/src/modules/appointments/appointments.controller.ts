@@ -1,11 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AppointmentsService } from './appointments.service.js';
 
 @ApiTags('appointments')
 @Controller('v1/appointments')
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  private readonly appointmentsService: AppointmentsService;
+
+  constructor(@Inject(AppointmentsService) appointmentsService: AppointmentsService) {
+    this.appointmentsService = appointmentsService;
+    this.create = this.create.bind(this);
+    this.createPublic = this.createPublic.bind(this);
+    this.findAll = this.findAll.bind(this);
+    this.getAvailableSlots = this.getAvailableSlots.bind(this);
+    this.findOne = this.findOne.bind(this);
+    this.update = this.update.bind(this);
+    this.remove = this.remove.bind(this);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new appointment' })

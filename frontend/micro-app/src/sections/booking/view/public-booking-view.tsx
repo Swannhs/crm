@@ -13,6 +13,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
 import { LoadingButton } from '@mui/lab';
 
 import { bookingService } from 'src/services/booking-service';
@@ -32,12 +33,12 @@ export function PublicBookingView({ link }: Props) {
   const [step, setStep] = useState(1); // 1: Date/Time, 2: Info, 3: Success
   const [customerInfo, setCustomerInfo] = useState({ name: '', email: '', notes: '' });
 
-  const { data: bookingType, isLoading: typeLoading } = useQuery({
+  const { data: bookingType, isLoading: typeLoading, error: bookingTypeError } = useQuery({
     queryKey: ['booking-type', link],
     queryFn: () => bookingService.getBookingTypeByLink(link),
   });
 
-  const { data: slots, isLoading: slotsLoading } = useQuery({
+  const { data: slots, isLoading: slotsLoading, error: slotsError } = useQuery({
     queryKey: ['available-slots', bookingType?.id, dayjs(selectedDate).format('YYYY-MM-DD')],
     queryFn: () => bookingService.getAvailableSlots(bookingType.id, dayjs(selectedDate).format('YYYY-MM-DD')),
     enabled: Boolean(bookingType?.id),
@@ -57,7 +58,6 @@ export function PublicBookingView({ link }: Props) {
 
   const handleBooking = () => {
     mutation.mutate({
-      orgId: bookingType.orgId,
       bookingTypeId: bookingType.id,
       startTime: selectedSlot.start,
       name: customerInfo.name,
@@ -67,6 +67,13 @@ export function PublicBookingView({ link }: Props) {
   };
 
   if (typeLoading) return <Box sx={{ p: 5, textAlign: 'center' }}><CircularProgress /></Box>;
+  if (bookingTypeError) {
+    return (
+      <Box sx={{ p: 5, textAlign: 'center' }}>
+        <Alert severity="error">Unable to load booking type. Please try again later.</Alert>
+      </Box>
+    );
+  }
   if (!bookingType) return <Box sx={{ p: 5, textAlign: 'center' }}><Typography variant="h4">Booking type not found</Typography></Box>;
 
   if (step === 3) {
@@ -133,6 +140,7 @@ export function PublicBookingView({ link }: Props) {
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
+                  {slotsError ? <Alert severity="error">Failed to load available slots for this date.</Alert> : null}
                   {slotsLoading ? (
                     <Box sx={{ textAlign: 'center', py: 5 }}><CircularProgress /></Box>
                   ) : slots?.length === 0 ? (

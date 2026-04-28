@@ -25,42 +25,52 @@ function notImplemented(res: Response, meta: { module: string; path: string; met
 }
 
 async function proxyTo(req: Request, res: Response, opts: { baseUrl: string; targetPath: string }) {
-  const url = new URL(opts.targetPath, opts.baseUrl);
+  try {
+    const url = new URL(opts.targetPath, opts.baseUrl);
 
-  const headers = new Headers();
-  const hopByHop = new Set(["connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade", "host"]);
+    const headers = new Headers();
+    const hopByHop = new Set(["connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade", "host"]);
 
-  for (const [k, v] of Object.entries(req.headers)) {
-    if (!k) continue;
-    if (hopByHop.has(k.toLowerCase())) continue;
-    headers.set(k, Array.isArray(v) ? v.join(",") : String(v));
-  }
+    for (const [k, v] of Object.entries(req.headers)) {
+      if (!k) continue;
+      if (hopByHop.has(k.toLowerCase())) continue;
+      headers.set(k, Array.isArray(v) ? v.join(",") : String(v));
+    }
 
-  const init: RequestInit = { method: req.method, headers };
+    const init: RequestInit = { method: req.method, headers };
 
-  if (!["GET", "HEAD"].includes(req.method)) {
-    if (req.is("application/json")) {
-      init.body = JSON.stringify(req.body ?? {});
-      headers.set("content-type", "application/json");
-    } else if (req.is("application/x-www-form-urlencoded")) {
-      init.body = new URLSearchParams(req.body ?? {}).toString();
-      headers.set("content-type", "application/x-www-form-urlencoded");
-    } else {
-      res.status(415).json({ message: "Unsupported Content-Type for proxy." });
-      return;
+    if (!["GET", "HEAD"].includes(req.method)) {
+      if (req.is("application/json")) {
+        init.body = JSON.stringify(req.body ?? {});
+        headers.set("content-type", "application/json");
+      } else if (req.is("application/x-www-form-urlencoded")) {
+        init.body = new URLSearchParams(req.body ?? {}).toString();
+        headers.set("content-type", "application/x-www-form-urlencoded");
+      } else {
+        res.status(415).json({ message: "Unsupported Content-Type for proxy." });
+        return;
+      }
+    }
+
+    const upstream = await fetch(url, init);
+    res.status(upstream.status);
+
+    upstream.headers.forEach((value: string, key: string) => {
+      if (hopByHop.has(key.toLowerCase())) return;
+      res.setHeader(key, value);
+    });
+
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.send(buf);
+  } catch (error: any) {
+    logger.error({ err: error, baseUrl: opts.baseUrl, targetPath: opts.targetPath }, "Proxy request failed");
+    if (!res.headersSent) {
+      res.status(502).json({
+        message: "Upstream service unavailable",
+        target: opts.targetPath,
+      });
     }
   }
-
-  const upstream = await fetch(url, init);
-  res.status(upstream.status);
-
-  upstream.headers.forEach((value: string, key: string) => {
-    if (hopByHop.has(key.toLowerCase())) return;
-    res.setHeader(key, value);
-  });
-
-  const buf = Buffer.from(await upstream.arrayBuffer());
-  res.send(buf);
 }
 
 function withQuery(req: Request, targetPath: string) {
@@ -677,6 +687,20 @@ async function handleApiCompat(req: Request, res: Response) {
 
     if (module === "booking") {
       if (req.method === "GET" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/booking-types" });
+      if (req.method === "GET" && /^\/booking-types\/[^/]+$/.test(rest)) {
+        const bookingTypeIdOrLink = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl,
+          targetPath: `/v1/booking-types/${encodeURIComponent(bookingTypeIdOrLink)}`,
+        });
+      }
+      if (req.method === "GET" && /^\/public\/booking-types\/[^/]+$/.test(rest)) {
+        const bookingTypeLink = rest.split("/")[3];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl,
+          targetPath: `/v1/booking-types/${encodeURIComponent(bookingTypeLink)}`,
+        });
+      }
       if (req.method === "POST" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/booking-types" });
       if (req.method === "GET" && rest === "/appointments") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments" });
       if (req.method === "POST" && rest === "/appointments") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments" });
@@ -907,6 +931,238 @@ async function handleApiCompat(req: Request, res: Response) {
       });
     }
 
+    if (module === "dashboard") {
+      const range = String(req.query.range ?? "30d");
+      const monthsByRange: Record<string, number> = { "7d": 1, "30d": 1, "90d": 3, "180d": 6 };
+      const months = monthsByRange[range] ?? 1;
+
+      const magentoOrdersUrl = toAbsoluteUrl(
+        API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
+        "/api/v1/magento/orders?pageSize=100&currentPage=1"
+      );
+      const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
+      const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
+      const contactsAnalyticsUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/contacts/analytics");
+      const bookingsUrl = toAbsoluteUrl(API_ROUTER_CONFIG.bookingServiceBaseUrl, "/v1/appointments");
+
+      if (req.method === "GET" && rest === "/overview") {
+        const [billingSummaryRes, contactsAnalyticsRes, magentoRes, odooRes, crmRes, bookingsRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
+          fetchUpstreamJsonSafe(req, contactsAnalyticsUrl),
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooCrmUrl),
+          fetchUpstreamJsonSafe(req, bookingsUrl),
+        ]);
+
+        const invoices = Array.isArray(billingSummaryRes.data?.data) ? billingSummaryRes.data.data : [];
+        const contactsAnalytics = contactsAnalyticsRes.data ?? {};
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+        const bookings = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+        const totals = invoiceTotals(invoices);
+        const overdueCount = invoices.filter((inv: any) => {
+          const dueDate = String(inv?.invoice_date_due ?? "");
+          return dueDate && toNum(inv?.amount_residual) > 0 && new Date(dueDate).getTime() < Date.now();
+        }).length;
+        const totalRevenue = magentoItems.reduce((sum: number, order: any) => sum + Number(order?.grand_total ?? 0), 0)
+          + odooItems.reduce((sum: number, order: any) => sum + Number(order?.amount_total ?? 0), 0);
+
+        return res.json({
+          data: {
+            range,
+            kpis: {
+              contactsTotal: Number(contactsAnalytics?.totalContacts ?? 0),
+              leadsTotal: crmItems.filter((lead: any) => Number(lead?.probability ?? 0) >= 70).length,
+              opportunitiesTotal: crmItems.length,
+              revenueTotal: Number(totals.totalInvoiced ?? totalRevenue),
+              outstandingTotal: Number(totals.totalOutstanding ?? 0),
+              orderCount: magentoItems.length + odooItems.length,
+              bookingCount: bookings.length,
+              overdueCount,
+            },
+            sourceStatus: {
+              odooContacts: { ok: contactsAnalyticsRes.ok, error: contactsAnalyticsRes.error },
+              odooBilling: { ok: billingSummaryRes.ok, error: billingSummaryRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              bookings: { ok: bookingsRes.ok, error: bookingsRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/graphs") {
+        const metric = String(req.query.metric ?? "revenue");
+        if (metric === "revenue") {
+          const invoices = await fetchAllOdooInvoicesForGraph(req, { months, maxPages: 20 });
+          const monthKeys: string[] = [];
+          const cursor = new Date();
+          cursor.setDate(1);
+          for (let i = months - 1; i >= 0; i -= 1) {
+            const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
+            monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+          }
+          const monthly = monthKeys.map((key) => {
+            const items = invoices.filter((inv: any) => {
+              const rawDate = inv?.invoice_date || inv?.create_date || inv?.invoice_date_due;
+              if (!rawDate) return false;
+              const d = new Date(rawDate);
+              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` === key;
+            });
+            const invoiced = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_total), 0);
+            const outstanding = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_residual), 0);
+            const paid = Math.max(0, invoiced - outstanding);
+            return { key, invoiced, paid, outstanding, count: items.length };
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: monthKeys,
+              series: [
+                { name: "Invoiced", data: monthly.map((m) => m.invoiced) },
+                { name: "Paid", data: monthly.map((m) => m.paid) },
+                { name: "Outstanding", data: monthly.map((m) => m.outstanding) },
+              ],
+            },
+          });
+        }
+
+        if (metric === "contacts") {
+          const contactsAnalytics = await fetchUpstreamJsonSafe(req, contactsAnalyticsUrl);
+          const monthly = Array.isArray(contactsAnalytics.data?.monthlyCreated) ? contactsAnalytics.data.monthlyCreated : [];
+          return res.json({
+            data: {
+              metric,
+              categories: monthly.map((item: any) => item.month),
+              series: [{ name: "Contacts", data: monthly.map((item: any) => Number(item.count ?? 0)) }],
+              meta: { upstream: { odooContacts: { ok: contactsAnalytics.ok, error: contactsAnalytics.error } } },
+            },
+          });
+        }
+
+        if (metric === "orders") {
+          const [magentoRes, odooRes] = await Promise.all([
+            fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+            fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          ]);
+          const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+          const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+          const bucket = new Map<string, number>();
+          [...magentoItems, ...odooItems].forEach((order: any) => {
+            const status = String(order?.status ?? order?.state ?? "unknown").toLowerCase();
+            bucket.set(status, (bucket.get(status) ?? 0) + 1);
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: Array.from(bucket.keys()),
+              series: [{ name: "Orders", data: Array.from(bucket.values()) }],
+            },
+          });
+        }
+
+        if (metric === "pipeline") {
+          const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+          const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+          const bucket = new Map<string, number>();
+          crmItems.forEach((lead: any) => {
+            const stage = String(Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "Unstaged");
+            bucket.set(stage, (bucket.get(stage) ?? 0) + 1);
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: Array.from(bucket.keys()),
+              series: [{ name: "Pipeline", data: Array.from(bucket.values()) }],
+            },
+          });
+        }
+
+        if (metric === "bookings") {
+          const bookingsRes = await fetchUpstreamJsonSafe(req, bookingsUrl);
+          const bookings = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+          const bucket = new Map<string, number>();
+          bookings.forEach((b: any) => {
+            const raw = b?.startTime;
+            if (!raw) return;
+            const d = new Date(raw);
+            const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            bucket.set(key, (bucket.get(key) ?? 0) + 1);
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: Array.from(bucket.keys()),
+              series: [{ name: "Bookings", data: Array.from(bucket.values()) }],
+            },
+          });
+        }
+
+        return res.status(400).json({ message: "Unsupported graph metric." });
+      }
+
+      if (req.method === "GET" && rest === "/activity") {
+        const limit = Math.max(1, Math.min(50, Number(req.query.limit ?? 12)));
+        const [contactsRes, magentoRes, invoicesRes, bookingsRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/contacts?page=1&pageSize=30")),
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=30")),
+          fetchUpstreamJsonSafe(req, bookingsUrl),
+        ]);
+        const items: any[] = [];
+        (Array.isArray(contactsRes.data?.data) ? contactsRes.data.data : []).forEach((c: any) => {
+          items.push({ id: `contact-${c.id}`, type: "contact", title: `New contact: ${c.name ?? "Contact"}`, subtitle: c.email ?? c.phone ?? "", timestamp: c.create_date || c.createdAt || null });
+        });
+        (Array.isArray(invoicesRes.data?.data) ? invoicesRes.data.data : []).forEach((inv: any) => {
+          items.push({ id: `invoice-${inv.id}`, type: "invoice", title: `Invoice ${inv.name ?? inv.id}`, subtitle: `${toNum(inv.amount_total).toFixed(2)} • ${inv.state ?? "draft"}`, timestamp: inv.create_date || inv.invoice_date || null });
+        });
+        (Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : []).forEach((order: any) => {
+          items.push({ id: `order-${order.entity_id ?? order.increment_id}`, type: "order", title: `Order ${order.increment_id ?? order.entity_id}`, subtitle: order.customer_email ?? "", timestamp: order.created_at || null });
+        });
+        (Array.isArray(bookingsRes.data) ? bookingsRes.data : []).forEach((b: any) => {
+          items.push({ id: `booking-${b.id}`, type: "booking", title: `Appointment ${b.status ?? "scheduled"}`, subtitle: b.email ?? b.name ?? "", timestamp: b.createdAt || b.startTime || null });
+        });
+        const rows = items
+          .filter((i) => i.timestamp)
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, limit);
+        return res.json({ data: rows });
+      }
+
+      if (req.method === "GET" && rest === "/attention") {
+        const [billingSummaryRes, reconciliationRes, bookingsRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
+          fetchUpstreamJsonSafe(req, bookingsUrl),
+        ]);
+        const invoices = Array.isArray(billingSummaryRes.data?.data) ? billingSummaryRes.data.data : [];
+        const overdueCount = invoices.filter((inv: any) => {
+          const dueDate = String(inv?.invoice_date_due ?? "");
+          return dueDate && toNum(inv?.amount_residual) > 0 && new Date(dueDate).getTime() < Date.now();
+        }).length;
+        const bookings = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+        const reconciliationInvoices = Array.isArray(reconciliationRes.data?.data) ? reconciliationRes.data.data : [];
+        const unmatchedCount = reconciliationInvoices.filter((inv: any) => !inv?.invoice_origin && !inv?.ref).length;
+        return res.json({
+          data: [
+            { id: "overdue", severity: overdueCount > 0 ? "error" : "success", title: "Overdue invoices", count: overdueCount, actionUrl: "/dashboard/billing/" },
+            { id: "unmatched", severity: unmatchedCount > 0 ? "warning" : "success", title: "Unmatched invoice/order links", count: unmatchedCount, actionUrl: "/dashboard/billing/?view=graph" },
+            { id: "bookings", severity: "info", title: "Upcoming appointments", count: bookings.length, actionUrl: "/dashboard/calendar/" },
+          ],
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: GET /overview, GET /graphs, GET /activity, GET /attention",
+      });
+    }
+
     // Fallback: proxy to legacy monolith
     const path = `/api/${module}${rest}`;
     logger.info({ module, path }, "Proxying unmigrated route to legacy monolith");
@@ -917,8 +1173,22 @@ async function handleApiCompat(req: Request, res: Response) {
   }
 }
 
-app.all("/api/:module", handleApiCompat);
-app.all("/api/:module/*", handleApiCompat);
+app.all("/api/:module", (req, res) => {
+  void handleApiCompat(req, res).catch((err) => {
+    logger.error({ err, path: req.path }, "Unhandled API router error");
+    if (!res.headersSent) {
+      res.status(502).json({ message: "Upstream error", module: req.params.module, path: req.path });
+    }
+  });
+});
+app.all("/api/:module/*", (req, res) => {
+  void handleApiCompat(req, res).catch((err) => {
+    logger.error({ err, path: req.path }, "Unhandled API router error");
+    if (!res.headersSent) {
+      res.status(502).json({ message: "Upstream error", module: req.params.module, path: req.path });
+    }
+  });
+});
 
 const port = Number(process.env.PORT || 7001);
 app.listen(port, "0.0.0.0", () => logger.info({ port }, "api-router-service listening (TS)"));

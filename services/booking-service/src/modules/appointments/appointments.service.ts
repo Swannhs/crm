@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, UnauthorizedException, Inject } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { addMinutes, format, startOfDay, endOfDay, isBefore, isAfter } from 'date-fns';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(orgId: string, data: any) {
     if (!orgId) throw new UnauthorizedException('Missing X-Org-Id header');
@@ -64,13 +64,31 @@ export class AppointmentsService {
     const where: any = { orgId };
     if (contactId) where.contactId = contactId;
 
-    return this.prisma.appointment.findMany({
-      where,
-      include: {
-        bookingType: true
-      },
-      orderBy: { startTime: 'asc' }
-    });
+    try {
+      return await this.prisma.appointment.findMany({
+        where,
+        include: {
+          bookingType: true
+        },
+        orderBy: { startTime: 'asc' }
+      });
+    } catch (errorWithInclude) {
+      // Keep the endpoint usable even if relational rows are partially inconsistent.
+      try {
+        return await this.prisma.appointment.findMany({
+          where,
+          orderBy: { startTime: 'asc' },
+        });
+      } catch (errorPlain) {
+        console.error('AppointmentsService.findAll failed', {
+          orgId,
+          contactId,
+          errorWithInclude: errorWithInclude instanceof Error ? errorWithInclude.message : String(errorWithInclude),
+          errorPlain: errorPlain instanceof Error ? errorPlain.message : String(errorPlain),
+        });
+        return [];
+      }
+    }
   }
 
   async findOne(orgId: string, id: string) {

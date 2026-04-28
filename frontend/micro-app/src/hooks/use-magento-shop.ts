@@ -37,7 +37,12 @@ export function useMagentoCreateProduct(opts: { orgId: string; invalidateKeys?: 
   return useMutation({
     mutationFn: (values: ProductFormValues) => commerceService.createProduct(opts.orgId, values),
     onSuccess: async () => {
-      const keys = opts.invalidateKeys ?? [['commerce-products']];
+      const keys = opts.invalidateKeys ?? [
+        ['magento-products', opts.orgId],
+        ['magento-categories', opts.orgId],
+        ['commerce-products'],
+        ['pos-magento-products', opts.orgId],
+      ];
       await Promise.all(keys.map((key) => queryClient.invalidateQueries({ queryKey: key })));
     },
   });
@@ -48,7 +53,12 @@ export function useMagentoUpdateProduct(opts: { orgId: string; sku: string; inva
   return useMutation({
     mutationFn: (values: ProductFormValues) => commerceService.updateProduct(opts.orgId, opts.sku, values),
     onSuccess: async () => {
-      const keys = opts.invalidateKeys ?? [['commerce-products']];
+      const keys = opts.invalidateKeys ?? [
+        ['magento-products', opts.orgId],
+        ['magento-categories', opts.orgId],
+        ['commerce-products'],
+        ['pos-magento-products', opts.orgId],
+      ];
       await Promise.all(keys.map((key) => queryClient.invalidateQueries({ queryKey: key })));
     },
   });
@@ -59,7 +69,12 @@ export function useMagentoDeleteProduct(opts: { orgId: string; invalidateKeys?: 
   return useMutation({
     mutationFn: (sku: string) => commerceService.deleteProduct(opts.orgId, sku),
     onSuccess: async () => {
-      const keys = opts.invalidateKeys ?? [['commerce-products']];
+      const keys = opts.invalidateKeys ?? [
+        ['magento-products', opts.orgId],
+        ['magento-categories', opts.orgId],
+        ['commerce-products'],
+        ['pos-magento-products', opts.orgId],
+      ];
       await Promise.all(keys.map((key) => queryClient.invalidateQueries({ queryKey: key })));
     },
   });
@@ -70,4 +85,3 @@ export function useMagentoUploadProductImages() {
     mutationFn: async (files: File[]) => Promise.all(files.map((file) => commerceService.uploadProductImage(file))),
   });
 }
-

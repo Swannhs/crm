@@ -35,6 +35,19 @@ export type IContactAnalyticsResponse = {
 };
 
 const ODOO_WRITE_DEPRECATED_MESSAGE = 'Odoo now owns this workflow. Manage it in Odoo.';
+const mapContactWritePayload = (data: any) => {
+  const payload: Record<string, any> = {
+    name: data?.name ?? data?.fullName,
+    email: data?.email,
+    phone: data?.phone,
+    mobile: data?.mobile,
+    street: data?.street,
+    city: data?.city,
+    vat: data?.vat,
+    is_company: data?.is_company ?? data?.isCompany,
+  };
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined));
+};
 
 const STATUS_TYPE_MAP: Record<string, string> = {
   lead: 'Lead',
@@ -124,14 +137,8 @@ export const contactService = {
   },
 
   getContact: async (id: string) => {
-    const response = await axios.get('/api/odoo/contacts', {
-      params: {
-        page: 1,
-        pageSize: 1,
-        search: id,
-      },
-    });
-    const [contact] = Array.isArray(response.data?.data) ? response.data.data : [];
+    const response = await axios.get(`/api/odoo/contacts/${encodeURIComponent(id)}`);
+    const contact = response.data?.data ?? response.data;
     return contact ? normalizeOdooContact(contact) : null;
   },
 
@@ -160,30 +167,13 @@ export const contactService = {
   },
 
   createContact: async (data: any) => {
-    const payload = {
-      ...data,
-      name: data.name ?? data.fullName,
-      is_company: data.is_company ?? data.isCompany,
-    };
-    delete (payload as any).fullName;
-    delete (payload as any).isCompany;
-    delete (payload as any).contactType;
-    delete (payload as any).status;
-
+    const payload = mapContactWritePayload(data);
     const response = await axios.post('/api/odoo/contacts', payload);
     return response.data;
   },
 
   updateContact: async (id: string, data: any) => {
-    const payload = {
-      ...data,
-      name: data.name ?? data.fullName,
-      is_company: data.is_company ?? data.isCompany,
-    };
-    delete (payload as any).fullName;
-    delete (payload as any).isCompany;
-    delete (payload as any).contactType;
-
+    const payload = mapContactWritePayload(data);
     const response = await axios.put(`/api/odoo/contacts/${id}`, payload);
     return response.data;
   },
