@@ -315,7 +315,7 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
   }
 
   const isEmployee = contact?.contactType?.includes('Employee');
-  const isClient = contact?.contactType?.includes('Client');
+  const isClient = contact?.contactType?.includes('Member');
 
   return (
     <DashboardContent maxWidth="xl">
@@ -370,7 +370,7 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
                 {contact.status || 'active'}
               </Label>
               <Label color="info" variant="soft">
-                {contact.contactType?.[0] || 'Client'}
+                {contact.contactType?.[0] || 'Member'}
               </Label>
             </Stack>
 

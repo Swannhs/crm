@@ -8,6 +8,11 @@ export type IContact = {
   fullName: string;
   email: string;
   phone: string;
+  mobile?: string;
+  isCompany?: boolean;
+  street?: string;
+  city?: string;
+  vat?: string;
   status: string;
   contactType: string[];
   photo?: string;
@@ -31,16 +36,41 @@ export type IContactAnalyticsResponse = {
 
 const ODOO_WRITE_DEPRECATED_MESSAGE = 'Odoo now owns this workflow. Manage it in Odoo.';
 
+const STATUS_TYPE_MAP: Record<string, string> = {
+  lead: 'Lead',
+  member: 'Member',
+  client: 'Client',
+  qualified: 'Member',
+  vendor: 'Vendor',
+  employee: 'Employee',
+};
+
 const normalizeOdooContact = (contact: any): IContact => {
   const id = String(contact?.id ?? contact?._id ?? '');
+  const rawStatus = String(contact?.status ?? '').toLowerCase();
+  const isEmployee = Boolean(contact?.employee);
+  const supplierRank = Number(contact?.supplier_rank ?? 0);
+
+  let normalizedType = STATUS_TYPE_MAP[rawStatus];
+  if (!normalizedType) {
+    if (isEmployee) normalizedType = 'Employee';
+    else if (supplierRank > 0) normalizedType = 'Vendor';
+    else normalizedType = 'Member';
+  }
+
   return {
     _id: id,
     id,
     fullName: contact?.name ?? contact?.fullName ?? 'Unnamed contact',
     email: contact?.email ?? '',
     phone: contact?.phone ?? contact?.mobile ?? '',
-    status: contact?.status ?? 'active',
-    contactType: [contact?.isCompany ? 'Company' : 'Client'],
+    mobile: contact?.mobile ?? '',
+    isCompany: Boolean(contact?.is_company ?? contact?.isCompany ?? false),
+    street: contact?.street ?? '',
+    city: contact?.city ?? '',
+    vat: contact?.vat ?? '',
+    status: contact?.status ?? 'new',
+    contactType: [normalizedType],
     createdAt: contact?.createdAt ?? contact?.create_date ?? new Date().toISOString(),
   };
 };
@@ -133,8 +163,10 @@ export const contactService = {
     const payload = {
       ...data,
       name: data.name ?? data.fullName,
+      is_company: data.is_company ?? data.isCompany,
     };
     delete (payload as any).fullName;
+    delete (payload as any).isCompany;
     delete (payload as any).contactType;
     delete (payload as any).status;
 
@@ -146,18 +178,19 @@ export const contactService = {
     const payload = {
       ...data,
       name: data.name ?? data.fullName,
+      is_company: data.is_company ?? data.isCompany,
     };
     delete (payload as any).fullName;
+    delete (payload as any).isCompany;
     delete (payload as any).contactType;
 
     const response = await axios.put(`/api/odoo/contacts/${id}`, payload);
     return response.data;
   },
 
-  deleteContact: async (ids: string[]) => {
-    // Note: If Odoo supports batch delete, we can pass the array. 
-    // For now, we delete one by one or assume the backend handles the array.
-    const promises = ids.map(id => axios.delete(`/api/odoo/contacts/${id}`));
+  deleteContact: async (ids: string | string[]) => {
+    const idList = Array.isArray(ids) ? ids : [ids];
+    const promises = idList.map((id) => axios.delete(`/api/odoo/contacts/${id}`));
     await Promise.all(promises);
   },
 

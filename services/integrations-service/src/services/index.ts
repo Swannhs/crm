@@ -35,8 +35,8 @@ import type {
   ImageAssetInput
 } from '../types/index.js';
 
-const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL || 'http://ms-magento-inegration-service:7210/api';
-const ODOO_SERVICE_URL = process.env.ODOO_INTEGRATION_SERVICE_URL || 'http://ms-odoo-integration-service:7200';
+const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL || 'http://magento-inegration-service:7210/api/v1/magento';
+const ODOO_SERVICE_URL = process.env.ODOO_INTEGRATION_SERVICE_URL || 'http://odoo-integration-service:7200';
 
 export class IntegrationConnectionService {
   private repo = new IntegrationConnectionRepository();

@@ -127,4 +127,9 @@ if [ -f src/index.ts ]; then
   exec "$WORKSPACE_DIR/node_modules/.bin/tsx" src/index.ts
 fi
 
-exec corepack yarn dev
+if [ -f src/main.ts ]; then
+  exec "$WORKSPACE_DIR/node_modules/.bin/tsx" src/main.ts
+fi
+
+echo "No supported entrypoint found for ${SERVICE_NAME}. Expected src/index.ts or src/main.ts." >&2
+exit 1

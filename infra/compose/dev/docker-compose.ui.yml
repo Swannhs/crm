@@ -3,7 +3,7 @@ services:
     build:
       context: ../../../frontend/micro-app
       dockerfile: docker/Dockerfile.dev
-    container_name: ms-frontend
+    container_name: frontend
     volumes:
       - ../../../frontend/micro-app:/app
 

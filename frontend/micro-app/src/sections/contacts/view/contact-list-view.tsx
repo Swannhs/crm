@@ -144,9 +144,9 @@ export function ContactListView() {
 
   // Summary stats (global, not tab-dependent)
   const totalContacts = summaryContacts.length;
-  const leadCount = summaryContacts.filter((c: any) => c.contactType?.[0] === 'Lead' || c.status === 'lead').length;
-  const clientCount = summaryContacts.filter((c: any) => c.contactType?.[0] === 'Client' || c.contactType?.[0] === 'Company' || !c.contactType).length;
-  const activeCount = summaryContacts.filter((c: any) => c.status === 'active' || !c.status).length;
+  const leadCount = summaryContacts.filter((c: any) => String(c.contactType?.[0] || '').toLowerCase() === 'lead' || c.status === 'lead').length;
+  const memberCount = summaryContacts.filter((c: any) => String(c.contactType?.[0] || '').toLowerCase() === 'member' || c.status === 'member').length;
+  const employeeCount = summaryContacts.filter((c: any) => String(c.contactType?.[0] || '').toLowerCase() === 'employee' || c.status === 'employee').length;
 
   const methods = useForm({
     resolver: zodResolver(NewContactSchema),
@@ -318,25 +318,27 @@ export function ContactListView() {
           <SummaryCard title="Active Leads" count={leadCount} icon="solar:user-plus-bold" color="warning" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <SummaryCard title="Clients" count={clientCount} icon="solar:medal-star-bold" color="info" />
+          <SummaryCard title="Members" count={memberCount} icon="solar:medal-star-bold" color="info" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <SummaryCard title="Recently Active" count={activeCount} icon="solar:history-bold" color="success" />
+          <SummaryCard title="Employees" count={employeeCount} icon="solar:history-bold" color="success" />
         </Grid>
       </Grid>
 
-      <Tabs
-        value={currentTab}
-        onChange={(e, val) => setCurrentTab(val)}
-        sx={{ mb: 3 }}
-      >
-        <Tab label="All" value="all" />
-        <Tab label="Leads" value="lead" />
-        <Tab label="Members" value="member" />
-        <Tab label="Clients" value="client" />
-        <Tab label="Vendors" value="vendor" />
-        <Tab label="Employees" value="employee" />
-      </Tabs>
+      {viewMode !== 'kanban' && (
+        <Tabs
+          value={currentTab}
+          onChange={(e, val) => setCurrentTab(val)}
+          sx={{ mb: 3 }}
+        >
+          <Tab label="All" value="all" />
+          <Tab label="Leads" value="lead" />
+          <Tab label="Members" value="member" />
+          <Tab label="Clients" value="client" />
+          <Tab label="Vendors" value="vendor" />
+          <Tab label="Employees" value="employee" />
+        </Tabs>
+      )}
 
       {viewMode === 'kanban' ? (
         <ContactKanban 
@@ -426,8 +428,8 @@ export function ContactListView() {
                              </Stack>
                           </TableCell>
                           <TableCell>
-                             <Label variant="soft" color={row.contactType?.[0] === 'Company' ? 'primary' : 'info'}>
-                                {row.contactType?.[0] || 'Client'}
+                             <Label variant="soft" color="info">
+                                {row.contactType?.[0] || 'Member'}
                              </Label>
                           </TableCell>
                           <TableCell>{row.phone}</TableCell>

@@ -108,6 +108,87 @@ export class OdooClientService {
     });
   }
 
+  private normalizeComparable(value: any): any {
+    if (Array.isArray(value)) {
+      return value[0];
+    }
+    return value;
+  }
+
+  private evaluateCondition(record: any, condition: any[]): boolean {
+    const [field, operator, rawValue] = condition;
+    const left = this.normalizeComparable(record?.[field]);
+    const right = operator === 'in' ? rawValue : this.normalizeComparable(rawValue);
+
+    switch (operator) {
+      case '=':
+        return left === right;
+      case '!=':
+        return left !== right;
+      case '>':
+        return Number(left ?? 0) > Number(right ?? 0);
+      case '>=':
+        return Number(left ?? 0) >= Number(right ?? 0);
+      case '<':
+        return Number(left ?? 0) < Number(right ?? 0);
+      case '<=':
+        return Number(left ?? 0) <= Number(right ?? 0);
+      case 'in':
+        return Array.isArray(rawValue) ? rawValue.includes(left) : false;
+      case 'ilike': {
+        const leftText = String(left ?? '').toLowerCase();
+        const pattern = String(right ?? '').toLowerCase().replaceAll('%', '');
+        return leftText.includes(pattern);
+      }
+      default:
+        return true;
+    }
+  }
+
+  private filterByDomain(records: any[], domain: any[]): any[] {
+    if (!Array.isArray(domain) || domain.length === 0) {
+      return records;
+    }
+
+    return records.filter((record) => {
+      let cursor = 0;
+
+      const evalNode = (): boolean => {
+        const token = domain[cursor++];
+
+        if (token === '|') {
+          const left = evalNode();
+          const right = evalNode();
+          return left || right;
+        }
+
+        if (token === '&') {
+          const left = evalNode();
+          const right = evalNode();
+          return left && right;
+        }
+
+        if (token === '!') {
+          return !evalNode();
+        }
+
+        if (Array.isArray(token)) {
+          return this.evaluateCondition(record, token);
+        }
+
+        return true;
+      };
+
+      // Odoo domains without explicit operators are AND-ed.
+      let result = true;
+      while (cursor < domain.length) {
+        result = result && evalNode();
+      }
+
+      return result;
+    });
+  }
+
   private handleMockExecute(model: string, method: string, args: any[], kwargs: any): any {
     if (!OdooClientService.mockStore[model]) {
       OdooClientService.mockStore[model] = [];
@@ -117,12 +198,14 @@ export class OdooClientService {
 
     switch (method) {
       case 'search_count':
-        return store.length;
+        return this.filterByDomain(store, args?.[0] ?? []).length;
 
       case 'search_read':
+        const domain = args?.[0] ?? [];
+        const filtered = this.filterByDomain(store, domain);
         const offset = kwargs.offset || 0;
         const limit = kwargs.limit || 100;
-        return store.slice(offset, offset + limit);
+        return filtered.slice(offset, offset + limit);
 
       case 'create':
         const newId = store.length + 1001;

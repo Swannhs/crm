@@ -6,7 +6,7 @@ services:
       args:
         SERVICE_NAME: organization-service
         SERVICE_PORT: 7010
-    container_name: ms-organization-service
+    container_name: organization-service
     volumes:
       - ../../../node_modules:/workspace/node_modules
       - ../../../services/organization-service:/workspace/services/organization-service
@@ -36,7 +36,7 @@ services:
       args:
         SERVICE_NAME: api-router-service
         SERVICE_PORT: 7001
-    container_name: ms-api-router-service
+    container_name: api-router-service
     volumes:
       - ../../../node_modules:/workspace/node_modules
       - ../../../services/api-router-service:/workspace/services/api-router-service
@@ -55,7 +55,7 @@ services:
       args:
         SERVICE_NAME: realtime-service
         SERVICE_PORT: 7030
-    container_name: ms-realtime-service
+    container_name: realtime-service
     volumes:
       - ../../../node_modules:/workspace/node_modules
       - ../../../services/realtime-service:/workspace/services/realtime-service
@@ -84,7 +84,7 @@ services:
       args:
         SERVICE_NAME: integrations-service
         SERVICE_PORT: 7140
-    container_name: ms-integrations-service
+    container_name: integrations-service
     volumes:
       - ../../../node_modules:/workspace/node_modules
       - ../../../services/integrations-service:/workspace/services/integrations-service
@@ -102,8 +102,6 @@ services:
         condition: service_started
       integrations-db:
         condition: service_healthy
-      magento-inegration-service:
-        condition: service_started
       odoo-integration-service:
         condition: service_started
     ports:
@@ -113,7 +111,8 @@ services:
     build:
       context: ../../..
       dockerfile: services/magento-inegration-service/docker/Dockerfile.dev
-    container_name: ms-magento-inegration-service
+    container_name: magento-inegration-service
+    profiles: ["magento"]
     volumes:
       - ../../../services/magento-inegration-service:/workspace/services/magento-inegration-service
     environment:
@@ -145,7 +144,7 @@ services:
       args:
         SERVICE_NAME: odoo-integration-service
         SERVICE_PORT: 7200
-    container_name: ms-odoo-integration-service
+    container_name: odoo-integration-service
     volumes:
       - ../../../node_modules:/workspace/node_modules
       - ../../../services/odoo-integration-service:/workspace/services/odoo-integration-service
@@ -162,8 +161,6 @@ services:
       MAGENTO_API_BASE_URL: http://magento-inegration-service:7210/api
       DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
     depends_on:
-      magento-inegration-service:
-        condition: service_healthy
       odoo-integration-db:
         condition: service_healthy
       odoo:
@@ -178,7 +175,7 @@ services:
       args:
         SERVICE_NAME: email-sync-service
         SERVICE_PORT: 7160
-    container_name: ms-email-sync-service
+    container_name: email-sync-service
     volumes:
       - ../../../node_modules:/workspace/node_modules
       - ../../../services/email-sync-service:/workspace/services/email-sync-service
@@ -204,7 +201,7 @@ services:
       args:
         SERVICE_NAME: booking-service
         SERVICE_PORT: 7040
-    container_name: ms-booking-service
+    container_name: booking-service
     volumes:
       - ../../../node_modules:/workspace/node_modules
       - ../../../services/booking-service:/workspace/services/booking-service

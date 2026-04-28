@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -8,23 +8,29 @@ import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Tooltip from '@mui/material/Tooltip';
+import Skeleton from '@mui/material/Skeleton';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import { alpha, useTheme } from '@mui/material/styles';
-
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
 import { Label } from 'src/components/label';
-import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
-const COLUMNS = [
-  { id: 'new', label: 'New', color: 'info' },
+const DEFAULT_COLUMNS = [
   { id: 'lead', label: 'Lead', color: 'warning' },
-  { id: 'qualified', label: 'Qualified', color: 'secondary' },
   { id: 'member', label: 'Member', color: 'success' },
-  { id: 'vip', label: 'VIP', color: 'error' },
+  { id: 'client', label: 'Client', color: 'info' },
+  { id: 'vendor', label: 'Vendor', color: 'secondary' },
+  { id: 'employee', label: 'Employee', color: 'primary' },
 ];
 
 type Props = {
@@ -44,9 +50,43 @@ export function ContactKanban({
   onDeleteContact,
   onViewContact
 }: Props) {
-  const router = useRouter();
   const theme = useTheme();
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [columns, setColumns] = useState(DEFAULT_COLUMNS);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem('contacts-kanban-columns');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const seen = new Set<string>();
+          const cleaned = parsed.filter((c: any) => {
+            const id = String(c?.id || '').toLowerCase();
+            if (!id || seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          });
+          const required = ['lead', 'member', 'client', 'vendor', 'employee'];
+          const existingIds = new Set(cleaned.map((c: any) => String(c.id).toLowerCase()));
+          const missingDefaults = DEFAULT_COLUMNS.filter((c) => !existingIds.has(c.id));
+          const normalized = [...missingDefaults, ...cleaned].filter((c: any) => required.includes(String(c.id).toLowerCase()));
+          setColumns(normalized);
+          window.localStorage.setItem('contacts-kanban-columns', JSON.stringify(normalized));
+        }
+      }
+    } catch {
+      // noop
+    }
+  }, []);
+
+  const persistColumns = (nextColumns: typeof DEFAULT_COLUMNS) => {
+    setColumns(nextColumns);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('contacts-kanban-columns', JSON.stringify(nextColumns));
+    }
+  };
 
   const onDragStart = (e: React.DragEvent, id: string) => {
     const normalizedId = String(id);
@@ -86,10 +126,11 @@ export function ContactKanban({
   };
 
   const getContactsByStatus = (status: string) => {
-    if (status === 'new') {
-      return contacts.filter(c => !c.status || c.status === 'new' || c.status === 'active');
-    }
-    return contacts.filter(c => c.status === status);
+    return contacts.filter((c) => {
+      const rowStatus = String(c.status || '').toLowerCase();
+      const rowType = String(c.contactType?.[0] || '').toLowerCase();
+      return rowStatus === status || rowType === status;
+    });
   };
 
   if (isLoading) {
@@ -105,7 +146,7 @@ export function ContactKanban({
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', pb: 3, overflowX: 'auto' }}>
       <Stack direction="row" spacing={3} sx={{ px: 1 }}>
-        {COLUMNS.map((column) => (
+        {columns.map((column) => (
           <Stack
             key={column.id}
             onDragOver={onDragOver}
@@ -133,7 +174,7 @@ export function ContactKanban({
                   {getContactsByStatus(column.id).length}
                 </Label>
               </Stack>
-              <IconButton size="small">
+              <IconButton size="small" onClick={() => setSettingsOpen(true)}>
                 <Iconify icon="solar:menu-dots-bold" />
               </IconButton>
             </Stack>
@@ -182,6 +223,61 @@ export function ContactKanban({
           </Stack>
         ))}
       </Stack>
+
+      <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Kanban Configuration</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            {columns.map((column, idx) => (
+              <Stack key={column.id} direction="row" spacing={1.5}>
+                <TextField
+                  label={`${column.id} label`}
+                  value={column.label}
+                  onChange={(e) => {
+                    const next = [...columns];
+                    next[idx] = { ...next[idx], label: e.target.value };
+                    persistColumns(next as any);
+                  }}
+                  fullWidth
+                  size="small"
+                />
+                <TextField
+                  select
+                  label="Color"
+                  value={column.color}
+                  onChange={(e) => {
+                    const next = [...columns];
+                    next[idx] = { ...next[idx], color: e.target.value };
+                    persistColumns(next as any);
+                  }}
+                  size="small"
+                  sx={{ minWidth: 120 }}
+                >
+                  <MenuItem value="info">Info</MenuItem>
+                  <MenuItem value="warning">Warning</MenuItem>
+                  <MenuItem value="success">Success</MenuItem>
+                  <MenuItem value="secondary">Secondary</MenuItem>
+                  <MenuItem value="error">Error</MenuItem>
+                  <MenuItem value="primary">Primary</MenuItem>
+                </TextField>
+              </Stack>
+            ))}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="inherit"
+            onClick={() => {
+              persistColumns(DEFAULT_COLUMNS as any);
+            }}
+          >
+            Reset
+          </Button>
+          <Button variant="contained" onClick={() => setSettingsOpen(false)}>
+            Done
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
@@ -189,12 +285,7 @@ export function ContactKanban({
 // ----------------------------------------------------------------------
 
 import { m } from 'framer-motion';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
-import Skeleton from '@mui/material/Skeleton';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 
 import { contactService } from 'src/services/contact-service';
 import { showToast } from 'src/components/toast';

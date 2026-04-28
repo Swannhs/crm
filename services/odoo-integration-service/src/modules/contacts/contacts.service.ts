@@ -8,7 +8,7 @@ import { parse } from 'csv-parse/sync';
 @Injectable()
 export class ContactsService {
   private readonly model = 'res.partner';
-  private readonly defaultFields = ['id', 'name', 'email', 'phone', 'mobile', 'is_company', 'street', 'city', 'country_id'];
+  private readonly defaultFields = ['id', 'name', 'email', 'phone', 'mobile', 'is_company', 'street', 'city', 'country_id', 'supplier_rank', 'employee'];
 
   async import(file: Express.Multer.File) {
     const content = file.buffer.toString();
@@ -50,21 +50,32 @@ export class ContactsService {
 
   private async buildDomain(search?: string, type?: string): Promise<any[]> {
     const domain: any[] = [];
+    const normalizedType = String(type || '').toLowerCase();
 
     if (search) {
       domain.push('|', ['name', 'ilike', `%${search}%`], ['email', 'ilike', `%${search}%`]);
     }
 
-    if (type) {
-      if (type === 'client') {
-        domain.push(['customer_rank', '>', 0]);
-      } else if (type === 'vendor') {
-        domain.push(['supplier_rank', '>', 0]);
-      } else if (type === 'employee') {
-        domain.push(['employee', '=', true]);
-      } else if (type === 'lead' || type === 'member') {
+    if (normalizedType) {
+      const tabStatuses: Record<string, string[]> = {
+        lead: ['lead'],
+        member: ['member', 'qualified'],
+        client: ['client'],
+        vendor: ['vendor'],
+        employee: ['employee'],
+      };
+
+      const statusAliases = tabStatuses[normalizedType];
+      if (statusAliases) {
         const statusMaps = await this.prisma.contactMap.findMany({
-          where: { status: type },
+          where: {
+            OR: statusAliases.map((status) => ({
+              status: {
+                equals: status,
+                mode: 'insensitive',
+              },
+            })),
+          },
           select: { odooId: true },
         });
 
@@ -325,7 +336,29 @@ export class ContactsService {
   }
 
   async create(data: CreateContactDto) {
-    return this.odooClient.execute(this.model, 'create', [data]);
+    const normalized: any = {
+      ...data,
+      name: (data as any).name ?? (data as any).fullName,
+      is_company: (data as any).is_company ?? (data as any).isCompany ?? false,
+    };
+
+    delete normalized.fullName;
+    delete normalized.isCompany;
+
+    const createdId = await this.odooClient.execute(this.model, 'create', [normalized]);
+
+    if (typeof createdId === 'number') {
+      await this.prisma.contactMap.upsert({
+        where: { odooId: createdId },
+        update: { status: String((data as any).status || 'new').toLowerCase() },
+        create: {
+          odooId: createdId,
+          status: String((data as any).status || 'new').toLowerCase(),
+        },
+      });
+    }
+
+    return createdId;
   }
 
   async update(id: number, data: UpdateContactDto) {
@@ -333,9 +366,10 @@ export class ContactsService {
 
     // Update local status if provided
     if (status) {
-      await (this.prisma.contactMap as any).update({
+      await (this.prisma.contactMap as any).upsert({
         where: { odooId: id },
-        data: { status }
+        update: { status: String(status).toLowerCase() },
+        create: { odooId: id, status: String(status).toLowerCase() },
       });
     }
 
