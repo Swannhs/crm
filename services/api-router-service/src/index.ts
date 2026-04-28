@@ -814,6 +814,17 @@ async function handleApiCompat(req: Request, res: Response) {
       );
       const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
       const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
+      const normalizeSalesStage = (rawStage: unknown): string => {
+        const s = String(rawStage ?? "").toLowerCase();
+        if (!s) return "new";
+        if (s.includes("qual")) return "qualified";
+        if (s.includes("prop") || s.includes("quote")) return "proposal";
+        if (s.includes("nego")) return "negotiation";
+        if (s.includes("won")) return "won";
+        if (s.includes("lost")) return "lost";
+        if (s.includes("new")) return "new";
+        return "new";
+      };
 
       if (req.method === "GET" && rest === "/summary") {
         const [magentoRes, odooRes, crmRes] = await Promise.all([
@@ -923,11 +934,187 @@ async function handleApiCompat(req: Request, res: Response) {
         });
       }
 
+      if (req.method === "GET" && rest === "/opportunities") {
+        const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const rows = crmItems.map((lead: any) => {
+          const stageLabel = Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "";
+          const stage = normalizeSalesStage(stageLabel);
+          const source = String(lead?.type ?? "").toLowerCase() === "lead" ? "manual" : "odoo";
+          const nextActivityTitle = String(lead?.activity_summary ?? "").trim();
+          const nextActivityDueDate = String(lead?.activity_date_deadline ?? "").trim();
+
+          return {
+            id: String(lead?.id ?? ""),
+            name: String(lead?.name ?? "Untitled opportunity"),
+            customerName: String(Array.isArray(lead?.partner_id) ? lead.partner_id[1] : ""),
+            email: String(lead?.email_from ?? ""),
+            phone: String(lead?.phone ?? ""),
+            stage,
+            probability: Number(lead?.probability ?? 0),
+            expectedRevenue: Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0),
+            recurringRevenue: Number(lead?.recurring_revenue_monthly ?? 0) || undefined,
+            assignedTo: String(Array.isArray(lead?.user_id) ? lead.user_id[1] : ""),
+            priority: Number(lead?.priority ?? 0) >= 2 ? "high" : Number(lead?.priority ?? 0) >= 1 ? "medium" : "low",
+            source,
+            expectedCloseDate: String(lead?.date_deadline ?? ""),
+            createdAt: String(lead?.create_date ?? ""),
+            updatedAt: String(lead?.write_date ?? ""),
+            nextActivity: nextActivityTitle || nextActivityDueDate ? {
+              id: `lead-${String(lead?.id ?? "")}-next-activity`,
+              type: String(Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo").toLowerCase(),
+              title: nextActivityTitle || "Follow-up",
+              dueDate: nextActivityDueDate || undefined,
+              overdue: Boolean(nextActivityDueDate && new Date(nextActivityDueDate).getTime() < Date.now()),
+            } : undefined,
+          };
+        });
+
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/activities") {
+        const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const rows = crmItems
+          .filter((lead: any) => String(lead?.activity_summary ?? "").trim() || String(lead?.activity_date_deadline ?? "").trim())
+          .map((lead: any) => {
+            const activityType = String(Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo").toLowerCase();
+            const dueDate = String(lead?.activity_date_deadline ?? "").trim();
+            const isDone = String(lead?.activity_state ?? "").toLowerCase() === "done";
+            return {
+              id: `lead-${String(lead?.id ?? "")}-activity`,
+              opportunityId: String(lead?.id ?? ""),
+              type: activityType.includes("mail")
+                ? "email"
+                : activityType.includes("call")
+                  ? "call"
+                  : activityType.includes("meet")
+                    ? "meeting"
+                    : "todo",
+              title: String(lead?.activity_summary ?? "Follow-up"),
+              dueDate: dueDate || undefined,
+              completed: isDone,
+              createdAt: String(lead?.create_date ?? ""),
+            };
+          });
+
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/analytics") {
+        const [magentoRes, odooRes, crmRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooCrmUrl),
+        ]);
+
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const allOrders = [
+          ...magentoItems.map((order: any) => ({
+            amount: Number(order?.grand_total ?? 0),
+            date: String(order?.created_at ?? ""),
+            source: "magento",
+          })),
+          ...odooItems.map((order: any) => ({
+            amount: Number(order?.amount_total ?? 0),
+            date: String(order?.date_order ?? ""),
+            source: "odoo",
+          })),
+        ].filter((item) => Number.isFinite(item.amount));
+
+        const revenueByMonth = new Map<string, number>();
+        allOrders.forEach((order) => {
+          const d = order.date ? new Date(order.date) : null;
+          if (!d || Number.isNaN(d.getTime())) return;
+          const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+          revenueByMonth.set(key, (revenueByMonth.get(key) ?? 0) + order.amount);
+        });
+        const revenueCategories = Array.from(revenueByMonth.keys()).sort();
+        const revenueValues = revenueCategories.map((k) => Number(revenueByMonth.get(k)?.toFixed(2) ?? 0));
+
+        const stageBuckets = new Map<string, { value: number; count: number }>();
+        crmItems.forEach((lead: any) => {
+          const stageLabel = Array.isArray(lead?.stage_id) ? String(lead.stage_id[1] ?? "") : "";
+          const stage = normalizeSalesStage(stageLabel);
+          const value = Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0);
+          const current = stageBuckets.get(stage) ?? { value: 0, count: 0 };
+          current.value += Number.isFinite(value) ? value : 0;
+          current.count += 1;
+          stageBuckets.set(stage, current);
+        });
+        const stageOrder = ["new", "qualified", "proposal", "negotiation", "won", "lost"];
+        const pipelineByStage = stageOrder
+          .filter((stage) => stageBuckets.has(stage))
+          .map((stage) => {
+            const bucket = stageBuckets.get(stage)!;
+            return { stage, value: Number(bucket.value.toFixed(2)), count: bucket.count };
+          });
+
+        const leadsCount = crmItems.filter((lead: any) => String(lead?.type ?? "").toLowerCase() === "lead").length;
+        const opportunitiesCount = crmItems.length;
+        const ordersCount = allOrders.length;
+
+        const sourceBreakdown = [
+          { source: "magento", value: magentoItems.length },
+          { source: "odoo", value: odooItems.length },
+        ];
+
+        const wonCount = pipelineByStage.find((item) => item.stage === "won")?.count ?? 0;
+        const lostCount = pipelineByStage.find((item) => item.stage === "lost")?.count ?? 0;
+
+        return res.json({
+          data: {
+            revenueTrend: {
+              categories: revenueCategories,
+              series: [{ name: "Revenue", data: revenueValues }],
+            },
+            pipelineByStage,
+            funnel: [
+              { label: "Leads", value: leadsCount },
+              { label: "Opportunities", value: opportunitiesCount },
+              { label: "Orders", value: ordersCount },
+            ],
+            sourceBreakdown,
+            winLoss: [
+              { label: "Won", value: wonCount },
+              { label: "Lost", value: lostCount },
+            ],
+          },
+          meta: {
+            upstream: {
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
       return notImplemented(res, {
         module,
         method: req.method,
         path: rest,
-        hint: "Implemented: GET /summary, GET /orders, GET /leads",
+        hint: "Implemented: GET /summary, GET /orders, GET /leads, GET /opportunities, GET /activities, GET /analytics",
       });
     }
 

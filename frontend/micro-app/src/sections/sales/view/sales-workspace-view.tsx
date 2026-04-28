@@ -1,274 +1,326 @@
 'use client';
 
-import type { SalesLeadRow, SalesSummary, SalesOrderRow } from 'src/services/sales-dashboard-service';
-
-import { useMemo, useState, useCallback } from 'react';
+import { useState } from 'react';
 
 import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
-import Tabs from '@mui/material/Tabs';
-import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import Skeleton from '@mui/material/Skeleton';
+import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 
-import { useSalesLeads, useSalesOrders, useSalesSummary } from 'src/hooks/use-sales-dashboard';
-
-import { fCurrency } from 'src/utils/format-number';
-
-import { syncMagentoAllToOdoo } from 'src/services/odoo-service';
+import {
+  useSalesLeads,
+  useSalesOrders,
+  useSalesSummary,
+  useSalesAnalytics,
+  useSalesActivities,
+  useSalesOpportunities,
+  useCreateSalesActivity,
+  useRunMagentoToOdooSync,
+  useCompleteSalesActivity,
+  useLinkOrderToOpportunity,
+  useUpdateSalesOpportunity,
+  useCreateSalesOpportunity,
+  useUpdateOpportunityStage,
+  usePreviewMagentoToOdooSync,
+} from 'src/hooks/use-sales-dashboard';
 
 import { toast } from 'src/components/snackbar';
-import { Iconify } from 'src/components/iconify';
 
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
+import { SalesHeader } from '../components/sales-header';
+import { SalesKpiRow } from '../components/sales-kpi-row';
+import { SalesSyncDialog } from '../components/sales-sync-dialog';
+import { SalesErrorState } from '../components/sales-error-state';
+import { SalesLeadsPanel } from '../components/sales-leads-panel';
+import { SalesTabs, type SalesTab } from '../components/sales-tabs';
+import { SalesOrdersTable } from '../components/sales-orders-table';
+import { SalesPipelineKanban } from '../components/sales-pipeline-kanban';
+import { SalesAnalyticsPanel } from '../components/sales-analytics-panel';
+import { SalesActivitiesPanel } from '../components/sales-activities-panel';
+import { SalesOpportunityDrawer } from '../components/sales-opportunity-drawer';
+import { SalesOpportunityDialog, type OpportunityFormValues } from '../components/sales-opportunity-dialog';
+
+import type { SalesFilters, SalesActivity, SalesOpportunity } from '../types';
+
 export function SalesWorkspaceView() {
-  const [activeTab, setActiveTab] = useState('pipeline');
-  const [syncing, setSyncing] = useState(false);
+  const [tab, setTab] = useState<SalesTab>('pipeline');
+  const [search, setSearch] = useState('');
+  const [syncOpen, setSyncOpen] = useState(false);
+  const [opportunityOpen, setOpportunityOpen] = useState(false);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<SalesOpportunity | null>(null);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [activityTitle, setActivityTitle] = useState('');
+  const [activityType, setActivityType] = useState<SalesActivity['type']>('todo');
+  const [activityDueDate, setActivityDueDate] = useState('');
 
-  const summaryQuery = useSalesSummary();
-  const ordersQuery = useSalesOrders();
-  const leadsQuery = useSalesLeads();
+  const filters: SalesFilters = { search: search || undefined };
 
-  const loading = summaryQuery.isLoading || ordersQuery.isLoading || leadsQuery.isLoading;
-  const summary = summaryQuery.data;
-  const orders = ordersQuery.data ?? [];
-  const leads = leadsQuery.data ?? [];
+  const summaryQuery = useSalesSummary(filters);
+  const opportunitiesQuery = useSalesOpportunities(filters);
+  const leadsQuery = useSalesLeads(filters);
+  const ordersQuery = useSalesOrders(filters);
+  const activitiesQuery = useSalesActivities(filters);
+  const analyticsQuery = useSalesAnalytics(filters);
 
-  const handleSync = useCallback(async () => {
+  const createOpportunityMutation = useCreateSalesOpportunity();
+  const updateOpportunityMutation = useUpdateSalesOpportunity();
+  const stageMutation = useUpdateOpportunityStage();
+  const createActivityMutation = useCreateSalesActivity();
+  const completeActivityMutation = useCompleteSalesActivity();
+  const linkOrderMutation = useLinkOrderToOpportunity();
+  const previewSyncMutation = usePreviewMagentoToOdooSync();
+  const runSyncMutation = useRunMagentoToOdooSync();
+
+  const failedSections = [summaryQuery, opportunitiesQuery, leadsQuery, ordersQuery, activitiesQuery, analyticsQuery].filter((query) => query.isError).length;
+
+  const refreshAll = () => {
+    summaryQuery.refetch();
+    opportunitiesQuery.refetch();
+    leadsQuery.refetch();
+    ordersQuery.refetch();
+    activitiesQuery.refetch();
+    analyticsQuery.refetch();
+  };
+
+  const handleOpportunitySubmit = async (values: OpportunityFormValues) => {
     try {
-      setSyncing(true);
-      const result = await syncMagentoAllToOdoo({ dryRun: false });
-      toast.success(`Successfully integrated: ${result.syncedOrders ?? 0} orders synced to Odoo CRM.`);
-
-      summaryQuery.refetch();
-      ordersQuery.refetch();
-      leadsQuery.refetch();
-    } catch (error) {
-      toast.error(error.message || 'Sync failed');
-    } finally {
-      setSyncing(false);
+      if (selectedOpportunity?.id) {
+        await updateOpportunityMutation.mutateAsync({ id: selectedOpportunity.id, payload: values });
+        toast.success('Opportunity updated');
+      } else {
+        await createOpportunityMutation.mutateAsync(values);
+        toast.success('Opportunity created');
+      }
+      setOpportunityOpen(false);
+    } catch (error: any) {
+      toast.error(error?.message || 'Unable to save opportunity');
     }
-  }, [summaryQuery, ordersQuery, leadsQuery]);
+  };
 
-  const TABS = [
-    { value: 'pipeline', label: 'Sales Pipeline', icon: 'solar:graph-up-bold' },
-    { value: 'leads', label: 'Lead Management', icon: 'solar:users-group-rounded-bold' },
-    { value: 'funnels', label: 'Conversion Funnels', icon: 'solar:filters-bold' },
-    { value: 'analytics', label: 'Revenue Analytics', icon: 'solar:chart-2-bold' },
-  ];
+  const handleMoveStage = async (id: string, stage: SalesOpportunity['stage']) => {
+    try {
+      await stageMutation.mutateAsync({ id, stage });
+      toast.success('Stage updated');
+      if (selectedOpportunity?.id === id) {
+        setSelectedOpportunity({ ...selectedOpportunity, stage });
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Stage update unavailable');
+    }
+  };
 
   return (
-    <FeatureRouteShell
-      title="Sales Orchestration"
-      description="Live Odoo and Magento sales operations, merged into one dashboard."
-      links={[
-        { href: '#', label: `Magento Orders: ${summary?.sources?.magentoOrders ?? 0}` },
-        { href: '#', label: `Odoo Orders: ${summary?.sources?.odooOrders ?? 0}` },
-        { href: '#', label: `Opportunities: ${summary?.opportunities ?? 0}` },
-      ]}
-      action={
-        <Stack direction="row" spacing={1}>
-          <Button
-            variant="soft"
-            color="warning"
-            loading={syncing}
-            startIcon={<Iconify icon="solar:round-transfer-horizontal-bold" />}
-            onClick={handleSync}
-          >
-            Sync Magento to Odoo
-          </Button>
+    <FeatureRouteShell title="Sales" description="Track pipeline, leads, orders, and revenue in one place.">
+      <Stack spacing={3}>
+        <SalesHeader
+          search={search}
+          onSearch={setSearch}
+          onRefresh={refreshAll}
+          onOpenSync={() => setSyncOpen(true)}
+          onOpenCreate={() => {
+            setSelectedOpportunity(null);
+            setOpportunityOpen(true);
+          }}
+        />
+
+        {failedSections >= 2 ? <Alert severity="warning">Some sales sections are temporarily unavailable. Available sections still work.</Alert> : null}
+
+        {summaryQuery.isError ? (
+          <SalesErrorState
+            title="Summary unavailable"
+            message={(summaryQuery.error as Error)?.message}
+            onRetry={() => summaryQuery.refetch()}
+          />
+        ) : (
+          <SalesKpiRow summary={summaryQuery.data} loading={summaryQuery.isLoading} />
+        )}
+
+        <SalesTabs value={tab} onChange={setTab} />
+
+        <Box>
+          {tab === 'pipeline' ? (
+            opportunitiesQuery.isError ? (
+              <SalesErrorState
+                title="Pipeline unavailable"
+                message={(opportunitiesQuery.error as Error)?.message}
+                onRetry={() => opportunitiesQuery.refetch()}
+              />
+            ) : (
+              <SalesPipelineKanban
+                opportunities={opportunitiesQuery.data ?? []}
+                moving={stageMutation.isPending}
+                onOpen={(item) => setSelectedOpportunity(item)}
+                onMove={handleMoveStage}
+              />
+            )
+          ) : null}
+
+          {tab === 'leads' ? (
+            leadsQuery.isError ? (
+              <SalesErrorState
+                title="Leads unavailable"
+                message={(leadsQuery.error as Error)?.message}
+                onRetry={() => leadsQuery.refetch()}
+              />
+            ) : (
+              <SalesLeadsPanel leads={leadsQuery.data ?? []} search={search} />
+            )
+          ) : null}
+
+          {tab === 'orders' ? (
+            ordersQuery.isError ? (
+              <SalesErrorState
+                title="Orders unavailable"
+                message={(ordersQuery.error as Error)?.message}
+                onRetry={() => ordersQuery.refetch()}
+              />
+            ) : (
+              <SalesOrdersTable
+                rows={ordersQuery.data ?? []}
+                opportunities={opportunitiesQuery.data ?? []}
+                onLink={async (orderId, opportunityId) => {
+                  try {
+                    await linkOrderMutation.mutateAsync({ orderId, opportunityId });
+                    toast.success('Order linked');
+                  } catch (error: any) {
+                    toast.error(error?.message || 'Link unavailable');
+                  }
+                }}
+                linking={linkOrderMutation.isPending}
+              />
+            )
+          ) : null}
+
+          {tab === 'activities' ? (
+            activitiesQuery.isError ? (
+              <SalesErrorState
+                title="Activities unavailable"
+                message={(activitiesQuery.error as Error)?.message}
+                onRetry={() => activitiesQuery.refetch()}
+              />
+            ) : (
+              <SalesActivitiesPanel
+                rows={activitiesQuery.data ?? []}
+                onComplete={async (id) => {
+                  try {
+                    await completeActivityMutation.mutateAsync(id);
+                    toast.success('Activity completed');
+                  } catch (error: any) {
+                    toast.error(error?.message || 'Complete unavailable');
+                  }
+                }}
+                completing={completeActivityMutation.isPending}
+              />
+            )
+          ) : null}
+
+          {tab === 'analytics' ? (
+            analyticsQuery.isError && summaryQuery.isError && leadsQuery.isError && ordersQuery.isError ? (
+              <SalesErrorState title="Analytics unavailable" description="Analytics data is currently unavailable." />
+            ) : (
+              <SalesAnalyticsPanel summary={summaryQuery.data} leads={leadsQuery.data ?? []} orders={ordersQuery.data ?? []} />
+            )
+          ) : null}
+        </Box>
+      </Stack>
+
+      <SalesOpportunityDrawer
+        open={Boolean(selectedOpportunity)}
+        item={selectedOpportunity}
+        orders={ordersQuery.data ?? []}
+        stageLoading={stageMutation.isPending}
+        onClose={() => setSelectedOpportunity(null)}
+        onEdit={() => setOpportunityOpen(true)}
+        onAddActivity={() => setActivityOpen(true)}
+        onLinkOrder={async (orderId, opportunityId) => {
+          try {
+            await linkOrderMutation.mutateAsync({ orderId, opportunityId });
+            toast.success('Order linked');
+          } catch (error: any) {
+            toast.error(error?.message || 'Link unavailable');
+          }
+        }}
+        onMoveStage={handleMoveStage}
+      />
+
+      <SalesOpportunityDialog
+        open={opportunityOpen}
+        initial={selectedOpportunity}
+        loading={createOpportunityMutation.isPending || updateOpportunityMutation.isPending}
+        onClose={() => setOpportunityOpen(false)}
+        onSubmit={handleOpportunitySubmit}
+      />
+
+      <Dialog open={activityOpen} onClose={() => setActivityOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Add activity</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <TextField label="Title" value={activityTitle} onChange={(e) => setActivityTitle(e.target.value)} />
+            <TextField select label="Type" value={activityType} onChange={(e) => setActivityType(e.target.value as SalesActivity['type'])}>
+              <MenuItem value="call">Call</MenuItem>
+              <MenuItem value="email">Email</MenuItem>
+              <MenuItem value="meeting">Meeting</MenuItem>
+              <MenuItem value="todo">To-do</MenuItem>
+              <MenuItem value="note">Note</MenuItem>
+            </TextField>
+            <TextField type="date" label="Due date" InputLabelProps={{ shrink: true }} value={activityDueDate} onChange={(e) => setActivityDueDate(e.target.value)} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setActivityOpen(false)}>Cancel</Button>
           <Button
             variant="contained"
-            color="primary"
-            startIcon={<Iconify icon="solar:refresh-bold" />}
-            onClick={() => {
-              summaryQuery.refetch();
-              ordersQuery.refetch();
-              leadsQuery.refetch();
+            disabled={!selectedOpportunity?.id || !activityTitle || createActivityMutation.isPending}
+            onClick={async () => {
+              if (!selectedOpportunity?.id) return;
+              try {
+                await createActivityMutation.mutateAsync({
+                  opportunityId: selectedOpportunity.id,
+                  payload: {
+                    type: activityType,
+                    title: activityTitle,
+                    dueDate: activityDueDate || undefined,
+                  },
+                });
+                toast.success('Activity created');
+                setActivityOpen(false);
+                setActivityTitle('');
+                setActivityDueDate('');
+              } catch (error: any) {
+                toast.error(error?.message || 'Create activity unavailable');
+              }
             }}
           >
-            Refresh Data
+            Add activity
           </Button>
-        </Stack>
-      }
-    >
-      <Grid container spacing={2} sx={{ mt: 0.5 }}>
-        <KpiCard title="Total Revenue" value={fCurrency(summary?.totalRevenue ?? 0)} icon="solar:wad-of-money-bold-duotone" />
-        <KpiCard title="Total Orders" value={String(summary?.totalOrders ?? 0)} icon="solar:bag-4-bold-duotone" />
-        <KpiCard title="AOV" value={fCurrency(summary?.avgOrderValue ?? 0)} icon="solar:chart-square-bold-duotone" />
-        <KpiCard title="Hot Leads" value={String(summary?.hotLeads ?? 0)} icon="solar:fire-bold-duotone" />
-      </Grid>
+        </DialogActions>
+      </Dialog>
 
-      <Box sx={{ mt: 3 }}>
-        <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} sx={{ mb: 3, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
-          {TABS.map((tab) => (
-            <Tab key={tab.value} value={tab.value} label={tab.label} icon={<Iconify icon={tab.icon} width={20} />} iconPosition="start" />
-          ))}
-        </Tabs>
-
-        {loading ? <PipelineSkeleton /> : null}
-        {!loading && activeTab === 'pipeline' ? <SalesPipelineTab orders={orders} /> : null}
-        {!loading && activeTab === 'leads' ? <SalesLeadsTab leads={leads} /> : null}
-        {!loading && activeTab === 'funnels' ? <SalesFunnelsTab orders={orders} leads={leads} /> : null}
-        {!loading && activeTab === 'analytics' ? <SalesAnalyticsTab summary={summary} /> : null}
-      </Box>
+      <SalesSyncDialog
+        open={syncOpen}
+        preview={previewSyncMutation.data ?? null}
+        result={runSyncMutation.data ?? null}
+        previewLoading={previewSyncMutation.isPending}
+        runLoading={runSyncMutation.isPending}
+        onClose={() => setSyncOpen(false)}
+        onPreview={() => previewSyncMutation.mutate()}
+        onRun={async () => {
+          try {
+            await runSyncMutation.mutateAsync();
+            toast.success('Sync completed');
+            refreshAll();
+          } catch (error: any) {
+            toast.error(error?.message || 'Sync unavailable');
+          }
+        }}
+      />
     </FeatureRouteShell>
-  );
-}
-
-function KpiCard({ title, value, icon }: { title: string; value: string; icon: string }) {
-  return (
-    <Grid item xs={12} md={3}>
-      <Card sx={{ p: 2.5 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant="caption" color="text.secondary">{title}</Typography>
-            <Typography variant="h5">{value}</Typography>
-          </Box>
-          <Iconify icon={icon} width={28} />
-        </Stack>
-      </Card>
-    </Grid>
-  );
-}
-
-function SalesPipelineTab({ orders }: { orders: SalesOrderRow[] }) {
-  const groups = useMemo(() => {
-    const statusMap = new Map<string, SalesOrderRow[]>();
-    orders.forEach((order) => {
-      const key = (order.status || 'unknown').toLowerCase();
-      const current = statusMap.get(key) ?? [];
-      current.push(order);
-      statusMap.set(key, current);
-    });
-    return Array.from(statusMap.entries());
-  }, [orders]);
-
-  return (
-    <Box sx={{ display: 'flex', gap: 3, overflowX: 'auto', pb: 3 }}>
-      {groups.map(([status, rows]) => (
-        <Box key={status} sx={{ minWidth: 300, width: 300, flexShrink: 0 }}>
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>{status}</Typography>
-            <Chip label={rows.length} size="small" variant="soft" />
-          </Box>
-          <Stack spacing={2}>
-            {rows.slice(0, 8).map((order) => (
-              <Card key={order.id} sx={{ p: 2 }}>
-                <Typography variant="subtitle2">{order.ref}</Typography>
-                <Typography variant="caption" color="text.secondary">{order.customer}</Typography>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1 }}>
-                  <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>
-                    {fCurrency(order.amount)}
-                  </Typography>
-                  <Chip size="small" label={order.source} color={order.source === 'magento' ? 'warning' : 'info'} variant="soft" />
-                </Stack>
-              </Card>
-            ))}
-          </Stack>
-        </Box>
-      ))}
-    </Box>
-  );
-}
-
-function PipelineSkeleton() {
-  return (
-    <Box sx={{ display: 'flex', gap: 3, overflowX: 'auto', pb: 3 }}>
-      {[...Array(4)].map((_, i) => (
-        <Box key={i} sx={{ minWidth: 280, width: 280, flexShrink: 0 }}>
-          <Stack spacing={2}>
-            <Skeleton variant="text" width="60%" height={32} />
-            {[...Array(3)].map((__, j) => (
-              <Card key={j} sx={{ p: 2 }}>
-                <Skeleton variant="text" width="80%" />
-                <Skeleton variant="text" width="40%" />
-              </Card>
-            ))}
-          </Stack>
-        </Box>
-      ))}
-    </Box>
-  );
-}
-
-function SalesLeadsTab({ leads }: { leads: SalesLeadRow[] }) {
-  return (
-    <Card sx={{ p: 0 }}>
-      <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Lead Directory (Odoo CRM)</Typography>
-        <TextField size="small" placeholder="Search leads..." sx={{ minWidth: 240 }} />
-      </Box>
-      <Divider />
-      <Stack>
-        {leads.slice(0, 12).map((lead) => (
-          <Box key={lead.id} sx={{ p: 2.5, borderBottom: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center' }}>
-            <Avatar sx={{ mr: 2 }}>{lead.name[0]}</Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="subtitle2">{lead.name}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                Stage: {lead.stage} • Expected: {fCurrency(lead.expectedRevenue)}
-              </Typography>
-            </Box>
-            <Chip label={lead.type} size="small" color={lead.type === 'opportunity' ? 'success' : 'default'} variant="soft" />
-          </Box>
-        ))}
-      </Stack>
-    </Card>
-  );
-}
-
-function SalesFunnelsTab({ orders, leads }: { orders: SalesOrderRow[]; leads: SalesLeadRow[] }) {
-  const opportunities = leads.filter((lead) => lead.type === 'opportunity').length;
-  const converted = orders.length;
-  const conversionRate = opportunities > 0 ? (converted / opportunities) * 100 : 0;
-
-  return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={8}>
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Conversion Snapshot</Typography>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="caption" color="text.secondary">Leads + Opportunities</Typography>
-              <Typography variant="h4">{leads.length}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary">Converted Orders (Magento + Odoo)</Typography>
-              <Typography variant="h4">{orders.length}</Typography>
-            </Box>
-          </Stack>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Funnel Metrics</Typography>
-          <Typography variant="caption" color="text.secondary">Opportunity to Order</Typography>
-          <Typography variant="h3">{conversionRate.toFixed(1)}%</Typography>
-        </Card>
-      </Grid>
-    </Grid>
-  );
-}
-
-function SalesAnalyticsTab({ summary }: { summary: SalesSummary | undefined }) {
-  return (
-    <Card sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>Revenue Analytics</Typography>
-      <Stack spacing={1}>
-        <Typography variant="body2">Total Revenue: {fCurrency(summary?.totalRevenue ?? 0)}</Typography>
-        <Typography variant="body2">Average Order Value: {fCurrency(summary?.avgOrderValue ?? 0)}</Typography>
-        <Typography variant="body2">Magento Orders: {summary?.sources?.magentoOrders ?? 0}</Typography>
-        <Typography variant="body2">Odoo Orders: {summary?.sources?.odooOrders ?? 0}</Typography>
-      </Stack>
-    </Card>
   );
 }
