@@ -170,6 +170,75 @@ async function fetchUpstreamJsonSafe(req: Request, url: string) {
   }
 }
 
+async function odooWriteInvoice(req: Request, invoiceId: number, payload: Record<string, unknown>) {
+  const upstream = await fetch(`http://odoo-integration-service:7200/v1/odoo/invoices/${invoiceId}`, {
+    method: "PUT",
+    headers: {
+      ...getForwardHeaders(req),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!upstream.ok) {
+    const body = await upstream.text();
+    throw new Error(`Odoo invoice update failed (${upstream.status}): ${body}`);
+  }
+
+  return upstream.json();
+}
+
+async function fetchAllOdooInvoicesForGraph(req: Request, opts?: { months?: number; maxPages?: number }) {
+  const months = Math.max(1, Math.min(24, Number(opts?.months ?? 6)));
+  const maxPages = Math.max(1, Math.min(50, Number(opts?.maxPages ?? 20)));
+  const pageSize = 200;
+  const rows: any[] = [];
+
+  for (let page = 1; page <= maxPages; page += 1) {
+    const query = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+    });
+    const upstream = await fetchUpstreamJsonSafe(req, `http://odoo-integration-service:7200/v1/odoo/invoices?${query.toString()}`);
+    if (!upstream.ok) break;
+
+    const batch = Array.isArray(upstream.data?.data) ? upstream.data.data : [];
+    rows.push(...batch);
+    if (batch.length < pageSize) break;
+  }
+
+  const startDate = new Date();
+  startDate.setDate(1);
+  startDate.setMonth(startDate.getMonth() - (months - 1));
+  const startTime = startDate.getTime();
+
+  return rows.filter((inv) => {
+    const rawDate = inv?.invoice_date || inv?.create_date || inv?.invoice_date_due;
+    if (!rawDate) return false;
+    const d = new Date(rawDate);
+    if (Number.isNaN(d.getTime())) return false;
+    return d.getTime() >= startTime;
+  });
+}
+
+async function fetchMagentoOrders(req: Request, query: URLSearchParams = new URLSearchParams()) {
+  const base = new URL("http://magento-inegration-service:7210/api/v1/magento/orders");
+  query.forEach((value, key) => base.searchParams.set(key, value));
+  return fetchUpstreamJsonSafe(req, base.toString());
+}
+
+function toNum(value: unknown): number {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function invoiceTotals(invoices: any[]) {
+  const totalInvoiced = invoices.reduce((sum, inv) => sum + toNum(inv?.amount_total), 0);
+  const totalOutstanding = invoices.reduce((sum, inv) => sum + toNum(inv?.amount_residual), 0);
+  const totalPaid = Math.max(0, totalInvoiced - totalOutstanding);
+  return { totalInvoiced, totalOutstanding, totalPaid };
+}
+
 const domainRoutes: Record<string, string> = {
   "community": "http://community-service:7030",
   "community-group": "http://community-service:7030",
@@ -315,6 +384,274 @@ async function handleApiCompat(req: Request, res: Response) {
         message: "Deprecated CRM compatibility module.",
         module,
         canonical: "/api/odoo/contacts",
+      });
+    }
+
+    if (module === "odoo") {
+      const targetPath = withQuery(req, `/v1/odoo${rest}`);
+      return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath });
+    }
+
+    if (module === "image-library") {
+      if (req.method === "GET" && (rest === "" || rest === "/")) {
+        return proxyTo(req, res, {
+          baseUrl: "http://integrations-service:7140",
+          targetPath: withQuery(req, "/v1/image-library"),
+        });
+      }
+
+      if (req.method === "POST" && (rest === "" || rest === "/")) {
+        return proxyTo(req, res, {
+          baseUrl: "http://integrations-service:7140",
+          targetPath: "/v1/image-library",
+        });
+      }
+
+      if (req.method === "DELETE" && /^\/[^/]+$/.test(rest)) {
+        const id = rest.slice(1);
+        return proxyTo(req, res, {
+          baseUrl: "http://integrations-service:7140",
+          targetPath: `/v1/image-library/${id}`,
+        });
+      }
+    }
+
+    if (module === "billing") {
+      if (req.method === "GET" && rest === "/graph") {
+        const months = Math.max(1, Math.min(24, Number(req.query.months ?? 6)));
+        const invoices = await fetchAllOdooInvoicesForGraph(req, { months, maxPages: 20 });
+
+        const monthKeys: string[] = [];
+        const cursor = new Date();
+        cursor.setDate(1);
+        for (let i = months - 1; i >= 0; i -= 1) {
+          const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
+          monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+        }
+
+        const points = monthKeys.map((key) => {
+          const items = invoices.filter((inv: any) => {
+            const rawDate = inv?.invoice_date || inv?.create_date || inv?.invoice_date_due;
+            if (!rawDate) return false;
+            const d = new Date(rawDate);
+            if (Number.isNaN(d.getTime())) return false;
+            const invKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+            return invKey === key;
+          });
+
+          const invoiced = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_total), 0);
+          const outstanding = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_residual), 0);
+          const paid = Math.max(0, invoiced - outstanding);
+          return { key, invoiced, paid, outstanding, count: items.length };
+        });
+
+        return res.json({
+          data: {
+            categories: monthKeys,
+            series: [
+              { name: "Invoiced", data: points.map((p) => p.invoiced) },
+              { name: "Paid", data: points.map((p) => p.paid) },
+              { name: "Outstanding", data: points.map((p) => p.outstanding) },
+            ],
+            monthly: points,
+            months,
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/summary") {
+        const query = new URLSearchParams({
+          page: "1",
+          pageSize: String(req.query.pageSize ?? 200),
+          ...(req.query.search ? { search: String(req.query.search) } : {}),
+          ...(req.query.contactId ? { contactId: String(req.query.contactId) } : {}),
+        });
+
+        const [odooInvoicesRes, magentoOrdersRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, `http://odoo-integration-service:7200/v1/odoo/invoices?${query.toString()}`),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
+        ]);
+
+        const invoices = Array.isArray(odooInvoicesRes.data?.data) ? odooInvoicesRes.data.data : [];
+        const magentoOrders = Array.isArray(magentoOrdersRes.data?.data?.items) ? magentoOrdersRes.data.data.items : [];
+        const { totalInvoiced, totalOutstanding, totalPaid } = invoiceTotals(invoices);
+        const overdueCount = invoices.filter((inv: any) => {
+          const dueDate = String(inv?.invoice_date_due ?? "");
+          if (!dueDate) return false;
+          const outstanding = toNum(inv?.amount_residual);
+          return outstanding > 0 && new Date(dueDate).getTime() < Date.now();
+        }).length;
+
+        return res.json({
+          data: {
+            totalInvoiced,
+            totalPaid,
+            totalOutstanding,
+            overdueCount,
+            invoiceCount: invoices.length,
+            magentoOrderCount: magentoOrders.length,
+            magentoRevenue: magentoOrders.reduce((sum: number, order: any) => sum + toNum(order?.grand_total), 0),
+          },
+          meta: {
+            upstream: {
+              odoo: { ok: odooInvoicesRes.ok, error: odooInvoicesRes.error },
+              magento: { ok: magentoOrdersRes.ok, error: magentoOrdersRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/invoices") {
+        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: withQuery(req, "/v1/odoo/invoices") });
+      }
+
+      if (req.method === "POST" && rest === "/invoices") {
+        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: "/v1/odoo/invoices" });
+      }
+
+      if (req.method === "GET" && /^\/invoices\/\d+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}` });
+      }
+
+      if (req.method === "PUT" && /^\/invoices\/\d+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}` });
+      }
+
+      if (req.method === "DELETE" && /^\/invoices\/\d+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}` });
+      }
+
+      if (req.method === "POST" && /^\/invoices\/\d+\/post$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}/post` });
+      }
+
+      if (req.method === "GET" && /^\/invoices\/\d+\/download$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: "http://odoo-integration-service:7200", targetPath: `/v1/odoo/invoices/${id}/download` });
+      }
+
+      if (req.method === "GET" && rest === "/magento/orders") {
+        const query = new URLSearchParams(req.query as Record<string, string>);
+        const result = await fetchMagentoOrders(req, query);
+        return res.status(result.ok ? 200 : 502).json(result.ok ? result.data : { message: result.error });
+      }
+
+      if (req.method === "GET" && /^\/magento\/orders\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[3];
+        return proxyTo(req, res, {
+          baseUrl: "http://magento-inegration-service:7210",
+          targetPath: `/api/v1/magento/rest/V1/orders/${id}`,
+        });
+      }
+
+      if (req.method === "GET" && /^\/magento\/customers\/[^/]+\/orders$/.test(rest)) {
+        const customerId = rest.split("/")[3];
+        const query = new URLSearchParams({
+          "searchCriteria[pageSize]": String(req.query.pageSize ?? 50),
+          "searchCriteria[currentPage]": String(req.query.currentPage ?? 1),
+          "searchCriteria[filter_groups][0][filters][0][field]": "customer_id",
+          "searchCriteria[filter_groups][0][filters][0][value]": customerId,
+          "searchCriteria[filter_groups][0][filters][0][condition_type]": "eq",
+        });
+        return proxyTo(req, res, {
+          baseUrl: "http://magento-inegration-service:7210",
+          targetPath: `/api/v1/magento/rest/default/V1/orders?${query.toString()}`,
+        });
+      }
+
+      if (req.method === "GET" && rest === "/reconciliation") {
+        const [odooInvoicesRes, magentoOrdersRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, "http://odoo-integration-service:7200/v1/odoo/invoices?page=1&pageSize=200"),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "200", currentPage: "1" })),
+        ]);
+        const invoices = Array.isArray(odooInvoicesRes.data?.data) ? odooInvoicesRes.data.data : [];
+        const magentoOrders = Array.isArray(magentoOrdersRes.data?.data?.items) ? magentoOrdersRes.data.data.items : [];
+        const magentoByRef = new Map(magentoOrders.map((o: any) => [String(o?.increment_id ?? o?.entity_id ?? ""), o]));
+
+        const rows = invoices.map((invoice: any) => {
+          const invoiceRef = String(invoice?.invoice_origin ?? invoice?.ref ?? "");
+          const order = invoiceRef ? magentoByRef.get(invoiceRef) : undefined;
+          return {
+            invoiceId: invoice?.id,
+            invoiceNumber: invoice?.name,
+            invoiceTotal: toNum(invoice?.amount_total),
+            residual: toNum(invoice?.amount_residual),
+            invoiceStatus: invoice?.state,
+            paymentStatus: invoice?.payment_state,
+            magentoOrderRef: invoiceRef || null,
+            magentoOrderId: order?.entity_id ?? null,
+            magentoGrandTotal: toNum(order?.grand_total ?? 0),
+            matched: Boolean(order),
+          };
+        });
+
+        return res.json({
+          data: rows,
+          meta: {
+            matched: rows.filter((r: any) => r.matched).length,
+            unmatched: rows.filter((r: any) => !r.matched).length,
+          },
+        });
+      }
+
+      if (req.method === "POST" && rest === "/reconciliation/link") {
+        const invoiceIdRaw = req.body?.invoiceId;
+        const magentoOrderRefRaw = req.body?.magentoOrderRef;
+        const invoiceId = Number(invoiceIdRaw);
+        const magentoOrderRef = String(magentoOrderRefRaw ?? "").trim();
+
+        if (!Number.isFinite(invoiceId) || invoiceId <= 0) {
+          return res.status(400).json({ message: "invoiceId is required and must be a positive number." });
+        }
+        if (!magentoOrderRef) {
+          return res.status(400).json({ message: "magentoOrderRef is required." });
+        }
+
+        // Persist reconciliation marker directly on the Odoo invoice.
+        // `invoice_origin` is commonly used to keep source document reference.
+        const result = await odooWriteInvoice(req, invoiceId, {
+          invoice_origin: magentoOrderRef,
+          ref: `Magento ${magentoOrderRef}`,
+        });
+
+        return res.status(200).json({
+          applied: true,
+          invoiceId,
+          magentoOrderRef,
+          result,
+        });
+      }
+
+      if (req.method === "POST" && rest === "/reconciliation/unlink") {
+        const invoiceIdRaw = req.body?.invoiceId;
+        const invoiceId = Number(invoiceIdRaw);
+
+        if (!Number.isFinite(invoiceId) || invoiceId <= 0) {
+          return res.status(400).json({ message: "invoiceId is required and must be a positive number." });
+        }
+
+        // Clear only the reconciliation reference fields.
+        const result = await odooWriteInvoice(req, invoiceId, {
+          invoice_origin: false,
+          ref: false,
+        });
+
+        return res.status(200).json({
+          applied: true,
+          invoiceId,
+          result,
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: invoices CRUD/post/download, summary, magento orders, reconciliation",
       });
     }
 

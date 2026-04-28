@@ -18,3 +18,5 @@ export interface AuthenticatedRequest extends Request {
     userId: string;
   };
 }
+
+export type Identity = AuthenticatedRequest['identity'];

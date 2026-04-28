@@ -2,9 +2,8 @@
 
 import { useMemo } from 'react';
 import { z as zod } from 'zod';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'src/routes/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import Box from '@mui/material/Box';
@@ -19,7 +18,7 @@ import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
 import { billingService } from 'src/services/billing-service';
 import { contactService } from 'src/services/contact-service';
 import { financeService } from 'src/services/finance-service';
@@ -103,7 +102,16 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
 
   const saveMutation = useMutation({
     mutationFn: async (values: any) => {
-      // Odoo Payload
+      if (mode === 'edit' && invoiceId) {
+        const updatePayload = {
+          partner_id: values.partner_id,
+          invoice_date_due: values.dueDate,
+          narration: values.description || 'Invoice updated from dashboard',
+        };
+        return billingService.updateInvoice(invoiceId, updatePayload);
+      }
+
+      // Odoo create payload
       const payload = {
         partner_id: values.partner_id,
         invoice_date: new Date().toISOString().slice(0, 10),
@@ -117,10 +125,6 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
           }]
         ]
       };
-
-      if (mode === 'edit' && invoiceId) {
-        return billingService.updateInvoice(invoiceId, payload);
-      }
 
       return billingService.createInvoice(payload);
     },
@@ -140,6 +144,39 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
       });
     },
   });
+
+  const postMutation = useMutation({
+    mutationFn: async () => {
+      if (!invoiceId) throw new Error('Invoice ID is required');
+      return billingService.postInvoice(invoiceId);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['invoice', invoiceId] });
+      await queryClient.invalidateQueries({ queryKey: ['invoice-list'] });
+      showToast({ message: 'Invoice posted successfully.', severity: 'success' });
+    },
+    onError: (error: any) => {
+      showToast({ message: error?.message || 'Failed to post invoice', severity: 'error' });
+    },
+  });
+
+  const handleDownloadInvoice = async () => {
+    if (!invoiceId || !invoice) return;
+    try {
+      const blob = await billingService.downloadInvoice(invoiceId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${invoice.no || `invoice-${invoiceId}`}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showToast({ message: 'Invoice PDF downloaded.', severity: 'success' });
+    } catch (error: any) {
+      showToast({ message: error?.message || 'Failed to download invoice', severity: 'error' });
+    }
+  };
 
   const title = useMemo(() => {
     if (mode === 'new') return 'Create Invoice';
@@ -192,6 +229,20 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
             <Typography variant="body2">Status: {invoice.status || 'Draft'}</Typography>
             <Typography variant="body2">Due: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}</Typography>
             <Typography variant="h4">{fCurrency(invoice.totalDue || invoice.totalAmount || 0)}</Typography>
+            <Stack direction="row" spacing={1}>
+              {String(invoice.status || '').toLowerCase() === 'draft' && (
+                <Button
+                  variant="contained"
+                  onClick={() => postMutation.mutate()}
+                  disabled={postMutation.isPending}
+                >
+                  Post Invoice
+                </Button>
+              )}
+              <Button variant="outlined" onClick={handleDownloadInvoice}>
+                Download PDF
+              </Button>
+            </Stack>
             {(mode === 'payment' || mode === 'confirm') && (
               <Alert severity={mode === 'confirm' ? 'success' : 'info'}>
                 {mode === 'confirm'
@@ -252,6 +303,23 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
               <Button type="submit" variant="contained" disabled={saveMutation.isPending}>
                 {mode === 'edit' ? 'Save Invoice' : 'Create Invoice'}
               </Button>
+              {mode === 'edit' && (
+                <Stack direction="row" spacing={1}>
+                  {String(invoice?.status || '').toLowerCase() === 'draft' && (
+                    <Button
+                      variant="soft"
+                      color="success"
+                      onClick={() => postMutation.mutate()}
+                      disabled={postMutation.isPending}
+                    >
+                      Post Invoice
+                    </Button>
+                  )}
+                  <Button variant="outlined" onClick={handleDownloadInvoice} disabled={!invoiceId}>
+                    Download PDF
+                  </Button>
+                </Stack>
+              )}
             </Stack>
           </Form>
         </Card>

@@ -12,6 +12,8 @@ import {
   VoiceIntegrationRepository,
   WhatsAppInstanceRepository,
   TelegramSessionRepository
+  ,
+  ImageAssetRepository
 } from '../repositories/index.js';
 import type { 
   IntegrationConnectionInput, 
@@ -29,6 +31,8 @@ import type {
   TelegramSessionInput,
   OmniMessageReceivedEvent,
   OdooIntegrationInput
+  ,
+  ImageAssetInput
 } from '../types/index.js';
 
 const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL || 'http://ms-magento-inegration-service:7210/api';
@@ -664,5 +668,39 @@ export class TelegramService {
 
   async deleteSession(sessionId: string) {
     return this.repo.delete(sessionId);
+  }
+}
+
+export class ImageLibraryService {
+  private repo = new ImageAssetRepository();
+
+  async list(organizationId: string, category?: string, limit = 200) {
+    return this.repo.listByOrg(organizationId, category, limit);
+  }
+
+  async create(userId: string, organizationId: string, data: ImageAssetInput) {
+    if (!data?.name?.trim()) throw new Error('Image name is required');
+    if (!data?.url?.trim()) throw new Error('Image url is required');
+    if (!String(data.url).startsWith('data:image/')) {
+      throw new Error('Only image data URLs are supported');
+    }
+
+    return this.repo.create({
+      userId,
+      organizationId,
+      name: data.name.trim(),
+      url: data.url.trim(),
+      thumbnail: data.thumbnail?.trim() || data.url.trim(),
+      mimeType: data.mimeType?.trim(),
+      size: data.size,
+      category: data.category?.trim() || 'commerce-product',
+      tags: Array.isArray(data.tags) ? data.tags.slice(0, 20) : [],
+    });
+  }
+
+  async remove(organizationId: string, id: string) {
+    if (!id) throw new Error('Image id is required');
+    const result = await this.repo.deleteById(id, organizationId);
+    return { deleted: result.count > 0 };
   }
 }

@@ -225,15 +225,98 @@ export const commerceService = {
   },
 
   createProduct: async (orgId: string, data: any) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    const sku = String(data?.sku || '').trim();
+    if (!sku) {
+      throw new Error('SKU is required to create a Magento product.');
+    }
+
+    const payload = {
+      product: {
+        sku,
+        name: String(data?.name || sku),
+        attribute_set_id: 4,
+        price: Number(data?.priceCents ?? 0) / 100,
+        status: data?.status === 'active' ? 1 : 2,
+        visibility: 4,
+        type_id: 'simple',
+        weight: 1,
+        extension_attributes: {
+          stock_item: {
+            qty: Number(data?.variants?.[0]?.stock ?? data?.lowStockThreshold ?? 0),
+            is_in_stock: true,
+          },
+        },
+        custom_attributes: [
+          { attribute_code: 'description', value: String(data?.description || '') },
+        ],
+      },
+    };
+
+    const response = await axios.post(
+      '/api/magento/rest',
+      { method: 'POST', path: '/rest/all/V1/products', payload },
+      {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+        headers: orgId ? { 'X-Org-Id': orgId } : {},
+      }
+    );
+    return response.data?.data ?? response.data;
   },
 
   updateProduct: async (orgId: string, id: string, data: any) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    const sku = String(data?.sku || '').trim();
+    if (!sku) {
+      throw new Error('SKU is required to update a Magento product.');
+    }
+
+    const payload = {
+      product: {
+        sku,
+        name: String(data?.name || sku),
+        price: Number(data?.priceCents ?? 0) / 100,
+        status: data?.status === 'active' ? 1 : 2,
+        visibility: 4,
+        type_id: 'simple',
+        custom_attributes: [
+          { attribute_code: 'description', value: String(data?.description || '') },
+        ],
+      },
+      saveOptions: true,
+    };
+
+    const response = await axios.post(
+      '/api/magento/rest',
+      {
+        method: 'PUT',
+        path: `/rest/all/V1/products/${encodeURIComponent(sku)}`,
+        payload,
+      },
+      {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+        headers: orgId ? { 'X-Org-Id': orgId } : {},
+      }
+    );
+    return response.data?.data ?? response.data;
   },
 
   deleteProduct: async (orgId: string, id: string) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    const sku = String(id || '').trim();
+    if (!sku) {
+      throw new Error('SKU is required to delete a Magento product.');
+    }
+
+    const response = await axios.post(
+      '/api/magento/rest',
+      {
+        method: 'DELETE',
+        path: `/rest/all/V1/products/${encodeURIComponent(sku)}`,
+      },
+      {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+        headers: orgId ? { 'X-Org-Id': orgId } : {},
+      }
+    );
+    return response.data?.data ?? response.data;
   },
 
   getOrders: async (orgId?: string) => {
@@ -314,9 +397,7 @@ export const commerceService = {
     throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
   },
 
-  getCoupons: async (orgId?: string) => {
-    return [];
-  },
+  getCoupons: async (orgId?: string) => [],
 
   createCoupon: async (orgId: string, data: any) => {
     throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
@@ -331,26 +412,44 @@ export const commerceService = {
   },
 
   getProductImages: async () => {
-    const response = await axios.get('/api/image-library');
-    const rows = response.data?.data ?? response.data ?? [];
-    return Array.isArray(rows)
-      ? rows
-          .map(normalizeImageAsset)
-          .filter((item) => item.category === 'commerce-product' || item.tags?.includes('shop-product'))
-      : [];
+    try {
+      const response = await axios.get('/api/image-library?category=commerce-product&limit=200', BEST_EFFORT_AXIOS_CONFIG);
+      const rows = response.data?.data ?? response.data ?? [];
+      return Array.isArray(rows)
+        ? rows
+            .map(normalizeImageAsset)
+            .filter((item) => item.category === 'commerce-product' || item.tags?.includes('shop-product'))
+        : [];
+    } catch {
+      return [];
+    }
   },
 
   uploadProductImage: async (file: File) => {
     const dataUrl = await fileToDataUrl(file);
-    const response = await axios.post('/api/image-library', {
-      name: file.name,
-      url: dataUrl,
-      thumbnail: dataUrl,
-      mimeType: file.type || 'image/*',
-      size: file.size,
-      category: 'commerce-product',
-      tags: ['shop-product'],
-    });
-    return normalizeImageAsset(response.data?.data ?? response.data);
+    try {
+      const response = await axios.post('/api/image-library', {
+        name: file.name,
+        url: dataUrl,
+        thumbnail: dataUrl,
+        mimeType: file.type || 'image/*',
+        size: file.size,
+        category: 'commerce-product',
+        tags: ['shop-product'],
+      });
+      return normalizeImageAsset(response.data?.data ?? response.data);
+    } catch {
+      return normalizeImageAsset({
+        id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: file.name,
+        url: dataUrl,
+        thumbnail: dataUrl,
+        mimeType: file.type || 'image/*',
+        size: file.size,
+        category: 'commerce-product',
+        tags: ['shop-product', 'local-fallback'],
+        createdAt: new Date().toISOString(),
+      });
+    }
   },
 };

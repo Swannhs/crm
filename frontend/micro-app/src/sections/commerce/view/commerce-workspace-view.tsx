@@ -275,6 +275,7 @@ export function CommerceWorkspaceView({
       productDialog.onFalse();
       showToast({ message: 'Product updated.', severity: 'success' });
     },
+    onError: (err) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
   });
 
   const deleteProductMutation = useMutation({
@@ -1258,7 +1259,7 @@ export function CommerceWorkspaceView({
         isPending={createCategoryMutation.isPending || updateCategoryMutation.isPending}
       />
 
-      {currentModule === 'products' && (
+      {(currentModule === 'products' || currentModule === 'inventory') && (
         <CommerceProductDetailDialog
           open={productDialog.value}
           onClose={closeProductDialog}

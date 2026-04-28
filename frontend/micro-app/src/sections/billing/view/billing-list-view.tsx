@@ -25,16 +25,18 @@ import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
 import TablePagination from '@mui/material/TablePagination';
 import Skeleton from '@mui/material/Skeleton';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { billingService } from 'src/services/billing-service';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
+import { usePathname, useRouter, useSearchParams } from 'src/routes/hooks';
 import { showToast } from 'src/components/toast';
 
 import { Label } from 'src/components/label';
+import { Chart, useChart } from 'src/components/chart';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
@@ -53,12 +55,25 @@ const TABLE_HEAD = [
   { id: 'action', label: 'Action', align: 'right' as const },
 ];
 
+const RECON_TABLE_HEAD = [
+  { id: 'invoice', label: 'Invoice' },
+  { id: 'invoiceTotal', label: 'Invoice Total' },
+  { id: 'residual', label: 'Outstanding' },
+  { id: 'magentoRef', label: 'Magento Ref' },
+  { id: 'match', label: 'Match' },
+  { id: 'action', label: 'Action', align: 'right' as const },
+];
+
 // ----------------------------------------------------------------------
 
 export function BillingListView() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const viewMode = searchParams.get('view') === 'graph' ? 'graph' : 'list';
   
   const { data: responseData, isLoading, refetch } = useQuery({
     queryKey: ['invoices', search, page, rowsPerPage],
@@ -68,14 +83,24 @@ export function BillingListView() {
       pageSize: rowsPerPage 
     }),
   });
-
-  const invoices = (responseData as any)?.data || [];
-  const totalInvoices = (responseData as any)?.total || 0;
+  const { data: summaryData } = useQuery({
+    queryKey: ['billing-summary'],
+    queryFn: () => billingService.getSummary(),
+  });
+  const { data: reconciliationData, refetch: refetchReconciliation } = useQuery({
+    queryKey: ['billing-reconciliation'],
+    queryFn: () => billingService.getReconciliation(),
+    enabled: viewMode === 'list',
+  });
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
-  
-  const router = useRouter();
+  const invoices = (responseData as any)?.data || [];
+  const reconciliationRows = Array.isArray(reconciliationData) ? reconciliationData : [];
+  const totalInvoices = (responseData as any)?.total || 0;
+  const selectedInvoice = invoices.find((invoice: any) => String(invoice.id) === String(selectedInvoiceId));
+  const paidAmount = Number(summaryData?.totalPaid ?? invoices.reduce((acc: number, curr: any) => acc + (Number(curr.paidAmount) || 0), 0));
+  const outstandingAmount = Number(summaryData?.totalOutstanding ?? invoices.reduce((acc: number, curr: any) => acc + (Number(curr.totalDue) || 0), 0));
   const confirmDelete = useBoolean();
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, invoiceId: string) => {
@@ -117,19 +142,150 @@ export function BillingListView() {
     handleCloseMenu();
   };
 
-  const totalAmount = invoices.reduce((acc: number, curr: any) => acc + curr.totalDue, 0);
+  const handlePostInvoice = async () => {
+    try {
+      if (!selectedInvoiceId) return;
+      await billingService.postInvoice(selectedInvoiceId);
+      await refetch();
+      showToast({ message: 'Invoice posted successfully.', severity: 'success' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to post invoice';
+      showToast({ message, severity: 'warning' });
+    } finally {
+      handleCloseMenu();
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      if (!selectedInvoiceId) return;
+      const blob = await billingService.downloadInvoice(selectedInvoiceId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${selectedInvoice?.no || `invoice-${selectedInvoiceId}`}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showToast({ message: 'Invoice PDF downloaded.', severity: 'success' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to download invoice';
+      showToast({ message, severity: 'warning' });
+    } finally {
+      handleCloseMenu();
+    }
+  };
+
+  const handleLink = async (invoiceId: string | number) => {
+    const magentoOrderRef = window.prompt('Enter Magento order reference (increment_id)');
+    if (!magentoOrderRef) return;
+    try {
+      await billingService.linkReconciliation({ invoiceId, magentoOrderRef });
+      await refetchReconciliation();
+      showToast({ message: 'Reconciliation link requested.', severity: 'success' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to link reconciliation';
+      showToast({ message, severity: 'warning' });
+    }
+  };
+
+  const handleUnlink = async (invoiceId: string | number) => {
+    try {
+      await billingService.unlinkReconciliation({ invoiceId });
+      await refetchReconciliation();
+      showToast({ message: 'Reconciliation unlink requested.', severity: 'success' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to unlink reconciliation';
+      showToast({ message, severity: 'warning' });
+    }
+  };
+
+  const totalAmount = Number(summaryData?.totalInvoiced ?? invoices.reduce((acc: number, curr: any) => acc + (Number(curr.totalAmount) || 0), 0));
+  const chartInvoicesQuery = useQuery({
+    queryKey: ['billing-graph'],
+    queryFn: () => billingService.getGraph(6),
+    enabled: viewMode === 'graph',
+  });
+  const graphData = chartInvoicesQuery.data as any;
+  const monthKeys = Array.isArray(graphData?.categories) ? graphData.categories : [];
+  const chartSeries = Array.isArray(graphData?.series) ? graphData.series : [
+    { name: 'Invoiced', data: [] },
+    { name: 'Paid', data: [] },
+    { name: 'Outstanding', data: [] },
+  ];
+
+  const chartOptions = useChart({
+    chart: { stacked: false, toolbar: { show: false } },
+    stroke: { width: [2, 2, 2], curve: 'smooth' },
+    fill: { opacity: 0.2 },
+    colors: ['#1f6feb', '#2e7d32', '#ed6c02'],
+    xaxis: {
+      categories: monthKeys.map((key) => {
+        const [year, month] = key.split('-');
+        return `${month}/${year.slice(2)}`;
+      }),
+    },
+    yaxis: {
+      labels: {
+        formatter: (value: number) => `$${Math.round(value).toLocaleString()}`,
+      },
+    },
+    tooltip: {
+      y: {
+        formatter: (value: number) => fCurrency(value),
+      },
+    },
+    legend: { position: 'top' },
+  });
+
+  const getStatusColor = (status: string, paymentStatus?: string) => {
+    const normalized = String(status || '').toLowerCase();
+    const payment = String(paymentStatus || '').toLowerCase();
+
+    if (normalized === 'cancel' || normalized === 'cancelled') return 'error';
+    if (payment === 'paid') return 'success';
+    if (payment === 'partial') return 'warning';
+    if (normalized === 'posted') return 'info';
+    return 'default';
+  };
+
+  const onChangeView = (nextView: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextView === 'graph') {
+      params.set('view', 'graph');
+    } else {
+      params.delete('view');
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <DashboardContent maxWidth="xl">
       <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="h4">Billing</Typography>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => router.push(paths.dashboard.invoiceNew)}
-        >
-          New Invoice
-        </Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <ToggleButtonGroup
+            size="small"
+            value={viewMode}
+            exclusive
+            onChange={(event, val) => val && onChangeView(val)}
+          >
+            <ToggleButton value="list">
+              <Iconify icon="solar:list-bold" />
+            </ToggleButton>
+            <ToggleButton value="graph">
+              <Iconify icon="solar:chart-2-bold" />
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="mingcute:add-line" />}
+            onClick={() => router.push(paths.dashboard.invoiceNew)}
+          >
+            New Invoice
+          </Button>
+        </Box>
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 5 }}>
@@ -144,7 +300,7 @@ export function BillingListView() {
         <Grid xs={12} md={4}>
           <BillingWidgetSummary
             title="Paid"
-            total={totalAmount * 0.7}
+            total={paidAmount}
             color="success"
             icon="solar:check-circle-bold"
           />
@@ -153,111 +309,182 @@ export function BillingListView() {
         <Grid xs={12} md={4}>
           <BillingWidgetSummary
             title="Outstanding"
-            total={totalAmount * 0.3}
+            total={outstandingAmount}
             color="warning"
             icon="solar:clock-circle-bold"
           />
         </Grid>
       </Grid>
 
-      <Card>
-        <Box sx={{ p: 2 }}>
-          <TextField
-            fullWidth
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search invoices..."
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
+      {viewMode === 'graph' ? (
+        <Card sx={{ p: 2.5 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h6">Billing Trend (Last 6 Months)</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Live monthly invoice, paid, and outstanding totals from Odoo billing data.
+            </Typography>
+          </Box>
+          <Chart type="line" series={chartSeries} options={chartOptions} height={340} />
+        </Card>
+      ) : (
+        <>
+          <Card>
+            <Box sx={{ p: 2 }}>
+              <TextField
+                fullWidth
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(0);
+                }}
+                placeholder="Search invoices..."
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
 
-        <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-          <Scrollbar>
-            <Table sx={{ minWidth: 800 }}>
-              <TableHead>
-                <TableRow>
-                  {TABLE_HEAD.map((headCell) => (
-                    <TableCell key={headCell.id} align={headCell.align}>
-                      {headCell.label}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {isLoading ? (
-                  [...Array(5)].map((_, index) => (
-                    <TableRow key={index}>
-                      <TableCell><Skeleton variant="text" width={60} /></TableCell>
-                      <TableCell><Skeleton variant="text" width={140} /></TableCell>
-                      <TableCell><Skeleton variant="text" width={80} /></TableCell>
-                      <TableCell><Skeleton variant="text" width={60} /></TableCell>
-                      <TableCell><Skeleton variant="text" width={100} /></TableCell>
-                      <TableCell align="right"><Skeleton variant="circular" width={32} height={32} /></TableCell>
+            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+              <Scrollbar>
+                <Table sx={{ minWidth: 800 }}>
+                  <TableHead>
+                    <TableRow>
+                      {TABLE_HEAD.map((headCell) => (
+                        <TableCell key={headCell.id} align={headCell.align}>
+                          {headCell.label}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  ))
-                ) : (
-                  <>
-                    {invoices.map((row: any) => (
-                      <TableRow key={row.id} hover>
-                        <TableCell>{row.no}</TableCell>
-                        <TableCell>{row.customerName}</TableCell>
-                        <TableCell>{fCurrency(row.totalDue)}</TableCell>
+                  </TableHead>
+
+                  <TableBody>
+                    {isLoading ? (
+                      [...Array(5)].map((_, index) => (
+                        <TableRow key={index}>
+                          <TableCell><Skeleton variant="text" width={60} /></TableCell>
+                          <TableCell><Skeleton variant="text" width={140} /></TableCell>
+                          <TableCell><Skeleton variant="text" width={80} /></TableCell>
+                          <TableCell><Skeleton variant="text" width={60} /></TableCell>
+                          <TableCell><Skeleton variant="text" width={100} /></TableCell>
+                          <TableCell align="right"><Skeleton variant="circular" width={32} height={32} /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <>
+                        {invoices.map((row: any) => (
+                          <TableRow key={row.id} hover>
+                            <TableCell>{row.no}</TableCell>
+                            <TableCell>{row.customerName}</TableCell>
+                            <TableCell>{fCurrency(row.totalAmount)}</TableCell>
+                            <TableCell>
+                              <Label
+                                variant="soft"
+                                color={getStatusColor(row.status, row.deliveryStatus) as any}
+                              >
+                                {row.deliveryStatus === 'paid' ? 'Paid' : row.status}
+                              </Label>
+                            </TableCell>
+                            <TableCell>{row.dueDate ? new Date(row.dueDate).toLocaleDateString() : '-'}</TableCell>
+                            <TableCell align="right">
+                              <IconButton onClick={(event) => handleOpenMenu(event, row.id)}>
+                                <Iconify icon="eva:more-vertical-fill" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+
+                        {invoices.length === 0 && !isLoading && (
+                          <TableRow>
+                            <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
+                              <Typography variant="h6">No data found</Typography>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
+                    )}
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            </TableContainer>
+
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={totalInvoices}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={(event, newPage) => setPage(newPage)}
+              onRowsPerPageChange={(event) => {
+                setRowsPerPage(parseInt(event.target.value, 10));
+                setPage(0);
+              }}
+            />
+          </Card>
+
+          <Card sx={{ mt: 3 }}>
+            <Box sx={{ p: 2 }}>
+              <Typography variant="h6">Reconciliation (Odoo vs Magento)</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Matched and unmatched invoice-to-order references across accounting and commerce.
+              </Typography>
+            </Box>
+            <TableContainer>
+              <Scrollbar>
+                <Table sx={{ minWidth: 900 }}>
+                  <TableHead>
+                    <TableRow>
+                      {RECON_TABLE_HEAD.map((headCell) => (
+                        <TableCell key={headCell.id} align={headCell.align}>
+                          {headCell.label}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {reconciliationRows.map((row: any) => (
+                      <TableRow key={String(row.invoiceId)}>
+                        <TableCell>{row.invoiceNumber || row.invoiceId}</TableCell>
+                        <TableCell>{fCurrency(Number(row.invoiceTotal || 0))}</TableCell>
+                        <TableCell>{fCurrency(Number(row.residual || 0))}</TableCell>
+                        <TableCell>{row.magentoOrderRef || '-'}</TableCell>
                         <TableCell>
-                          <Label
-                            variant="soft"
-                            color={
-                              (row.status === 'PAID' && 'success') ||
-                              (row.status === 'DUE' && 'warning') ||
-                              (row.status === 'PAST DUE' && 'error') ||
-                              'default'
-                            }
-                          >
-                            {row.status}
+                          <Label variant="soft" color={row.matched ? 'success' : 'warning'}>
+                            {row.matched ? 'Matched' : 'Unmatched'}
                           </Label>
                         </TableCell>
-                        <TableCell>{new Date(row.dueDate).toLocaleDateString()}</TableCell>
                         <TableCell align="right">
-                          <IconButton onClick={(event) => handleOpenMenu(event, row.id)}>
-                            <Iconify icon="eva:more-vertical-fill" />
-                          </IconButton>
+                          {row.matched ? (
+                            <Button size="small" color="warning" variant="soft" onClick={() => handleUnlink(row.invoiceId)}>
+                              Unlink
+                            </Button>
+                          ) : (
+                            <Button size="small" variant="contained" onClick={() => handleLink(row.invoiceId)}>
+                              Link
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
-
-                    {invoices.length === 0 && !isLoading && (
+                    {reconciliationRows.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
-                          <Typography variant="h6">No data found</Typography>
+                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            No reconciliation records available.
+                          </Typography>
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
-                )}
-              </TableBody>
-            </Table>
-          </Scrollbar>
-        </TableContainer>
-
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={totalInvoices}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={(event, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(event) => {
-            setRowsPerPage(parseInt(event.target.value, 10));
-            setPage(0);
-          }}
-        />
-      </Card>
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            </TableContainer>
+          </Card>
+        </>
+      )}
       <Menu
         anchorEl={menuAnchorEl}
         open={Boolean(menuAnchorEl)}
@@ -272,6 +499,17 @@ export function BillingListView() {
         <MenuItem onClick={handleEdit}>
           <Iconify icon="solar:pen-bold" sx={{ mr: 1 }} />
           Edit
+        </MenuItem>
+        <MenuItem
+          onClick={handlePostInvoice}
+          disabled={!selectedInvoice || String(selectedInvoice.status).toLowerCase() !== 'draft'}
+        >
+          <Iconify icon="solar:verified-check-bold" sx={{ mr: 1 }} />
+          Post Invoice
+        </MenuItem>
+        <MenuItem onClick={handleDownload}>
+          <Iconify icon="solar:download-bold" sx={{ mr: 1 }} />
+          Download PDF
         </MenuItem>
         <MenuItem onClick={confirmDelete.onTrue} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-trash-bold" sx={{ mr: 1 }} />

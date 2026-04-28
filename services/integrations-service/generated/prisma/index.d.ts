@@ -78,6 +78,11 @@ export type WhatsAppInstance = $Result.DefaultSelection<Prisma.$WhatsAppInstance
  * 
  */
 export type TelegramSession = $Result.DefaultSelection<Prisma.$TelegramSessionPayload>
+/**
+ * Model ImageAsset
+ * 
+ */
+export type ImageAsset = $Result.DefaultSelection<Prisma.$ImageAssetPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -326,6 +331,16 @@ export class PrismaClient<
     * ```
     */
   get telegramSession(): Prisma.TelegramSessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.imageAsset`: Exposes CRUD operations for the **ImageAsset** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ImageAssets
+    * const imageAssets = await prisma.imageAsset.findMany()
+    * ```
+    */
+  get imageAsset(): Prisma.ImageAssetDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -779,7 +794,8 @@ export namespace Prisma {
     MetaIntegration: 'MetaIntegration',
     VoiceIntegration: 'VoiceIntegration',
     WhatsAppInstance: 'WhatsAppInstance',
-    TelegramSession: 'TelegramSession'
+    TelegramSession: 'TelegramSession',
+    ImageAsset: 'ImageAsset'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -798,7 +814,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "integrationConnection" | "googleIntegration" | "zoomIntegration" | "zoomMeeting" | "shopifyStore" | "uberEatsConfig" | "easyPostConfig" | "integrationActivity" | "userIntegrationSettings" | "metaIntegration" | "voiceIntegration" | "whatsAppInstance" | "telegramSession"
+      modelProps: "integrationConnection" | "googleIntegration" | "zoomIntegration" | "zoomMeeting" | "shopifyStore" | "uberEatsConfig" | "easyPostConfig" | "integrationActivity" | "userIntegrationSettings" | "metaIntegration" | "voiceIntegration" | "whatsAppInstance" | "telegramSession" | "imageAsset"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1764,6 +1780,80 @@ export namespace Prisma {
           }
         }
       }
+      ImageAsset: {
+        payload: Prisma.$ImageAssetPayload<ExtArgs>
+        fields: Prisma.ImageAssetFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ImageAssetFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ImageAssetFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>
+          }
+          findFirst: {
+            args: Prisma.ImageAssetFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ImageAssetFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>
+          }
+          findMany: {
+            args: Prisma.ImageAssetFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>[]
+          }
+          create: {
+            args: Prisma.ImageAssetCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>
+          }
+          createMany: {
+            args: Prisma.ImageAssetCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ImageAssetCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>[]
+          }
+          delete: {
+            args: Prisma.ImageAssetDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>
+          }
+          update: {
+            args: Prisma.ImageAssetUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>
+          }
+          deleteMany: {
+            args: Prisma.ImageAssetDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ImageAssetUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ImageAssetUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>[]
+          }
+          upsert: {
+            args: Prisma.ImageAssetUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ImageAssetPayload>
+          }
+          aggregate: {
+            args: Prisma.ImageAssetAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateImageAsset>
+          }
+          groupBy: {
+            args: Prisma.ImageAssetGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ImageAssetGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ImageAssetCountArgs<ExtArgs>
+            result: $Utils.Optional<ImageAssetCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1873,6 +1963,7 @@ export namespace Prisma {
     voiceIntegration?: VoiceIntegrationOmit
     whatsAppInstance?: WhatsAppInstanceOmit
     telegramSession?: TelegramSessionOmit
+    imageAsset?: ImageAssetOmit
   }
 
   /* Types for Logging */
@@ -15740,6 +15831,1122 @@ export namespace Prisma {
 
 
   /**
+   * Model ImageAsset
+   */
+
+  export type AggregateImageAsset = {
+    _count: ImageAssetCountAggregateOutputType | null
+    _avg: ImageAssetAvgAggregateOutputType | null
+    _sum: ImageAssetSumAggregateOutputType | null
+    _min: ImageAssetMinAggregateOutputType | null
+    _max: ImageAssetMaxAggregateOutputType | null
+  }
+
+  export type ImageAssetAvgAggregateOutputType = {
+    size: number | null
+  }
+
+  export type ImageAssetSumAggregateOutputType = {
+    size: number | null
+  }
+
+  export type ImageAssetMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    name: string | null
+    url: string | null
+    thumbnail: string | null
+    mimeType: string | null
+    size: number | null
+    category: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ImageAssetMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    organizationId: string | null
+    name: string | null
+    url: string | null
+    thumbnail: string | null
+    mimeType: string | null
+    size: number | null
+    category: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ImageAssetCountAggregateOutputType = {
+    id: number
+    userId: number
+    organizationId: number
+    name: number
+    url: number
+    thumbnail: number
+    mimeType: number
+    size: number
+    category: number
+    tags: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ImageAssetAvgAggregateInputType = {
+    size?: true
+  }
+
+  export type ImageAssetSumAggregateInputType = {
+    size?: true
+  }
+
+  export type ImageAssetMinAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    url?: true
+    thumbnail?: true
+    mimeType?: true
+    size?: true
+    category?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ImageAssetMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    url?: true
+    thumbnail?: true
+    mimeType?: true
+    size?: true
+    category?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ImageAssetCountAggregateInputType = {
+    id?: true
+    userId?: true
+    organizationId?: true
+    name?: true
+    url?: true
+    thumbnail?: true
+    mimeType?: true
+    size?: true
+    category?: true
+    tags?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ImageAssetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ImageAsset to aggregate.
+     */
+    where?: ImageAssetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageAssets to fetch.
+     */
+    orderBy?: ImageAssetOrderByWithRelationInput | ImageAssetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ImageAssetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageAssets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageAssets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ImageAssets
+    **/
+    _count?: true | ImageAssetCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ImageAssetAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ImageAssetSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ImageAssetMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ImageAssetMaxAggregateInputType
+  }
+
+  export type GetImageAssetAggregateType<T extends ImageAssetAggregateArgs> = {
+        [P in keyof T & keyof AggregateImageAsset]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateImageAsset[P]>
+      : GetScalarType<T[P], AggregateImageAsset[P]>
+  }
+
+
+
+
+  export type ImageAssetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ImageAssetWhereInput
+    orderBy?: ImageAssetOrderByWithAggregationInput | ImageAssetOrderByWithAggregationInput[]
+    by: ImageAssetScalarFieldEnum[] | ImageAssetScalarFieldEnum
+    having?: ImageAssetScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ImageAssetCountAggregateInputType | true
+    _avg?: ImageAssetAvgAggregateInputType
+    _sum?: ImageAssetSumAggregateInputType
+    _min?: ImageAssetMinAggregateInputType
+    _max?: ImageAssetMaxAggregateInputType
+  }
+
+  export type ImageAssetGroupByOutputType = {
+    id: string
+    userId: string
+    organizationId: string | null
+    name: string
+    url: string
+    thumbnail: string | null
+    mimeType: string | null
+    size: number | null
+    category: string | null
+    tags: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ImageAssetCountAggregateOutputType | null
+    _avg: ImageAssetAvgAggregateOutputType | null
+    _sum: ImageAssetSumAggregateOutputType | null
+    _min: ImageAssetMinAggregateOutputType | null
+    _max: ImageAssetMaxAggregateOutputType | null
+  }
+
+  type GetImageAssetGroupByPayload<T extends ImageAssetGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ImageAssetGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ImageAssetGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ImageAssetGroupByOutputType[P]>
+            : GetScalarType<T[P], ImageAssetGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ImageAssetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    url?: boolean
+    thumbnail?: boolean
+    mimeType?: boolean
+    size?: boolean
+    category?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["imageAsset"]>
+
+  export type ImageAssetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    url?: boolean
+    thumbnail?: boolean
+    mimeType?: boolean
+    size?: boolean
+    category?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["imageAsset"]>
+
+  export type ImageAssetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    url?: boolean
+    thumbnail?: boolean
+    mimeType?: boolean
+    size?: boolean
+    category?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["imageAsset"]>
+
+  export type ImageAssetSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    organizationId?: boolean
+    name?: boolean
+    url?: boolean
+    thumbnail?: boolean
+    mimeType?: boolean
+    size?: boolean
+    category?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ImageAssetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "organizationId" | "name" | "url" | "thumbnail" | "mimeType" | "size" | "category" | "tags" | "createdAt" | "updatedAt", ExtArgs["result"]["imageAsset"]>
+
+  export type $ImageAssetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ImageAsset"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      organizationId: string | null
+      name: string
+      url: string
+      thumbnail: string | null
+      mimeType: string | null
+      size: number | null
+      category: string | null
+      tags: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["imageAsset"]>
+    composites: {}
+  }
+
+  type ImageAssetGetPayload<S extends boolean | null | undefined | ImageAssetDefaultArgs> = $Result.GetResult<Prisma.$ImageAssetPayload, S>
+
+  type ImageAssetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ImageAssetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ImageAssetCountAggregateInputType | true
+    }
+
+  export interface ImageAssetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ImageAsset'], meta: { name: 'ImageAsset' } }
+    /**
+     * Find zero or one ImageAsset that matches the filter.
+     * @param {ImageAssetFindUniqueArgs} args - Arguments to find a ImageAsset
+     * @example
+     * // Get one ImageAsset
+     * const imageAsset = await prisma.imageAsset.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ImageAssetFindUniqueArgs>(args: SelectSubset<T, ImageAssetFindUniqueArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ImageAsset that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ImageAssetFindUniqueOrThrowArgs} args - Arguments to find a ImageAsset
+     * @example
+     * // Get one ImageAsset
+     * const imageAsset = await prisma.imageAsset.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ImageAssetFindUniqueOrThrowArgs>(args: SelectSubset<T, ImageAssetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ImageAsset that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAssetFindFirstArgs} args - Arguments to find a ImageAsset
+     * @example
+     * // Get one ImageAsset
+     * const imageAsset = await prisma.imageAsset.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ImageAssetFindFirstArgs>(args?: SelectSubset<T, ImageAssetFindFirstArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ImageAsset that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAssetFindFirstOrThrowArgs} args - Arguments to find a ImageAsset
+     * @example
+     * // Get one ImageAsset
+     * const imageAsset = await prisma.imageAsset.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ImageAssetFindFirstOrThrowArgs>(args?: SelectSubset<T, ImageAssetFindFirstOrThrowArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ImageAssets that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAssetFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ImageAssets
+     * const imageAssets = await prisma.imageAsset.findMany()
+     * 
+     * // Get first 10 ImageAssets
+     * const imageAssets = await prisma.imageAsset.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const imageAssetWithIdOnly = await prisma.imageAsset.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ImageAssetFindManyArgs>(args?: SelectSubset<T, ImageAssetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ImageAsset.
+     * @param {ImageAssetCreateArgs} args - Arguments to create a ImageAsset.
+     * @example
+     * // Create one ImageAsset
+     * const ImageAsset = await prisma.imageAsset.create({
+     *   data: {
+     *     // ... data to create a ImageAsset
+     *   }
+     * })
+     * 
+     */
+    create<T extends ImageAssetCreateArgs>(args: SelectSubset<T, ImageAssetCreateArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ImageAssets.
+     * @param {ImageAssetCreateManyArgs} args - Arguments to create many ImageAssets.
+     * @example
+     * // Create many ImageAssets
+     * const imageAsset = await prisma.imageAsset.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ImageAssetCreateManyArgs>(args?: SelectSubset<T, ImageAssetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ImageAssets and returns the data saved in the database.
+     * @param {ImageAssetCreateManyAndReturnArgs} args - Arguments to create many ImageAssets.
+     * @example
+     * // Create many ImageAssets
+     * const imageAsset = await prisma.imageAsset.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ImageAssets and only return the `id`
+     * const imageAssetWithIdOnly = await prisma.imageAsset.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ImageAssetCreateManyAndReturnArgs>(args?: SelectSubset<T, ImageAssetCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ImageAsset.
+     * @param {ImageAssetDeleteArgs} args - Arguments to delete one ImageAsset.
+     * @example
+     * // Delete one ImageAsset
+     * const ImageAsset = await prisma.imageAsset.delete({
+     *   where: {
+     *     // ... filter to delete one ImageAsset
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ImageAssetDeleteArgs>(args: SelectSubset<T, ImageAssetDeleteArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ImageAsset.
+     * @param {ImageAssetUpdateArgs} args - Arguments to update one ImageAsset.
+     * @example
+     * // Update one ImageAsset
+     * const imageAsset = await prisma.imageAsset.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ImageAssetUpdateArgs>(args: SelectSubset<T, ImageAssetUpdateArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ImageAssets.
+     * @param {ImageAssetDeleteManyArgs} args - Arguments to filter ImageAssets to delete.
+     * @example
+     * // Delete a few ImageAssets
+     * const { count } = await prisma.imageAsset.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ImageAssetDeleteManyArgs>(args?: SelectSubset<T, ImageAssetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ImageAssets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAssetUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ImageAssets
+     * const imageAsset = await prisma.imageAsset.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ImageAssetUpdateManyArgs>(args: SelectSubset<T, ImageAssetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ImageAssets and returns the data updated in the database.
+     * @param {ImageAssetUpdateManyAndReturnArgs} args - Arguments to update many ImageAssets.
+     * @example
+     * // Update many ImageAssets
+     * const imageAsset = await prisma.imageAsset.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ImageAssets and only return the `id`
+     * const imageAssetWithIdOnly = await prisma.imageAsset.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ImageAssetUpdateManyAndReturnArgs>(args: SelectSubset<T, ImageAssetUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ImageAsset.
+     * @param {ImageAssetUpsertArgs} args - Arguments to update or create a ImageAsset.
+     * @example
+     * // Update or create a ImageAsset
+     * const imageAsset = await prisma.imageAsset.upsert({
+     *   create: {
+     *     // ... data to create a ImageAsset
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ImageAsset we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ImageAssetUpsertArgs>(args: SelectSubset<T, ImageAssetUpsertArgs<ExtArgs>>): Prisma__ImageAssetClient<$Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ImageAssets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAssetCountArgs} args - Arguments to filter ImageAssets to count.
+     * @example
+     * // Count the number of ImageAssets
+     * const count = await prisma.imageAsset.count({
+     *   where: {
+     *     // ... the filter for the ImageAssets we want to count
+     *   }
+     * })
+    **/
+    count<T extends ImageAssetCountArgs>(
+      args?: Subset<T, ImageAssetCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ImageAssetCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ImageAsset.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAssetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ImageAssetAggregateArgs>(args: Subset<T, ImageAssetAggregateArgs>): Prisma.PrismaPromise<GetImageAssetAggregateType<T>>
+
+    /**
+     * Group by ImageAsset.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ImageAssetGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ImageAssetGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ImageAssetGroupByArgs['orderBy'] }
+        : { orderBy?: ImageAssetGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ImageAssetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetImageAssetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ImageAsset model
+   */
+  readonly fields: ImageAssetFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ImageAsset.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ImageAssetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ImageAsset model
+   */
+  interface ImageAssetFieldRefs {
+    readonly id: FieldRef<"ImageAsset", 'String'>
+    readonly userId: FieldRef<"ImageAsset", 'String'>
+    readonly organizationId: FieldRef<"ImageAsset", 'String'>
+    readonly name: FieldRef<"ImageAsset", 'String'>
+    readonly url: FieldRef<"ImageAsset", 'String'>
+    readonly thumbnail: FieldRef<"ImageAsset", 'String'>
+    readonly mimeType: FieldRef<"ImageAsset", 'String'>
+    readonly size: FieldRef<"ImageAsset", 'Int'>
+    readonly category: FieldRef<"ImageAsset", 'String'>
+    readonly tags: FieldRef<"ImageAsset", 'Json'>
+    readonly createdAt: FieldRef<"ImageAsset", 'DateTime'>
+    readonly updatedAt: FieldRef<"ImageAsset", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ImageAsset findUnique
+   */
+  export type ImageAssetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * Filter, which ImageAsset to fetch.
+     */
+    where: ImageAssetWhereUniqueInput
+  }
+
+  /**
+   * ImageAsset findUniqueOrThrow
+   */
+  export type ImageAssetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * Filter, which ImageAsset to fetch.
+     */
+    where: ImageAssetWhereUniqueInput
+  }
+
+  /**
+   * ImageAsset findFirst
+   */
+  export type ImageAssetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * Filter, which ImageAsset to fetch.
+     */
+    where?: ImageAssetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageAssets to fetch.
+     */
+    orderBy?: ImageAssetOrderByWithRelationInput | ImageAssetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ImageAssets.
+     */
+    cursor?: ImageAssetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageAssets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageAssets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ImageAssets.
+     */
+    distinct?: ImageAssetScalarFieldEnum | ImageAssetScalarFieldEnum[]
+  }
+
+  /**
+   * ImageAsset findFirstOrThrow
+   */
+  export type ImageAssetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * Filter, which ImageAsset to fetch.
+     */
+    where?: ImageAssetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageAssets to fetch.
+     */
+    orderBy?: ImageAssetOrderByWithRelationInput | ImageAssetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ImageAssets.
+     */
+    cursor?: ImageAssetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageAssets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageAssets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ImageAssets.
+     */
+    distinct?: ImageAssetScalarFieldEnum | ImageAssetScalarFieldEnum[]
+  }
+
+  /**
+   * ImageAsset findMany
+   */
+  export type ImageAssetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * Filter, which ImageAssets to fetch.
+     */
+    where?: ImageAssetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ImageAssets to fetch.
+     */
+    orderBy?: ImageAssetOrderByWithRelationInput | ImageAssetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ImageAssets.
+     */
+    cursor?: ImageAssetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ImageAssets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ImageAssets.
+     */
+    skip?: number
+    distinct?: ImageAssetScalarFieldEnum | ImageAssetScalarFieldEnum[]
+  }
+
+  /**
+   * ImageAsset create
+   */
+  export type ImageAssetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ImageAsset.
+     */
+    data: XOR<ImageAssetCreateInput, ImageAssetUncheckedCreateInput>
+  }
+
+  /**
+   * ImageAsset createMany
+   */
+  export type ImageAssetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ImageAssets.
+     */
+    data: ImageAssetCreateManyInput | ImageAssetCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ImageAsset createManyAndReturn
+   */
+  export type ImageAssetCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * The data used to create many ImageAssets.
+     */
+    data: ImageAssetCreateManyInput | ImageAssetCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ImageAsset update
+   */
+  export type ImageAssetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ImageAsset.
+     */
+    data: XOR<ImageAssetUpdateInput, ImageAssetUncheckedUpdateInput>
+    /**
+     * Choose, which ImageAsset to update.
+     */
+    where: ImageAssetWhereUniqueInput
+  }
+
+  /**
+   * ImageAsset updateMany
+   */
+  export type ImageAssetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ImageAssets.
+     */
+    data: XOR<ImageAssetUpdateManyMutationInput, ImageAssetUncheckedUpdateManyInput>
+    /**
+     * Filter which ImageAssets to update
+     */
+    where?: ImageAssetWhereInput
+    /**
+     * Limit how many ImageAssets to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ImageAsset updateManyAndReturn
+   */
+  export type ImageAssetUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * The data used to update ImageAssets.
+     */
+    data: XOR<ImageAssetUpdateManyMutationInput, ImageAssetUncheckedUpdateManyInput>
+    /**
+     * Filter which ImageAssets to update
+     */
+    where?: ImageAssetWhereInput
+    /**
+     * Limit how many ImageAssets to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ImageAsset upsert
+   */
+  export type ImageAssetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ImageAsset to update in case it exists.
+     */
+    where: ImageAssetWhereUniqueInput
+    /**
+     * In case the ImageAsset found by the `where` argument doesn't exist, create a new ImageAsset with this data.
+     */
+    create: XOR<ImageAssetCreateInput, ImageAssetUncheckedCreateInput>
+    /**
+     * In case the ImageAsset was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ImageAssetUpdateInput, ImageAssetUncheckedUpdateInput>
+  }
+
+  /**
+   * ImageAsset delete
+   */
+  export type ImageAssetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+    /**
+     * Filter which ImageAsset to delete.
+     */
+    where: ImageAssetWhereUniqueInput
+  }
+
+  /**
+   * ImageAsset deleteMany
+   */
+  export type ImageAssetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ImageAssets to delete
+     */
+    where?: ImageAssetWhereInput
+    /**
+     * Limit how many ImageAssets to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ImageAsset without action
+   */
+  export type ImageAssetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ImageAsset
+     */
+    select?: ImageAssetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ImageAsset
+     */
+    omit?: ImageAssetOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -15959,6 +17166,24 @@ export namespace Prisma {
   };
 
   export type TelegramSessionScalarFieldEnum = (typeof TelegramSessionScalarFieldEnum)[keyof typeof TelegramSessionScalarFieldEnum]
+
+
+  export const ImageAssetScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    organizationId: 'organizationId',
+    name: 'name',
+    url: 'url',
+    thumbnail: 'thumbnail',
+    mimeType: 'mimeType',
+    size: 'size',
+    category: 'category',
+    tags: 'tags',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ImageAssetScalarFieldEnum = (typeof ImageAssetScalarFieldEnum)[keyof typeof ImageAssetScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -17089,6 +18314,95 @@ export namespace Prisma {
     metadata?: JsonNullableWithAggregatesFilter<"TelegramSession">
     createdAt?: DateTimeWithAggregatesFilter<"TelegramSession"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TelegramSession"> | Date | string
+  }
+
+  export type ImageAssetWhereInput = {
+    AND?: ImageAssetWhereInput | ImageAssetWhereInput[]
+    OR?: ImageAssetWhereInput[]
+    NOT?: ImageAssetWhereInput | ImageAssetWhereInput[]
+    id?: UuidFilter<"ImageAsset"> | string
+    userId?: UuidFilter<"ImageAsset"> | string
+    organizationId?: UuidNullableFilter<"ImageAsset"> | string | null
+    name?: StringFilter<"ImageAsset"> | string
+    url?: StringFilter<"ImageAsset"> | string
+    thumbnail?: StringNullableFilter<"ImageAsset"> | string | null
+    mimeType?: StringNullableFilter<"ImageAsset"> | string | null
+    size?: IntNullableFilter<"ImageAsset"> | number | null
+    category?: StringNullableFilter<"ImageAsset"> | string | null
+    tags?: JsonNullableFilter<"ImageAsset">
+    createdAt?: DateTimeFilter<"ImageAsset"> | Date | string
+    updatedAt?: DateTimeFilter<"ImageAsset"> | Date | string
+  }
+
+  export type ImageAssetOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    thumbnail?: SortOrderInput | SortOrder
+    mimeType?: SortOrderInput | SortOrder
+    size?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
+    tags?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageAssetWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ImageAssetWhereInput | ImageAssetWhereInput[]
+    OR?: ImageAssetWhereInput[]
+    NOT?: ImageAssetWhereInput | ImageAssetWhereInput[]
+    userId?: UuidFilter<"ImageAsset"> | string
+    organizationId?: UuidNullableFilter<"ImageAsset"> | string | null
+    name?: StringFilter<"ImageAsset"> | string
+    url?: StringFilter<"ImageAsset"> | string
+    thumbnail?: StringNullableFilter<"ImageAsset"> | string | null
+    mimeType?: StringNullableFilter<"ImageAsset"> | string | null
+    size?: IntNullableFilter<"ImageAsset"> | number | null
+    category?: StringNullableFilter<"ImageAsset"> | string | null
+    tags?: JsonNullableFilter<"ImageAsset">
+    createdAt?: DateTimeFilter<"ImageAsset"> | Date | string
+    updatedAt?: DateTimeFilter<"ImageAsset"> | Date | string
+  }, "id">
+
+  export type ImageAssetOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrderInput | SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    thumbnail?: SortOrderInput | SortOrder
+    mimeType?: SortOrderInput | SortOrder
+    size?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
+    tags?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ImageAssetCountOrderByAggregateInput
+    _avg?: ImageAssetAvgOrderByAggregateInput
+    _max?: ImageAssetMaxOrderByAggregateInput
+    _min?: ImageAssetMinOrderByAggregateInput
+    _sum?: ImageAssetSumOrderByAggregateInput
+  }
+
+  export type ImageAssetScalarWhereWithAggregatesInput = {
+    AND?: ImageAssetScalarWhereWithAggregatesInput | ImageAssetScalarWhereWithAggregatesInput[]
+    OR?: ImageAssetScalarWhereWithAggregatesInput[]
+    NOT?: ImageAssetScalarWhereWithAggregatesInput | ImageAssetScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"ImageAsset"> | string
+    userId?: UuidWithAggregatesFilter<"ImageAsset"> | string
+    organizationId?: UuidNullableWithAggregatesFilter<"ImageAsset"> | string | null
+    name?: StringWithAggregatesFilter<"ImageAsset"> | string
+    url?: StringWithAggregatesFilter<"ImageAsset"> | string
+    thumbnail?: StringNullableWithAggregatesFilter<"ImageAsset"> | string | null
+    mimeType?: StringNullableWithAggregatesFilter<"ImageAsset"> | string | null
+    size?: IntNullableWithAggregatesFilter<"ImageAsset"> | number | null
+    category?: StringNullableWithAggregatesFilter<"ImageAsset"> | string | null
+    tags?: JsonNullableWithAggregatesFilter<"ImageAsset">
+    createdAt?: DateTimeWithAggregatesFilter<"ImageAsset"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ImageAsset"> | Date | string
   }
 
   export type IntegrationConnectionCreateInput = {
@@ -18274,6 +19588,111 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ImageAssetCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name: string
+    url: string
+    thumbnail?: string | null
+    mimeType?: string | null
+    size?: number | null
+    category?: string | null
+    tags?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageAssetUncheckedCreateInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name: string
+    url: string
+    thumbnail?: string | null
+    mimeType?: string | null
+    size?: number | null
+    category?: string | null
+    tags?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageAssetUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageAssetUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageAssetCreateManyInput = {
+    id?: string
+    userId: string
+    organizationId?: string | null
+    name: string
+    url: string
+    thumbnail?: string | null
+    mimeType?: string | null
+    size?: number | null
+    category?: string | null
+    tags?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ImageAssetUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ImageAssetUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
+    thumbnail?: NullableStringFieldUpdateOperationsInput | string | null
+    mimeType?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -19042,6 +20461,57 @@ export namespace Prisma {
     phone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type ImageAssetCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    thumbnail?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    category?: SortOrder
+    tags?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageAssetAvgOrderByAggregateInput = {
+    size?: SortOrder
+  }
+
+  export type ImageAssetMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    thumbnail?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    category?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageAssetMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    organizationId?: SortOrder
+    name?: SortOrder
+    url?: SortOrder
+    thumbnail?: SortOrder
+    mimeType?: SortOrder
+    size?: SortOrder
+    category?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ImageAssetSumOrderByAggregateInput = {
+    size?: SortOrder
   }
 
   export type StringFieldUpdateOperationsInput = {
