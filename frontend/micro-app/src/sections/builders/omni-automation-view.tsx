@@ -1,24 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
 import Tab from '@mui/material/Tab';
+import Card from '@mui/material/Card';
 import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
+import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { omniAutomationService } from 'src/services/omni-service';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { omniAutomationService } from 'src/services/omni-service';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------

@@ -6,18 +6,18 @@ import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { businessService } from 'src/services/business-service';
 
-import { BusinessRetention } from '../business-retention';
-import { BusinessBirthday } from '../business-birthday';
+import { Iconify } from 'src/components/iconify';
+
 import { BusinessExpired } from '../business-expired';
+import { BusinessBirthday } from '../business-birthday';
+import { BusinessRetention } from '../business-retention';
 import { BusinessProgression } from '../business-progression';
 
 // ----------------------------------------------------------------------

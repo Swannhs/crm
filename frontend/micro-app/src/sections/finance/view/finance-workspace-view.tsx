@@ -1,10 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
 import { z as zod } from 'zod';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -19,13 +19,17 @@ import LinearProgress from '@mui/material/LinearProgress';
 
 import { paths } from 'src/routes/paths';
 import { useRouter, useSearchParams } from 'src/routes/hooks';
+
+import { fCurrency } from 'src/utils/format-number';
+
 import { billingService } from 'src/services/billing-service';
 import { contactService } from 'src/services/contact-service';
 import { financeService } from 'src/services/finance-service';
+
 import { showToast } from 'src/components/toast';
-import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 import { Form, RHFTextField } from 'src/components/hook-form';
-import { fCurrency } from 'src/utils/format-number';
+
+import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
 

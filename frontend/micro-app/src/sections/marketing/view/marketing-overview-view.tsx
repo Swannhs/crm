@@ -7,12 +7,13 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { marketingService } from 'src/services/marketing-service';
+
+import { Iconify } from 'src/components/iconify';
 
 import { MarketingSummaryCard } from '../marketing-summary-card';
 import { MarketingRecentActivity } from '../marketing-recent-activity';

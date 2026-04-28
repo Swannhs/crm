@@ -1,21 +1,23 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
+
 import Box from '@mui/material/Box';
+import Fab from '@mui/material/Fab';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CardHeader from '@mui/material/CardHeader';
-import Fab from '@mui/material/Fab';
-import Badge from '@mui/material/Badge';
-import { useTheme } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
+
+import { aiService } from 'src/services/ai-service';
 
 import { Iconify } from 'src/components/iconify';
-import { aiService } from 'src/services/ai-service';
 
 // ----------------------------------------------------------------------
 
@@ -170,5 +172,3 @@ export function AIChatBox() {
     </>
   );
 }
-
-import CircularProgress from '@mui/material/CircularProgress';

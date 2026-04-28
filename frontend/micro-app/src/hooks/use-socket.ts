@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
+
 import { socketClient } from 'src/utils/socket';
 
 export function useSocket(orgId?: string, onEvent?: (event: string, data: any) => void) {

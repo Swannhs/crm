@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect } from 'react';
+
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+
 import { useRouter, useSearchParams } from 'src/routes/hooks';
+
 import { CONFIG } from 'src/config-global';
+
 import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------

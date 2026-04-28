@@ -1,19 +1,19 @@
-import axios from 'src/utils/axios';
-
 import type {
-  MagentoConnectInput,
-  MagentoConnectionStatus,
+  MagentoOrder,
+  MagentoStore,
+  MagentoProduct,
   MagentoCustomer,
-  MagentoDownstreamHealth,
+  MagentoSyncResult,
+  MagentoSyncOptions,
+  MagentoConnectInput,
   MagentoGraphqlInput,
   MagentoListResponse,
-  MagentoOrder,
-  MagentoProduct,
   MagentoRestProxyInput,
-  MagentoStore,
-  MagentoSyncOptions,
-  MagentoSyncResult,
+  MagentoConnectionStatus,
+  MagentoDownstreamHealth,
 } from 'src/types/magento';
+
+import axios from 'src/utils/axios';
 
 const MAGENTO_API_BASE = '/api/magento';
 

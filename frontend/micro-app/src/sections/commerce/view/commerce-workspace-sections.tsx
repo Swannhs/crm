@@ -1,55 +1,58 @@
+import type { ICommerceCoupon, ICommerceProduct } from 'src/services/commerce-service';
+
 import Link from 'next/link';
 import { useState } from 'react';
 
-import Alert from '@mui/material/Alert';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import LinearProgress from '@mui/material/LinearProgress';
-import MenuItem from '@mui/material/MenuItem';
-import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
+import MenuItem from '@mui/material/MenuItem';
+import TableRow from '@mui/material/TableRow';
+import Checkbox from '@mui/material/Checkbox';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TablePagination from '@mui/material/TablePagination';
 import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Checkbox from '@mui/material/Checkbox';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import InputAdornment from '@mui/material/InputAdornment';
+import LinearProgress from '@mui/material/LinearProgress';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
-import { Form, RHFTextField } from 'src/components/hook-form';
+
 import { fCurrency } from 'src/utils/format-number';
+
 import { Iconify } from 'src/components/iconify';
+import { Form, RHFTextField } from 'src/components/hook-form';
 
-import type { ICommerceCoupon, ICommerceProduct } from 'src/services/commerce-service';
-
-import type { CartLine, CommerceDashboardModule, LocalOrder, ProductFormValues } from './commerce-workspace.types';
 import {
-  getAvailableStock,
   getBasePrice,
-  getInventoryTotal,
   getProductHref,
-  getStorefrontHomeHref,
   inventoryStatus,
-  isProductPurchasable,
   orderStatusColor,
+  getAvailableStock,
+  getInventoryTotal,
+  isProductPurchasable,
+  getStorefrontHomeHref,
 } from './commerce-workspace.utils';
+
+import type { CartLine, LocalOrder, ProductFormValues, CommerceDashboardModule } from './commerce-workspace.types';
 
 type SummaryCardsProps = {
   products: ICommerceProduct[];

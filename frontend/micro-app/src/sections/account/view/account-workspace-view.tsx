@@ -3,19 +3,20 @@
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
+import Switch from '@mui/material/Switch';
 import Divider from '@mui/material/Divider';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import { useTheme, alpha } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
+
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
@@ -195,5 +196,3 @@ function AccountWalletTab() {
     </Grid>
   );
 }
-
-import Switch from '@mui/material/Switch';

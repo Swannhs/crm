@@ -10,8 +10,10 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+
 import { bookingService } from 'src/services/booking-service';
 import { calendarService } from 'src/services/calendar-service';
+
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------

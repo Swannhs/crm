@@ -11,12 +11,13 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
+import { Grid, LinearProgress } from '@mui/material';
 
 import { fDate } from 'src/utils/format-time';
-import { Iconify } from 'src/components/iconify';
+
 import { reputationService } from 'src/services/reputation-service';
-import { Scrollbar } from 'src/components/scrollbar';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -138,5 +139,3 @@ function PlatformStatus({ provider, icon, isConnected }: any) {
     </Stack>
   );
 }
-
-import { Grid, LinearProgress, Skeleton } from '@mui/material';

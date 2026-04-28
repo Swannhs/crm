@@ -2,8 +2,10 @@
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import { Button } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -94,5 +96,3 @@ export function MarketingRecentActivity() {
     </Card>
   );
 }
-
-import { Button } from '@mui/material';

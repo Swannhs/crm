@@ -11,8 +11,9 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { integrationService } from 'src/services/integration-service';
-import { Iconify } from 'src/components/iconify';
+
 import { toast } from 'src/components/snackbar';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 

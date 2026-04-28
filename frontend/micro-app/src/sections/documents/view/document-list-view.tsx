@@ -7,10 +7,10 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
+import Skeleton from '@mui/material/Skeleton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
-import Skeleton from '@mui/material/Skeleton';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { documentService } from 'src/services/document-service';

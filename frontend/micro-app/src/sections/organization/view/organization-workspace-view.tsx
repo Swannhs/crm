@@ -3,18 +3,26 @@
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
+import { alpha } from '@mui/material/styles';
+import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
-import { useTheme, alpha } from '@mui/material/styles';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
 
 import { Iconify } from 'src/components/iconify';
+
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
@@ -325,12 +333,3 @@ function OrgPlansTab() {
     </Grid>
   );
 }
-
-import Chip from '@mui/material/Chip';
-import TextField from '@mui/material/TextField';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';

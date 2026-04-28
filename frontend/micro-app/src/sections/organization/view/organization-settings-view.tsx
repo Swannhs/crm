@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -14,15 +15,16 @@ import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
-import Link from 'next/link';
 
 import { paths } from 'src/routes/paths';
-import { organizationService } from 'src/services/organization-service';
+
 import { DashboardContent } from 'src/layouts/dashboard';
+import { organizationService } from 'src/services/organization-service';
+
 import { Iconify } from 'src/components/iconify';
 
-import { OmniIntegrationView } from '../omni-integration-view';
 import { IntegrationAdp } from '../integration-adp';
+import { OmniIntegrationView } from '../omni-integration-view';
 import { OrganizationUserManagementView } from './organization-user-management-view';
 
 // ----------------------------------------------------------------------

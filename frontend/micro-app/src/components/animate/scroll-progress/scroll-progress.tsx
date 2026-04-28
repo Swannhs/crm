@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 
 // ----------------------------------------------------------------------
 
-import type { BoxProps } from '@mui/material/Box';
 import type { MotionValue } from 'framer-motion';
+import type { BoxProps } from '@mui/material/Box';
 
 // ----------------------------------------------------------------------
 

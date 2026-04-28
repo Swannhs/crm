@@ -1,20 +1,22 @@
+import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z as zod } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import { LoadingButton } from '@mui/lab';
 import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import Typography from '@mui/material/Typography';
-import { LoadingButton } from '@mui/lab';
 
 import { bookingService } from 'src/services/booking-service';
+
 import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
@@ -138,5 +140,3 @@ export function BookingTypeDialog({ open, onClose, bookingType }: Props) {
     </Dialog>
   );
 }
-
-import Box from '@mui/material/Box';

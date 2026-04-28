@@ -1,57 +1,55 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Timeline from '@mui/lab/Timeline';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
+import Dialog from '@mui/material/Dialog';
+import Select from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import CircularProgress from '@mui/material/CircularProgress';
-import LinearProgress from '@mui/material/LinearProgress';
-import Table from '@mui/material/Table';
+import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
+import Skeleton from '@mui/material/Skeleton';
+import MenuItem from '@mui/material/MenuItem';
+import TimelineDot from '@mui/lab/TimelineDot';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
-import TableContainer from '@mui/material/TableContainer';
+import TextField from '@mui/material/TextField';
+import TimelineItem from '@mui/lab/TimelineItem';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Skeleton from '@mui/material/Skeleton';
-import TablePagination from '@mui/material/TablePagination';
-import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
+import TimelineContent from '@mui/lab/TimelineContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
-import Popover from '@mui/material/Popover';
-import { useBoolean } from 'src/hooks/use-boolean';
-import { showToast } from 'src/components/toast';
-import { contactService } from 'src/services/contact-service';
-
-import { useRouter } from 'src/routes/hooks';
-import { paths } from 'src/routes/paths';
-import { billingService } from 'src/services/billing-service';
-
-import Timeline from '@mui/lab/Timeline';
-import TimelineItem from '@mui/lab/TimelineItem';
+import LinearProgress from '@mui/material/LinearProgress';
+import TableContainer from '@mui/material/TableContainer';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineContent from '@mui/lab/TimelineContent';
-import TimelineDot from '@mui/lab/TimelineDot';
+import TablePagination from '@mui/material/TablePagination';
 
-import { Iconify } from 'src/components/iconify';
-import { Label } from 'src/components/label';
-import { Scrollbar } from 'src/components/scrollbar';
+import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
+
+import { useBoolean } from 'src/hooks/use-boolean';
+
 import { fCurrency } from 'src/utils/format-number';
+
+import { contactService } from 'src/services/contact-service';
+import { billingService } from 'src/services/billing-service';
+
+import { Label } from 'src/components/label';
+import { showToast } from 'src/components/toast';
+import { Iconify } from 'src/components/iconify';
+import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
@@ -213,7 +211,7 @@ export function ContactBillingTab({ invoices: invoicesData, loading, contactId, 
           variant="contained" 
           size="small" 
           startIcon={<Iconify icon="solar:add-circle-bold" />}
-          onClick={() => router.push(paths.dashboard.invoiceNew + `?customer=${contactId}`)}
+          onClick={() => router.push(`${paths.dashboard.invoiceNew  }?customer=${contactId}`)}
         >
           New Invoice
         </Button>
@@ -1185,7 +1183,7 @@ export function ContactOrdersTab({ orders, loading }: any) {
               }}
             >
               <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Box sx={{ cursor: 'pointer' }} onClick={() => router.push(paths.dashboard.sales + `?order=${order.name}`)}>
+                <Box sx={{ cursor: 'pointer' }} onClick={() => router.push(`${paths.dashboard.sales  }?order=${order.name}`)}>
                   <Typography variant="subtitle2">{order.name}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {new Date(order.date_order).toLocaleDateString()}
@@ -1283,7 +1281,7 @@ export function ContactProjectsTab({ projects, loading }: any) {
                   size="small"
                   sx={{ mt: 2 }}
                   startIcon={<Iconify icon="solar:eye-bold" />}
-                  onClick={() => router.push(paths.dashboard.projects + `/view/${project.id}`)}
+                  onClick={() => router.push(`${paths.dashboard.projects  }/view/${project.id}`)}
                 >
                   View Details
                 </Button>

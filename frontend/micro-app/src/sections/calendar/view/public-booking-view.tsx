@@ -8,15 +8,17 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
-import Avatar from '@mui/material/Avatar';
+
+import { fCurrency } from 'src/utils/format-number';
+
+import { bookingService } from 'src/services/booking-service';
 
 import { Iconify } from 'src/components/iconify';
-import { bookingService } from 'src/services/booking-service';
-import { fCurrency } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 

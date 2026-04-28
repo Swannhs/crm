@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
@@ -12,15 +12,25 @@ import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
-import Divider from '@mui/material/Divider';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+
 import { publicFlowService } from 'src/services/public-flow-service';
+
+import { Iconify } from 'src/components/iconify';
+
+import { PublicOrgView } from './public-org-view';
+import { WaiverSignView } from './waiver-sign-view';
+// --- Internal Import ---
+import { PublicEventView } from './public-event-view';
+import { PublicPagesView } from './public-pages-view';
+import { PublicSupportView } from './public-support-view';
+import { PublicCommerceView } from './public-commerce-view';
+import { PublicMembershipView } from './public-membership-view';
 
 // ----------------------------------------------------------------------
 
@@ -637,14 +647,3 @@ export function PublicFlowWorkspaceView(props: Props) {
   );
 }
 
-// --- Internal Import ---
-import { PublicEventView } from './public-event-view';
-import { PublicSupportView } from './public-support-view';
-import { PublicMembershipView } from './public-membership-view';
-import { PublicOrgView } from './public-org-view';
-import { PublicPagesView } from './public-pages-view';
-import { PublicCommerceView } from './public-commerce-view';
-import { Iconify } from 'src/components/iconify';
-import { WaiverSignView } from './waiver-sign-view';
-import Chip from '@mui/material/Chip';
-import Avatar from '@mui/material/Avatar';

@@ -1,23 +1,24 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+
+import LoadingButton from '@mui/lab/LoadingButton';
 import { 
   Box, 
   Stack, 
   Drawer, 
   Button, 
-  Avatar, 
   Divider, 
   TextField, 
   Typography, 
   IconButton,
 } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
+
+import { projectService } from 'src/services/project-service';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-import { projectService } from 'src/services/project-service';
 
 // ----------------------------------------------------------------------
 

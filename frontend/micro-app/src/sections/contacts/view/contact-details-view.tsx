@@ -4,49 +4,48 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
-import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
+import Tooltip from '@mui/material/Tooltip';
+import Skeleton from '@mui/material/Skeleton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import Skeleton from '@mui/material/Skeleton';
-import LinearProgress from '@mui/material/LinearProgress';
 import LoadingButton from '@mui/lab/LoadingButton';
 import DialogTitle from '@mui/material/DialogTitle';
+import AvatarGroup from '@mui/material/AvatarGroup';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
+import { useContactRealtime } from 'src/hooks/use-contact-realtime';
+
+import { DashboardContent } from 'src/layouts/dashboard';
 import { contactService } from 'src/services/contact-service';
 import { billingService } from 'src/services/billing-service';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
-import { DashboardContent } from 'src/layouts/dashboard';
-import { useContactRealtime } from 'src/hooks/use-contact-realtime';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Tooltip from '@mui/material/Tooltip';
 
 import {
-  ContactOverviewTab,
-  ContactBillingTab,
-  ContactWorkHistoryTab,
+  TasksTab,
   ContactPetsTab,
   ContactFilesTab,
   ContactTimeline,
   ContactOrdersTab,
+  ContactBillingTab,
+  ContactOverviewTab,
   ContactProjectsTab,
-  TasksTab,
+  ContactWorkHistoryTab,
 } from './contact-workspace-sections';
 
 // ----------------------------------------------------------------------

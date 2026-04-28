@@ -3,17 +3,19 @@
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useTheme, alpha } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
+
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
@@ -169,6 +171,3 @@ function SettingsIntegrationsTab() {
     </Grid>
   );
 }
-
-import TextField from '@mui/material/TextField';
-import Chip from '@mui/material/Chip';

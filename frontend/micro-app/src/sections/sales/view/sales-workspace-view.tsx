@@ -1,30 +1,33 @@
 'use client';
 
+import type { SalesLeadRow, SalesSummary, SalesOrderRow } from 'src/services/sales-dashboard-service';
+
 import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Chip from '@mui/material/Chip';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
+import { useSalesLeads, useSalesOrders, useSalesSummary } from 'src/hooks/use-sales-dashboard';
+
 import { fCurrency } from 'src/utils/format-number';
+
+import { syncMagentoAllToOdoo } from 'src/services/odoo-service';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
-import { syncMagentoAllToOdoo } from 'src/services/odoo-service';
-import { useSalesLeads, useSalesOrders, useSalesSummary } from 'src/hooks/use-sales-dashboard';
-import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
-import type { SalesLeadRow, SalesSummary, SalesOrderRow } from 'src/services/sales-dashboard-service';
+import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 export function SalesWorkspaceView() {
   const [activeTab, setActiveTab] = useState('pipeline');

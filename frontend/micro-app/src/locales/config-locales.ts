@@ -1,12 +1,10 @@
 'use client';
 
 import i18next from 'i18next';
-
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 import { defaultLang } from './all-langs';
-
 import enTranslation from './langs/en.json';
 import frTranslation from './langs/fr.json';
 

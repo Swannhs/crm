@@ -47,7 +47,7 @@ export const CATEGORY_FORM_SCHEMA = zod.object({
   description: zod.string().optional(),
   isActive: zod
     .union([zod.boolean(), zod.string()])
-    .transform((value) => value === false || value === 'false' ? false : true)
+    .transform((value) => !(value === false || value === 'false'))
     .default(true),
 });
 
@@ -60,7 +60,7 @@ export const COUPON_FORM_SCHEMA = zod.object({
   expiresAt: zod.string().optional(),
   isActive: zod
     .union([zod.boolean(), zod.string()])
-    .transform((value) => value === false || value === 'false' ? false : true)
+    .transform((value) => !(value === false || value === 'false'))
     .default(true),
 });
 

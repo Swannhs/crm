@@ -1,8 +1,9 @@
+import type { FormControlLabelProps } from '@mui/material/FormControlLabel';
+
 import { Controller, useFormContext } from 'react-hook-form';
 
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import type { FormControlLabelProps } from '@mui/material/FormControlLabel';
 
 // ----------------------------------------------------------------------
 

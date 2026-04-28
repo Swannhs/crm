@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import FullCalendar from '@fullcalendar/react';
 import listPlugin from '@fullcalendar/list';
+import FullCalendar from '@fullcalendar/react';
+import { useQuery } from '@tanstack/react-query';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -14,8 +14,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { calendarService } from 'src/services/calendar-service';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { calendarService } from 'src/services/calendar-service';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------

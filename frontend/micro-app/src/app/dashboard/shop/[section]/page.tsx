@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { paths } from 'src/routes/paths';
+
 import { CommerceWorkspaceView } from 'src/sections/commerce/view/commerce-workspace-view';
 import { COMMERCE_DASHBOARD_MODULES } from 'src/sections/commerce/view/commerce-workspace.types';
 

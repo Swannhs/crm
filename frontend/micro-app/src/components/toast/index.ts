@@ -1,1 +1,1 @@
-export { ToastProvider, showToast } from './toast-provider';
+export { showToast, ToastProvider } from './toast-provider';

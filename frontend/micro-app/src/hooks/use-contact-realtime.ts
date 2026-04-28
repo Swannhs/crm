@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useSocket } from './use-socket';
 import { useQueryClient } from '@tanstack/react-query';
+
 import { useAuthContext } from 'src/auth/hooks';
+
+import { useSocket } from './use-socket';
 
 export function useContactRealtime(contactId: string, orgId: string) {
   const socket = useSocket(orgId);

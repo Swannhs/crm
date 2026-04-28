@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -17,10 +17,13 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 import { organizationService } from 'src/services/organization-service';
-import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
+
 import { Form, RHFTextField } from 'src/components/hook-form';
+
+import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
 

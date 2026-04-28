@@ -1,22 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { OdooListParams, OdooSyncOptions, OdooConnectInput } from 'src/types/odoo';
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
   connectOdoo,
-  disconnectOdoo,
-  getOdooCompanies,
-  getOdooConnection,
-  getOdooContacts,
-  getOdooInventory,
-  getOdooInvoices,
   getOdooLeads,
-  getOdooOpportunities,
+  disconnectOdoo,
+  getOdooContacts,
+  getOdooInvoices,
   getOdooProducts,
+  getOdooCompanies,
+  getOdooInventory,
+  getOdooConnection,
   getOdooSalesOrders,
+  getOdooOpportunities,
   syncMagentoAllToOdoo,
-  syncMagentoCustomersToOdoo,
   syncMagentoOrdersToOdoo,
+  syncMagentoCustomersToOdoo,
 } from 'src/services/odoo-service';
-import type { OdooConnectInput, OdooListParams, OdooSyncOptions } from 'src/types/odoo';
 
 export const odooKeys = {
   all: ['odoo'] as const,

@@ -1,5 +1,7 @@
 'use client';
 
+import type { IContactAnalyticsResponse } from 'src/services/contact-service';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -8,8 +10,8 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 
 import { fShortenNumber } from 'src/utils/format-number';
+
 import { Chart, useChart } from 'src/components/chart';
-import type { IContactAnalyticsResponse } from 'src/services/contact-service';
 
 type Props = {
   analytics?: IContactAnalyticsResponse | null;

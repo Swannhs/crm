@@ -1,43 +1,47 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import Alert from '@mui/material/Alert';
-import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
-import { useAuthContext } from 'src/auth/hooks';
+
+import { posService } from 'src/services/pos-service';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { commerceService } from 'src/services/commerce-service';
-import { posService } from 'src/services/pos-service';
 import { organizationService } from 'src/services/organization-service';
-import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
-import { PosPublicFlowView } from 'src/sections/commerce/view/pos-public-flow-view';
-import { Form, RHFTextField } from 'src/components/hook-form';
+
 import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
+import { Form, RHFTextField } from 'src/components/hook-form';
+
+import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
+import { PosPublicFlowView } from 'src/sections/commerce/view/pos-public-flow-view';
+
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 

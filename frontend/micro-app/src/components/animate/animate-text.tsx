@@ -1,3 +1,6 @@
+import type { Variants } from 'framer-motion';
+import type { TypographyProps } from '@mui/material/Typography';
+
 import { useRef, useEffect } from 'react';
 import { m, useInView, useAnimation } from 'framer-motion';
 
@@ -18,9 +21,6 @@ export const animateTextClasses = {
   srOnly: 'sr-only',
   dataIndex: '[data-columns="3"]',
 };
-
-import type { TypographyProps } from '@mui/material/Typography';
-import type { Variants } from 'framer-motion';
 
 // ----------------------------------------------------------------------
 

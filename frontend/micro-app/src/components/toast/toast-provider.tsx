@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
@@ -33,7 +33,7 @@ export function ToastProvider() {
   useEffect(() => {
     const handleToast = (event: Event) => {
       const customEvent = event as CustomEvent<ToastDetail>;
-      const detail = customEvent.detail;
+      const {detail} = customEvent;
 
       if (!detail?.message) return;
 

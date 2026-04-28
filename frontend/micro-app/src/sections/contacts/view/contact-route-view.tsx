@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'src/routes/hooks';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -16,11 +15,12 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
+import { DashboardContent } from 'src/layouts/dashboard';
 import { contactService } from 'src/services/contact-service';
 
 import { Scrollbar } from 'src/components/scrollbar';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 import { ContactDetailsView } from './contact-details-view';
 

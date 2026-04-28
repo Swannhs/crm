@@ -1,11 +1,11 @@
+import type { TabsProps } from '@mui/material/Tabs';
+
 import NoSsr from '@mui/material/NoSsr';
 import { tabClasses } from '@mui/material/Tab';
 import { useTheme } from '@mui/material/styles';
 import Tabs, { tabsClasses } from '@mui/material/Tabs';
 
 import { stylesMode } from 'src/theme/styles';
-
-import type { TabsProps } from '@mui/material/Tabs';
 
 // ----------------------------------------------------------------------
 

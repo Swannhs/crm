@@ -2,96 +2,100 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useMemo, useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
+import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
-import { DashboardContent } from 'src/layouts/dashboard';
-import { useAuthContext } from 'src/auth/hooks';
+
 import { useBoolean } from 'src/hooks/use-boolean';
 import {
   useMagentoCategories,
   useMagentoCreateProduct,
   useMagentoDeleteProduct,
 } from 'src/hooks/use-magento-shop';
-import { showToast } from 'src/components/toast';
+
+import { DashboardContent } from 'src/layouts/dashboard';
+import { publicCommerceService } from 'src/services/public-commerce-service';
 import {
   commerceService,
-  type ICommerceCategory,
   type ICommerceCoupon,
-  type ICommerceImageAsset,
   type ICommerceProduct,
+  type ICommerceCategory,
+  type ICommerceImageAsset,
 } from 'src/services/commerce-service';
-import { publicCommerceService } from 'src/services/public-commerce-service';
+
+import { showToast } from 'src/components/toast';
+
+import { useAuthContext } from 'src/auth/hooks';
 
 import {
-  COMMERCE_DASHBOARD_MODULES,
-  CHECKOUT_FORM_SCHEMA,
-  CATEGORY_FORM_SCHEMA,
-  COUPON_FORM_SCHEMA,
-  DEFAULT_SETTINGS,
-  DEFAULT_PRODUCT_FORM_VALUES,
-  PRODUCT_FORM_SCHEMA,
-  SETTINGS_FORM_SCHEMA,
-  resolveInitialModule,
-  type CartLine,
-  type CategoryFormValues,
-  type CheckoutFormValues,
-  type CommerceDashboardModule,
-  type CommerceWorkspaceProps,
-  type CouponFormValues,
-  type LocalOrder,
-  type ProductFormValues,
-  type SettingsFormValues,
-} from './commerce-workspace.types';
-import {
+  readStorage,
+  getBasePrice,
+  writeStorage,
   buildCartLine,
   cartStorageKey,
-  getAvailableStock,
-  getBasePrice,
-  isProductPurchasable,
   normalizeOrder,
   orderStorageKey,
-  readStorage,
-  settingsStorageKey,
   tableStorageKey,
-  writeStorage,
+  getAvailableStock,
+  settingsStorageKey,
+  isProductPurchasable,
 } from './commerce-workspace.utils';
 import {
+  type CartLine,
+  type LocalOrder,
+  DEFAULT_SETTINGS,
+  COUPON_FORM_SCHEMA,
+  PRODUCT_FORM_SCHEMA,
+  CHECKOUT_FORM_SCHEMA,
+  CATEGORY_FORM_SCHEMA,
+  SETTINGS_FORM_SCHEMA,
+  resolveInitialModule,
+  type CouponFormValues,
+  type ProductFormValues,
+  type CategoryFormValues,
+  type CheckoutFormValues,
+  type SettingsFormValues,
+  COMMERCE_DASHBOARD_MODULES,
+  DEFAULT_PRODUCT_FORM_VALUES,
+  type CommerceWorkspaceProps,
+  type CommerceDashboardModule,
+} from './commerce-workspace.types';
+import {
+  CommerceOrderCard,
   CommerceCartSummary,
-  CommerceCategoryDialog,
-  CommerceCategoriesTable,
-  CommerceCheckoutPanel,
+  CommerceOrdersTable,
+  CommerceTablesPanel,
   CommerceCouponDialog,
   CommerceCouponsTable,
-  CommerceCustomersTable,
-  CommerceDashboardModules,
-  CommerceOrderCard,
-  CommerceProductDetailDialog,
-  CommerceOrderDetailDialog,
-  CommerceOrdersTable,
+  CommerceSummaryCards,
+  CommerceCheckoutPanel,
   CommerceProductDetail,
-  CommerceProductFormCard,
   CommerceProductsTable,
   CommerceSettingsPanel,
+  CommerceCategoryDialog,
+  CommerceCustomersTable,
   CommerceStorefrontGrid,
-  CommerceSummaryCards,
+  CommerceCategoriesTable,
+  CommerceProductFormCard,
+  CommerceDashboardModules,
   CommerceTableGuideDialog,
-  CommerceTablesPanel,
+  CommerceOrderDetailDialog,
+  CommerceProductDetailDialog,
 } from './commerce-workspace-sections';
 
 export function CommerceWorkspaceView({

@@ -1,27 +1,30 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { bookingService } from 'src/services/booking-service';
-import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useState } from 'react';
-import { BookingTypeDialog } from '../booking-type-dialog';
-import { AppointmentsTab } from '../appointments-tab';
-import { showToast } from 'src/components/toast';
-import { useLocales } from 'src/locales';
 
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+import { useLocales } from 'src/locales';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { bookingService } from 'src/services/booking-service';
+
+import { Iconify } from 'src/components/iconify';
+import { showToast } from 'src/components/toast';
+
+import { AppointmentsTab } from '../appointments-tab';
+import { BookingTypeDialog } from '../booking-type-dialog';
 
 // ----------------------------------------------------------------------
 

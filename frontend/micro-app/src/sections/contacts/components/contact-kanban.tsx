@@ -1,27 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
+import MenuItem from '@mui/material/MenuItem';
 import Skeleton from '@mui/material/Skeleton';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
 import DialogTitle from '@mui/material/DialogTitle';
+import { alpha, useTheme } from '@mui/material/styles';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import { alpha, useTheme } from '@mui/material/styles';
 
-import { Iconify } from 'src/components/iconify';
 import { Label } from 'src/components/label';
+import { Iconify } from 'src/components/iconify';
+
+// ----------------------------------------------------------------------
+
+import { m } from 'framer-motion';
+
+import Menu from '@mui/material/Menu';
+
+import { contactService } from 'src/services/contact-service';
+
+import { showToast } from 'src/components/toast';
 
 // ----------------------------------------------------------------------
 
@@ -125,13 +135,11 @@ export function ContactKanban({
     }
   };
 
-  const getContactsByStatus = (status: string) => {
-    return contacts.filter((c) => {
+  const getContactsByStatus = (status: string) => contacts.filter((c) => {
       const rowStatus = String(c.status || '').toLowerCase();
       const rowType = String(c.contactType?.[0] || '').toLowerCase();
       return rowStatus === status || rowType === status;
     });
-  };
 
   if (isLoading) {
     return (
@@ -281,14 +289,6 @@ export function ContactKanban({
     </Box>
   );
 }
-
-// ----------------------------------------------------------------------
-
-import { m } from 'framer-motion';
-import Menu from '@mui/material/Menu';
-
-import { contactService } from 'src/services/contact-service';
-import { showToast } from 'src/components/toast';
 
 function ContactCard({ contact, onClick, onDragStart, onDragEnd, isDragging, onEdit, onDelete }: any) {
   const theme = useTheme();

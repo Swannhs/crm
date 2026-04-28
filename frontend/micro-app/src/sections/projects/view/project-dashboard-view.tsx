@@ -6,12 +6,13 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import CardHeader from '@mui/material/CardHeader';
-import { useTheme } from '@mui/material/styles';
 
 import { projectService } from 'src/services/project-service';
-import { Label } from 'src/components/label';
+
 import { Iconify } from 'src/components/iconify';
 import { Chart, useChart } from 'src/components/chart';
 
@@ -136,5 +137,3 @@ function SummaryWidget({ title, total, icon, color }: any) {
     </Card>
   );
 }
-
-import Avatar from '@mui/material/Avatar';

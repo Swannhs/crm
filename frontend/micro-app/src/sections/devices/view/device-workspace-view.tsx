@@ -3,24 +3,20 @@
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import { useTheme, alpha } from '@mui/material/styles';
 
 import { paths } from 'src/routes/paths';
+
 import { Iconify } from 'src/components/iconify';
+
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 import { 
-  DeviceDashboardTab,
   DeviceListTab,
+  DeviceFirmwareTab,
+  DeviceDashboardTab,
   DeviceAppManagementTab,
-  DeviceRemoteControlTab,
-  DeviceFirmwareTab
+  DeviceRemoteControlTab
 } from './device-workspace-sections';
 
 // ----------------------------------------------------------------------

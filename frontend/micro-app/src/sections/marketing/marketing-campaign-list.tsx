@@ -2,7 +2,6 @@
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import TableRow from '@mui/material/TableRow';
@@ -10,9 +9,11 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
+import { Switch, IconButton } from '@mui/material';
 import TableContainer from '@mui/material/TableContainer';
 
 import { fDate } from 'src/utils/format-time';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -125,5 +126,3 @@ export function MarketingAutomationList({ automations }: any) {
     </Card>
   );
 }
-
-import { IconButton, Switch } from '@mui/material';

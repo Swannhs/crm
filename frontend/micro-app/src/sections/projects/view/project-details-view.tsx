@@ -8,29 +8,30 @@ import Card from '@mui/material/Card';
 import Menu from '@mui/material/Menu';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
+import { Tab, Tabs } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import MenuItem from '@mui/material/MenuItem';
+import Skeleton from '@mui/material/Skeleton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import Avatar from '@mui/material/Avatar';
-import Skeleton from '@mui/material/Skeleton';
-import Dialog, { dialogClasses } from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-import { projectService } from 'src/services/project-service';
+
 import { DashboardContent } from 'src/layouts/dashboard';
+import { projectService } from 'src/services/project-service';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 
-import { TaskDetailDrawer } from '../components/task-detail-drawer';
 import { ProjectDashboardView } from './project-dashboard-view';
-import { Tab, Tabs } from '@mui/material';
+import { TaskDetailDrawer } from '../components/task-detail-drawer';
 
 // ----------------------------------------------------------------------
 

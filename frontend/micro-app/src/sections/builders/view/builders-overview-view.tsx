@@ -10,11 +10,13 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
-import { builderService } from 'src/services/builder-service';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+
+import { DashboardContent } from 'src/layouts/dashboard';
+import { builderService } from 'src/services/builder-service';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
