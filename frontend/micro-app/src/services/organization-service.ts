@@ -7,8 +7,23 @@ export async function getOrganizationDetails() {
   return response.data?.data ?? response.data;
 }
 
+export async function getOrganizationWorkspace() {
+  const response = await axiosInstance.get('/org/v1/workspace');
+  return response.data?.data ?? response.data;
+}
+
 export async function updateOrganization(data: any) {
   const response = await axiosInstance.put('/api/organization/v1/details', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function getOrganizationSettings(section: 'profile' | 'branding' | 'crm' | 'security') {
+  const response = await axiosInstance.get(`/org/v1/settings/${section}`);
+  return response.data?.data ?? response.data;
+}
+
+export async function updateOrganizationSettings(section: 'profile' | 'branding' | 'crm' | 'security', data: any) {
+  const response = await axiosInstance.put(`/org/v1/settings/${section}`, data);
   return response.data?.data ?? response.data;
 }
 
@@ -24,6 +39,16 @@ export async function getLocations() {
 
 export async function createLocation(data: any) {
   const response = await axiosInstance.post('/org/v1/locations', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function updateLocation(locationId: string, data: any) {
+  const response = await axiosInstance.patch(`/org/v1/locations/${locationId}`, data);
+  return response.data?.data ?? response.data;
+}
+
+export async function deleteLocation(locationId: string) {
+  const response = await axiosInstance.delete(`/org/v1/locations/${locationId}`);
   return response.data?.data ?? response.data;
 }
 
@@ -75,12 +100,87 @@ export async function syncMembershipToKeycloak(userId: string) {
   return response.data?.data ?? response.data;
 }
 
+export async function getTeams() {
+  const response = await axiosInstance.get('/org/v1/teams');
+  return response.data?.data ?? [];
+}
+
+export async function createTeam(data: any) {
+  const response = await axiosInstance.post('/org/v1/teams', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function updateTeam(teamId: string, data: any) {
+  const response = await axiosInstance.patch(`/org/v1/teams/${teamId}`, data);
+  return response.data?.data ?? response.data;
+}
+
+export async function deleteTeam(teamId: string) {
+  const response = await axiosInstance.delete(`/org/v1/teams/${teamId}`);
+  return response.data?.data ?? response.data;
+}
+
+export async function getCrmPipelines() {
+  const response = await axiosInstance.get('/org/v1/crm/pipelines');
+  return response.data?.data ?? [];
+}
+
+export async function createCrmPipeline(data: any) {
+  const response = await axiosInstance.post('/org/v1/crm/pipelines', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function updateCrmPipeline(pipelineId: string, data: any) {
+  const response = await axiosInstance.patch(`/org/v1/crm/pipelines/${pipelineId}`, data);
+  return response.data?.data ?? response.data;
+}
+
+export async function deleteCrmPipeline(pipelineId: string) {
+  const response = await axiosInstance.delete(`/org/v1/crm/pipelines/${pipelineId}`);
+  return response.data?.data ?? response.data;
+}
+
+export async function getCrmCustomFields() {
+  const response = await axiosInstance.get('/org/v1/crm/custom-fields');
+  return response.data?.data ?? [];
+}
+
+export async function createCrmCustomField(data: any) {
+  const response = await axiosInstance.post('/org/v1/crm/custom-fields', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function updateCrmCustomField(fieldId: string, data: any) {
+  const response = await axiosInstance.patch(`/org/v1/crm/custom-fields/${fieldId}`, data);
+  return response.data?.data ?? response.data;
+}
+
+export async function deleteCrmCustomField(fieldId: string) {
+  const response = await axiosInstance.delete(`/org/v1/crm/custom-fields/${fieldId}`);
+  return response.data?.data ?? response.data;
+}
+
+export async function getCrmAutomationRules() {
+  const response = await axiosInstance.get('/org/v1/crm/automation');
+  return response.data?.data ?? [];
+}
+
+export async function updateCrmAutomationRules(data: { rules: any[] }) {
+  const response = await axiosInstance.put('/org/v1/crm/automation', data);
+  return response.data?.data ?? response.data;
+}
+
 export const organizationService = {
   getOrganizationDetails,
+  getOrganizationWorkspace,
   updateOrganization,
+  getOrganizationSettings,
+  updateOrganizationSettings,
   getRoles,
   getLocations,
   createLocation,
+  updateLocation,
+  deleteLocation,
   getMyMembership,
   upsertMembership,
   removeMembership,
@@ -89,4 +189,18 @@ export const organizationService = {
   searchKeycloakUsers,
   createKeycloakUser,
   syncMembershipToKeycloak,
+  getTeams,
+  createTeam,
+  updateTeam,
+  deleteTeam,
+  getCrmPipelines,
+  createCrmPipeline,
+  updateCrmPipeline,
+  deleteCrmPipeline,
+  getCrmCustomFields,
+  createCrmCustomField,
+  updateCrmCustomField,
+  deleteCrmCustomField,
+  getCrmAutomationRules,
+  updateCrmAutomationRules,
 };

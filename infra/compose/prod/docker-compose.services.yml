@@ -1,0 +1,357 @@
+services:
+  organization-service:
+    build:
+      context: ../../..
+      dockerfile: services/organization-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: organization-service
+        SERVICE_PORT: 7010
+    environment:
+      NODE_ENV: production
+      PORT: ${ORGANIZATION_SERVICE_PORT:-7010}
+      DATABASE_URL: postgres://organization:organization@organization-db:5432/organization
+      KAFKA_BROKERS: kafka:9092
+      KEYCLOAK_ADMIN_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mymanager
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    depends_on:
+      organization-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+
+  booking-service:
+    build:
+      context: ../../..
+      dockerfile: services/booking-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: booking-service
+        SERVICE_PORT: 7040
+    environment:
+      NODE_ENV: production
+      PORT: ${BOOKING_SERVICE_PORT:-7040}
+      DATABASE_URL: postgres://booking:booking@booking-db:5432/booking
+      ODOO_SERVICE_URL: http://odoo-integration-service:7200
+    depends_on:
+      booking-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  finance-service:
+    build:
+      context: ../../..
+      dockerfile: services/finance-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: finance-service
+        SERVICE_PORT: 7170
+    environment:
+      NODE_ENV: production
+      PORT: ${FINANCE_SERVICE_PORT:-7170}
+    restart: unless-stopped
+
+  api-router-service:
+    build:
+      context: ../../..
+      dockerfile: services/api-router-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: api-router-service
+        SERVICE_PORT: 7001
+    environment:
+      NODE_ENV: production
+      PORT: ${API_ROUTER_SERVICE_PORT:-7001}
+    restart: unless-stopped
+
+  community-service:
+    build:
+      context: ../../..
+      dockerfile: services/community-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: community-service
+        SERVICE_PORT: 7050
+    environment:
+      NODE_ENV: production
+      PORT: ${COMMUNITY_SERVICE_PORT:-7050}
+    restart: unless-stopped
+
+  commerce-service:
+    build:
+      context: ../../..
+      dockerfile: services/commerce-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: commerce-service
+        SERVICE_PORT: 7060
+    environment:
+      NODE_ENV: production
+      PORT: ${COMMERCE_SERVICE_PORT:-7060}
+    restart: unless-stopped
+
+  documents-service:
+    build:
+      context: ../../..
+      dockerfile: services/documents-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: documents-service
+        SERVICE_PORT: 7080
+    environment:
+      NODE_ENV: production
+      PORT: ${DOCUMENTS_SERVICE_PORT:-7080}
+    restart: unless-stopped
+
+  payments-service:
+    build:
+      context: ../../..
+      dockerfile: services/payments-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: payments-service
+        SERVICE_PORT: 7090
+    environment:
+      NODE_ENV: production
+      PORT: ${PAYMENTS_SERVICE_PORT:-7090}
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ../../..
+      dockerfile: services/notification-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: notification-service
+        SERVICE_PORT: 8000
+    environment:
+      NODE_ENV: production
+      PORT: ${NOTIFICATION_SERVICE_PORT:-8000}
+    restart: unless-stopped
+
+  employees-service:
+    build:
+      context: ../../..
+      dockerfile: services/employees-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: employees-service
+        SERVICE_PORT: 7070
+    environment:
+      NODE_ENV: production
+      PORT: ${EMPLOYEES_SERVICE_PORT:-7070}
+    restart: unless-stopped
+
+  realtime-service:
+    build:
+      context: ../../..
+      dockerfile: services/realtime-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: realtime-service
+        SERVICE_PORT: 7030
+    environment:
+      NODE_ENV: production
+      PORT: ${REALTIME_SERVICE_PORT:-7030}
+      KAFKA_BROKERS: kafka:9092
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://realtime:realtime@realtime-db:5432/realtime
+    depends_on:
+      realtime-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  marketing-service:
+    build:
+      context: ../../..
+      dockerfile: services/marketing-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: marketing-service
+        SERVICE_PORT: 8030
+    environment:
+      NODE_ENV: production
+      PORT: ${MARKETING_SERVICE_PORT:-8030}
+    restart: unless-stopped
+
+  projects-service:
+    build:
+      context: ../../..
+      dockerfile: services/projects-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: projects-service
+        SERVICE_PORT: 8040
+    environment:
+      NODE_ENV: production
+      PORT: ${PROJECTS_SERVICE_PORT:-8040}
+    restart: unless-stopped
+
+  calendar-service:
+    build:
+      context: ../../..
+      dockerfile: services/calendar-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: calendar-service
+        SERVICE_PORT: 8050
+    environment:
+      NODE_ENV: production
+      PORT: ${CALENDAR_SERVICE_PORT:-8050}
+    restart: unless-stopped
+
+  pos-service:
+    build:
+      context: ../../..
+      dockerfile: services/pos-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: pos-service
+        SERVICE_PORT: 7100
+    environment:
+      NODE_ENV: production
+      PORT: ${POS_SERVICE_PORT:-7100}
+    restart: unless-stopped
+
+  automation-service:
+    build:
+      context: ../../..
+      dockerfile: services/automation-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: automation-service
+        SERVICE_PORT: 7110
+    environment:
+      NODE_ENV: production
+      PORT: ${AUTOMATION_SERVICE_PORT:-7110}
+    restart: unless-stopped
+
+  device-service:
+    build:
+      context: ../../..
+      dockerfile: services/device-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: device-service
+        SERVICE_PORT: 7120
+    environment:
+      NODE_ENV: production
+      PORT: ${DEVICE_SERVICE_PORT:-7120}
+    restart: unless-stopped
+
+  file-service:
+    build:
+      context: ../../..
+      dockerfile: services/file-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: file-service
+        SERVICE_PORT: 7130
+    environment:
+      NODE_ENV: production
+      PORT: ${FILE_SERVICE_PORT:-7130}
+    restart: unless-stopped
+
+  integrations-service:
+    build:
+      context: ../../..
+      dockerfile: services/integrations-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: integrations-service
+        SERVICE_PORT: 7140
+    environment:
+      NODE_ENV: production
+      PORT: ${INTEGRATIONS_SERVICE_PORT:-7140}
+      MAGENTO_INTEGRATION_SERVICE_URL: http://magento-integration-service:7190
+      ODOO_INTEGRATION_SERVICE_URL: http://odoo-integration-service:7200
+      DATABASE_URL: postgres://integrations:integrations@integrations-db:5432/integrations
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      integrations-db:
+        condition: service_healthy
+      magento-integration-service:
+        condition: service_started
+      odoo-integration-service:
+        condition: service_started
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+
+  magento-integration-service:
+    build:
+      context: ../../..
+      dockerfile: services/magento-integration-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: magento-integration-service
+        SERVICE_PORT: 7190
+    environment:
+      NODE_ENV: production
+      PORT: ${MAGENTO_INTEGRATION_SERVICE_PORT:-7190}
+      MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-http://magento}
+      MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
+      MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
+      MAGENTO_ADMIN_USERNAME: ${MAGENTO_ADMIN_USERNAME:-admin}
+      MAGENTO_ADMIN_PASSWORD: ${MAGENTO_ADMIN_PASSWORD:-admin123}
+      DATABASE_URL: postgres://magento_integration:magento_integration@magento-integration-db:5432/magento_integration
+    depends_on:
+      magento-integration-db:
+        condition: service_healthy
+      magento:
+        condition: service_started
+    restart: unless-stopped
+
+  odoo-integration-service:
+    build:
+      context: ../../..
+      dockerfile: services/odoo-integration-service/docker/Dockerfile.prod
+    environment:
+      NODE_ENV: production
+      PORT: ${ODOO_INTEGRATION_SERVICE_PORT:-7200}
+      ODOO_BASE_URL: ${ODOO_BASE_URL:-http://odoo:8069}
+      ODOO_DB: ${ODOO_DB:-odoo}
+      ODOO_USERNAME: ${ODOO_USERNAME:-admin}
+      ODOO_PASSWORD: ${ODOO_PASSWORD:-admin}
+      ODOO_API_KEY: ${ODOO_API_KEY:-}
+      MAGENTO_API_BASE_URL: http://magento-integration-service:7190
+      DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
+    depends_on:
+      odoo-integration-db:
+        condition: service_healthy
+      magento-integration-service:
+        condition: service_started
+      odoo:
+        condition: service_started
+    restart: unless-stopped
+
+  scoring-service:
+    build:
+      context: ../../..
+      dockerfile: services/scoring-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: scoring-service
+        SERVICE_PORT: 7180
+    environment:
+      NODE_ENV: production
+      PORT: ${SCORING_SERVICE_PORT:-7180}
+    restart: unless-stopped
+
+  deal-service:
+    build:
+      context: ../../..
+      dockerfile: services/deal-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: deal-service
+        SERVICE_PORT: 7150
+    environment:
+      NODE_ENV: production
+      PORT: ${DEAL_SERVICE_PORT:-7150}
+    restart: unless-stopped
+
+  email-sync-service:
+    build:
+      context: ../../..
+      dockerfile: services/email-sync-service/docker/Dockerfile.prod
+      args:
+        SERVICE_NAME: email-sync-service
+        SERVICE_PORT: 7160
+    environment:
+      NODE_ENV: production
+      PORT: ${EMAIL_SYNC_SERVICE_PORT:-7160}
+      DATABASE_URL: postgres://emailsync:emailsync@email-sync-db:5432/email_sync_service
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mymanager
+      KEYCLOAK_CLIENT_ID: crm-api
+    depends_on:
+      email-sync-db:
+        condition: service_healthy
+    restart: unless-stopped
+

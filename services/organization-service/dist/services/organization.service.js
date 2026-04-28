@@ -1,8 +1,34 @@
+import { randomUUID } from 'node:crypto';
 import { OrganizationRepository, LocationRepository, OnboardingRepository, MembershipRepository, } from '../repositories/organization.repository.js';
 import { KeycloakAdminService } from './keycloak-admin.service.js';
 import { VALID_ORG_ROLES, DEFAULT_ROLE_PERMISSIONS, normalizeIntegrationRoles, buildEffectivePermissions, getRbacCatalog, getRoleProfile, } from './rbac-catalog.js';
+function asRecord(value) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return value;
+    }
+    return {};
+}
+function asArray(value) {
+    return Array.isArray(value) ? value : [];
+}
+function cleanString(value) {
+    return String(value || '').trim();
+}
 export class OrganizationService {
     orgRepo = new OrganizationRepository();
+    membershipRepo = new MembershipRepository();
+    toOrganizationDto(org) {
+        const metadata = asRecord(org?.metadata);
+        return {
+            ...org,
+            email: metadata.email || null,
+            phone: metadata.phone || null,
+            address: metadata.address || null,
+            website: metadata.website || null,
+            timezone: metadata.timezone || null,
+            branding: metadata.branding || {},
+        };
+    }
     async getOrganization(orgId, userId) {
         const org = await this.orgRepo.findById(orgId);
         if (org) {
@@ -10,7 +36,7 @@ export class OrganizationService {
                 const membershipSvc = new MembershipService();
                 await membershipSvc.resolveMembership(orgId, userId);
             }
-            return org;
+            return this.toOrganizationDto(org);
         }
         const created = await this.orgRepo.create({
             id: orgId,
@@ -22,11 +48,133 @@ export class OrganizationService {
             const membershipSvc = new MembershipService();
             await membershipSvc.resolveMembership(orgId, userId);
         }
-        return created;
+        return this.toOrganizationDto(created);
     }
-    async updateOrganization(orgId, userId, name) {
-        await this.getOrganization(orgId, userId);
-        return this.orgRepo.update(orgId, { name });
+    async updateOrganization(orgId, userId, payload) {
+        const org = await this.getOrganization(orgId, userId);
+        const metadata = { ...asRecord(org?.metadata) };
+        const name = cleanString(payload?.name) || org.name || 'Organization';
+        const email = cleanString(payload?.email);
+        const phone = cleanString(payload?.phone);
+        const address = cleanString(payload?.address);
+        const website = cleanString(payload?.website);
+        const timezone = cleanString(payload?.timezone);
+        const brandingRaw = payload?.branding && typeof payload.branding === 'object' && !Array.isArray(payload.branding)
+            ? payload.branding
+            : {};
+        const branding = {
+            ...(metadata.branding && typeof metadata.branding === 'object' ? metadata.branding : {}),
+            ...brandingRaw,
+        };
+        const updated = await this.orgRepo.update(orgId, {
+            name,
+            metadata: {
+                ...metadata,
+                email: email || null,
+                phone: phone || null,
+                address: address || null,
+                website: website || null,
+                timezone: timezone || null,
+                branding,
+            },
+        });
+        return this.toOrganizationDto(updated);
+    }
+    async getWorkspace(orgId, userId) {
+        const org = await this.getOrganization(orgId, userId);
+        const memberships = await this.membershipRepo.findMany(orgId);
+        const locationsCount = await this.orgRepo.countLocations(orgId);
+        const membership = await new MembershipService().resolveMembership(orgId, userId);
+        const roleCounts = memberships.reduce((acc, item) => {
+            const role = cleanString(item?.role) || 'unknown';
+            acc[role] = (acc[role] || 0) + 1;
+            return acc;
+        }, {});
+        const metadata = asRecord(org?.metadata);
+        const crm = asRecord(metadata.crm);
+        return {
+            organization: org,
+            stats: {
+                membersTotal: memberships.length,
+                locationsTotal: locationsCount,
+                roleCounts,
+                teamsTotal: asArray(crm.teams).length,
+                pipelinesTotal: asArray(crm.pipelines).length,
+                customFieldsTotal: asArray(crm.customFields).length,
+            },
+            capabilities: {
+                canManageOrganization: ['org_owner', 'org_admin'].includes(cleanString(membership?.role)),
+                hasAutomationRules: asArray(crm.automationRules).length > 0,
+            },
+        };
+    }
+    async getSettingsSection(orgId, userId, section) {
+        const org = await this.getOrganization(orgId, userId);
+        const metadata = asRecord(org?.metadata);
+        const crm = asRecord(metadata.crm);
+        switch (section) {
+            case 'profile':
+                return {
+                    name: org.name || '',
+                    email: metadata.email || '',
+                    phone: metadata.phone || '',
+                    website: metadata.website || '',
+                    timezone: metadata.timezone || '',
+                    address: metadata.address || '',
+                };
+            case 'branding':
+                return {
+                    branding: asRecord(metadata.branding),
+                };
+            case 'crm':
+                return {
+                    teams: asArray(crm.teams),
+                    pipelines: asArray(crm.pipelines),
+                    customFields: asArray(crm.customFields),
+                    automationRules: asArray(crm.automationRules),
+                };
+            case 'security':
+                return {
+                    security: asRecord(metadata.security),
+                };
+            default:
+                throw new Error('Unknown settings section');
+        }
+    }
+    async updateSettingsSection(orgId, userId, section, payload) {
+        const org = await this.getOrganization(orgId, userId);
+        const metadata = { ...asRecord(org?.metadata) };
+        if (section === 'profile') {
+            return this.updateOrganization(orgId, userId, payload);
+        }
+        if (section === 'branding') {
+            metadata.branding = {
+                ...asRecord(metadata.branding),
+                ...asRecord(payload?.branding),
+            };
+        }
+        else if (section === 'security') {
+            metadata.security = {
+                ...asRecord(metadata.security),
+                ...asRecord(payload?.security),
+            };
+        }
+        else if (section === 'crm') {
+            const incoming = asRecord(payload);
+            const existingCrm = asRecord(metadata.crm);
+            metadata.crm = {
+                ...existingCrm,
+                ...(incoming.teams ? { teams: asArray(incoming.teams) } : {}),
+                ...(incoming.pipelines ? { pipelines: asArray(incoming.pipelines) } : {}),
+                ...(incoming.customFields ? { customFields: asArray(incoming.customFields) } : {}),
+                ...(incoming.automationRules ? { automationRules: asArray(incoming.automationRules) } : {}),
+            };
+        }
+        else {
+            throw new Error('Unknown settings section');
+        }
+        const updated = await this.orgRepo.update(orgId, { metadata });
+        return this.toOrganizationDto(updated);
     }
 }
 export class LocationService {
@@ -49,6 +197,243 @@ export class LocationService {
             zipCode: data.zip_code,
             country: data.country,
         });
+    }
+    async updateLocation(orgId, userId, locationId, data) {
+        await this.orgSvc.getOrganization(orgId, userId);
+        const existing = await this.locationRepo.findById(orgId, locationId);
+        if (!existing) {
+            throw new Error('Location not found');
+        }
+        return this.locationRepo.update(locationId, {
+            name: data.name ?? existing.name,
+            email: data.email ?? existing.email,
+            phone: data.phone ?? existing.phone,
+            street: data.street ?? existing.street,
+            city: data.city ?? existing.city,
+            state: data.state ?? existing.state,
+            zipCode: data.zip_code ?? existing.zipCode,
+            country: data.country ?? existing.country,
+        });
+    }
+    async removeLocation(orgId, userId, locationId) {
+        await this.orgSvc.getOrganization(orgId, userId);
+        const existing = await this.locationRepo.findById(orgId, locationId);
+        if (!existing) {
+            return { deleted: false };
+        }
+        await this.locationRepo.delete(locationId);
+        return { deleted: true };
+    }
+}
+export class CrmConfigurationService {
+    orgRepo = new OrganizationRepository();
+    orgSvc = new OrganizationService();
+    getCrmMetadata(org) {
+        const metadata = asRecord(org?.metadata);
+        const crm = asRecord(metadata.crm);
+        return {
+            metadata,
+            crm: {
+                teams: asArray(crm.teams),
+                pipelines: asArray(crm.pipelines),
+                customFields: asArray(crm.customFields),
+                automationRules: asArray(crm.automationRules),
+            },
+        };
+    }
+    async persistCrm(orgId, metadata, crmPatch) {
+        const crm = { ...asRecord(metadata.crm), ...crmPatch };
+        return this.orgRepo.update(orgId, {
+            metadata: {
+                ...metadata,
+                crm,
+            },
+        });
+    }
+    async listTeams(orgId, userId) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { crm } = this.getCrmMetadata(org);
+        return crm.teams;
+    }
+    async upsertTeam(orgId, userId, teamId, payload) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { metadata, crm } = this.getCrmMetadata(org);
+        const existing = crm.teams;
+        const name = cleanString(payload?.name);
+        if (!name)
+            throw new Error('Team name is required');
+        const managerUserId = cleanString(payload?.managerUserId) || null;
+        const members = asArray(payload?.members)
+            .map((item) => cleanString(item))
+            .filter(Boolean);
+        const id = teamId || randomUUID();
+        const now = new Date().toISOString();
+        const next = existing.some((item) => item.id === id)
+            ? existing.map((item) => item.id === id
+                ? {
+                    ...item,
+                    name,
+                    description: cleanString(payload?.description),
+                    managerUserId,
+                    members,
+                    updatedAt: now,
+                }
+                : item)
+            : [
+                ...existing,
+                {
+                    id,
+                    name,
+                    description: cleanString(payload?.description),
+                    managerUserId,
+                    members,
+                    createdAt: now,
+                    updatedAt: now,
+                },
+            ];
+        await this.persistCrm(orgId, metadata, { teams: next });
+        return next.find((item) => item.id === id) || null;
+    }
+    async deleteTeam(orgId, userId, teamId) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { metadata, crm } = this.getCrmMetadata(org);
+        const next = crm.teams.filter((item) => item.id !== teamId);
+        const deleted = next.length !== crm.teams.length;
+        if (deleted) {
+            await this.persistCrm(orgId, metadata, { teams: next });
+        }
+        return { deleted };
+    }
+    async listPipelines(orgId, userId) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { crm } = this.getCrmMetadata(org);
+        return crm.pipelines;
+    }
+    async upsertPipeline(orgId, userId, pipelineId, payload) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { metadata, crm } = this.getCrmMetadata(org);
+        const existing = crm.pipelines;
+        const name = cleanString(payload?.name);
+        if (!name)
+            throw new Error('Pipeline name is required');
+        const stages = asArray(payload?.stages)
+            .map((stage) => ({
+            id: cleanString(stage?.id) || randomUUID(),
+            name: cleanString(stage?.name),
+            probability: Number(stage?.probability || 0),
+            color: cleanString(stage?.color) || '#3366FF',
+        }))
+            .filter((stage) => stage.name);
+        const id = pipelineId || randomUUID();
+        const now = new Date().toISOString();
+        const next = existing.some((item) => item.id === id)
+            ? existing.map((item) => item.id === id
+                ? {
+                    ...item,
+                    name,
+                    description: cleanString(payload?.description),
+                    stages,
+                    updatedAt: now,
+                }
+                : item)
+            : [
+                ...existing,
+                {
+                    id,
+                    name,
+                    description: cleanString(payload?.description),
+                    stages,
+                    createdAt: now,
+                    updatedAt: now,
+                },
+            ];
+        await this.persistCrm(orgId, metadata, { pipelines: next });
+        return next.find((item) => item.id === id) || null;
+    }
+    async deletePipeline(orgId, userId, pipelineId) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { metadata, crm } = this.getCrmMetadata(org);
+        const next = crm.pipelines.filter((item) => item.id !== pipelineId);
+        const deleted = next.length !== crm.pipelines.length;
+        if (deleted) {
+            await this.persistCrm(orgId, metadata, { pipelines: next });
+        }
+        return { deleted };
+    }
+    async listCustomFields(orgId, userId) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { crm } = this.getCrmMetadata(org);
+        return crm.customFields;
+    }
+    async upsertCustomField(orgId, userId, fieldId, payload) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { metadata, crm } = this.getCrmMetadata(org);
+        const existing = crm.customFields;
+        const name = cleanString(payload?.name);
+        const entity = cleanString(payload?.entity) || 'contact';
+        const type = cleanString(payload?.type) || 'text';
+        if (!name)
+            throw new Error('Custom field name is required');
+        const options = asArray(payload?.options)
+            .map((option) => cleanString(option))
+            .filter(Boolean);
+        const id = fieldId || randomUUID();
+        const now = new Date().toISOString();
+        const next = existing.some((item) => item.id === id)
+            ? existing.map((item) => item.id === id
+                ? {
+                    ...item,
+                    name,
+                    entity,
+                    type,
+                    required: Boolean(payload?.required),
+                    options,
+                    updatedAt: now,
+                }
+                : item)
+            : [
+                ...existing,
+                {
+                    id,
+                    name,
+                    entity,
+                    type,
+                    required: Boolean(payload?.required),
+                    options,
+                    createdAt: now,
+                    updatedAt: now,
+                },
+            ];
+        await this.persistCrm(orgId, metadata, { customFields: next });
+        return next.find((item) => item.id === id) || null;
+    }
+    async deleteCustomField(orgId, userId, fieldId) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { metadata, crm } = this.getCrmMetadata(org);
+        const next = crm.customFields.filter((item) => item.id !== fieldId);
+        const deleted = next.length !== crm.customFields.length;
+        if (deleted) {
+            await this.persistCrm(orgId, metadata, { customFields: next });
+        }
+        return { deleted };
+    }
+    async getAutomationRules(orgId, userId) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { crm } = this.getCrmMetadata(org);
+        return crm.automationRules;
+    }
+    async updateAutomationRules(orgId, userId, payload) {
+        const org = await this.orgSvc.getOrganization(orgId, userId);
+        const { metadata } = this.getCrmMetadata(org);
+        const rules = asArray(payload?.rules).map((rule) => ({
+            id: cleanString(rule?.id) || randomUUID(),
+            name: cleanString(rule?.name),
+            trigger: cleanString(rule?.trigger),
+            action: cleanString(rule?.action),
+            enabled: Boolean(rule?.enabled),
+        }));
+        await this.persistCrm(orgId, metadata, { automationRules: rules });
+        return rules;
     }
 }
 export class OnboardingService {

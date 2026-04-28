@@ -1,5 +1,5 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
-import { OrganizationController, LocationController, OnboardingController, MembershipController, UserAccessController, } from "./controllers/organization.controller.js";
+import { OrganizationController, LocationController, OnboardingController, MembershipController, UserAccessController, CrmConfigurationController, } from "./controllers/organization.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 import { attachRoleContext, requireOrgRoles } from "./middleware/authorization.js";
 const { app, logger } = createServiceApp({
@@ -14,6 +14,7 @@ const locationCtrl = new LocationController();
 const onboardingCtrl = new OnboardingController();
 const membershipCtrl = new MembershipController();
 const userAccessCtrl = new UserAccessController();
+const crmConfigCtrl = new CrmConfigurationController();
 const ownerOrAdmin = requireOrgRoles(['org_owner', 'org_admin']);
 const ownerOnly = requireOrgRoles(['org_owner']);
 const managerUp = requireOrgRoles(['org_owner', 'org_admin', 'org_manager']);
@@ -22,9 +23,14 @@ app.get("/v1/organizations", identityMiddleware, attachRoleContext, (req, res) =
 app.get("/v1/details", identityMiddleware, attachRoleContext, (req, res) => orgCtrl.get(cast(req), res));
 app.put("/v1/organizations", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => orgCtrl.update(cast(req), res));
 app.put("/v1/details", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => orgCtrl.update(cast(req), res));
+app.get("/v1/workspace", identityMiddleware, attachRoleContext, (req, res) => orgCtrl.workspace(cast(req), res));
+app.get("/v1/settings/:section", identityMiddleware, attachRoleContext, (req, res) => orgCtrl.getSettings(cast(req), res));
+app.put("/v1/settings/:section", identityMiddleware, attachRoleContext, ownerOrAdmin, (req, res) => orgCtrl.updateSettings(cast(req), res));
 // --- Locations ---
 app.get("/v1/locations", identityMiddleware, attachRoleContext, (req, res) => locationCtrl.list(cast(req), res));
 app.post("/v1/locations", identityMiddleware, attachRoleContext, managerUp, (req, res) => locationCtrl.create(cast(req), res));
+app.patch("/v1/locations/:locationId", identityMiddleware, attachRoleContext, managerUp, (req, res) => locationCtrl.update(cast(req), res));
+app.delete("/v1/locations/:locationId", identityMiddleware, attachRoleContext, managerUp, (req, res) => locationCtrl.remove(cast(req), res));
 // --- Memberships ---
 app.get("/v1/memberships/resolve", identityMiddleware, attachRoleContext, (req, res) => membershipCtrl.resolve(cast(req), res));
 app.get("/v1/memberships/me", identityMiddleware, attachRoleContext, (req, res) => membershipCtrl.resolve(cast(req), res));
@@ -38,6 +44,21 @@ app.get("/v1/users/access", identityMiddleware, attachRoleContext, ownerOnly, (r
 app.get("/v1/keycloak/users", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.keycloakUsers(cast(req), res));
 app.post("/v1/keycloak/users", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.create(cast(req), res));
 app.post("/v1/memberships/:userId/sync-keycloak", identityMiddleware, attachRoleContext, ownerOnly, (req, res) => userAccessCtrl.sync(cast(req), res));
+// --- CRM Configuration ---
+app.get("/v1/teams", identityMiddleware, attachRoleContext, (req, res) => crmConfigCtrl.listTeams(cast(req), res));
+app.post("/v1/teams", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.upsertTeam(cast(req), res));
+app.patch("/v1/teams/:teamId", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.upsertTeam(cast(req), res));
+app.delete("/v1/teams/:teamId", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.deleteTeam(cast(req), res));
+app.get("/v1/crm/pipelines", identityMiddleware, attachRoleContext, (req, res) => crmConfigCtrl.listPipelines(cast(req), res));
+app.post("/v1/crm/pipelines", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.upsertPipeline(cast(req), res));
+app.patch("/v1/crm/pipelines/:pipelineId", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.upsertPipeline(cast(req), res));
+app.delete("/v1/crm/pipelines/:pipelineId", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.deletePipeline(cast(req), res));
+app.get("/v1/crm/custom-fields", identityMiddleware, attachRoleContext, (req, res) => crmConfigCtrl.listCustomFields(cast(req), res));
+app.post("/v1/crm/custom-fields", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.upsertCustomField(cast(req), res));
+app.patch("/v1/crm/custom-fields/:fieldId", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.upsertCustomField(cast(req), res));
+app.delete("/v1/crm/custom-fields/:fieldId", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.deleteCustomField(cast(req), res));
+app.get("/v1/crm/automation", identityMiddleware, attachRoleContext, (req, res) => crmConfigCtrl.getAutomationRules(cast(req), res));
+app.put("/v1/crm/automation", identityMiddleware, attachRoleContext, managerUp, (req, res) => crmConfigCtrl.updateAutomationRules(cast(req), res));
 // --- Onboarding ---
 app.get("/v1/onboarding/status", identityMiddleware, attachRoleContext, (req, res) => onboardingCtrl.list(cast(req), res));
 app.post("/v1/onboarding/status", identityMiddleware, attachRoleContext, (req, res) => onboardingCtrl.create(cast(req), res));

@@ -15,10 +15,15 @@
     "compose:ps": "./manage.sh dev ps"
   },
   "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
     "prisma": "^6.19.3",
     "tsx": "^4.19.0"
   },
   "dependencies": {
-    "@prisma/client": "6.19.3"
+    "@azure/identity": "^4.13.1",
+    "@prisma/client": "6.19.3",
+    "googleapis": "^171.4.0",
+    "microsoft-graph": "^3.13.34",
+    "socket.io": "^4.8.1"
   }
 }

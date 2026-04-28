@@ -80,21 +80,30 @@ The Docker stack now supports three intended modes:
 - `web-test`: production-like runtime commands plus seeded dummy data for demos/QA
 - `production`: production-oriented commands and env wiring for real-user environments
 
+Compose layout is now organized per environment and per concern:
+
+- `infra/compose/dev/`
+- `infra/compose/test/`
+- `infra/compose/prod/`
+
+Each environment has exactly:
+
+- `docker-compose.databases.yml`
+- `docker-compose.platform.yml`
+- `docker-compose.services.yml`
+- `docker-compose.ui.yml`
+- `docker-compose.gateway.yml`
+- `docker-compose.yml` (entrypoint that includes the five files above)
+
 ### Local development
 
 Use the unified manager:
 
 ```bash
-./manage.sh dev up --with-magento
+./manage.sh dev up
 ```
 
-Run the full local project stack with Magento and Odoo addons:
-
-```bash
-./manage.sh dev up --with-all
-```
-
-When enabled, Magento and its local infrastructure are exposed at:
+Magento and its local infrastructure are exposed at:
 
 - `http://localhost:8088`
 - `https://localhost:8448`
@@ -108,10 +117,10 @@ Magento runs from source code mounted to:
 - default: `<repo>/services/magento-service` -> `/var/www/html` in container
 - override host source path with `MAGENTO_SOURCE_DIR`
 
-Example:
+Example override:
 
 ```bash
-MAGENTO_SOURCE_DIR=../../my-magento-src ./manage.sh dev up --with-magento
+MAGENTO_SOURCE_DIR=../../my-magento-src ./manage.sh dev up
 ```
 
 On first run, if the mounted source directory is empty, the Magento container bootstraps Magento Open Source into it.
@@ -133,7 +142,7 @@ This mode keeps the current repo-mounted workflow:
 ./manage.sh test up
 ```
 
-This mode layers `infra/compose/docker-compose.web-test.yml` on top of the base stack:
+This mode uses `infra/compose/test/*` and provides:
 - frontend runs with `next build && next start`
 - Node services switch from watch mode to `build && start`
 - a one-shot `seed-dummy-data` container populates projects, contacts, and invoices
@@ -156,7 +165,7 @@ cp .env.docker.prod.example .env.docker.prod
 ./manage.sh prod up
 ```
 
-This mode layers `infra/compose/docker-compose.prod.yml` on top of the base stack:
+This mode uses `infra/compose/prod/*` and provides:
 - frontend and Node services run in `NODE_ENV=production`
 - services use `build && start` rather than watch mode
 - restart policies are enabled for long-running services

@@ -36,7 +36,7 @@ export class AppointmentsService {
       include: {
         bookingType: true
       },
-      order: { startTime: 'asc' }
+      orderBy: { startTime: 'asc' }
     });
   }
 

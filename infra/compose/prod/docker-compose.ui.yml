@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build:
+      context: ../../../frontend/micro-app
+      dockerfile: docker/Dockerfile.prod
+    container_name: ms-frontend
+    volumes: []
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8081/api}
+      PORT: ${FRONTEND_PORT:-3034}
+      WATCHPACK_POLLING: "false"
+    ports:
+      - "3034:3034"
+    depends_on:
+      - nginx
+    restart: unless-stopped
+

@@ -1,7 +1,0 @@
-# Root compose entrypoint.
-# Keeps mode commands (`dev`/`prod`/`test`) stable while splitting the stack into readable units.
-include:
-  - docker-compose.platform.yml
-  - docker-compose.databases.yml
-  - docker-compose.apps.yml
-  - docker-compose.web.yml

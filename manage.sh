@@ -33,12 +33,6 @@ usage() {
     echo "  ps        List containers"
     echo "  seed      Generate dummy data & test users"
     echo "  clean     Remove all volumes & clean install"
-    echo ""
-    echo "Optional flags:"
-    echo "  --with-magento   Include local Magento Open Source stack addon (app + DB + search)"
-    echo "  --with-odoo      Include local Odoo stack addon (Odoo + Postgres)"
-    echo "  --with-all       Shortcut for --with-magento --with-odoo"
-    echo ""
     echo "Example:"
     echo "  $0 dev up"
     echo "  $0 prod logs"
@@ -67,21 +61,7 @@ WITH_MAGENTO=false
 WITH_ODOO=false
 FILTERED_ARGS=()
 for arg in "$@"; do
-    case "$arg" in
-        --with-magento)
-            WITH_MAGENTO=true
-            ;;
-        --with-odoo)
-            WITH_ODOO=true
-            ;;
-        --with-all)
-            WITH_MAGENTO=true
-            WITH_ODOO=true
-            ;;
-        *)
-            FILTERED_ARGS+=("$arg")
-            ;;
-    esac
+    FILTERED_ARGS+=("$arg")
 done
 set -- "${FILTERED_ARGS[@]}"
 
@@ -103,16 +83,6 @@ case $ENV in
         error "Unknown environment: $ENV"
         ;;
 esac
-
-if [ "$WITH_MAGENTO" = true ]; then
-    FILES="$FILES -f $COMPOSE_DIR/docker-compose.magento.yml"
-    info "Magento addon enabled via docker-compose.magento.yml"
-fi
-
-if [ "$WITH_ODOO" = true ]; then
-    FILES="$FILES -f $COMPOSE_DIR/docker-compose.odoo.yml"
-    info "Odoo addon enabled via docker-compose.odoo.yml"
-fi
 
 # Configure compose env arguments
 COMPOSE_ENV_ARGS=()
