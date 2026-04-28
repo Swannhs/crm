@@ -1,62 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Logged Out | MyManager</title>
-    <link rel="stylesheet" href="${url.resourcesPath}/css/styles.css">
-    <style>
-        .logout-container {
-            text-align: center;
-        }
-        .icon-box {
-            width: 64px;
-            height: 64px;
-            background-color: rgba(0, 167, 111, 0.08);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px auto;
-            color: var(--primary-main);
-            box-shadow: 0 4px 12px 0 rgba(0, 167, 111, 0.1);
-        }
-        .icon-box svg {
-            width: 32px;
-            height: 32px;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <div class="logout-container">
-            <div class="card-header">
-                <div class="brand-section">
-                    <div class="logo-symbol">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                    </div>
-                    <div class="logo-text">MyManager</div>
-                </div>
-                
-                <div class="icon-box" style="margin-top: 24px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                </div>
-                <h1>You are logged out</h1>
-                <p class="subtitle">Thank you for using MyManager. You have successfully signed out of your account.</p>
-            </div>
-
-            <div style="margin-top: 32px;">
-                <a href="${url.loginUrl}" style="text-decoration: none;">
-                    <button type="button" style="width: 100%; padding: 14px 22px; font-size: 0.9375rem; font-weight: 700; color: #FFFFFF; background-color: var(--text-primary); border: none; border-radius: 12px; cursor: pointer; transition: all 250ms ease;">
-                        Sign back in
-                    </button>
-                </a>
-            </div>
-
-            <div class="footer">
-                <p>&copy; 2024 MyManager. All rights reserved.</p>
-            </div>
+<#import "template.ftl" as layout>
+<@layout.registrationLayout; section>
+    <#if section = "header">
+        <div style="width: 64px; height: 64px; background-color: rgba(0, 167, 111, 0.08); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 24px auto 24px auto; color: var(--primary-main);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         </div>
-    </div>
-</body>
-</html>
+        <h1>${msg("loggedOutTitle")}</h1>
+        <p class="subtitle">${msg("loggedOutSubtitle")}</p>
+    <#elseif section = "form">
+        <div style="margin-top: 32px;">
+            <button type="button" onclick="location.href='${url.loginUrl}'">
+                ${msg("signBackIn")}
+            </button>
+        </div>
+    </#if>
+</@layout.registrationLayout>

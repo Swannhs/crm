@@ -1,16 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { useTheme, alpha } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -144,5 +143,3 @@ export function PublicOrgView({ mode, orgId, planId, token, formId, userId }: Pr
     </Box>
   );
 }
-
-import CircularProgress from '@mui/material/CircularProgress';

@@ -80,26 +80,30 @@ The Docker stack now supports three intended modes:
 - `web-test`: production-like runtime commands plus seeded dummy data for demos/QA
 - `production`: production-oriented commands and env wiring for real-user environments
 
+Compose layout is now organized per environment and per concern:
+
+- `infra/compose/dev/`
+- `infra/compose/test/`
+- `infra/compose/prod/`
+
+Each environment has exactly:
+
+- `docker-compose.databases.yml`
+- `docker-compose.platform.yml`
+- `docker-compose.services.yml`
+- `docker-compose.ui.yml`
+- `docker-compose.gateway.yml`
+- `docker-compose.yml` (entrypoint that includes the five files above)
+
 ### Local development
 
-```bash
-cd microservices
-./compose-dev.sh
-```
-
-Or use the unified manager and include local Magento:
+Use the unified manager:
 
 ```bash
-./manage.sh dev up --with-magento
+./manage.sh dev up
 ```
 
-Run the full local project stack with Magento and Odoo addons:
-
-```bash
-./manage.sh dev up --with-all
-```
-
-When enabled, Magento and its local infrastructure are exposed at:
+Magento and its local infrastructure are exposed at:
 
 - `http://localhost:8088`
 - `https://localhost:8448`
@@ -110,16 +114,26 @@ The Magento integration service will default to internal base URL `http://magent
 
 Magento runs from source code mounted to:
 
-- default: `<repo>/services/magento-service` -> `/var/www/html` in container
-- override host source path with `MAGENTO_SOURCE_DIR`
+- default: Docker named volume `magento_app_data` -> `/var/www/html`
+- on first boot, container clones `https://github.com/magento/magento2` and installs Magento automatically
+- override host source path with `MAGENTO_SOURCE_DIR` if you want to mount your own checkout
 
-Example:
+Example override:
 
 ```bash
-MAGENTO_SOURCE_DIR=../../my-magento-src ./manage.sh dev up --with-magento
+MAGENTO_SOURCE_DIR=../../my-magento-src ./manage.sh dev up
 ```
 
-On first run, if the mounted source directory is empty, the Magento container bootstraps Magento Open Source into it.
+On first run, if `/var/www/html` is empty, the Magento container:
+- clones Magento 2 from `MAGENTO_GIT_URL` at `MAGENTO_GIT_REF`
+- runs `composer install`
+- runs `bin/magento setup:install` against `magento-db` and `magento-search`
+
+You can pin the branch/tag with:
+
+```bash
+MAGENTO_GIT_REF=2.4.7-p1 ./manage.sh dev up
+```
 
 If you already have Magento running elsewhere, keep using your external URL:
 
@@ -135,11 +149,10 @@ This mode keeps the current repo-mounted workflow:
 ### Web testing with dummy data
 
 ```bash
-cd microservices
-./compose-web-test.sh
+./manage.sh test up
 ```
 
-This mode layers `infra/compose/docker-compose.web-test.yml` on top of the base stack:
+This mode uses `infra/compose/test/*` and provides:
 - frontend runs with `next build && next start`
 - Node services switch from watch mode to `build && start`
 - a one-shot `seed-dummy-data` container populates projects, contacts, and invoices
@@ -153,17 +166,16 @@ The dummy seeder reads Docker-friendly env vars from:
 1. Copy the example env file and replace placeholders:
 
 ```bash
-cd microservices
 cp .env.docker.prod.example .env.docker.prod
 ```
 
 2. Start the production-oriented stack:
 
 ```bash
-./compose-prod.sh
+./manage.sh prod up
 ```
 
-This mode layers `infra/compose/docker-compose.prod.yml` on top of the base stack:
+This mode uses `infra/compose/prod/*` and provides:
 - frontend and Node services run in `NODE_ENV=production`
 - services use `build && start` rather than watch mode
 - restart policies are enabled for long-running services
@@ -176,7 +188,7 @@ This is intended as the repo’s “real user” compose entrypoint until a full
 Start the platform stack:
 
 ```bash
-docker compose -f microservices/infra/compose/docker-compose.yml up --build
+docker compose -f microservices/infra/compose/dev/docker-compose.yml up --build
 ```
 
 Key endpoints (defaults):

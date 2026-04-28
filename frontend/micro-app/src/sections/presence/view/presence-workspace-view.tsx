@@ -3,17 +3,19 @@
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Switch from '@mui/material/Switch';
+import Rating from '@mui/material/Rating';
 import Divider from '@mui/material/Divider';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
-import { useTheme, alpha } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
+
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
@@ -129,6 +131,3 @@ function PresenceReputationTab() {
     </Stack>
   );
 }
-
-import Switch from '@mui/material/Switch';
-import Rating from '@mui/material/Rating';

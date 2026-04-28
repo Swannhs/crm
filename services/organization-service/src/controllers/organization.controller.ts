@@ -4,6 +4,8 @@ import {
   LocationService,
   OnboardingService,
   MembershipService,
+  UserAccessService,
+  CrmConfigurationService,
 } from '../services/organization.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
@@ -22,10 +24,40 @@ export class OrganizationController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      if (!req.body.name) return res.status(400).json({ message: 'Name is required' });
-      const org = await this.svc.updateOrganization(req.identity.orgId, req.identity.userId, req.body.name);
+      const org = await this.svc.updateOrganization(req.identity.orgId, req.identity.userId, req.body || {});
       return res.json({ data: org });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async workspace(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getWorkspace(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async getSettings(req: AuthenticatedRequest, res: Response) {
+    try {
+      const section = String(req.params.section || '').trim();
+      const data = await this.svc.getSettingsSection(req.identity.orgId, req.identity.userId, section);
+      return res.json({ data });
+    } catch (err: any) {
+      if (err.message === 'Unknown settings section') return res.status(400).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async updateSettings(req: AuthenticatedRequest, res: Response) {
+    try {
+      const section = String(req.params.section || '').trim();
+      const data = await this.svc.updateSettingsSection(req.identity.orgId, req.identity.userId, section, req.body || {});
+      return res.json({ data });
+    } catch (err: any) {
+      if (err.message === 'Unknown settings section') return res.status(400).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
   }
 }
 
@@ -45,6 +77,34 @@ export class LocationController {
       const location = await this.svc.createLocation(req.identity.orgId, req.identity.userId, req.body);
       return res.status(201).json({ data: location });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async update(req: AuthenticatedRequest, res: Response) {
+    try {
+      const locationId = String(req.params.locationId || '').trim();
+      if (!locationId) return res.status(400).json({ message: 'locationId is required' });
+      const location = await this.svc.updateLocation(
+        req.identity.orgId,
+        req.identity.userId,
+        locationId,
+        req.body || {}
+      );
+      return res.json({ data: location });
+    } catch (err: any) {
+      if (err.message === 'Location not found') return res.status(404).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async remove(req: AuthenticatedRequest, res: Response) {
+    try {
+      const locationId = String(req.params.locationId || '').trim();
+      if (!locationId) return res.status(400).json({ message: 'locationId is required' });
+      const data = await this.svc.removeLocation(req.identity.orgId, req.identity.userId, locationId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
   }
 }
 
@@ -111,6 +171,194 @@ export class MembershipController {
       if (err.message === 'Invalid organization role') {
         return res.status(400).json({ message: err.message });
       }
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async remove(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = String(req.params.userId || '').trim();
+      if (!userId) return res.status(400).json({ message: 'userId is required' });
+      const data = await this.svc.removeMembership(req.identity.orgId, req.identity.userId, userId);
+      return res.json({ data });
+    } catch (err: any) {
+      if (err.message === 'Cannot remove the last organization owner') {
+        return res.status(400).json({ message: err.message });
+      }
+      return res.status(500).json({ message: err.message });
+    }
+  }
+}
+
+export class UserAccessController {
+  private svc = new UserAccessService();
+
+  async catalog(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getCatalog(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const search = String(req.query.search || '').trim();
+      const data = await this.svc.listUsers(req.identity.orgId, req.identity.userId, search || undefined);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async keycloakUsers(req: AuthenticatedRequest, res: Response) {
+    try {
+      const search = String(req.query.search || '').trim();
+      const data = await this.svc.searchKeycloakUsers(req.identity.orgId, req.identity.userId, search || undefined);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.createUser(req.identity.orgId, req.identity.userId, req.body || {});
+      return res.status(201).json({ data });
+    } catch (err: any) {
+      if (err.message === 'email is required') {
+        return res.status(400).json({ message: err.message });
+      }
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async sync(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = String(req.params.userId || req.body.userId || '').trim();
+      if (!userId) return res.status(400).json({ message: 'userId is required' });
+      const data = await this.svc.syncKeycloak(req.identity.orgId, req.identity.userId, userId);
+      return res.json({ data });
+    } catch (err: any) {
+      if (err.message === 'Membership not found') {
+        return res.status(404).json({ message: err.message });
+      }
+      return res.status(500).json({ message: err.message });
+    }
+  }
+}
+
+export class CrmConfigurationController {
+  private svc = new CrmConfigurationService();
+
+  async listTeams(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.listTeams(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async upsertTeam(req: AuthenticatedRequest, res: Response) {
+    try {
+      const teamId = String(req.params.teamId || '').trim() || null;
+      const data = await this.svc.upsertTeam(req.identity.orgId, req.identity.userId, teamId, req.body || {});
+      return res.status(teamId ? 200 : 201).json({ data });
+    } catch (err: any) {
+      if (err.message === 'Team name is required') return res.status(400).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async deleteTeam(req: AuthenticatedRequest, res: Response) {
+    try {
+      const teamId = String(req.params.teamId || '').trim();
+      if (!teamId) return res.status(400).json({ message: 'teamId is required' });
+      const data = await this.svc.deleteTeam(req.identity.orgId, req.identity.userId, teamId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async listPipelines(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.listPipelines(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async upsertPipeline(req: AuthenticatedRequest, res: Response) {
+    try {
+      const pipelineId = String(req.params.pipelineId || '').trim() || null;
+      const data = await this.svc.upsertPipeline(req.identity.orgId, req.identity.userId, pipelineId, req.body || {});
+      return res.status(pipelineId ? 200 : 201).json({ data });
+    } catch (err: any) {
+      if (err.message === 'Pipeline name is required') return res.status(400).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async deletePipeline(req: AuthenticatedRequest, res: Response) {
+    try {
+      const pipelineId = String(req.params.pipelineId || '').trim();
+      if (!pipelineId) return res.status(400).json({ message: 'pipelineId is required' });
+      const data = await this.svc.deletePipeline(req.identity.orgId, req.identity.userId, pipelineId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async listCustomFields(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.listCustomFields(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async upsertCustomField(req: AuthenticatedRequest, res: Response) {
+    try {
+      const fieldId = String(req.params.fieldId || '').trim() || null;
+      const data = await this.svc.upsertCustomField(req.identity.orgId, req.identity.userId, fieldId, req.body || {});
+      return res.status(fieldId ? 200 : 201).json({ data });
+    } catch (err: any) {
+      if (err.message === 'Custom field name is required') return res.status(400).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async deleteCustomField(req: AuthenticatedRequest, res: Response) {
+    try {
+      const fieldId = String(req.params.fieldId || '').trim();
+      if (!fieldId) return res.status(400).json({ message: 'fieldId is required' });
+      const data = await this.svc.deleteCustomField(req.identity.orgId, req.identity.userId, fieldId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async getAutomationRules(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getAutomationRules(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async updateAutomationRules(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.updateAutomationRules(req.identity.orgId, req.identity.userId, req.body || {});
+      return res.json({ data });
+    } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }
   }

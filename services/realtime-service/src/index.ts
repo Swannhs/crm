@@ -80,17 +80,39 @@ io.on("connection", (socket) => {
     socket.join(`channel:${channelId}`);
     logger.info({ socketId: socket.id, channelId }, "socket joined channel room");
   });
-  
-  socket.on("send-message", (data: { channelId: string; message: any }) => {
-    io.to(`channel:${data.channelId}`).emit("new-message", data.message);
+
+  // --- CRM Collaboration ---
+  socket.on("join-contact", (data: { contactId: string; userId: string; userName: string }) => {
+    const { contactId, userId, userName } = data;
+    socket.join(`contact:${contactId}`);
+    
+    // Notify others in the room that someone is viewing
+    socket.to(`contact:${contactId}`).emit("contact:presence", {
+      contactId,
+      userId,
+      userName,
+      action: 'viewing'
+    });
+    
+    logger.info({ socketId: socket.id, contactId, userId }, "socket joined contact room");
   });
-  
-  socket.on("typing", (data: { channelId: string; userId: string }) => {
-    socket.to(`channel:${data.channelId}`).emit("user-typing", data);
+
+  socket.on("contact:editing", (data: { contactId: string; userId: string; userName: string }) => {
+    socket.to(`contact:${data.contactId}`).emit("contact:presence", {
+      ...data,
+      action: 'editing'
+    });
   });
-  
-  socket.on("mark-read", (data: { channelId: string; userId: string }) => {
-    io.to(`channel:${data.channelId}`).emit("messages-read", data);
+
+  socket.on("contact:update", (data: { contactId: string; userId: string; updates: any }) => {
+    // Broadcast to everyone in the contact room (including sender if needed, but usually sender already has it)
+    io.to(`contact:${data.contactId}`).emit("contact:updated", data);
+    // Also broadcast to the org room for list view updates
+    const rooms = Array.from(socket.rooms);
+    const orgRoom = rooms.find(r => r.startsWith('org:'));
+    if (orgRoom) {
+      io.to(orgRoom).emit("contact:list-updated", data);
+    }
   });
   
   socket.emit("hello", { message: "connected to realtime-service" });

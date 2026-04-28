@@ -1,24 +1,25 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Radio from '@mui/material/Radio';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
 
-import { Iconify } from 'src/components/iconify';
 import { publicFlowService } from 'src/services/public-flow-service';
+
 import { Label } from 'src/components/label';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -119,7 +120,7 @@ export function WaiverSignView({ id }: Props) {
   if (error || !waiver) return <Alert severity="error">Failed to load waiver or invalid link.</Alert>;
 
   const members = waiver.members || [];
-  const guardian = waiver.guardian;
+  const {guardian} = waiver;
   const isCompleted = waiver.status === 'completed';
 
   return (

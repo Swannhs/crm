@@ -1,0 +1,9 @@
+include:
+  - ../prod/docker-compose.ui.yml
+
+services:
+  frontend:
+    environment:
+      NEXT_PUBLIC_APP_ENV: web-test
+      NEXT_PUBLIC_API_URL: http://localhost:8081/api
+

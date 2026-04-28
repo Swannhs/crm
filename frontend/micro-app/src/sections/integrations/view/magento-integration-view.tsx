@@ -1,51 +1,54 @@
 'use client';
 
+import type {
+  MagentoOrder,
+  MagentoStore,
+  MagentoProduct,
+  MagentoCustomer,
+  MagentoSyncResult,
+  MagentoListResponse,
+} from 'src/types/magento';
+
 import { useMemo, useState } from 'react';
 
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
+import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import TableContainer from '@mui/material/TableContainer';
+import CircularProgress from '@mui/material/CircularProgress';
+
+import {
+  useMagentoOrders,
+  useMagentoStores,
+  useMagentoProducts,
+  useMagentoCustomers,
+  useMagentoConnection,
+  useConnectMagentoMutation,
+  useMagentoDownstreamHealth,
+  useDisconnectMagentoMutation,
+  useSyncMagentoOrdersMutation,
+  useSyncMagentoCustomersMutation,
+} from 'src/hooks/use-magento';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import {
-  useConnectMagentoMutation,
-  useDisconnectMagentoMutation,
-  useMagentoConnection,
-  useMagentoCustomers,
-  useMagentoDownstreamHealth,
-  useMagentoOrders,
-  useMagentoProducts,
-  useMagentoStores,
-  useSyncMagentoCustomersMutation,
-  useSyncMagentoOrdersMutation,
-} from 'src/hooks/use-magento';
+
 import { toast } from 'src/components/snackbar';
-import type {
-  MagentoCustomer,
-  MagentoListResponse,
-  MagentoOrder,
-  MagentoProduct,
-  MagentoStore,
-  MagentoSyncResult,
-} from 'src/types/magento';
 
 type PreviewTab = 'stores' | 'products' | 'customers' | 'orders';
 type SyncAction = 'dry-customers' | 'dry-orders' | 'push-customers' | 'push-orders';

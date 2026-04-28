@@ -9,18 +9,17 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { omniChannelService } from 'src/services/omni-service';
-import { Iconify } from 'src/components/iconify';
+
 import { Label } from 'src/components/label';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -66,7 +65,7 @@ export function OmniIntegrationView() {
   };
 
   if (isLoading) {
-    return <Box sx={{ p: 5, textAlign: 'center' }}><CircularProgress /></Box>;
+    return <Box sx={{ p: 5, textAlign: 'center' }}><LinearProgress /></Box>;
   }
 
   return (
@@ -180,7 +179,7 @@ export function OmniIntegrationView() {
         <DialogTitle sx={{ textAlign: 'center' }}>Scan QR Code</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
           {qrLoading ? (
-            <CircularProgress />
+            <LinearProgress />
           ) : qrData?.qr ? (
             <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2, boxShadow: 1 }}>
                <img src={qrData.qr} alt="WhatsApp QR" style={{ width: 240, height: 240 }} />

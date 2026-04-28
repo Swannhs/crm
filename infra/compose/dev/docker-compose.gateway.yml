@@ -1,0 +1,16 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    volumes:
+      - ../../../gateway/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../../gateway/nginx/cors.conf:/etc/nginx/cors.conf:ro
+    ports:
+      - "8081:8081"
+    depends_on:
+      - organization-service
+      - integrations-service
+      - odoo-integration-service
+      - realtime-service
+      - email-sync-service
+      - api-router-service

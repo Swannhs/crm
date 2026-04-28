@@ -2,87 +2,100 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useMemo, useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
-import { DashboardContent } from 'src/layouts/dashboard';
-import { useAuthContext } from 'src/auth/hooks';
+
 import { useBoolean } from 'src/hooks/use-boolean';
-import { showToast } from 'src/components/toast';
+import {
+  useMagentoCategories,
+  useMagentoCreateProduct,
+  useMagentoDeleteProduct,
+} from 'src/hooks/use-magento-shop';
+
+import { DashboardContent } from 'src/layouts/dashboard';
+import { publicCommerceService } from 'src/services/public-commerce-service';
 import {
   commerceService,
-  type ICommerceCategory,
   type ICommerceCoupon,
-  type ICommerceImageAsset,
   type ICommerceProduct,
+  type ICommerceCategory,
+  type ICommerceImageAsset,
 } from 'src/services/commerce-service';
-import { publicCommerceService } from 'src/services/public-commerce-service';
+
+import { showToast } from 'src/components/toast';
+
+import { useAuthContext } from 'src/auth/hooks';
 
 import {
-  COMMERCE_DASHBOARD_MODULES,
-  CHECKOUT_FORM_SCHEMA,
-  CATEGORY_FORM_SCHEMA,
-  COUPON_FORM_SCHEMA,
-  DEFAULT_SETTINGS,
-  DEFAULT_PRODUCT_FORM_VALUES,
-  PRODUCT_FORM_SCHEMA,
-  SETTINGS_FORM_SCHEMA,
-  resolveInitialModule,
-  type CartLine,
-  type CategoryFormValues,
-  type CheckoutFormValues,
-  type CommerceDashboardModule,
-  type CommerceWorkspaceProps,
-  type CouponFormValues,
-  type LocalOrder,
-  type ProductFormValues,
-  type SettingsFormValues,
-} from './commerce-workspace.types';
-import {
+  readStorage,
+  getBasePrice,
+  writeStorage,
   buildCartLine,
   cartStorageKey,
-  getAvailableStock,
-  getBasePrice,
-  isProductPurchasable,
   normalizeOrder,
   orderStorageKey,
-  readStorage,
-  settingsStorageKey,
   tableStorageKey,
-  writeStorage,
+  getAvailableStock,
+  settingsStorageKey,
+  isProductPurchasable,
 } from './commerce-workspace.utils';
 import {
+  type CartLine,
+  type LocalOrder,
+  DEFAULT_SETTINGS,
+  COUPON_FORM_SCHEMA,
+  PRODUCT_FORM_SCHEMA,
+  CHECKOUT_FORM_SCHEMA,
+  CATEGORY_FORM_SCHEMA,
+  SETTINGS_FORM_SCHEMA,
+  resolveInitialModule,
+  type CouponFormValues,
+  type ProductFormValues,
+  type CategoryFormValues,
+  type CheckoutFormValues,
+  type SettingsFormValues,
+  COMMERCE_DASHBOARD_MODULES,
+  DEFAULT_PRODUCT_FORM_VALUES,
+  type CommerceWorkspaceProps,
+  type CommerceDashboardModule,
+} from './commerce-workspace.types';
+import {
+  CommerceOrderCard,
   CommerceCartSummary,
-  CommerceCategoryDialog,
-  CommerceCategoriesTable,
-  CommerceCheckoutPanel,
+  CommerceOrdersTable,
+  CommerceTablesPanel,
   CommerceCouponDialog,
   CommerceCouponsTable,
-  CommerceCustomersTable,
-  CommerceDashboardModules,
-  CommerceOrderCard,
-  CommerceProductDetailDialog,
-  CommerceOrderDetailDialog,
-  CommerceOrdersTable,
+  CommerceSummaryCards,
+  CommerceCheckoutPanel,
   CommerceProductDetail,
-  CommerceProductFormCard,
   CommerceProductsTable,
   CommerceSettingsPanel,
+  CommerceCategoryDialog,
+  CommerceCustomersTable,
   CommerceStorefrontGrid,
-  CommerceSummaryCards,
+  CommerceCategoriesTable,
+  CommerceProductFormCard,
+  CommerceDashboardModules,
   CommerceTableGuideDialog,
-  CommerceTablesPanel,
+  CommerceOrderDetailDialog,
+  CommerceProductDetailDialog,
 } from './commerce-workspace-sections';
 
 export function CommerceWorkspaceView({
@@ -129,7 +142,13 @@ export function CommerceWorkspaceView({
 
   const [activeTab, setActiveTab] = useState<'general' | 'variants' | 'modifiers'>('general');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState('all');
+  const [productStatusFilter, setProductStatusFilter] = useState('all');
+  const [productPage, setProductPage] = useState(0);
+  const [productRowsPerPage, setProductRowsPerPage] = useState(20);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]);
   const [categorySearch, setCategorySearch] = useState('');
   const [couponSearch, setCouponSearch] = useState('');
   const [orderSearch, setOrderSearch] = useState('');
@@ -224,16 +243,27 @@ export function CommerceWorkspaceView({
     );
   }, [resolvedShopKey, settingsMethods]);
 
-  const productsQuery = useQuery({
-    queryKey: ['commerce-products', mode, resolvedShopKey],
-    enabled: Boolean(resolvedShopKey),
-    queryFn: async () => {
-      if (isStorefrontMode) {
-        return publicCommerceService.getProducts(shopId || shopPath || resolvedOrgId || resolvedShopKey);
-      }
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
-      return commerceService.getProducts();
-    },
+  const storefrontProductsQuery = useQuery({
+    queryKey: ['commerce-products', mode, resolvedShopKey],
+    enabled: Boolean(resolvedShopKey) && isStorefrontMode,
+    queryFn: () => publicCommerceService.getProducts(shopId || shopPath || resolvedOrgId || resolvedShopKey),
+  });
+  const adminProductsQuery = useQuery({
+    queryKey: ['commerce-products', mode, resolvedShopKey, productPage, productRowsPerPage, debouncedSearch],
+    enabled: Boolean(resolvedShopKey) && !isStorefrontMode,
+    queryFn: () =>
+      commerceService.getProductsPage(resolvedShopKey, {
+        currentPage: productPage + 1,
+        pageSize: productRowsPerPage,
+        search: debouncedSearch,
+      }),
   });
 
   const ordersQuery = useQuery({
@@ -242,10 +272,10 @@ export function CommerceWorkspaceView({
     queryFn: () => commerceService.getOrders(),
   });
 
-  const categoriesQuery = useQuery({
-    queryKey: categoryQueryKey,
+  const categoriesQuery = useMagentoCategories({
+    orgId: resolvedShopKey,
     enabled: authenticated && !isStorefrontMode,
-    queryFn: () => commerceService.getCategories(),
+    queryKey: categoryQueryKey,
   });
 
   const couponsQuery = useQuery({
@@ -254,16 +284,26 @@ export function CommerceWorkspaceView({
     queryFn: () => commerceService.getCoupons(),
   });
 
+  const createProductMagentoMutation = useMagentoCreateProduct({
+    orgId: resolvedShopKey,
+    invalidateKeys: [productQueryKey as unknown[]],
+  });
   const createProductMutation = useMutation({
-    mutationFn: (values: ProductFormValues) => commerceService.createProduct(resolvedShopKey, values),
+    mutationFn: (values: ProductFormValues) => createProductMagentoMutation.mutateAsync(values),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productQueryKey });
       productMethods.reset(DEFAULT_PRODUCT_FORM_VALUES);
       setEditingId(null);
       productDialog.onFalse();
       showToast({ message: 'Product created successfully.', severity: 'success' });
     },
-    onError: (err) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
+    onError: (err: Error) => {
+      const message = String(err?.message || '');
+      const lower = message.toLowerCase();
+      if ((lower.includes('sku') && lower.includes('exist')) || lower.includes('already exists')) {
+        productMethods.setError('sku', { type: 'manual', message: 'SKU already exists in Magento. Use a unique SKU.' });
+      }
+      showToast({ message: `Error: ${message}`, severity: 'error' });
+    },
   });
 
   const updateProductMutation = useMutation({
@@ -275,14 +315,56 @@ export function CommerceWorkspaceView({
       productDialog.onFalse();
       showToast({ message: 'Product updated.', severity: 'success' });
     },
+    onError: (err: Error) => {
+      const message = String(err?.message || '');
+      const lower = message.toLowerCase();
+      if ((lower.includes('sku') && lower.includes('exist')) || lower.includes('already exists')) {
+        productMethods.setError('sku', { type: 'manual', message: 'SKU already exists in Magento. Use a unique SKU.' });
+      }
+      showToast({ message: `Error: ${message}`, severity: 'error' });
+    },
   });
 
+  const deleteProductMagentoMutation = useMagentoDeleteProduct({
+    orgId: resolvedShopKey,
+    invalidateKeys: [productQueryKey as unknown[]],
+  });
   const deleteProductMutation = useMutation({
-    mutationFn: (id: string) => commerceService.deleteProduct(resolvedShopKey, id),
+    mutationFn: (id: string) => deleteProductMagentoMutation.mutateAsync(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productQueryKey });
       showToast({ message: 'Product deleted.', severity: 'success' });
     },
+  });
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: string[]) => Promise.all(ids.map((id) => deleteProductMagentoMutation.mutateAsync(id))),
+    onSuccess: () => {
+      setSelectedProductIds([]);
+      setDeleteTargetIds([]);
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      showToast({ message: 'Selected products deleted.', severity: 'success' });
+    },
+    onError: (err: Error) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
+  });
+
+  const bulkStatusMutation = useMutation({
+    mutationFn: ({ ids, status }: { ids: string[]; status: 'active' | 'archived' | 'draft' }) =>
+      commerceService.bulkUpdateProductStatus(resolvedShopKey, ids, status),
+    onSuccess: () => {
+      setSelectedProductIds([]);
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      showToast({ message: 'Bulk status update completed.', severity: 'success' });
+    },
+    onError: (err: Error) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
+  });
+
+  const quickInventoryMutation = useMutation({
+    mutationFn: ({ sku, qty, sourceCode }: { sku: string; qty: number; sourceCode: string }) =>
+      commerceService.updateProductInventory(resolvedShopKey, sku, qty, sourceCode),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      showToast({ message: 'Inventory updated.', severity: 'success' });
+    },
+    onError: (err: Error) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
   });
 
   const createCategoryMutation = useMutation({
@@ -351,7 +433,15 @@ export function CommerceWorkspaceView({
   });
 
   const uploadProductImageMutation = useMutation({
-    mutationFn: async (files: File[]) => Promise.all(files.map((file) => commerceService.uploadProductImage(file))),
+    mutationFn: async (files: File[]) =>
+      Promise.all(
+        files.map((file) =>
+          commerceService.uploadProductImage(file, {
+            sku: editingId || undefined,
+            orgId: resolvedShopKey,
+          })
+        )
+      ),
     onSuccess: (uploadedImages: ICommerceImageAsset[]) => {
       const currentImages = productMethods.getValues('photos') || [];
       const nextUrls = [...new Set([...currentImages, ...uploadedImages.map((item) => item.url).filter(Boolean)])];
@@ -367,8 +457,15 @@ export function CommerceWorkspaceView({
   });
 
   const products = useMemo<ICommerceProduct[]>(
-    () => (Array.isArray(productsQuery.data) ? productsQuery.data : []),
-    [productsQuery.data]
+    () => {
+      const source = isStorefrontMode ? storefrontProductsQuery.data : adminProductsQuery.data?.items;
+      return Array.isArray(source) ? source : [];
+    },
+    [adminProductsQuery.data?.items, isStorefrontMode, storefrontProductsQuery.data]
+  );
+  const totalProductRows = useMemo(
+    () => (isStorefrontMode ? products.length : Number(adminProductsQuery.data?.total ?? 0)),
+    [adminProductsQuery.data?.total, isStorefrontMode, products.length]
   );
 
   const categories = useMemo<ICommerceCategory[]>(
@@ -426,10 +523,20 @@ export function CommerceWorkspaceView({
         (!product.categoryId &&
           catalogCategories.find((category) => category.id === productCategoryFilter)?.name.toLowerCase() ===
             categoryName);
+      const normalizedStatus = String(product.status || 'draft').toLowerCase();
+      const matchesStatus = productStatusFilter === 'all' || normalizedStatus === productStatusFilter;
 
-      return matchesQuery && matchesCategory;
+      return matchesQuery && matchesCategory && matchesStatus;
     });
-  }, [catalogCategories, productCategoryFilter, products, search]);
+  }, [catalogCategories, productCategoryFilter, productStatusFilter, products, search]);
+
+  useEffect(() => {
+    setSelectedProductIds([]);
+  }, [search, productCategoryFilter, productStatusFilter, productPage, productRowsPerPage]);
+
+  useEffect(() => {
+    setProductPage(0);
+  }, [debouncedSearch]);
 
   const filteredCategories = useMemo(() => {
     const query = categorySearch.trim().toLowerCase();
@@ -538,8 +645,9 @@ export function CommerceWorkspaceView({
     [mergedOrders, orderId, receiptId]
   );
 
-  const filteredOrders = useMemo(() => {
-    return mergedOrders.filter((item) => {
+  const filteredOrders = useMemo(
+    () =>
+      mergedOrders.filter((item) => {
       const matchesSearch =
         !orderSearch.trim() ||
         item.id.toLowerCase().includes(orderSearch.toLowerCase()) ||
@@ -552,8 +660,9 @@ export function CommerceWorkspaceView({
         item.paymentStatus === orderStatusFilter;
 
       return matchesSearch && matchesStatus;
-    });
-  }, [mergedOrders, orderSearch, orderStatusFilter]);
+      }),
+    [mergedOrders, orderSearch, orderStatusFilter]
+  );
 
   const customers = useMemo(() => {
     const customerMap = new Map<string, any>();
@@ -630,16 +739,17 @@ export function CommerceWorkspaceView({
     writeStorage(tableStorageKey(resolvedShopKey), nextValue);
   };
 
-  const addProductToCart = (product: ICommerceProduct, quantity = 1, variantId?: string) => {
+  const addProductToCart = (product: ICommerceProduct, quantity?: number, variantId?: string) => {
+    const nextQuantityToAdd = quantity ?? 1;
     if (!isProductPurchasable(product, variantId)) {
       showToast({ message: `${product.name} is currently unavailable.`, severity: 'warning' });
       return;
     }
 
-    const line = buildCartLine(product, quantity, variantId);
+    const line = buildCartLine(product, nextQuantityToAdd, variantId);
     const existing = cartItems.find((item) => item.id === line.id);
     const availableStock = getAvailableStock(product, variantId);
-    const nextQuantity = (existing?.quantity || 0) + quantity;
+    const nextQuantity = (existing?.quantity || 0) + nextQuantityToAdd;
 
     if (availableStock > 0 && nextQuantity > availableStock) {
       showToast({
@@ -651,7 +761,9 @@ export function CommerceWorkspaceView({
 
     if (existing) {
       persistCart(
-        cartItems.map((item) => (item.id === line.id ? { ...item, quantity: item.quantity + quantity } : item))
+        cartItems.map((item) =>
+          item.id === line.id ? { ...item, quantity: item.quantity + nextQuantityToAdd } : item
+        )
       );
     } else {
       persistCart([...cartItems, line]);
@@ -699,6 +811,7 @@ export function CommerceWorkspaceView({
       compareAtPriceCents: product.compareAtPriceCents || 0,
       costCents: product.costCents || 0,
       lowStockThreshold: product.lowStockThreshold || 5,
+      inventorySourceCode: 'default',
       tagsText: product.tags?.join(', ') || '',
       photos: product.photos || [],
       status: (product.status as any) || 'active',
@@ -949,7 +1062,7 @@ export function CommerceWorkspaceView({
   }, [isStorefrontMode, mode]);
 
   const isLoading =
-    productsQuery.isLoading ||
+    (isStorefrontMode ? storefrontProductsQuery.isLoading : adminProductsQuery.isLoading) ||
     (!isStorefrontMode &&
       (ordersQuery.isLoading || categoriesQuery.isLoading || couponsQuery.isLoading));
 
@@ -1003,7 +1116,7 @@ export function CommerceWorkspaceView({
         )}
       </Stack>
 
-      {productsQuery.isError && (
+      {(isStorefrontMode ? storefrontProductsQuery.isError : adminProductsQuery.isError) && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           Product data could not be loaded for this shop. Verify the shop identifier or backend mapping.
         </Alert>
@@ -1089,11 +1202,35 @@ export function CommerceWorkspaceView({
               resolvedShopKey={resolvedShopKey}
               search={search}
               categoryFilter={productCategoryFilter}
+              statusFilter={productStatusFilter}
               onCreate={openCreateProductDialog}
               onSearchChange={setSearch}
               onCategoryFilterChange={setProductCategoryFilter}
+              onStatusFilterChange={setProductStatusFilter}
               onEdit={handleProductEdit}
               onDelete={(id) => deleteProductMutation.mutate(id)}
+              selectedIds={selectedProductIds}
+              onToggleSelect={(id) =>
+                setSelectedProductIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+              }
+              onToggleSelectAll={(ids, checked) => setSelectedProductIds(checked ? ids : [])}
+              onBulkActivate={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'active' })}
+              onBulkArchive={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'archived' })}
+              onBulkDelete={() => setDeleteTargetIds(selectedProductIds)}
+              onQuickInventorySave={(sku, qty, sourceCode) =>
+                quickInventoryMutation.mutate({ sku, qty, sourceCode })
+              }
+              isBulkUpdating={bulkStatusMutation.isPending}
+              isBulkDeleting={bulkDeleteMutation.isPending}
+              isQuickInventorySaving={quickInventoryMutation.isPending}
+              page={productPage}
+              rowsPerPage={productRowsPerPage}
+              totalRows={totalProductRows}
+              onPageChange={setProductPage}
+              onRowsPerPageChange={(size) => {
+                setProductRowsPerPage(size);
+                setProductPage(0);
+              }}
             />
           }
           productForm={null}
@@ -1203,11 +1340,35 @@ export function CommerceWorkspaceView({
               resolvedShopKey={resolvedShopKey}
               search={search}
               categoryFilter={productCategoryFilter}
+              statusFilter={productStatusFilter}
               onCreate={openCreateProductDialog}
               onSearchChange={setSearch}
               onCategoryFilterChange={setProductCategoryFilter}
+              onStatusFilterChange={setProductStatusFilter}
               onEdit={handleProductEdit}
               onDelete={(id) => deleteProductMutation.mutate(id)}
+              selectedIds={selectedProductIds}
+              onToggleSelect={(id) =>
+                setSelectedProductIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+              }
+              onToggleSelectAll={(ids, checked) => setSelectedProductIds(checked ? ids : [])}
+              onBulkActivate={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'active' })}
+              onBulkArchive={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'archived' })}
+              onBulkDelete={() => setDeleteTargetIds(selectedProductIds)}
+              onQuickInventorySave={(sku, qty, sourceCode) =>
+                quickInventoryMutation.mutate({ sku, qty, sourceCode })
+              }
+              isBulkUpdating={bulkStatusMutation.isPending}
+              isBulkDeleting={bulkDeleteMutation.isPending}
+              isQuickInventorySaving={quickInventoryMutation.isPending}
+              page={productPage}
+              rowsPerPage={productRowsPerPage}
+              totalRows={totalProductRows}
+              onPageChange={setProductPage}
+              onRowsPerPageChange={(size) => {
+                setProductRowsPerPage(size);
+                setProductPage(0);
+              }}
             />
           }
           designerPanel={
@@ -1258,7 +1419,7 @@ export function CommerceWorkspaceView({
         isPending={createCategoryMutation.isPending || updateCategoryMutation.isPending}
       />
 
-      {currentModule === 'products' && (
+      {(currentModule === 'products' || currentModule === 'inventory') && (
         <CommerceProductDetailDialog
           open={productDialog.value}
           onClose={closeProductDialog}
@@ -1306,6 +1467,26 @@ export function CommerceWorkspaceView({
       />
 
       <CommerceTableGuideDialog open={tableDialog.value} onClose={tableDialog.onFalse} />
+
+      <Dialog open={deleteTargetIds.length > 0} onClose={() => setDeleteTargetIds([])}>
+        <DialogTitle>Delete products?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            This will permanently delete {deleteTargetIds.length} selected product{deleteTargetIds.length > 1 ? 's' : ''}.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteTargetIds([])} disabled={bulkDeleteMutation.isPending}>Cancel</Button>
+          <Button
+            color="error"
+            variant="contained"
+            disabled={bulkDeleteMutation.isPending}
+            onClick={() => bulkDeleteMutation.mutate(deleteTargetIds)}
+          >
+            {bulkDeleteMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <CommerceOrderDetailDialog
         open={orderDialog.value}

@@ -1,5 +1,6 @@
-import { paths } from 'src/routes/paths';
 import type { ICommerceProduct } from 'src/services/commerce-service';
+
+import { paths } from 'src/routes/paths';
 
 import type { CartLine, LocalOrder } from './commerce-workspace.types';
 

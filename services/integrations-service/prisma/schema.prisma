@@ -221,3 +221,22 @@ model TelegramSession {
   @@index([organizationId])
   @@map("telegram_sessions")
 }
+
+model ImageAsset {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  name           String
+  url            String
+  thumbnail      String?
+  mimeType       String?  @map("mime_type")
+  size           Int?
+  category       String?
+  tags           Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, category])
+  @@index([userId, createdAt])
+  @@map("image_assets")
+}

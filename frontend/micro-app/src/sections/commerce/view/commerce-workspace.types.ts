@@ -11,6 +11,7 @@ export const PRODUCT_FORM_SCHEMA = zod.object({
   compareAtPriceCents: zod.coerce.number().min(0).default(0),
   costCents: zod.coerce.number().min(0).default(0),
   lowStockThreshold: zod.coerce.number().min(0).default(5),
+  inventorySourceCode: zod.string().default('default'),
   tagsText: zod.string().optional(),
   photos: zod.array(zod.string()).default([]),
   status: zod.enum(['draft', 'active', 'archived']).default('active'),
@@ -46,7 +47,7 @@ export const CATEGORY_FORM_SCHEMA = zod.object({
   description: zod.string().optional(),
   isActive: zod
     .union([zod.boolean(), zod.string()])
-    .transform((value) => value === false || value === 'false' ? false : true)
+    .transform((value) => !(value === false || value === 'false'))
     .default(true),
 });
 
@@ -59,7 +60,7 @@ export const COUPON_FORM_SCHEMA = zod.object({
   expiresAt: zod.string().optional(),
   isActive: zod
     .union([zod.boolean(), zod.string()])
-    .transform((value) => value === false || value === 'false' ? false : true)
+    .transform((value) => !(value === false || value === 'false'))
     .default(true),
 });
 
@@ -203,6 +204,7 @@ export const DEFAULT_PRODUCT_FORM_VALUES: ProductFormValues = {
   compareAtPriceCents: 0,
   costCents: 0,
   lowStockThreshold: 5,
+  inventorySourceCode: 'default',
   tagsText: '',
   photos: [],
   status: 'active',

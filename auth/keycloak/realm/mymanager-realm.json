@@ -68,6 +68,51 @@
         "attributes": {}
       },
       {
+        "id": "a772a5f8-94a9-4f6d-9274-8983b556b529",
+        "name": "customer",
+        "description": "End Customer",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "4c5c6931-76c1-499f-904b-f52cfb82204b",
+        "attributes": {}
+      },
+      {
+        "id": "529402fc-57fa-4240-a499-c7088276a1df",
+        "name": "vip_client",
+        "description": "VIP/B2B Client",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "4c5c6931-76c1-499f-904b-f52cfb82204b",
+        "attributes": {}
+      },
+      {
+        "id": "066e7e4c-562c-4743-97f6-b97f7b13aa79",
+        "name": "sales_staff",
+        "description": "Sales Rep",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "4c5c6931-76c1-499f-904b-f52cfb82204b",
+        "attributes": {}
+      },
+      {
+        "id": "40c1ca9a-c188-42ee-baa0-2485ee7d4700",
+        "name": "admin_manager",
+        "description": "Manager",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "4c5c6931-76c1-499f-904b-f52cfb82204b",
+        "attributes": {}
+      },
+      {
+        "id": "f2ff8b77-3a37-4f0a-9be6-6d799db8e31f",
+        "name": "logistics",
+        "description": "Warehouse",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "4c5c6931-76c1-499f-904b-f52cfb82204b",
+        "attributes": {}
+      },
+      {
         "id": "24779025-d0f0-4ca7-b5da-f64eda2e85b9",
         "name": "default-roles-mymanager",
         "description": "${role_default-roles}",

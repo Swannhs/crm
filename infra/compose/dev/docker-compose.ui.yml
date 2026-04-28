@@ -1,0 +1,23 @@
+services:
+  frontend:
+    build:
+      context: ../../../frontend/micro-app
+      dockerfile: docker/Dockerfile.dev
+    container_name: frontend
+    volumes:
+      - ../../../frontend/micro-app:/app
+
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_SERVER_URL: http://localhost:8081
+      NEXT_PUBLIC_API_URL: http://localhost:8081/api
+      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
+      NEXT_PUBLIC_KEYCLOAK_REALM: mymanager
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: mymanager-web
+      PORT: 3034
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "3034:3034"
+    depends_on:
+      - nginx
+

@@ -7,12 +7,13 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { marketingService } from 'src/services/marketing-service';
+
+import { Iconify } from 'src/components/iconify';
 
 import { MarketingSummaryCard } from '../marketing-summary-card';
 import { MarketingRecentActivity } from '../marketing-recent-activity';
@@ -32,9 +33,26 @@ export function MarketingOverviewView() {
 
   if (campaignsLoading || automationsLoading) {
     return (
-      <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
+      <DashboardContent maxWidth="xl">
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+          <Box><Skeleton variant="text" width={240} height={40} /><Skeleton variant="text" width={400} /></Box>
+          <Stack direction="row" spacing={2}>
+            <Skeleton variant="rectangular" width={120} height={40} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rectangular" width={140} height={40} sx={{ borderRadius: 1 }} />
+          </Stack>
+        </Stack>
+        <Grid container spacing={3} sx={{ mb: 5 }}>
+          {[...Array(4)].map((_, i) => (
+            <Grid item xs={12} md={3} key={i}>
+              <Skeleton variant="rectangular" height={100} sx={{ borderRadius: 2 }} />
+            </Grid>
+          ))}
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={8}><Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} /></Grid>
+          <Grid item xs={12} md={4}><Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} /></Grid>
+        </Grid>
+      </DashboardContent>
     );
   }
 

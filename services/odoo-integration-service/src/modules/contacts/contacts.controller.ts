@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ContactsService } from './contacts.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 import { ContactEntity } from './entities/contact.entity.js';
@@ -14,6 +15,25 @@ import { IdentityGuard } from '../../common/guards/identity.guard.js';
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
+  @Post('import')
+  @ApiOperation({ summary: 'Import contacts from CSV' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async import(@UploadedFile() file: Express.Multer.File) {
+    return this.contactsService.import(file);
+  }
+
   @Get()
   @ApiOperation({ summary: 'List all contacts' })
   @ApiResponse({ status: 200, type: [ContactEntity] })
@@ -21,11 +41,21 @@ export class ContactsController {
     return this.contactsService.findAll(paginationDto);
   }
 
+  @Get('analytics')
+  @ApiOperation({ summary: 'Get contacts analytics' })
+  async getAnalytics(@Query() paginationDto: PaginationDto) {
+    return this.contactsService.getAnalytics(paginationDto);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get contact details' })
   @ApiResponse({ status: 200, type: ContactEntity })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.contactsService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    // Check if ID is a numeric string (Odoo ID) or UUID
+    if (/^\d+$/.test(id)) {
+      return this.contactsService.findOne(Number(id));
+    }
+    return this.contactsService.findByUuid(id);
   }
 
   @Post()
@@ -47,5 +77,136 @@ export class ContactsController {
   @ApiOperation({ summary: 'Delete a contact' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.contactsService.remove(id);
+  }
+
+  @Get(':id/orders')
+  @ApiOperation({ summary: 'Get contact sales orders' })
+  async getOrders(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) return [];
+    return this.contactsService.getOrders(odooId);
+  }
+
+  @Get(':id/projects')
+  @ApiOperation({ summary: 'Get contact projects' })
+  async getProjects(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) return [];
+    return this.contactsService.getProjects(odooId);
+  }
+
+  // --- Pets ---
+  @Get(':id/pets')
+  async getPets(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) return [];
+    return this.contactsService.getPets(odooId);
+  }
+
+  @Post(':id/pets')
+  async createPet(@Param('id') id: string, @Body() data: any) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) throw new Error('Contact not found');
+    return this.contactsService.createPet(odooId, data);
+  }
+
+  @Put('pets/:petId')
+  async updatePet(@Param('petId') petId: string, @Body() data: any) {
+    return this.contactsService.updatePet(petId, data);
+  }
+
+  @Delete('pets/:petId')
+  async removePet(@Param('petId') petId: string) {
+    return this.contactsService.removePet(petId);
+  }
+
+  // --- Files ---
+  @Get(':id/files')
+  async getFiles(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) return [];
+    return this.contactsService.getFiles(odooId);
+  }
+
+  @Post(':id/files')
+  async createFile(@Param('id') id: string, @Body() data: any) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) throw new Error('Contact not found');
+    return this.contactsService.createFile(odooId, data);
+  }
+
+  @Delete('files/:fileId')
+  async removeFile(@Param('fileId') fileId: string) {
+    return this.contactsService.removeFile(fileId);
+  }
+
+  // --- Tasks ---
+  @Get(':id/tasks')
+  async getTasks(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) return [];
+    return this.contactsService.getTasks(odooId);
+  }
+
+  @Post(':id/tasks')
+  async createTask(@Param('id') id: string, @Body() data: any) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) throw new Error('Contact not found');
+    return this.contactsService.createTask(odooId, data);
+  }
+
+  @Put('tasks/:taskId')
+  async updateTask(@Param('taskId') taskId: string, @Body() data: any) {
+    return this.contactsService.updateTask(taskId, data);
+  }
+
+  @Delete('tasks/:taskId')
+  async removeTask(@Param('taskId') taskId: string) {
+    return this.contactsService.removeTask(taskId);
+  }
+
+  // --- Activities ---
+  @Get(':id/activities')
+  async getActivities(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) return [];
+    return this.contactsService.getActivities(odooId);
+  }
+
+  @Post(':id/activities')
+  async createActivity(@Param('id') id: string, @Body() data: any) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) throw new Error('Contact not found');
+    return this.contactsService.createActivity(odooId, data);
+  }
+
+  @Put('activities/:activityId')
+  async updateActivity(@Param('activityId') activityId: string, @Body() data: any) {
+    return this.contactsService.updateActivity(activityId, data);
+  }
+
+  @Delete('activities/:activityId')
+  async removeActivity(@Param('activityId') activityId: string) {
+    return this.contactsService.removeActivity(activityId);
+  }
+
+  // --- Shifts ---
+  @Get(':id/shifts')
+  async getShifts(@Param('id') id: string, @Query() paginationDto: PaginationDto) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) return { data: [], total: 0 };
+    return this.contactsService.getShifts(odooId, paginationDto);
+  }
+
+  @Post(':id/clock-in')
+  async clockIn(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    if (!odooId) throw new Error('Contact not found');
+    return this.contactsService.clockIn(odooId);
+  }
+
+  @Post('shifts/:shiftId/clock-out')
+  async clockOut(@Param('shiftId') shiftId: string) {
+    return this.contactsService.clockOut(shiftId);
   }
 }

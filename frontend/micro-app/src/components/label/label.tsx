@@ -1,5 +1,7 @@
 'use client';
 
+import type { BoxProps } from '@mui/material/Box';
+
 import { forwardRef } from 'react';
 
 import Box from '@mui/material/Box';
@@ -7,8 +9,6 @@ import { useTheme } from '@mui/material/styles';
 
 import { StyledLabel } from './styles';
 import { labelClasses } from './classes';
-
-import type { BoxProps } from '@mui/material/Box';
 
 // ----------------------------------------------------------------------
 

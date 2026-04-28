@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 import { CONFIG } from 'src/config-global';
+
 import { showToast } from 'src/components/toast';
+
 import { STORAGE_KEY as JWT_STORAGE_KEY } from 'src/auth/context/jwt/constant';
 
 // ----------------------------------------------------------------------
@@ -85,7 +87,7 @@ axiosInstance.interceptors.response.use(
     let message = 'Something went wrong!';
 
     if (error?.response?.data) {
-      const data = error.response.data;
+      const {data} = error.response;
       if (typeof data.message === 'string') {
         message = data.message;
       } else if (Array.isArray(data.message) && typeof data.message[0] === 'string') {

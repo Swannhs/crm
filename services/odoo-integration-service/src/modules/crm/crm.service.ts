@@ -6,8 +6,28 @@ import { PaginationDto } from '../../common/dto/pagination.dto.js';
 export class CrmService {
   private readonly model = 'crm.lead';
   private readonly defaultFields = [
-    'id', 'name', 'partner_id', 'email_from', 'phone', 
-    'probability', 'planned_revenue', 'stage_id', 'type', 'description'
+    'id',
+    'name',
+    'partner_id',
+    'email_from',
+    'phone',
+    'probability',
+    'planned_revenue',
+    'expected_revenue',
+    'recurring_revenue_monthly',
+    'stage_id',
+    'type',
+    'description',
+    'priority',
+    'user_id',
+    'date_deadline',
+    'create_date',
+    'write_date',
+    'activity_ids',
+    'activity_type_id',
+    'activity_summary',
+    'activity_state',
+    'activity_date_deadline',
   ];
 
   constructor(private readonly odooClient: OdooClientService) {}

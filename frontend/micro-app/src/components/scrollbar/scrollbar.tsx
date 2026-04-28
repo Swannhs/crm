@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import SimpleBar, { Props as SimpleBarProps } from 'simplebar-react';
+import SimpleBar from 'simplebar-react';
 
 import Box, { BoxProps } from '@mui/material/Box';
 

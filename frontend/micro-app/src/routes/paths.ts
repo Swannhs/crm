@@ -45,6 +45,7 @@ export const paths = {
   dashboard: {
     root: ROOTS.DASHBOARD,
     overview: `${ROOTS.DASHBOARD}/overview`,
+    sales: `${ROOTS.DASHBOARD}/sales`,
     contacts: `${ROOTS.DASHBOARD}/contacts`,
     contact: (id: string) => `${ROOTS.DASHBOARD}/contacts/${id}`,
     contactView: (id: string, mode: string = 'overview') =>

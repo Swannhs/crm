@@ -15,11 +15,12 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
+import { DashboardContent } from 'src/layouts/dashboard';
 import { contactService } from 'src/services/contact-service';
 
 import { Scrollbar } from 'src/components/scrollbar';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 import { ContactDetailsView } from './contact-details-view';
 
@@ -32,6 +33,7 @@ type Props = {
 };
 
 export function ContactRouteView({ type, id, mode }: Props) {
+  const router = useRouter();
   const isDetailMode = Boolean(mode && id);
 
   const title = useMemo(() => {
@@ -90,7 +92,7 @@ export function ContactRouteView({ type, id, mode }: Props) {
                     hover
                     sx={{ cursor: 'pointer' }}
                     onClick={() => {
-                      window.location.href = paths.dashboard.contactView(contact._id, 'overview');
+                      router.push(paths.dashboard.contactView(contact._id, 'overview'));
                     }}
                   >
                     <TableCell>{contact.fullName}</TableCell>

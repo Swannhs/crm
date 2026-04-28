@@ -3,16 +3,17 @@
 import Keycloak from 'keycloak-js';
 import { useRef, useMemo, useEffect, ReactNode, useCallback } from 'react';
 
+import { paths } from 'src/routes/paths';
+
 import { useSetState } from 'src/hooks/use-set-state';
 
 import { CONFIG } from 'src/config-global';
-import { paths } from 'src/routes/paths';
 
 import { AuthContext } from '../auth-context';
 import {
-  extractPlatformRolesFromToken,
-  getHighestPriorityRole,
   toCurrentRoles,
+  getHighestPriorityRole,
+  extractPlatformRolesFromToken,
 } from '../../utils/roles';
 
 // ----------------------------------------------------------------------

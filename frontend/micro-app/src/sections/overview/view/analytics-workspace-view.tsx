@@ -1,14 +1,16 @@
 'use client';
 
 import { useMemo } from 'react';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Grid from '@mui/material/Unstable_Grid2';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Unstable_Grid2';
 import { useTheme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+
 import { Chart, useChart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------

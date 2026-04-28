@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Stack from '@mui/material/Stack';
@@ -15,7 +16,10 @@ import TableContainer from '@mui/material/TableContainer';
 
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
+
 import { affiliateService } from 'src/services/affiliate-service';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -138,5 +142,3 @@ export function AffiliateOnboarding() {
     </Card>
   );
 }
-import Box from '@mui/material/Box';
-import { Iconify } from 'src/components/iconify';

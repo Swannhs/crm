@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -13,16 +14,18 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import Link from 'next/link';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { paths } from 'src/routes/paths';
-import { organizationService } from 'src/services/organization-service';
+
 import { DashboardContent } from 'src/layouts/dashboard';
+import { organizationService } from 'src/services/organization-service';
+
 import { Iconify } from 'src/components/iconify';
 
-import { OmniIntegrationView } from '../omni-integration-view';
 import { IntegrationAdp } from '../integration-adp';
+import { OmniIntegrationView } from '../omni-integration-view';
+import { OrganizationUserManagementView } from './organization-user-management-view';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +40,7 @@ export function OrganizationSettingsView() {
   if (isLoading) {
     return (
       <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
+        <LinearProgress />
       </Box>
     );
   }
@@ -106,6 +109,7 @@ export function OrganizationSettingsView() {
             </Grid>
          </Grid>
       )}
+      {currentTab === 'roles' && <OrganizationUserManagementView />}
       {currentTab === 'omni' && <OmniIntegrationView />}
       {currentTab === 'integrations' && (
         <Grid container spacing={3}>

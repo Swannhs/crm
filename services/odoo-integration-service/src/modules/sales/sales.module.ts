@@ -7,5 +7,6 @@ import { OdooBaseModule } from '../odoo-base/odoo-base.module.js';
   imports: [OdooBaseModule],
   controllers: [SalesController],
   providers: [SalesService],
+  exports: [SalesService],
 })
 export class SalesModule {}

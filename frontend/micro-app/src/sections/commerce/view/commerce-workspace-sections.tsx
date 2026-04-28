@@ -1,52 +1,58 @@
-import Link from 'next/link';
-
-import Alert from '@mui/material/Alert';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import LinearProgress from '@mui/material/LinearProgress';
-import MenuItem from '@mui/material/MenuItem';
-import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-
-import { paths } from 'src/routes/paths';
-import { Form, RHFTextField } from 'src/components/hook-form';
-import { fCurrency } from 'src/utils/format-number';
-import { Iconify } from 'src/components/iconify';
-
 import type { ICommerceCoupon, ICommerceProduct } from 'src/services/commerce-service';
 
-import type { CartLine, CommerceDashboardModule, LocalOrder, ProductFormValues } from './commerce-workspace.types';
+import Link from 'next/link';
+import { useState } from 'react';
+
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
+import MenuItem from '@mui/material/MenuItem';
+import TableRow from '@mui/material/TableRow';
+import Checkbox from '@mui/material/Checkbox';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import InputAdornment from '@mui/material/InputAdornment';
+import LinearProgress from '@mui/material/LinearProgress';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
+import CircularProgress from '@mui/material/CircularProgress';
+
+import { paths } from 'src/routes/paths';
+
+import { fCurrency } from 'src/utils/format-number';
+
+import { Iconify } from 'src/components/iconify';
+import { Form, RHFTextField } from 'src/components/hook-form';
+
 import {
-  getAvailableStock,
   getBasePrice,
-  getInventoryTotal,
   getProductHref,
-  getStorefrontHomeHref,
   inventoryStatus,
-  isProductPurchasable,
   orderStatusColor,
+  getAvailableStock,
+  getInventoryTotal,
+  isProductPurchasable,
+  getStorefrontHomeHref,
 } from './commerce-workspace.utils';
+
+import type { CartLine, LocalOrder, ProductFormValues, CommerceDashboardModule } from './commerce-workspace.types';
 
 type SummaryCardsProps = {
   products: ICommerceProduct[];
@@ -266,11 +272,28 @@ type ProductsTableProps = {
   resolvedShopKey: string;
   search: string;
   categoryFilter: string;
+  statusFilter: string;
   onCreate: () => void;
   onSearchChange: (value: string) => void;
   onCategoryFilterChange: (value: string) => void;
+  onStatusFilterChange: (value: string) => void;
   onEdit: (product: ICommerceProduct) => void;
   onDelete: (id: string) => void;
+  selectedIds: string[];
+  onToggleSelect: (id: string) => void;
+  onToggleSelectAll: (ids: string[], checked: boolean) => void;
+  onBulkActivate: () => void;
+  onBulkArchive: () => void;
+  onBulkDelete: () => void;
+  onQuickInventorySave: (sku: string, qty: number, sourceCode: string) => void;
+  isBulkUpdating?: boolean;
+  isBulkDeleting?: boolean;
+  isQuickInventorySaving?: boolean;
+  page: number;
+  rowsPerPage: number;
+  totalRows: number;
+  onPageChange: (page: number) => void;
+  onRowsPerPageChange: (pageSize: number) => void;
 };
 
 export function CommerceProductsTable({
@@ -279,11 +302,28 @@ export function CommerceProductsTable({
   resolvedShopKey,
   search,
   categoryFilter,
+  statusFilter,
   onCreate,
   onSearchChange,
   onCategoryFilterChange,
+  onStatusFilterChange,
   onEdit,
   onDelete,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
+  onBulkActivate,
+  onBulkArchive,
+  onBulkDelete,
+  onQuickInventorySave,
+  isBulkUpdating = false,
+  isBulkDeleting = false,
+  isQuickInventorySaving = false,
+  page,
+  rowsPerPage,
+  totalRows,
+  onPageChange,
+  onRowsPerPageChange,
 }: ProductsTableProps) {
   const activeProducts = filteredProducts.filter((product) => product.status === 'active').length;
   const lowStockProducts = filteredProducts.filter((product) => {
@@ -291,6 +331,7 @@ export function CommerceProductsTable({
     const threshold = product.lowStockThreshold || 5;
     return product.variants?.length ? inventory > 0 && inventory <= threshold : false;
   }).length;
+  const [inventoryDrafts, setInventoryDrafts] = useState<Record<string, { qty: string; sourceCode: string }>>({});
 
   return (
     <Card sx={{ overflow: 'hidden' }}>
@@ -313,6 +354,15 @@ export function CommerceProductsTable({
           </Stack>
         </Box>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
+          {selectedIds.length > 0 && (
+            <Stack direction="row" spacing={1}>
+              <Button size="small" color="success" variant="outlined" onClick={onBulkActivate} disabled={isBulkUpdating || isBulkDeleting}>Activate ({selectedIds.length})</Button>
+              <Button size="small" color="warning" variant="outlined" onClick={onBulkArchive} disabled={isBulkUpdating || isBulkDeleting}>Archive</Button>
+              <Button size="small" color="error" variant="outlined" onClick={onBulkDelete} disabled={isBulkDeleting || isBulkUpdating}>
+                {isBulkDeleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </Stack>
+          )}
           <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={onCreate}>
             New product
           </Button>
@@ -345,6 +395,19 @@ export function CommerceProductsTable({
                 {typeof category.productCount === 'number' ? ` (${category.productCount})` : ''}
               </MenuItem>
             ))}
+          </TextField>
+          <TextField
+            select
+            size="small"
+            label="Status"
+            value={statusFilter}
+            onChange={(event) => onStatusFilterChange(event.target.value)}
+            sx={{ minWidth: { md: 180 } }}
+          >
+            <MenuItem value="all">All statuses</MenuItem>
+            <MenuItem value="active">Active</MenuItem>
+            <MenuItem value="draft">Draft</MenuItem>
+            <MenuItem value="archived">Archived</MenuItem>
           </TextField>
         </Stack>
       </Stack>
@@ -381,6 +444,13 @@ export function CommerceProductsTable({
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={selectedIds.length > 0 && selectedIds.length < filteredProducts.length}
+                  checked={filteredProducts.length > 0 && selectedIds.length === filteredProducts.length}
+                  onChange={(event) => onToggleSelectAll(filteredProducts.map((p) => p.id), event.target.checked)}
+                />
+              </TableCell>
               <TableCell>Product</TableCell>
               <TableCell>Catalog</TableCell>
               <TableCell>Status</TableCell>
@@ -399,6 +469,9 @@ export function CommerceProductsTable({
 
               return (
                 <TableRow key={product.id} hover>
+                  <TableCell padding="checkbox">
+                    <Checkbox checked={selectedIds.includes(product.id)} onChange={() => onToggleSelect(product.id)} />
+                  </TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Avatar
@@ -499,6 +572,53 @@ export function CommerceProductsTable({
                           value={inventory > 0 ? Math.min(100, inventory * 5) : 0}
                         />
                       )}
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <TextField
+                          size="small"
+                          label="Qty"
+                          type="number"
+                          value={inventoryDrafts[product.id]?.qty ?? String(inventory)}
+                          onChange={(event) =>
+                            setInventoryDrafts((prev) => ({
+                              ...prev,
+                              [product.id]: {
+                                qty: event.target.value,
+                                sourceCode: prev[product.id]?.sourceCode ?? 'default',
+                              },
+                            }))
+                          }
+                          sx={{ maxWidth: 110 }}
+                        />
+                        <TextField
+                          size="small"
+                          label="Source"
+                          value={inventoryDrafts[product.id]?.sourceCode ?? 'default'}
+                          onChange={(event) =>
+                            setInventoryDrafts((prev) => ({
+                              ...prev,
+                              [product.id]: {
+                                qty: prev[product.id]?.qty ?? String(inventory),
+                                sourceCode: event.target.value,
+                              },
+                            }))
+                          }
+                          sx={{ maxWidth: 130 }}
+                        />
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          disabled={isQuickInventorySaving}
+                          onClick={() =>
+                            onQuickInventorySave(
+                              product.sku || product.id,
+                              Number(inventoryDrafts[product.id]?.qty ?? inventory),
+                              inventoryDrafts[product.id]?.sourceCode ?? 'default'
+                            )
+                          }
+                        >
+                          {isQuickInventorySaving ? 'Saving...' : 'Save'}
+                        </Button>
+                      </Stack>
                     </Stack>
                   </TableCell>
                   <TableCell align="right">
@@ -528,7 +648,7 @@ export function CommerceProductsTable({
             })}
             {filteredProducts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} sx={{ py: 8, textAlign: 'center' }}>
+                <TableCell colSpan={7} sx={{ py: 8, textAlign: 'center' }}>
                   <Typography variant="subtitle1">No products found.</Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Create your first product or adjust the search query.
@@ -539,6 +659,15 @@ export function CommerceProductsTable({
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        component="div"
+        count={totalRows}
+        page={page}
+        onPageChange={(_event, nextPage) => onPageChange(nextPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(event) => onRowsPerPageChange(Number(event.target.value))}
+        rowsPerPageOptions={[10, 20, 50]}
+      />
     </Card>
   );
 }
@@ -716,6 +845,11 @@ export function CommerceProductFormCard({
                 />
                 <RHFTextField name="lowStockThreshold" label="Low stock threshold" type="number" />
               </Stack>
+              <RHFTextField
+                name="inventorySourceCode"
+                label="Inventory Source Code"
+                helperText="Magento MSI source code (default: default)"
+              />
               <RHFTextField name="tagsText" label="Tags" placeholder="summer, bestseller, new" />
               <Stack spacing={1.5}>
                 <Stack

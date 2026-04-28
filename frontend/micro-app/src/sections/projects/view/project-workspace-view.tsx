@@ -6,10 +6,12 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { paths } from 'src/routes/paths';
+
 import { projectService } from 'src/services/project-service';
+
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
@@ -48,7 +50,7 @@ export function ProjectWorkspaceView({ boardId, workspaceId, mode = 'tasks' }: P
   if (tasksQuery.isLoading || boardQuery.isLoading || columnsQuery.isLoading || cardsQuery.isLoading) {
     return (
       <Box sx={{ py: 8, textAlign: 'center' }}>
-        <CircularProgress />
+        <LinearProgress />
       </Box>
     );
   }

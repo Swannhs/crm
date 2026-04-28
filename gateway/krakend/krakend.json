@@ -7825,7 +7825,7 @@
       "backend": [
         {
           "host": [
-            "http://file-service:7130"
+            "http://integrations-service:7140"
           ],
           "url_pattern": "/v1/image-library"
         }
@@ -7861,7 +7861,7 @@
       "backend": [
         {
           "host": [
-            "http://file-service:7130"
+            "http://integrations-service:7140"
           ],
           "url_pattern": "/v1/image-library"
         }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -12,9 +13,9 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-import { Iconify } from 'src/components/iconify';
 import { socialService } from 'src/services/social-service';
-import { toast } from 'src/components/snackbar';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -169,5 +170,3 @@ export function SocialComposer() {
     </Grid>
   );
 }
-
-import { useState } from 'react';

@@ -1,24 +1,26 @@
-FROM node:24-alpine
+FROM php:8.4-cli
 
-ARG SERVICE_NAME
-ARG SERVICE_PORT
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV SERVICE_NAME=${SERVICE_NAME}
-ENV PORT=${SERVICE_PORT}
-ENV NODE_ENV=development
+RUN sed -i 's|https://deb.debian.org|http://deb.debian.org|g; s|https://security.debian.org|http://security.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update -o Acquire::ForceIPv4=true -o Acquire::Retries=10 \
+  && apt-get install -y \
+  git \
+  unzip \
+  zip \
+  curl \
+  libicu-dev \
+  libzip-dev \
+  libxml2-dev \
+  libonig-dev \
+  && docker-php-ext-install -j"$(nproc)" intl pdo_mysql mbstring zip \
+  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /workspace/services/${SERVICE_NAME}
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN apk add --no-cache openssl libc6-compat \
-  && corepack enable
+WORKDIR /workspace/services/magento-integration-service
 
-EXPOSE ${SERVICE_PORT}
+COPY services/magento-integration-service/docker/entrypoint.dev.sh /usr/local/bin/entrypoint.dev.sh
+RUN chmod +x /usr/local/bin/entrypoint.dev.sh
 
-ENV SHARED_INSTALL_TIMEOUT_SECONDS=1800
-ENV SHARED_INSTALL_STALE_SECONDS=180
-ENV SHARED_INSTALL_POLL_SECONDS=2
-
-COPY services/${SERVICE_NAME}/docker/entrypoint.dev.sh /usr/local/bin/node-service-dev-entrypoint.sh
-RUN chmod +x /usr/local/bin/node-service-dev-entrypoint.sh
-
-CMD ["/usr/local/bin/node-service-dev-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.dev.sh"]

@@ -1,24 +1,26 @@
 'use client';
 
 import Link from 'next/link';
+import { useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
-import Divider from '@mui/material/Divider';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+import CardContent from '@mui/material/CardContent';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
-import { showToast } from 'src/components/toast';
+
 import { posService } from 'src/services/pos-service';
+
+import { showToast } from 'src/components/toast';
 
 type Props = {
   mode: 'table-join-approve' | 'table-register' | 'table-side' | 'deliver';

@@ -7,17 +7,19 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
 import AvatarGroup from '@mui/material/AvatarGroup';
+import CircularProgress from '@mui/material/CircularProgress';
 
-import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
-import { calendarService } from 'src/services/calendar-service';
-import { bookingService } from 'src/services/booking-service';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+
+import { DashboardContent } from 'src/layouts/dashboard';
+import { bookingService } from 'src/services/booking-service';
+import { calendarService } from 'src/services/calendar-service';
+
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 

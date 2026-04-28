@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../generated-prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ContactMap {
+  uuid      String   @id @default(uuid())
+  odooId    Int      @unique
+  status    String?  @default("new")
+  createdAt DateTime @default(now())
+}
+
+model Pet {
+  id        String    @id @default(uuid())
+  contactId Int // Odoo partner_id
+  name      String
+  breed     String?
+  age       String? // Keep for legacy/manual entry
+  birthDate DateTime?
+  photo     String?
+  createdAt DateTime  @default(now())
+}
+
+model ContactFile {
+  id        String   @id @default(uuid())
+  contactId Int // Odoo partner_id
+  name      String
+  size      String
+  url       String
+  type      String?
+  createdAt DateTime @default(now())
+}
+
+model ContactTask {
+  id        String   @id @default(uuid())
+  contactId Int // Odoo partner_id
+  title     String
+  dueDate   String?
+  priority  String?  @default("Medium")
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model ContactActivity {
+  id        String   @id @default(uuid())
+  contactId Int // Odoo partner_id
+  type      String // note, call, system, email
+  title     String
+  content   String?
+  author    String   @default("System")
+  color     String?  @default("info")
+  icon      String?
+  createdAt DateTime @default(now())
+}
+
+model ContactShift {
+  id        String    @id @default(uuid())
+  contactId Int // Odoo partner_id
+  clockIn   DateTime  @default(now())
+  clockOut  DateTime?
+  status    String    @default("Approved") // Pending, Approved, Rejected
+  createdAt DateTime  @default(now())
+}

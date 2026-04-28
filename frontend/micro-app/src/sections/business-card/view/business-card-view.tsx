@@ -10,17 +10,14 @@ import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
-import InputAdornment from '@mui/material/InputAdornment';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { businessCardService } from 'src/services/business-card-service';
+
 import { toast } from 'src/components/snackbar';
-import { Scrollbar } from 'src/components/scrollbar';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 

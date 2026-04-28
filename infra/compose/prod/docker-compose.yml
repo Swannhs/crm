@@ -1,0 +1,6 @@
+include:
+  - ./docker-compose.databases.yml
+  - ./docker-compose.platform.yml
+  - ./docker-compose.services.yml
+  - ./docker-compose.ui.yml
+  - ./docker-compose.gateway.yml

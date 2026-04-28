@@ -3,198 +3,324 @@
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
-import { useTheme, alpha } from '@mui/material/styles';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 
-import { fCurrency } from 'src/utils/format-number';
+import {
+  useSalesLeads,
+  useSalesOrders,
+  useSalesSummary,
+  useSalesAnalytics,
+  useSalesActivities,
+  useSalesOpportunities,
+  useCreateSalesActivity,
+  useRunMagentoToOdooSync,
+  useCompleteSalesActivity,
+  useLinkOrderToOpportunity,
+  useUpdateSalesOpportunity,
+  useCreateSalesOpportunity,
+  useUpdateOpportunityStage,
+  usePreviewMagentoToOdooSync,
+} from 'src/hooks/use-sales-dashboard';
 
-import { useGetDeals } from 'src/hooks/use-deals';
+import { toast } from 'src/components/snackbar';
 
-import { Iconify } from 'src/components/iconify';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
-// ----------------------------------------------------------------------
+import { SalesHeader } from '../components/sales-header';
+import { SalesKpiRow } from '../components/sales-kpi-row';
+import { SalesSyncDialog } from '../components/sales-sync-dialog';
+import { SalesErrorState } from '../components/sales-error-state';
+import { SalesLeadsPanel } from '../components/sales-leads-panel';
+import { SalesTabs, type SalesTab } from '../components/sales-tabs';
+import { SalesOrdersTable } from '../components/sales-orders-table';
+import { SalesPipelineKanban } from '../components/sales-pipeline-kanban';
+import { SalesAnalyticsPanel } from '../components/sales-analytics-panel';
+import { SalesActivitiesPanel } from '../components/sales-activities-panel';
+import { SalesOpportunityDrawer } from '../components/sales-opportunity-drawer';
+import { SalesOpportunityDialog, type OpportunityFormValues } from '../components/sales-opportunity-dialog';
+
+import type { SalesFilters, SalesActivity, SalesOpportunity } from '../types';
 
 export function SalesWorkspaceView() {
-  const [activeTab, setActiveTab] = useState('pipeline');
+  const [tab, setTab] = useState<SalesTab>('pipeline');
+  const [search, setSearch] = useState('');
+  const [syncOpen, setSyncOpen] = useState(false);
+  const [opportunityOpen, setOpportunityOpen] = useState(false);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<SalesOpportunity | null>(null);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [activityTitle, setActivityTitle] = useState('');
+  const [activityType, setActivityType] = useState<SalesActivity['type']>('todo');
+  const [activityDueDate, setActivityDueDate] = useState('');
 
-  const { deals, dealsLoading } = useGetDeals();
+  const filters: SalesFilters = { search: search || undefined };
 
-  const TABS = [
-    { value: 'pipeline', label: 'Sales Pipeline', icon: 'solar:graph-up-bold' },
-    { value: 'leads', label: 'Lead Management', icon: 'solar:users-group-rounded-bold' },
-    { value: 'funnels', label: 'Conversion Funnels', icon: 'solar:filters-bold' },
-    { value: 'analytics', label: 'Revenue Analytics', icon: 'solar:chart-2-bold' },
-    { value: 'settings', label: 'Pipeline Settings', icon: 'solar:settings-bold' },
-  ];
+  const summaryQuery = useSalesSummary(filters);
+  const opportunitiesQuery = useSalesOpportunities(filters);
+  const leadsQuery = useSalesLeads(filters);
+  const ordersQuery = useSalesOrders(filters);
+  const activitiesQuery = useSalesActivities(filters);
+  const analyticsQuery = useSalesAnalytics(filters);
+
+  const createOpportunityMutation = useCreateSalesOpportunity();
+  const updateOpportunityMutation = useUpdateSalesOpportunity();
+  const stageMutation = useUpdateOpportunityStage();
+  const createActivityMutation = useCreateSalesActivity();
+  const completeActivityMutation = useCompleteSalesActivity();
+  const linkOrderMutation = useLinkOrderToOpportunity();
+  const previewSyncMutation = usePreviewMagentoToOdooSync();
+  const runSyncMutation = useRunMagentoToOdooSync();
+
+  const failedSections = [summaryQuery, opportunitiesQuery, leadsQuery, ordersQuery, activitiesQuery, analyticsQuery].filter((query) => query.isError).length;
+
+  const refreshAll = () => {
+    summaryQuery.refetch();
+    opportunitiesQuery.refetch();
+    leadsQuery.refetch();
+    ordersQuery.refetch();
+    activitiesQuery.refetch();
+    analyticsQuery.refetch();
+  };
+
+  const handleOpportunitySubmit = async (values: OpportunityFormValues) => {
+    try {
+      if (selectedOpportunity?.id) {
+        await updateOpportunityMutation.mutateAsync({ id: selectedOpportunity.id, payload: values });
+        toast.success('Opportunity updated');
+      } else {
+        await createOpportunityMutation.mutateAsync(values);
+        toast.success('Opportunity created');
+      }
+      setOpportunityOpen(false);
+    } catch (error: any) {
+      toast.error(error?.message || 'Unable to save opportunity');
+    }
+  };
+
+  const handleMoveStage = async (id: string, stage: SalesOpportunity['stage']) => {
+    try {
+      await stageMutation.mutateAsync({ id, stage });
+      toast.success('Stage updated');
+      if (selectedOpportunity?.id === id) {
+        setSelectedOpportunity({ ...selectedOpportunity, stage });
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Stage update unavailable');
+    }
+  };
 
   return (
-    <FeatureRouteShell
-      title="Sales Orchestration"
-      description="Manage organizational sales pipelines, track lead lifecycles, and monitor revenue conversion through high-fidelity deal tracking."
-      links={[
-        { href: '#', label: 'Active Deals' },
-        { href: '#', label: 'Lead Sources' },
-        { href: '#', label: 'Conversion Reports' },
-      ]}
-      action={
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Iconify icon="solar:add-circle-bold" />}
-        >
-          New Lead
-        </Button>
-      }
-    >
-      <Box sx={{ mt: 3 }}>
-        <Tabs
-          value={activeTab}
-          onChange={(e, v) => setActiveTab(v)}
-          sx={{ mb: 3, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-        >
-          {TABS.map((tab) => (
-            <Tab 
-              key={tab.value} 
-              value={tab.value} 
-              label={tab.label} 
-              icon={<Iconify icon={tab.icon} width={20} />} 
-              iconPosition="start"
-            />
-          ))}
-        </Tabs>
+    <FeatureRouteShell title="Sales" description="Track pipeline, leads, orders, and revenue in one place.">
+      <Stack spacing={3}>
+        <SalesHeader
+          search={search}
+          onSearch={setSearch}
+          onRefresh={refreshAll}
+          onOpenSync={() => setSyncOpen(true)}
+          onOpenCreate={() => {
+            setSelectedOpportunity(null);
+            setOpportunityOpen(true);
+          }}
+        />
 
-        {dealsLoading ? (
-          <Box sx={{ py: 10, textAlign: 'center' }}>
-            <CircularProgress />
-          </Box>
+        {failedSections >= 2 ? <Alert severity="warning">Some sales sections are temporarily unavailable. Available sections still work.</Alert> : null}
+
+        {summaryQuery.isError ? (
+          <SalesErrorState
+            title="Summary unavailable"
+            message={(summaryQuery.error as Error)?.message}
+            onRetry={() => summaryQuery.refetch()}
+          />
         ) : (
-          <>
-            {activeTab === 'pipeline' && <SalesPipelineTab deals={deals} />}
-            {activeTab === 'leads' && <SalesLeadsTab />}
-            {activeTab === 'funnels' && <SalesFunnelsTab />}
-          </>
+          <SalesKpiRow summary={summaryQuery.data} loading={summaryQuery.isLoading} />
         )}
-      </Box>
+
+        <SalesTabs value={tab} onChange={setTab} />
+
+        <Box>
+          {tab === 'pipeline' ? (
+            opportunitiesQuery.isError ? (
+              <SalesErrorState
+                title="Pipeline unavailable"
+                message={(opportunitiesQuery.error as Error)?.message}
+                onRetry={() => opportunitiesQuery.refetch()}
+              />
+            ) : (
+              <SalesPipelineKanban
+                opportunities={opportunitiesQuery.data ?? []}
+                moving={stageMutation.isPending}
+                onOpen={(item) => setSelectedOpportunity(item)}
+                onMove={handleMoveStage}
+              />
+            )
+          ) : null}
+
+          {tab === 'leads' ? (
+            leadsQuery.isError ? (
+              <SalesErrorState
+                title="Leads unavailable"
+                message={(leadsQuery.error as Error)?.message}
+                onRetry={() => leadsQuery.refetch()}
+              />
+            ) : (
+              <SalesLeadsPanel leads={leadsQuery.data ?? []} search={search} />
+            )
+          ) : null}
+
+          {tab === 'orders' ? (
+            ordersQuery.isError ? (
+              <SalesErrorState
+                title="Orders unavailable"
+                message={(ordersQuery.error as Error)?.message}
+                onRetry={() => ordersQuery.refetch()}
+              />
+            ) : (
+              <SalesOrdersTable
+                rows={ordersQuery.data ?? []}
+                opportunities={opportunitiesQuery.data ?? []}
+                onLink={async (orderId, opportunityId) => {
+                  try {
+                    await linkOrderMutation.mutateAsync({ orderId, opportunityId });
+                    toast.success('Order linked');
+                  } catch (error: any) {
+                    toast.error(error?.message || 'Link unavailable');
+                  }
+                }}
+                linking={linkOrderMutation.isPending}
+              />
+            )
+          ) : null}
+
+          {tab === 'activities' ? (
+            activitiesQuery.isError ? (
+              <SalesErrorState
+                title="Activities unavailable"
+                message={(activitiesQuery.error as Error)?.message}
+                onRetry={() => activitiesQuery.refetch()}
+              />
+            ) : (
+              <SalesActivitiesPanel
+                rows={activitiesQuery.data ?? []}
+                onComplete={async (id) => {
+                  try {
+                    await completeActivityMutation.mutateAsync(id);
+                    toast.success('Activity completed');
+                  } catch (error: any) {
+                    toast.error(error?.message || 'Complete unavailable');
+                  }
+                }}
+                completing={completeActivityMutation.isPending}
+              />
+            )
+          ) : null}
+
+          {tab === 'analytics' ? (
+            analyticsQuery.isError && summaryQuery.isError && leadsQuery.isError && ordersQuery.isError ? (
+              <SalesErrorState title="Analytics unavailable" description="Analytics data is currently unavailable." />
+            ) : (
+              <SalesAnalyticsPanel summary={summaryQuery.data} leads={leadsQuery.data ?? []} orders={ordersQuery.data ?? []} />
+            )
+          ) : null}
+        </Box>
+      </Stack>
+
+      <SalesOpportunityDrawer
+        open={Boolean(selectedOpportunity)}
+        item={selectedOpportunity}
+        orders={ordersQuery.data ?? []}
+        stageLoading={stageMutation.isPending}
+        onClose={() => setSelectedOpportunity(null)}
+        onEdit={() => setOpportunityOpen(true)}
+        onAddActivity={() => setActivityOpen(true)}
+        onLinkOrder={async (orderId, opportunityId) => {
+          try {
+            await linkOrderMutation.mutateAsync({ orderId, opportunityId });
+            toast.success('Order linked');
+          } catch (error: any) {
+            toast.error(error?.message || 'Link unavailable');
+          }
+        }}
+        onMoveStage={handleMoveStage}
+      />
+
+      <SalesOpportunityDialog
+        open={opportunityOpen}
+        initial={selectedOpportunity}
+        loading={createOpportunityMutation.isPending || updateOpportunityMutation.isPending}
+        onClose={() => setOpportunityOpen(false)}
+        onSubmit={handleOpportunitySubmit}
+      />
+
+      <Dialog open={activityOpen} onClose={() => setActivityOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Add activity</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <TextField label="Title" value={activityTitle} onChange={(e) => setActivityTitle(e.target.value)} />
+            <TextField select label="Type" value={activityType} onChange={(e) => setActivityType(e.target.value as SalesActivity['type'])}>
+              <MenuItem value="call">Call</MenuItem>
+              <MenuItem value="email">Email</MenuItem>
+              <MenuItem value="meeting">Meeting</MenuItem>
+              <MenuItem value="todo">To-do</MenuItem>
+              <MenuItem value="note">Note</MenuItem>
+            </TextField>
+            <TextField type="date" label="Due date" InputLabelProps={{ shrink: true }} value={activityDueDate} onChange={(e) => setActivityDueDate(e.target.value)} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setActivityOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!selectedOpportunity?.id || !activityTitle || createActivityMutation.isPending}
+            onClick={async () => {
+              if (!selectedOpportunity?.id) return;
+              try {
+                await createActivityMutation.mutateAsync({
+                  opportunityId: selectedOpportunity.id,
+                  payload: {
+                    type: activityType,
+                    title: activityTitle,
+                    dueDate: activityDueDate || undefined,
+                  },
+                });
+                toast.success('Activity created');
+                setActivityOpen(false);
+                setActivityTitle('');
+                setActivityDueDate('');
+              } catch (error: any) {
+                toast.error(error?.message || 'Create activity unavailable');
+              }
+            }}
+          >
+            Add activity
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <SalesSyncDialog
+        open={syncOpen}
+        preview={previewSyncMutation.data ?? null}
+        result={runSyncMutation.data ?? null}
+        previewLoading={previewSyncMutation.isPending}
+        runLoading={runSyncMutation.isPending}
+        onClose={() => setSyncOpen(false)}
+        onPreview={() => previewSyncMutation.mutate()}
+        onRun={async () => {
+          try {
+            await runSyncMutation.mutateAsync();
+            toast.success('Sync completed');
+            refreshAll();
+          } catch (error: any) {
+            toast.error(error?.message || 'Sync unavailable');
+          }
+        }}
+      />
     </FeatureRouteShell>
   );
 }
-
-// --- Tab Components ---
-
-function SalesPipelineTab({ deals }: { deals: any[] }) {
-  const STAGES = [
-    { id: 'prospect', label: 'Prospecting' },
-    { id: 'qualification', label: 'Qualification' },
-    { id: 'proposal', label: 'Proposal' },
-    { id: 'negotiation', label: 'Negotiation' },
-    { id: 'closed_won', label: 'Closed Won' },
-    { id: 'closed_lost', label: 'Closed Lost' },
-  ];
-
-  return (
-    <Box sx={{ display: 'flex', gap: 3, overflowX: 'auto', pb: 3 }}>
-       {STAGES.map((stage) => {
-         const stageDeals = deals.filter((d) => d.stage === stage.id);
-         
-         return (
-            <Box key={stage.id} sx={{ minWidth: 280, width: 280, flexShrink: 0 }}>
-               <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="subtitle1">{stage.label}</Typography>
-                  <Chip label={stageDeals.length} size="small" variant="soft" />
-               </Box>
-               <Stack spacing={2}>
-                  {stageDeals.map((deal) => (
-                     <Card key={deal.id} sx={{ p: 2, cursor: 'pointer', '&:hover': { boxShadow: (theme) => theme.customShadows.z12 } }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>{deal.name}</Typography>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                           <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>
-                             {fCurrency(deal.amount)}
-                           </Typography>
-                           <Iconify 
-                             icon={deal.priority === 'high' || deal.priority === 'urgent' ? "solar:flag-bold" : "solar:flag-linear"} 
-                             width={14} 
-                             color={deal.priority === 'high' || deal.priority === 'urgent' ? "error.main" : "text.disabled"} 
-                           />
-                        </Stack>
-                     </Card>
-                  ))}
-                  <Button fullWidth variant="dashed" startIcon={<Iconify icon="solar:add-circle-bold" />}>Add Deal</Button>
-               </Stack>
-            </Box>
-         );
-       })}
-    </Box>
-  );
-}
-
-function SalesLeadsTab() {
-  return (
-    <Card sx={{ p: 0 }}>
-       <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Lead Directory</Typography>
-          <TextField size="small" placeholder="Search leads..." sx={{ minWidth: 240 }} />
-       </Box>
-       <Divider />
-       <Stack>
-          {[
-            { name: 'John Smith', source: 'Website Form', status: 'Warm', date: '2 hours ago' },
-            { name: 'Sarah Wilson', source: 'Facebook Ads', status: 'Hot', date: '5 hours ago' },
-          ].map((lead, i) => (
-             <Box key={i} sx={{ p: 2.5, borderBottom: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ mr: 2 }}>{lead.name[0]}</Avatar>
-                <Box sx={{ flexGrow: 1 }}>
-                   <Typography variant="subtitle2">{lead.name}</Typography>
-                   <Typography variant="caption" color="text.secondary">Source: {lead.source} • {lead.date}</Typography>
-                </Box>
-                <Chip label={lead.status} size="small" color={lead.status === 'Hot' ? 'error' : 'warning'} variant="soft" />
-                <Button variant="soft" size="small" sx={{ ml: 2 }}>Nurture</Button>
-             </Box>
-          ))}
-       </Stack>
-    </Card>
-  );
-}
-
-function SalesFunnelsTab() {
-  return (
-    <Grid container spacing={3}>
-       <Grid item xs={12} md={8}>
-          <Card sx={{ p: 4, height: 400, bgcolor: 'background.neutral', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-             <Box sx={{ textAlign: 'center' }}>
-                <Iconify icon="solar:filters-bold-duotone" width={64} color="primary.main" sx={{ mb: 2 }} />
-                <Typography variant="h5">Visual Conversion Funnel</Typography>
-                <Typography variant="body2" color="text.secondary">Orchestrating high-fidelity data visualization for lead-to-deal conversion...</Typography>
-             </Box>
-          </Card>
-       </Grid>
-       <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3 }}>
-             <Typography variant="h6" sx={{ mb: 2 }}>Funnel Metrics</Typography>
-             <Stack spacing={2}>
-                <Box>
-                   <Typography variant="caption" color="text.secondary">Total Conversions</Typography>
-                   <Typography variant="h4">12.5%</Typography>
-                </Box>
-                <Box>
-                   <Typography variant="caption" color="text.secondary">Average Deal Size</Typography>
-                   <Typography variant="h4">$8,420</Typography>
-                </Box>
-             </Stack>
-          </Card>
-       </Grid>
-    </Grid>
-  );
-}
-
-import Chip from '@mui/material/Chip';
-import TextField from '@mui/material/TextField';
-import Avatar from '@mui/material/Avatar';

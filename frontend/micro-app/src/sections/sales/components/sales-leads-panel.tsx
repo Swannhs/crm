@@ -1,0 +1,64 @@
+import type { SalesLeadRow } from 'src/services/sales-dashboard-service';
+
+import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Table from '@mui/material/Table';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
+
+import { formatOptionalCurrency } from '../utils';
+import { SalesEmptyState } from './sales-empty-state';
+
+export function SalesLeadsPanel({ leads, search }: { leads: SalesLeadRow[]; search: string }) {
+  const query = search.trim().toLowerCase();
+  const filtered = !query
+    ? leads
+    : leads.filter((lead) =>
+        [lead.name, lead.email, lead.phone, lead.stage]
+          .map((v) => String(v || '').toLowerCase())
+          .some((v) => v.includes(query))
+      );
+
+  if (!leads.length) {
+    return <SalesEmptyState title="No leads" description="No leads are available right now." />;
+  }
+
+  if (!filtered.length) {
+    return <SalesEmptyState title="No leads found" description="Try a different search term." compact />;
+  }
+
+  return (
+    <Card sx={{ p: 0 }}>
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Stage</TableCell>
+              <TableCell>Expected Revenue</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Phone</TableCell>
+              <TableCell>Priority</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filtered.map((lead) => (
+              <TableRow key={lead.id} hover>
+                <TableCell><Typography variant="body2">{lead.name || 'Unnamed lead'}</Typography></TableCell>
+                <TableCell><Chip label={lead.stage || 'Unknown'} size="small" variant="outlined" /></TableCell>
+                <TableCell>{formatOptionalCurrency(lead.expectedRevenue)}</TableCell>
+                <TableCell>{lead.email || 'Unavailable'}</TableCell>
+                <TableCell>{lead.phone || 'Unavailable'}</TableCell>
+                <TableCell>{lead.priority || 'Unavailable'}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Card>
+  );
+}

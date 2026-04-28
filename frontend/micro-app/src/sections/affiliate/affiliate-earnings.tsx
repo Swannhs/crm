@@ -17,11 +17,13 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 
-import { fCurrency } from 'src/utils/format-number';
 import { fDate } from 'src/utils/format-time';
-import { Iconify } from 'src/components/iconify';
+import { fCurrency } from 'src/utils/format-number';
+
 import { affiliateService } from 'src/services/affiliate-service';
+
 import { toast } from 'src/components/snackbar';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 

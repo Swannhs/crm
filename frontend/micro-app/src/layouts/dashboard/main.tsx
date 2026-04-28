@@ -1,10 +1,8 @@
 'use client';
 
-import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
-import Container from '@mui/material/Container';
-import { BoxProps } from '@mui/material/Box';
-import { ContainerProps } from '@mui/material/Container';
+import Box, { BoxProps } from '@mui/material/Box';
+import Container, { ContainerProps } from '@mui/material/Container';
 
 import { layoutClasses } from 'src/layouts/classes';
 

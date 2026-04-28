@@ -1,0 +1,7 @@
+include:
+  - ../prod/docker-compose.platform.yml
+
+services:
+  keycloak:
+    command: ["start", "--http-enabled=true", "--hostname-strict=false", "--import-realm"]
+

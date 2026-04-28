@@ -1,4 +1,4 @@
-import { CalendarWorkspaceView } from 'src/sections/calendar/view/calendar-workspace-view';
+import { PublicBookingView } from 'src/sections/booking/view/public-booking-view';
 
 export const metadata = {
   title: 'Booking',
@@ -11,5 +11,6 @@ type Props = {
 };
 
 export default function Page({ params }: Props) {
-  return <CalendarWorkspaceView bookingLink={params.link} publicMode="booking" />;
+  return <PublicBookingView link={params.link} />;
 }
+

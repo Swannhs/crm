@@ -1,4 +1,5 @@
 import { createServiceApp } from "@mymanager/node-service-kit";
+import { API_ROUTER_CONFIG } from "./config.js";
 
 const { app, logger } = createServiceApp({
   serviceName: "api-router-service",
@@ -24,42 +25,52 @@ function notImplemented(res: Response, meta: { module: string; path: string; met
 }
 
 async function proxyTo(req: Request, res: Response, opts: { baseUrl: string; targetPath: string }) {
-  const url = new URL(opts.targetPath, opts.baseUrl);
+  try {
+    const url = new URL(opts.targetPath, opts.baseUrl);
 
-  const headers = new Headers();
-  const hopByHop = new Set(["connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade", "host"]);
+    const headers = new Headers();
+    const hopByHop = new Set(["connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade", "host"]);
 
-  for (const [k, v] of Object.entries(req.headers)) {
-    if (!k) continue;
-    if (hopByHop.has(k.toLowerCase())) continue;
-    headers.set(k, Array.isArray(v) ? v.join(",") : String(v));
-  }
+    for (const [k, v] of Object.entries(req.headers)) {
+      if (!k) continue;
+      if (hopByHop.has(k.toLowerCase())) continue;
+      headers.set(k, Array.isArray(v) ? v.join(",") : String(v));
+    }
 
-  const init: RequestInit = { method: req.method, headers };
+    const init: RequestInit = { method: req.method, headers };
 
-  if (!["GET", "HEAD"].includes(req.method)) {
-    if (req.is("application/json")) {
-      init.body = JSON.stringify(req.body ?? {});
-      headers.set("content-type", "application/json");
-    } else if (req.is("application/x-www-form-urlencoded")) {
-      init.body = new URLSearchParams(req.body ?? {}).toString();
-      headers.set("content-type", "application/x-www-form-urlencoded");
-    } else {
-      res.status(415).json({ message: "Unsupported Content-Type for proxy." });
-      return;
+    if (!["GET", "HEAD"].includes(req.method)) {
+      if (req.is("application/json")) {
+        init.body = JSON.stringify(req.body ?? {});
+        headers.set("content-type", "application/json");
+      } else if (req.is("application/x-www-form-urlencoded")) {
+        init.body = new URLSearchParams(req.body ?? {}).toString();
+        headers.set("content-type", "application/x-www-form-urlencoded");
+      } else {
+        res.status(415).json({ message: "Unsupported Content-Type for proxy." });
+        return;
+      }
+    }
+
+    const upstream = await fetch(url, init);
+    res.status(upstream.status);
+
+    upstream.headers.forEach((value: string, key: string) => {
+      if (hopByHop.has(key.toLowerCase())) return;
+      res.setHeader(key, value);
+    });
+
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.send(buf);
+  } catch (error: any) {
+    logger.error({ err: error, baseUrl: opts.baseUrl, targetPath: opts.targetPath }, "Proxy request failed");
+    if (!res.headersSent) {
+      res.status(502).json({
+        message: "Upstream service unavailable",
+        target: opts.targetPath,
+      });
     }
   }
-
-  const upstream = await fetch(url, init);
-  res.status(upstream.status);
-
-  upstream.headers.forEach((value: string, key: string) => {
-    if (hopByHop.has(key.toLowerCase())) return;
-    res.setHeader(key, value);
-  });
-
-  const buf = Buffer.from(await upstream.arrayBuffer());
-  res.send(buf);
 }
 
 function withQuery(req: Request, targetPath: string) {
@@ -67,31 +78,208 @@ function withQuery(req: Request, targetPath: string) {
   return query ? `${targetPath}?${query}` : targetPath;
 }
 
+type CompatEmployeeRow = {
+  _id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  totalShifts: number;
+  displaySummary: string;
+  categories: Array<{ _id: string; name: string }>;
+};
+
+function toCompatEmployeeRow(raw: any): CompatEmployeeRow {
+  const id = String(raw?.uuid ?? raw?.id ?? "");
+  const contactTypes = Array.isArray(raw?.contactType)
+    ? raw.contactType
+    : (raw?.contactType ? [raw.contactType] : []);
+
+  return {
+    _id: id,
+    fullName: String(raw?.fullName ?? raw?.name ?? "Unnamed employee"),
+    email: String(raw?.email ?? ""),
+    phone: String(raw?.phone ?? ""),
+    totalShifts: 0,
+    displaySummary: "0 shifts",
+    categories: contactTypes.map((name: string, idx: number) => ({
+      _id: `${id}-cat-${idx}`,
+      name: String(name),
+    })),
+  };
+}
+
+async function getCompatEmployeesFromOdoo(req: Request): Promise<CompatEmployeeRow[]> {
+  const headers = {
+    Authorization: req.header("Authorization") ?? "",
+    "X-Org-Id": req.header("X-Org-Id") ?? "",
+    "X-User-Id": req.header("X-User-Id") ?? "",
+  };
+
+  let page = 1;
+  let totalPages = 1;
+  const rows: any[] = [];
+
+  do {
+    const query = new URLSearchParams({
+      page: String(page),
+      pageSize: "200",
+      type: "employee",
+      search: String(req.query.search ?? ""),
+    });
+
+    const upstream = await fetch(toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/contacts?${query.toString()}`), {
+      method: "GET",
+      headers,
+    });
+
+    if (!upstream.ok) {
+      throw new Error(`Odoo contacts compat failed with status ${upstream.status}`);
+    }
+
+    const payload = await upstream.json();
+    const batch = Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload)
+        ? payload
+        : [];
+
+    rows.push(...batch);
+    totalPages = Number(payload?.totalPages ?? 1);
+    page += 1;
+  } while (page <= totalPages);
+
+  return rows.map(toCompatEmployeeRow);
+}
+
+function getForwardHeaders(req: Request) {
+  return {
+    Authorization: req.header("Authorization") ?? "",
+    "X-Org-Id": req.header("X-Org-Id") ?? "",
+    "X-User-Id": req.header("X-User-Id") ?? "",
+  };
+}
+
+async function fetchUpstreamJson(req: Request, url: string) {
+  const upstream = await fetch(url, {
+    method: "GET",
+    headers: getForwardHeaders(req),
+  });
+
+  if (!upstream.ok) {
+    throw new Error(`Upstream failed (${upstream.status}) for ${url}`);
+  }
+
+  return upstream.json();
+}
+
+async function fetchUpstreamJsonSafe(req: Request, url: string) {
+  try {
+    const data = await fetchUpstreamJson(req, url);
+    return { ok: true as const, data, error: null as string | null };
+  } catch (error: any) {
+    return { ok: false as const, data: null, error: String(error?.message ?? "Unknown upstream error") };
+  }
+}
+
+function toAbsoluteUrl(baseUrl: string, pathOrUrl: string) {
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) return pathOrUrl;
+  return new URL(pathOrUrl, baseUrl).toString();
+}
+
+async function odooWriteInvoice(req: Request, invoiceId: number, payload: Record<string, unknown>) {
+  const upstream = await fetch(toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/invoices/${invoiceId}`), {
+    method: "PUT",
+    headers: {
+      ...getForwardHeaders(req),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!upstream.ok) {
+    const body = await upstream.text();
+    throw new Error(`Odoo invoice update failed (${upstream.status}): ${body}`);
+  }
+
+  return upstream.json();
+}
+
+async function fetchAllOdooInvoicesForGraph(req: Request, opts?: { months?: number; maxPages?: number }) {
+  const months = Math.max(1, Math.min(24, Number(opts?.months ?? 6)));
+  const maxPages = Math.max(1, Math.min(50, Number(opts?.maxPages ?? 20)));
+  const pageSize = 200;
+  const rows: any[] = [];
+
+  for (let page = 1; page <= maxPages; page += 1) {
+    const query = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+    });
+    const upstream = await fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/invoices?${query.toString()}`));
+    if (!upstream.ok) break;
+
+    const batch = Array.isArray(upstream.data?.data) ? upstream.data.data : [];
+    rows.push(...batch);
+    if (batch.length < pageSize) break;
+  }
+
+  const startDate = new Date();
+  startDate.setDate(1);
+  startDate.setMonth(startDate.getMonth() - (months - 1));
+  const startTime = startDate.getTime();
+
+  return rows.filter((inv) => {
+    const rawDate = inv?.invoice_date || inv?.create_date || inv?.invoice_date_due;
+    if (!rawDate) return false;
+    const d = new Date(rawDate);
+    if (Number.isNaN(d.getTime())) return false;
+    return d.getTime() >= startTime;
+  });
+}
+
+async function fetchMagentoOrders(req: Request, query: URLSearchParams = new URLSearchParams()) {
+  const base = new URL("/api/v1/magento/orders", API_ROUTER_CONFIG.magentoIntegrationBaseUrl);
+  query.forEach((value, key) => base.searchParams.set(key, value));
+  return fetchUpstreamJsonSafe(req, base.toString());
+}
+
+function toNum(value: unknown): number {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function invoiceTotals(invoices: any[]) {
+  const totalInvoiced = invoices.reduce((sum, inv) => sum + toNum(inv?.amount_total), 0);
+  const totalOutstanding = invoices.reduce((sum, inv) => sum + toNum(inv?.amount_residual), 0);
+  const totalPaid = Math.max(0, totalInvoiced - totalOutstanding);
+  return { totalInvoiced, totalOutstanding, totalPaid };
+}
+
 const domainRoutes: Record<string, string> = {
-  "community": "http://community-service:7030",
-  "community-group": "http://community-service:7030",
-  "community-members": "http://community-service:7030",
-  "community-post": "http://community-service:7030",
-  "community-profile": "http://community-service:7030",
-  "community-settings": "http://community-service:7030",
-  "community-events": "http://community-service:7030",
-  "community-badges": "http://community-service:7030",
-  "community-activity": "http://community-service:7030",
-  "community-points": "http://community-service:7030",
-  "document": "http://documents-service:7080",
-  "documents": "http://documents-service:7080",
-  "document-recipient": "http://documents-service:7080",
-  "document-signature": "http://documents-service:7080",
-  "upload": "http://documents-service:7080",
-  "payment": "http://payments-service:7090",
-  "payments": "http://payments-service:7090",
-  "payment-cards": "http://payments-service:7090",
-  "deposit": "http://payments-service:7090",
-  "employee": "http://employees-service:7070",
-  "employees": "http://employees-service:7070",
-  "employee-schedule": "http://employees-service:7070",
-  "employee-timeoff-request": "http://employees-service:7070",
-  "employee-attendance": "http://employees-service:7070"
+  "community": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-group": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-members": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-post": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-profile": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-settings": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-events": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-badges": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-activity": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "community-points": API_ROUTER_CONFIG.communityServiceBaseUrl,
+  "document": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "documents": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "document-recipient": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "document-signature": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "upload": API_ROUTER_CONFIG.documentsServiceBaseUrl,
+  "payment": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "payments": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "payment-cards": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "deposit": API_ROUTER_CONFIG.paymentsServiceBaseUrl,
+  "employee": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employees": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employee-schedule": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employee-timeoff-request": API_ROUTER_CONFIG.employeesServiceBaseUrl,
+  "employee-attendance": API_ROUTER_CONFIG.employeesServiceBaseUrl
 };
 
 const deprecatedCommerceModules = new Set([
@@ -108,23 +296,27 @@ async function handleApiCompat(req: Request, res: Response) {
   const rest = req.params[0] ? `/${req.params[0]}` : "";
 
   if (module === "public" && req.method === "GET" && rest === "/help-center/articles") {
-    return res.json({ data: [], total: 0 });
+    return notImplemented(res, {
+      module,
+      method: req.method,
+      path: rest,
+      hint: "Public help-center articles endpoint has no upstream implementation.",
+    });
   }
 
   if (module === "auth") {
     if (req.method === "POST" && rest === "/sign-in") {
       try {
         const { email, password } = req.body;
-        const keycloakUrl = "http://keycloak:8080/realms/mymanager/protocol/openid-connect/token";
         const body = new URLSearchParams({
           grant_type: "password",
-          client_id: "mymanager-web",
+          client_id: API_ROUTER_CONFIG.keycloakClientId,
           username: email,
           password: password,
           scope: "openid profile email"
         });
 
-        const response = await fetch(keycloakUrl, {
+        const response = await fetch(API_ROUTER_CONFIG.keycloakTokenUrl, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: body.toString()
@@ -148,15 +340,24 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (req.method === "GET" && rest === "/me") {
-       const ident = identityOr401(req, res);
-       if (!ident) return;
-       return res.json({ 
-         user: { 
-           id: ident.userId, 
-           email: "owner@example.com", // Fallback or extract from token
-           role: "admin" 
-         } 
-       });
+      const userId = req.header("X-User-Id") || "";
+      const orgId = req.header("X-Org-Id") || "";
+      if (!userId || !orgId) {
+        return res.status(501).json({
+          message: "Authenticated identity headers are required for /auth/me",
+          requiredHeaders: ["X-User-Id", "X-Org-Id"],
+        });
+      }
+
+      return res.json({
+        user: {
+          id: userId,
+          orgId,
+          email: req.header("X-User-Email") || null,
+          name: req.header("X-User-Name") || null,
+          role: req.header("X-User-Role") || null,
+        },
+      });
     }
   }
 
@@ -165,22 +366,15 @@ async function handleApiCompat(req: Request, res: Response) {
 
   try {
     if (module === "form-builder" && req.method === "GET" && (rest === "/forms" || rest === "/templates")) {
-      return res.json({ data: [] });
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Form builder compatibility endpoint has no upstream implementation." });
     }
 
     if (module === "webbuilder" && req.method === "GET" && (rest === "" || rest === "/")) {
-      return res.json({ data: [] });
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Webbuilder compatibility endpoint has no upstream implementation." });
     }
 
     if (module === "reputation" && req.method === "GET" && rest === "/dashboard-stats") {
-      return res.json({
-        data: {
-          reviews: 0,
-          averageRating: 0,
-          responseRate: 0,
-          mentions: 0,
-        },
-      });
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Reputation dashboard compatibility endpoint has no upstream implementation." });
     }
 
     if (deprecatedCommerceModules.has(module)) {
@@ -190,6 +384,17 @@ async function handleApiCompat(req: Request, res: Response) {
         canonical: "/api/magento/* (CRM/admin integration)",
         storefront: "Use Magento storefront/GraphQL APIs for public commerce flows.",
       });
+    }
+
+    if (module === "employee-schedule" && req.method === "GET") {
+      if (rest === "/get-contacts-with-categories-and-shifts" || rest === "/get-employee-category-schedule-data") {
+        const data = await getCompatEmployeesFromOdoo(req);
+        return res.json({ data, total: data.length });
+      }
+
+      if (rest === "/get-all") {
+        return notImplemented(res, { module, method: req.method, path: rest, hint: "Employee schedule list compatibility endpoint has no upstream implementation." });
+      }
     }
 
     if (domainRoutes[module]) {
@@ -204,6 +409,274 @@ async function handleApiCompat(req: Request, res: Response) {
       });
     }
 
+    if (module === "odoo") {
+      const targetPath = withQuery(req, `/v1/odoo${rest}`);
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
+    }
+
+    if (module === "image-library") {
+      if (req.method === "GET" && (rest === "" || rest === "/")) {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: withQuery(req, "/v1/image-library"),
+        });
+      }
+
+      if (req.method === "POST" && (rest === "" || rest === "/")) {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: "/v1/image-library",
+        });
+      }
+
+      if (req.method === "DELETE" && /^\/[^/]+$/.test(rest)) {
+        const id = rest.slice(1);
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: `/v1/image-library/${id}`,
+        });
+      }
+    }
+
+    if (module === "billing") {
+      if (req.method === "GET" && rest === "/graph") {
+        const months = Math.max(1, Math.min(24, Number(req.query.months ?? 6)));
+        const invoices = await fetchAllOdooInvoicesForGraph(req, { months, maxPages: 20 });
+
+        const monthKeys: string[] = [];
+        const cursor = new Date();
+        cursor.setDate(1);
+        for (let i = months - 1; i >= 0; i -= 1) {
+          const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
+          monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+        }
+
+        const points = monthKeys.map((key) => {
+          const items = invoices.filter((inv: any) => {
+            const rawDate = inv?.invoice_date || inv?.create_date || inv?.invoice_date_due;
+            if (!rawDate) return false;
+            const d = new Date(rawDate);
+            if (Number.isNaN(d.getTime())) return false;
+            const invKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+            return invKey === key;
+          });
+
+          const invoiced = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_total), 0);
+          const outstanding = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_residual), 0);
+          const paid = Math.max(0, invoiced - outstanding);
+          return { key, invoiced, paid, outstanding, count: items.length };
+        });
+
+        return res.json({
+          data: {
+            categories: monthKeys,
+            series: [
+              { name: "Invoiced", data: points.map((p) => p.invoiced) },
+              { name: "Paid", data: points.map((p) => p.paid) },
+              { name: "Outstanding", data: points.map((p) => p.outstanding) },
+            ],
+            monthly: points,
+            months,
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/summary") {
+        const query = new URLSearchParams({
+          page: "1",
+          pageSize: String(req.query.pageSize ?? 200),
+          ...(req.query.search ? { search: String(req.query.search) } : {}),
+          ...(req.query.contactId ? { contactId: String(req.query.contactId) } : {}),
+        });
+
+        const [odooInvoicesRes, magentoOrdersRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/invoices?${query.toString()}`)),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
+        ]);
+
+        const invoices = Array.isArray(odooInvoicesRes.data?.data) ? odooInvoicesRes.data.data : [];
+        const magentoOrders = Array.isArray(magentoOrdersRes.data?.data?.items) ? magentoOrdersRes.data.data.items : [];
+        const { totalInvoiced, totalOutstanding, totalPaid } = invoiceTotals(invoices);
+        const overdueCount = invoices.filter((inv: any) => {
+          const dueDate = String(inv?.invoice_date_due ?? "");
+          if (!dueDate) return false;
+          const outstanding = toNum(inv?.amount_residual);
+          return outstanding > 0 && new Date(dueDate).getTime() < Date.now();
+        }).length;
+
+        return res.json({
+          data: {
+            totalInvoiced,
+            totalPaid,
+            totalOutstanding,
+            overdueCount,
+            invoiceCount: invoices.length,
+            magentoOrderCount: magentoOrders.length,
+            magentoRevenue: magentoOrders.reduce((sum: number, order: any) => sum + toNum(order?.grand_total), 0),
+          },
+          meta: {
+            upstream: {
+              odoo: { ok: odooInvoicesRes.ok, error: odooInvoicesRes.error },
+              magento: { ok: magentoOrdersRes.ok, error: magentoOrdersRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/invoices") {
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: withQuery(req, "/v1/odoo/invoices") });
+      }
+
+      if (req.method === "POST" && rest === "/invoices") {
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: "/v1/odoo/invoices" });
+      }
+
+      if (req.method === "GET" && /^\/invoices\/\d+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}` });
+      }
+
+      if (req.method === "PUT" && /^\/invoices\/\d+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}` });
+      }
+
+      if (req.method === "DELETE" && /^\/invoices\/\d+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}` });
+      }
+
+      if (req.method === "POST" && /^\/invoices\/\d+\/post$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}/post` });
+      }
+
+      if (req.method === "GET" && /^\/invoices\/\d+\/download$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/invoices/${id}/download` });
+      }
+
+      if (req.method === "GET" && rest === "/magento/orders") {
+        const query = new URLSearchParams(req.query as Record<string, string>);
+        const result = await fetchMagentoOrders(req, query);
+        return res.status(result.ok ? 200 : 502).json(result.ok ? result.data : { message: result.error });
+      }
+
+      if (req.method === "GET" && /^\/magento\/orders\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[3];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
+          targetPath: `/api/v1/magento/rest/V1/orders/${id}`,
+        });
+      }
+
+      if (req.method === "GET" && /^\/magento\/customers\/[^/]+\/orders$/.test(rest)) {
+        const customerId = rest.split("/")[3];
+        const query = new URLSearchParams({
+          "searchCriteria[pageSize]": String(req.query.pageSize ?? 50),
+          "searchCriteria[currentPage]": String(req.query.currentPage ?? 1),
+          "searchCriteria[filter_groups][0][filters][0][field]": "customer_id",
+          "searchCriteria[filter_groups][0][filters][0][value]": customerId,
+          "searchCriteria[filter_groups][0][filters][0][condition_type]": "eq",
+        });
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
+          targetPath: `/api/v1/magento/rest/default/V1/orders?${query.toString()}`,
+        });
+      }
+
+      if (req.method === "GET" && rest === "/reconciliation") {
+        const [odooInvoicesRes, magentoOrdersRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "200", currentPage: "1" })),
+        ]);
+        const invoices = Array.isArray(odooInvoicesRes.data?.data) ? odooInvoicesRes.data.data : [];
+        const magentoOrders = Array.isArray(magentoOrdersRes.data?.data?.items) ? magentoOrdersRes.data.data.items : [];
+        const magentoByRef = new Map(magentoOrders.map((o: any) => [String(o?.increment_id ?? o?.entity_id ?? ""), o]));
+
+        const rows = invoices.map((invoice: any) => {
+          const invoiceRef = String(invoice?.invoice_origin ?? invoice?.ref ?? "");
+          const order = invoiceRef ? magentoByRef.get(invoiceRef) : undefined;
+          return {
+            invoiceId: invoice?.id,
+            invoiceNumber: invoice?.name,
+            invoiceTotal: toNum(invoice?.amount_total),
+            residual: toNum(invoice?.amount_residual),
+            invoiceStatus: invoice?.state,
+            paymentStatus: invoice?.payment_state,
+            magentoOrderRef: invoiceRef || null,
+            magentoOrderId: order?.entity_id ?? null,
+            magentoGrandTotal: toNum(order?.grand_total ?? 0),
+            matched: Boolean(order),
+          };
+        });
+
+        return res.json({
+          data: rows,
+          meta: {
+            matched: rows.filter((r: any) => r.matched).length,
+            unmatched: rows.filter((r: any) => !r.matched).length,
+          },
+        });
+      }
+
+      if (req.method === "POST" && rest === "/reconciliation/link") {
+        const invoiceIdRaw = req.body?.invoiceId;
+        const magentoOrderRefRaw = req.body?.magentoOrderRef;
+        const invoiceId = Number(invoiceIdRaw);
+        const magentoOrderRef = String(magentoOrderRefRaw ?? "").trim();
+
+        if (!Number.isFinite(invoiceId) || invoiceId <= 0) {
+          return res.status(400).json({ message: "invoiceId is required and must be a positive number." });
+        }
+        if (!magentoOrderRef) {
+          return res.status(400).json({ message: "magentoOrderRef is required." });
+        }
+
+        // Persist reconciliation marker directly on the Odoo invoice.
+        // `invoice_origin` is commonly used to keep source document reference.
+        const result = await odooWriteInvoice(req, invoiceId, {
+          invoice_origin: magentoOrderRef,
+          ref: `Magento ${magentoOrderRef}`,
+        });
+
+        return res.status(200).json({
+          applied: true,
+          invoiceId,
+          magentoOrderRef,
+          result,
+        });
+      }
+
+      if (req.method === "POST" && rest === "/reconciliation/unlink") {
+        const invoiceIdRaw = req.body?.invoiceId;
+        const invoiceId = Number(invoiceIdRaw);
+
+        if (!Number.isFinite(invoiceId) || invoiceId <= 0) {
+          return res.status(400).json({ message: "invoiceId is required and must be a positive number." });
+        }
+
+        // Clear only the reconciliation reference fields.
+        const result = await odooWriteInvoice(req, invoiceId, {
+          invoice_origin: false,
+          ref: false,
+        });
+
+        return res.status(200).json({
+          applied: true,
+          invoiceId,
+          result,
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: invoices CRUD/post/download, summary, magento orders, reconciliation",
+      });
+    }
+
     if (module === "invoice") {
       return res.status(410).json({
         message: "Deprecated billing compatibility module.",
@@ -213,10 +686,33 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "booking") {
-      if (req.method === "GET" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/booking-types" });
-      if (req.method === "POST" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: "http://booking-service:7040", targetPath: "/v1/booking-types" });
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "booking-types (scaffold)" });
+      if (req.method === "GET" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/booking-types" });
+      if (req.method === "GET" && /^\/booking-types\/[^/]+$/.test(rest)) {
+        const bookingTypeIdOrLink = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl,
+          targetPath: `/v1/booking-types/${encodeURIComponent(bookingTypeIdOrLink)}`,
+        });
+      }
+      if (req.method === "GET" && /^\/public\/booking-types\/[^/]+$/.test(rest)) {
+        const bookingTypeLink = rest.split("/")[3];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl,
+          targetPath: `/v1/booking-types/${encodeURIComponent(bookingTypeLink)}`,
+        });
+      }
+      if (req.method === "POST" && rest === "/booking-types") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/booking-types" });
+      if (req.method === "GET" && rest === "/appointments") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments" });
+      if (req.method === "POST" && rest === "/appointments") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments" });
+      if (req.method === "POST" && rest === "/appointments/user") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: "/v1/appointments/public" });
+      if (req.method === "GET" && rest === "/available-slots") return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: `/v1/appointments/available-slots?${new URLSearchParams(req.query as any).toString()}` });
+      if (req.method === "DELETE" && rest.startsWith("/appointments/")) {
+        const id = rest.split("/").pop();
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.bookingServiceBaseUrl, targetPath: `/v1/appointments/${id}` });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "booking-types & appointments" });
     }
+
 
     if (module === "scoring") {
       if (req.method === "GET" && (rest === "/models" || rest === "/hot-leads")) {
@@ -224,24 +720,24 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = rest === "/models"
           ? "/api/v1/scoring/models"
           : `/api/v1/scoring/leads/hot${query ? `?${query}` : ""}`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       if (req.method === "POST" && rest === "/models") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/models" });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: "/api/v1/scoring/models" });
       }
 
       if (req.method === "POST" && rest === "/calculate") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/calculate" });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: "/api/v1/scoring/calculate" });
       }
 
       if (req.method === "POST" && rest === "/sync") {
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: "/api/v1/scoring/sync" });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: "/api/v1/scoring/sync" });
       }
 
       if (req.method === "POST" && rest.startsWith("/sync/contacts/")) {
         const contactId = rest.split("/").pop();
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath: `/api/v1/scoring/sync/contacts/${contactId}` });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath: `/api/v1/scoring/sync/contacts/${contactId}` });
       }
 
       if (req.method === "GET" && rest.startsWith("/contacts/") && rest.endsWith("/score")) {
@@ -250,7 +746,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
           : `/api/v1/scoring/contacts/${contactId}/score`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       return notImplemented(res, {
@@ -275,7 +771,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/leads/hot?${query}`
           : "/api/v1/scoring/leads/hot";
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       if (req.method === "GET" && rest.startsWith("/score/")) {
@@ -284,7 +780,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const targetPath = query
           ? `/api/v1/scoring/contacts/${contactId}/score?${query}`
           : `/api/v1/scoring/contacts/${contactId}/score`;
-        return proxyTo(req, res, { baseUrl: "http://scoring-service:7180", targetPath });
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.scoringServiceBaseUrl, targetPath });
       }
 
       return notImplemented(res, {
@@ -296,33 +792,590 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "finance-category") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-category${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/finance-category${rest}`) });
     }
 
     if (module === "finance-dashboard") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-dashboard${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/finance-dashboard${rest}`) });
     }
 
     if (module === "finance-kanban") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/finance-kanban${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/finance-kanban${rest}`) });
     }
 
     if (module === "super-admin-finance") {
-      return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/super-admin-finance${rest}`) });
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.financeServiceBaseUrl, targetPath: withQuery(req, `/api/super-admin-finance${rest}`) });
+    }
+
+    if (module === "sales-dashboard") {
+      const magentoOrdersUrl = toAbsoluteUrl(
+        API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
+        "/api/v1/magento/orders?pageSize=100&currentPage=1"
+      );
+      const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
+      const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
+      const normalizeSalesStage = (rawStage: unknown): string => {
+        const s = String(rawStage ?? "").toLowerCase();
+        if (!s) return "new";
+        if (s.includes("qual")) return "qualified";
+        if (s.includes("prop") || s.includes("quote")) return "proposal";
+        if (s.includes("nego")) return "negotiation";
+        if (s.includes("won")) return "won";
+        if (s.includes("lost")) return "lost";
+        if (s.includes("new")) return "new";
+        return "new";
+      };
+
+      if (req.method === "GET" && rest === "/summary") {
+        const [magentoRes, odooRes, crmRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooCrmUrl),
+        ]);
+
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const magentoRevenue = magentoItems.reduce((sum: number, order: any) => sum + Number(order?.grand_total ?? 0), 0);
+        const odooRevenue = odooItems.reduce((sum: number, order: any) => sum + Number(order?.amount_total ?? 0), 0);
+
+        const totalOrders = magentoItems.length + odooItems.length;
+        const totalRevenue = magentoRevenue + odooRevenue;
+        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+        const hotLeads = crmItems.filter((lead: any) => Number(lead?.probability ?? 0) >= 70).length;
+        const opportunities = crmItems.length;
+
+        return res.json({
+          data: {
+            totalOrders,
+            totalRevenue,
+            avgOrderValue,
+            hotLeads,
+            opportunities,
+            sources: {
+              magentoOrders: magentoItems.length,
+              odooOrders: odooItems.length,
+            },
+            upstream: {
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/orders") {
+        const [magentoRes, odooRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+        ]);
+
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+
+        const normalizedMagento = magentoItems.map((order: any) => ({
+          id: String(order?.entity_id ?? order?.increment_id ?? ""),
+          ref: String(order?.increment_id ?? order?.entity_id ?? ""),
+          customer: String(order?.customer_firstname && order?.customer_lastname
+            ? `${order.customer_firstname} ${order.customer_lastname}`
+            : order?.customer_email ?? "Magento Customer"),
+          amount: Number(order?.grand_total ?? 0),
+          status: String(order?.status ?? "unknown"),
+          date: String(order?.created_at ?? ""),
+          source: "magento",
+        }));
+
+        const normalizedOdoo = odooItems.map((order: any) => ({
+          id: String(order?.id ?? ""),
+          ref: String(order?.name ?? order?.id ?? ""),
+          customer: String(Array.isArray(order?.partner_id) ? order.partner_id[1] : "Odoo Customer"),
+          amount: Number(order?.amount_total ?? 0),
+          status: String(order?.state ?? "unknown"),
+          date: String(order?.date_order ?? ""),
+          source: "odoo",
+        }));
+
+        const rows = [...normalizedMagento, ...normalizedOdoo]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/leads") {
+        const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+        const rows = crmItems.map((lead: any) => ({
+          id: String(lead?.id ?? ""),
+          name: String(lead?.name ?? "Unnamed lead"),
+          stage: String(Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "Unstaged"),
+          priority: Number(lead?.probability ?? 0) >= 70 ? "high" : "normal",
+          expectedRevenue: Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0),
+          type: String(lead?.type ?? "opportunity"),
+          email: String(lead?.email_from ?? ""),
+          phone: String(lead?.phone ?? ""),
+        }));
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/opportunities") {
+        const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const rows = crmItems.map((lead: any) => {
+          const stageLabel = Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "";
+          const stage = normalizeSalesStage(stageLabel);
+          const source = String(lead?.type ?? "").toLowerCase() === "lead" ? "manual" : "odoo";
+          const nextActivityTitle = String(lead?.activity_summary ?? "").trim();
+          const nextActivityDueDate = String(lead?.activity_date_deadline ?? "").trim();
+
+          return {
+            id: String(lead?.id ?? ""),
+            name: String(lead?.name ?? "Untitled opportunity"),
+            customerName: String(Array.isArray(lead?.partner_id) ? lead.partner_id[1] : ""),
+            email: String(lead?.email_from ?? ""),
+            phone: String(lead?.phone ?? ""),
+            stage,
+            probability: Number(lead?.probability ?? 0),
+            expectedRevenue: Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0),
+            recurringRevenue: Number(lead?.recurring_revenue_monthly ?? 0) || undefined,
+            assignedTo: String(Array.isArray(lead?.user_id) ? lead.user_id[1] : ""),
+            priority: Number(lead?.priority ?? 0) >= 2 ? "high" : Number(lead?.priority ?? 0) >= 1 ? "medium" : "low",
+            source,
+            expectedCloseDate: String(lead?.date_deadline ?? ""),
+            createdAt: String(lead?.create_date ?? ""),
+            updatedAt: String(lead?.write_date ?? ""),
+            nextActivity: nextActivityTitle || nextActivityDueDate ? {
+              id: `lead-${String(lead?.id ?? "")}-next-activity`,
+              type: String(Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo").toLowerCase(),
+              title: nextActivityTitle || "Follow-up",
+              dueDate: nextActivityDueDate || undefined,
+              overdue: Boolean(nextActivityDueDate && new Date(nextActivityDueDate).getTime() < Date.now()),
+            } : undefined,
+          };
+        });
+
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/activities") {
+        const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const rows = crmItems
+          .filter((lead: any) => String(lead?.activity_summary ?? "").trim() || String(lead?.activity_date_deadline ?? "").trim())
+          .map((lead: any) => {
+            const activityType = String(Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo").toLowerCase();
+            const dueDate = String(lead?.activity_date_deadline ?? "").trim();
+            const isDone = String(lead?.activity_state ?? "").toLowerCase() === "done";
+            return {
+              id: `lead-${String(lead?.id ?? "")}-activity`,
+              opportunityId: String(lead?.id ?? ""),
+              type: activityType.includes("mail")
+                ? "email"
+                : activityType.includes("call")
+                  ? "call"
+                  : activityType.includes("meet")
+                    ? "meeting"
+                    : "todo",
+              title: String(lead?.activity_summary ?? "Follow-up"),
+              dueDate: dueDate || undefined,
+              completed: isDone,
+              createdAt: String(lead?.create_date ?? ""),
+            };
+          });
+
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/analytics") {
+        const [magentoRes, odooRes, crmRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooCrmUrl),
+        ]);
+
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const allOrders = [
+          ...magentoItems.map((order: any) => ({
+            amount: Number(order?.grand_total ?? 0),
+            date: String(order?.created_at ?? ""),
+            source: "magento",
+          })),
+          ...odooItems.map((order: any) => ({
+            amount: Number(order?.amount_total ?? 0),
+            date: String(order?.date_order ?? ""),
+            source: "odoo",
+          })),
+        ].filter((item) => Number.isFinite(item.amount));
+
+        const revenueByMonth = new Map<string, number>();
+        allOrders.forEach((order) => {
+          const d = order.date ? new Date(order.date) : null;
+          if (!d || Number.isNaN(d.getTime())) return;
+          const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+          revenueByMonth.set(key, (revenueByMonth.get(key) ?? 0) + order.amount);
+        });
+        const revenueCategories = Array.from(revenueByMonth.keys()).sort();
+        const revenueValues = revenueCategories.map((k) => Number(revenueByMonth.get(k)?.toFixed(2) ?? 0));
+
+        const stageBuckets = new Map<string, { value: number; count: number }>();
+        crmItems.forEach((lead: any) => {
+          const stageLabel = Array.isArray(lead?.stage_id) ? String(lead.stage_id[1] ?? "") : "";
+          const stage = normalizeSalesStage(stageLabel);
+          const value = Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0);
+          const current = stageBuckets.get(stage) ?? { value: 0, count: 0 };
+          current.value += Number.isFinite(value) ? value : 0;
+          current.count += 1;
+          stageBuckets.set(stage, current);
+        });
+        const stageOrder = ["new", "qualified", "proposal", "negotiation", "won", "lost"];
+        const pipelineByStage = stageOrder
+          .filter((stage) => stageBuckets.has(stage))
+          .map((stage) => {
+            const bucket = stageBuckets.get(stage)!;
+            return { stage, value: Number(bucket.value.toFixed(2)), count: bucket.count };
+          });
+
+        const leadsCount = crmItems.filter((lead: any) => String(lead?.type ?? "").toLowerCase() === "lead").length;
+        const opportunitiesCount = crmItems.length;
+        const ordersCount = allOrders.length;
+
+        const sourceBreakdown = [
+          { source: "magento", value: magentoItems.length },
+          { source: "odoo", value: odooItems.length },
+        ];
+
+        const wonCount = pipelineByStage.find((item) => item.stage === "won")?.count ?? 0;
+        const lostCount = pipelineByStage.find((item) => item.stage === "lost")?.count ?? 0;
+
+        return res.json({
+          data: {
+            revenueTrend: {
+              categories: revenueCategories,
+              series: [{ name: "Revenue", data: revenueValues }],
+            },
+            pipelineByStage,
+            funnel: [
+              { label: "Leads", value: leadsCount },
+              { label: "Opportunities", value: opportunitiesCount },
+              { label: "Orders", value: ordersCount },
+            ],
+            sourceBreakdown,
+            winLoss: [
+              { label: "Won", value: wonCount },
+              { label: "Lost", value: lostCount },
+            ],
+          },
+          meta: {
+            upstream: {
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: GET /summary, GET /orders, GET /leads, GET /opportunities, GET /activities, GET /analytics",
+      });
+    }
+
+    if (module === "dashboard") {
+      const range = String(req.query.range ?? "30d");
+      const monthsByRange: Record<string, number> = { "7d": 1, "30d": 1, "90d": 3, "180d": 6 };
+      const months = monthsByRange[range] ?? 1;
+
+      const magentoOrdersUrl = toAbsoluteUrl(
+        API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
+        "/api/v1/magento/orders?pageSize=100&currentPage=1"
+      );
+      const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
+      const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
+      const contactsAnalyticsUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/contacts/analytics");
+      const bookingsUrl = toAbsoluteUrl(API_ROUTER_CONFIG.bookingServiceBaseUrl, "/v1/appointments");
+
+      if (req.method === "GET" && rest === "/overview") {
+        const [billingSummaryRes, contactsAnalyticsRes, magentoRes, odooRes, crmRes, bookingsRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
+          fetchUpstreamJsonSafe(req, contactsAnalyticsUrl),
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooCrmUrl),
+          fetchUpstreamJsonSafe(req, bookingsUrl),
+        ]);
+
+        const invoices = Array.isArray(billingSummaryRes.data?.data) ? billingSummaryRes.data.data : [];
+        const contactsAnalytics = contactsAnalyticsRes.data ?? {};
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+        const bookings = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+        const totals = invoiceTotals(invoices);
+        const overdueCount = invoices.filter((inv: any) => {
+          const dueDate = String(inv?.invoice_date_due ?? "");
+          return dueDate && toNum(inv?.amount_residual) > 0 && new Date(dueDate).getTime() < Date.now();
+        }).length;
+        const totalRevenue = magentoItems.reduce((sum: number, order: any) => sum + Number(order?.grand_total ?? 0), 0)
+          + odooItems.reduce((sum: number, order: any) => sum + Number(order?.amount_total ?? 0), 0);
+
+        return res.json({
+          data: {
+            range,
+            kpis: {
+              contactsTotal: Number(contactsAnalytics?.totalContacts ?? 0),
+              leadsTotal: crmItems.filter((lead: any) => Number(lead?.probability ?? 0) >= 70).length,
+              opportunitiesTotal: crmItems.length,
+              revenueTotal: Number(totals.totalInvoiced ?? totalRevenue),
+              outstandingTotal: Number(totals.totalOutstanding ?? 0),
+              orderCount: magentoItems.length + odooItems.length,
+              bookingCount: bookings.length,
+              overdueCount,
+            },
+            sourceStatus: {
+              odooContacts: { ok: contactsAnalyticsRes.ok, error: contactsAnalyticsRes.error },
+              odooBilling: { ok: billingSummaryRes.ok, error: billingSummaryRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              bookings: { ok: bookingsRes.ok, error: bookingsRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/graphs") {
+        const metric = String(req.query.metric ?? "revenue");
+        if (metric === "revenue") {
+          const invoices = await fetchAllOdooInvoicesForGraph(req, { months, maxPages: 20 });
+          const monthKeys: string[] = [];
+          const cursor = new Date();
+          cursor.setDate(1);
+          for (let i = months - 1; i >= 0; i -= 1) {
+            const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
+            monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+          }
+          const monthly = monthKeys.map((key) => {
+            const items = invoices.filter((inv: any) => {
+              const rawDate = inv?.invoice_date || inv?.create_date || inv?.invoice_date_due;
+              if (!rawDate) return false;
+              const d = new Date(rawDate);
+              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` === key;
+            });
+            const invoiced = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_total), 0);
+            const outstanding = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_residual), 0);
+            const paid = Math.max(0, invoiced - outstanding);
+            return { key, invoiced, paid, outstanding, count: items.length };
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: monthKeys,
+              series: [
+                { name: "Invoiced", data: monthly.map((m) => m.invoiced) },
+                { name: "Paid", data: monthly.map((m) => m.paid) },
+                { name: "Outstanding", data: monthly.map((m) => m.outstanding) },
+              ],
+            },
+          });
+        }
+
+        if (metric === "contacts") {
+          const contactsAnalytics = await fetchUpstreamJsonSafe(req, contactsAnalyticsUrl);
+          const monthly = Array.isArray(contactsAnalytics.data?.monthlyCreated) ? contactsAnalytics.data.monthlyCreated : [];
+          return res.json({
+            data: {
+              metric,
+              categories: monthly.map((item: any) => item.month),
+              series: [{ name: "Contacts", data: monthly.map((item: any) => Number(item.count ?? 0)) }],
+              meta: { upstream: { odooContacts: { ok: contactsAnalytics.ok, error: contactsAnalytics.error } } },
+            },
+          });
+        }
+
+        if (metric === "orders") {
+          const [magentoRes, odooRes] = await Promise.all([
+            fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+            fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          ]);
+          const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+          const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+          const bucket = new Map<string, number>();
+          [...magentoItems, ...odooItems].forEach((order: any) => {
+            const status = String(order?.status ?? order?.state ?? "unknown").toLowerCase();
+            bucket.set(status, (bucket.get(status) ?? 0) + 1);
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: Array.from(bucket.keys()),
+              series: [{ name: "Orders", data: Array.from(bucket.values()) }],
+            },
+          });
+        }
+
+        if (metric === "pipeline") {
+          const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+          const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+          const bucket = new Map<string, number>();
+          crmItems.forEach((lead: any) => {
+            const stage = String(Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "Unstaged");
+            bucket.set(stage, (bucket.get(stage) ?? 0) + 1);
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: Array.from(bucket.keys()),
+              series: [{ name: "Pipeline", data: Array.from(bucket.values()) }],
+            },
+          });
+        }
+
+        if (metric === "bookings") {
+          const bookingsRes = await fetchUpstreamJsonSafe(req, bookingsUrl);
+          const bookings = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+          const bucket = new Map<string, number>();
+          bookings.forEach((b: any) => {
+            const raw = b?.startTime;
+            if (!raw) return;
+            const d = new Date(raw);
+            const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            bucket.set(key, (bucket.get(key) ?? 0) + 1);
+          });
+          return res.json({
+            data: {
+              metric,
+              categories: Array.from(bucket.keys()),
+              series: [{ name: "Bookings", data: Array.from(bucket.values()) }],
+            },
+          });
+        }
+
+        return res.status(400).json({ message: "Unsupported graph metric." });
+      }
+
+      if (req.method === "GET" && rest === "/activity") {
+        const limit = Math.max(1, Math.min(50, Number(req.query.limit ?? 12)));
+        const [contactsRes, magentoRes, invoicesRes, bookingsRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/contacts?page=1&pageSize=30")),
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=30")),
+          fetchUpstreamJsonSafe(req, bookingsUrl),
+        ]);
+        const items: any[] = [];
+        (Array.isArray(contactsRes.data?.data) ? contactsRes.data.data : []).forEach((c: any) => {
+          items.push({ id: `contact-${c.id}`, type: "contact", title: `New contact: ${c.name ?? "Contact"}`, subtitle: c.email ?? c.phone ?? "", timestamp: c.create_date || c.createdAt || null });
+        });
+        (Array.isArray(invoicesRes.data?.data) ? invoicesRes.data.data : []).forEach((inv: any) => {
+          items.push({ id: `invoice-${inv.id}`, type: "invoice", title: `Invoice ${inv.name ?? inv.id}`, subtitle: `${toNum(inv.amount_total).toFixed(2)} • ${inv.state ?? "draft"}`, timestamp: inv.create_date || inv.invoice_date || null });
+        });
+        (Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : []).forEach((order: any) => {
+          items.push({ id: `order-${order.entity_id ?? order.increment_id}`, type: "order", title: `Order ${order.increment_id ?? order.entity_id}`, subtitle: order.customer_email ?? "", timestamp: order.created_at || null });
+        });
+        (Array.isArray(bookingsRes.data) ? bookingsRes.data : []).forEach((b: any) => {
+          items.push({ id: `booking-${b.id}`, type: "booking", title: `Appointment ${b.status ?? "scheduled"}`, subtitle: b.email ?? b.name ?? "", timestamp: b.createdAt || b.startTime || null });
+        });
+        const rows = items
+          .filter((i) => i.timestamp)
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, limit);
+        return res.json({ data: rows });
+      }
+
+      if (req.method === "GET" && rest === "/attention") {
+        const [billingSummaryRes, reconciliationRes, bookingsRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
+          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
+          fetchUpstreamJsonSafe(req, bookingsUrl),
+        ]);
+        const invoices = Array.isArray(billingSummaryRes.data?.data) ? billingSummaryRes.data.data : [];
+        const overdueCount = invoices.filter((inv: any) => {
+          const dueDate = String(inv?.invoice_date_due ?? "");
+          return dueDate && toNum(inv?.amount_residual) > 0 && new Date(dueDate).getTime() < Date.now();
+        }).length;
+        const bookings = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+        const reconciliationInvoices = Array.isArray(reconciliationRes.data?.data) ? reconciliationRes.data.data : [];
+        const unmatchedCount = reconciliationInvoices.filter((inv: any) => !inv?.invoice_origin && !inv?.ref).length;
+        return res.json({
+          data: [
+            { id: "overdue", severity: overdueCount > 0 ? "error" : "success", title: "Overdue invoices", count: overdueCount, actionUrl: "/dashboard/billing/" },
+            { id: "unmatched", severity: unmatchedCount > 0 ? "warning" : "success", title: "Unmatched invoice/order links", count: unmatchedCount, actionUrl: "/dashboard/billing/?view=graph" },
+            { id: "bookings", severity: "info", title: "Upcoming appointments", count: bookings.length, actionUrl: "/dashboard/calendar/" },
+          ],
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: GET /overview, GET /graphs, GET /activity, GET /attention",
+      });
     }
 
     // Fallback: proxy to legacy monolith
     const path = `/api/${module}${rest}`;
     logger.info({ module, path }, "Proxying unmigrated route to legacy monolith");
-    return proxyTo(req, res, { baseUrl: "http://monolith:5000", targetPath: path });
+    return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.monolithBaseUrl, targetPath: path });
   } catch (err) {
     logger.error({ err, module, rest }, "api-router-service failed");
     res.status(502).json({ message: "Upstream error", module, path: rest });
   }
 }
 
-app.all("/api/:module", handleApiCompat);
-app.all("/api/:module/*", handleApiCompat);
+app.all("/api/:module", (req, res) => {
+  void handleApiCompat(req, res).catch((err) => {
+    logger.error({ err, path: req.path }, "Unhandled API router error");
+    if (!res.headersSent) {
+      res.status(502).json({ message: "Upstream error", module: req.params.module, path: req.path });
+    }
+  });
+});
+app.all("/api/:module/*", (req, res) => {
+  void handleApiCompat(req, res).catch((err) => {
+    logger.error({ err, path: req.path }, "Unhandled API router error");
+    if (!res.headersSent) {
+      res.status(502).json({ message: "Upstream error", module: req.params.module, path: req.path });
+    }
+  });
+});
 
 const port = Number(process.env.PORT || 7001);
 app.listen(port, "0.0.0.0", () => logger.info({ port }, "api-router-service listening (TS)"));

@@ -4,22 +4,24 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
-import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
 
-import { Iconify } from 'src/components/iconify';
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { Iconify } from 'src/components/iconify';
+
 // ----------------------------------------------------------------------
+
+import { communityService } from 'src/services/community-service';
 
 import {
   CommunityFeed,
@@ -28,7 +30,6 @@ import {
   CommunitySettings,
   CommunityMessenger,
 } from './community-workspace-sections';
-import { communityService } from 'src/services/community-service';
 
 type Props = {
   tab?: string;

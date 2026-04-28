@@ -12,13 +12,25 @@ export class OrganizationRepository {
     async countMemberships(orgId) {
         return db.organizationMembership.count({ where: { organizationId: orgId } });
     }
+    async countLocations(orgId) {
+        return db.location.count({ where: { organizationId: orgId } });
+    }
 }
 export class LocationRepository {
     async findMany(orgId) {
         return db.location.findMany({ where: { organizationId: orgId }, orderBy: { name: 'asc' } });
     }
+    async findById(orgId, id) {
+        return db.location.findFirst({ where: { id, organizationId: orgId } });
+    }
     async create(data) {
         return db.location.create({ data });
+    }
+    async update(id, data) {
+        return db.location.update({ where: { id }, data });
+    }
+    async delete(id) {
+        return db.location.delete({ where: { id } });
     }
 }
 export class OnboardingRepository {
@@ -58,6 +70,11 @@ export class MembershipRepository {
                 ...data,
             },
             update: data,
+        });
+    }
+    async delete(orgId, userId) {
+        return db.organizationMembership.delete({
+            where: { organizationId_userId: { organizationId: orgId, userId } },
         });
     }
 }

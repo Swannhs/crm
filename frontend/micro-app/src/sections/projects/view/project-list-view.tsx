@@ -12,6 +12,7 @@ import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import TableRow from '@mui/material/TableRow';
+import Skeleton from '@mui/material/Skeleton';
 import TableBody from '@mui/material/TableBody';
 import TextField from '@mui/material/TextField';
 import TableCell from '@mui/material/TableCell';
@@ -24,13 +25,15 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import TableContainer from '@mui/material/TableContainer';
 import InputAdornment from '@mui/material/InputAdornment';
-import CircularProgress from '@mui/material/CircularProgress';
 
-import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { projectService } from 'src/services/project-service';
+
+import { useBoolean } from 'src/hooks/use-boolean';
+
 import { DashboardContent } from 'src/layouts/dashboard';
+import { projectService } from 'src/services/project-service';
+
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { Form, RHFTextField } from 'src/components/hook-form';
@@ -134,11 +137,15 @@ export function ProjectListView() {
 
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 10 }}>
-                      <CircularProgress />
-                    </TableCell>
-                  </TableRow>
+                  [...Array(5)].map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell><Skeleton variant="text" width="60%" /></TableCell>
+                      <TableCell><Skeleton variant="text" width="80%" /></TableCell>
+                      <TableCell><Skeleton variant="text" width="40%" /></TableCell>
+                      <TableCell><Skeleton variant="text" width="40%" /></TableCell>
+                      <TableCell align="right"><Skeleton variant="circular" width={32} height={32} /></TableCell>
+                    </TableRow>
+                  ))
                 ) : (
                   <>
                     {projects.map((row: any) => (

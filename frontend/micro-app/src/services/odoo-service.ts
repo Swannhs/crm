@@ -1,18 +1,18 @@
-import axios from 'src/utils/axios';
-
 import type {
+  OdooLead,
+  OdooContact,
+  OdooInvoice,
+  OdooProduct,
+  OdooInventory,
+  OdooListParams,
+  OdooSalesOrder,
+  OdooSyncResult,
+  OdooSyncOptions,
   OdooConnectInput,
   OdooConnectionStatus,
-  OdooContact,
-  OdooInventory,
-  OdooInvoice,
-  OdooLead,
-  OdooListParams,
-  OdooProduct,
-  OdooSalesOrder,
-  OdooSyncOptions,
-  OdooSyncResult,
 } from 'src/types/odoo';
+
+import axios from 'src/utils/axios';
 
 const ODOO_API_BASE = '/api/odoo';
 

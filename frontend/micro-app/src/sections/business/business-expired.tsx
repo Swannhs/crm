@@ -3,6 +3,7 @@
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import { Button } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
@@ -15,6 +16,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -116,5 +118,3 @@ export function BusinessProgression() {
     </Grid>
   );
 }
-
-import { Button } from '@mui/material';

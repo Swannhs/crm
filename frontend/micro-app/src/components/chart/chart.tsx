@@ -1,8 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+
 import Box, { BoxProps } from '@mui/material/Box';
-import { styled } from '@mui/material/styles';
+import { alpha , styled } from '@mui/material/styles';
 
 // ----------------------------------------------------------------------
 
@@ -66,8 +67,6 @@ const StyledRoot = styled(Box)(({ theme }) => ({
     },
   },
 }));
-
-import { alpha } from '@mui/material/styles';
 
 interface Props extends BoxProps {
   type?: 'line' | 'area' | 'bar' | 'histogram' | 'pie' | 'donut' | 'rangeBar' | 'radialBar' | 'scatter' | 'bubble' | 'radar' | 'polarArea';

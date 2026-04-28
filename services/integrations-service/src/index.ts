@@ -18,7 +18,8 @@ import {
   WhatsAppController,
   TelegramController,
   WebhookController,
-  OdooController
+  OdooController,
+  ImageLibraryController
 } from "./controllers/index.js";
 import { identityMiddleware } from "./middleware/identity.js";
 import { startOmniSendConsumer } from './kafka/omni.send.consumer.js';
@@ -46,6 +47,7 @@ const whatsappCtrl = new WhatsAppController();
 const telegramCtrl = new TelegramController();
 const webhookCtrl = new WebhookController();
 const odooCtrl = new OdooController();
+const imageLibraryCtrl = new ImageLibraryController();
 
 // --- Webhooks (Public) ---
 app.get("/v1/webhook/whatsapp", (req, res) => webhookCtrl.verifyMeta(req, res));
@@ -149,6 +151,11 @@ app.post("/v1/integrations/odoo/disconnect", auth, (req, res) => odooCtrl.discon
 app.get("/v1/integrations/odoo/contacts", auth, (req, res) => odooCtrl.getContacts(cast(req), res));
 app.get("/v1/integrations/odoo/invoices", auth, (req, res) => odooCtrl.getInvoices(cast(req), res));
 app.post("/v1/integrations/odoo/sync/magento", auth, (req, res) => odooCtrl.syncMagento(cast(req), res));
+
+// --- Image Library ---
+app.get("/v1/image-library", auth, (req, res) => imageLibraryCtrl.list(cast(req), res));
+app.post("/v1/image-library", auth, (req, res) => imageLibraryCtrl.create(cast(req), res));
+app.delete("/v1/image-library/:id", auth, (req, res) => imageLibraryCtrl.remove(cast(req), res));
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "integrations-service" }));

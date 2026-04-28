@@ -12,7 +12,7 @@ export class AccountingService {
 
   constructor(private readonly odooClient: OdooClientService) {}
 
-  async findAllInvoices(paginationDto: PaginationDto) {
+  async findAllInvoices(paginationDto: PaginationDto, contactId?: number) {
     const page = paginationDto.page ?? 1;
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
@@ -20,6 +20,10 @@ export class AccountingService {
     const domain: any[] = [
       ['move_type', 'in', ['out_invoice', 'out_refund']]
     ];
+
+    if (contactId) {
+      domain.push(['partner_id', '=', contactId]);
+    }
 
     if (search) {
       domain.push(['name', 'ilike', search]);
@@ -63,5 +67,14 @@ export class AccountingService {
 
   async post(id: number) {
     return this.odooClient.execute(this.model, 'action_post', [[id]]);
+  }
+
+  async downloadInvoice(id: number) {
+    const result = await this.odooClient.execute(
+      'ir.actions.report',
+      '_render_qweb_pdf',
+      ['account.report_invoice', [id]]
+    );
+    return result[0];
   }
 }

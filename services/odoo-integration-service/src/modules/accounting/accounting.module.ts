@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AccountingController } from './accounting.controller.js';
 import { AccountingService } from './accounting.service.js';
+import { ContactsModule } from '../contacts/contacts.module.js';
 import { OdooBaseModule } from '../odoo-base/odoo-base.module.js';
 
 @Module({
-  imports: [OdooBaseModule],
+  imports: [OdooBaseModule, ContactsModule],
   controllers: [AccountingController],
   providers: [AccountingService],
 })

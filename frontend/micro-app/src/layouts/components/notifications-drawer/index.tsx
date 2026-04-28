@@ -18,13 +18,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
+import { notificationService } from 'src/services/notification-service';
+
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { varHover } from 'src/components/animate';
 import { Scrollbar } from 'src/components/scrollbar';
 import { CustomTabs } from 'src/components/custom-tabs';
-
-import { notificationService } from 'src/services/notification-service';
 
 import { NotificationItem } from './notification-item';
 
@@ -55,7 +55,7 @@ export function NotificationsDrawer({ data = [], sx, ...other }) {
     queryKey: ['notifications', currentTab],
     queryFn: () =>
       notificationService.getNotifications({
-        archived: currentTab === 'archived' ? true : false,
+        archived: currentTab === 'archived',
         unread: currentTab === 'unread',
       }),
     enabled: drawer.value,

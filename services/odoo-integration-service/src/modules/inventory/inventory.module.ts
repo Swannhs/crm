@@ -7,5 +7,6 @@ import { OdooBaseModule } from '../odoo-base/odoo-base.module.js';
   imports: [OdooBaseModule],
   controllers: [InventoryController],
   providers: [InventoryService],
+  exports: [InventoryService],
 })
 export class InventoryModule {}

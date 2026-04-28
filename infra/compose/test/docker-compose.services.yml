@@ -1,0 +1,22 @@
+include:
+  - ../prod/docker-compose.services.yml
+
+services:
+  seed-dummy-data:
+    image: node:24-alpine
+    container_name: ms-seed-dummy-data
+    working_dir: /repo
+    volumes:
+      - ../../../:/repo
+    environment:
+      SEED_PROJECTS_HOST: projects-service
+      SEED_PROJECTS_PORT: 8040
+      SEED_ORG_ID: d6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384
+      SEED_USER_ID: 85c982a3-5a2e-4fca-bdf9-0373083edf60
+      SEED_DELAY_SECONDS: 30
+    command: sh -c "sleep ${SEED_DELAY_SECONDS:-30} && node scripts/seed.cjs"
+    depends_on:
+      - projects-service
+      - frontend
+    restart: "no"
+

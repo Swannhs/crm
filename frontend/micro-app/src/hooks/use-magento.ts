@@ -1,25 +1,26 @@
+import type {
+  MagentoSyncOptions,
+  MagentoConnectInput,
+  MagentoGraphqlInput,
+  MagentoRestProxyInput,
+} from 'src/types/magento';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
   connectMagento,
-  disconnectMagento,
-  getMagentoConnection,
-  getMagentoCustomers,
-  getMagentoDownstreamHealth,
-  getMagentoOrders,
-  getMagentoProducts,
-  getMagentoStores,
-  sendMagentoGraphql,
   sendMagentoRest,
-  syncMagentoCustomers,
+  getMagentoOrders,
+  getMagentoStores,
+  disconnectMagento,
   syncMagentoOrders,
+  getMagentoProducts,
+  sendMagentoGraphql,
+  getMagentoCustomers,
+  getMagentoConnection,
+  syncMagentoCustomers,
+  getMagentoDownstreamHealth,
 } from 'src/services/magento-service';
-import type {
-  MagentoConnectInput,
-  MagentoGraphqlInput,
-  MagentoRestProxyInput,
-  MagentoSyncOptions,
-} from 'src/types/magento';
 
 export const magentoKeys = {
   all: ['magento'] as const,

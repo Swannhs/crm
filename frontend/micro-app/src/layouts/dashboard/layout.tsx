@@ -6,6 +6,8 @@ import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import { iconButtonClasses } from '@mui/material/IconButton';
 
+import { usePathname } from 'src/routes/hooks';
+
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { _contacts } from 'src/_mock';
@@ -13,6 +15,10 @@ import { varAlpha, stylesMode } from 'src/theme/styles';
 
 import { bulletColor } from 'src/components/nav-section';
 import { useSettingsContext } from 'src/components/settings';
+import { AIChatBox } from 'src/components/ai-chat/ai-chat-box';
+
+import { useAuthContext } from 'src/auth/hooks';
+import { RoleBasedGuard } from 'src/auth/guard';
 
 import { Main } from './main';
 import { NavMobile } from './nav-mobile';
@@ -24,11 +30,6 @@ import { HeaderBase } from '../core/header-base';
 import { _workspaces } from '../config-nav-workspace';
 import { LayoutSection } from '../core/layout-section';
 import { navData as dashboardNavData } from '../config-nav-dashboard';
-import { usePathname } from 'src/routes/hooks';
-import { useAuthContext } from 'src/auth/hooks';
-import { RoleBasedGuard } from 'src/auth/guard';
-
-import { AIChatBox } from 'src/components/ai-chat/ai-chat-box';
 
 // ----------------------------------------------------------------------
 

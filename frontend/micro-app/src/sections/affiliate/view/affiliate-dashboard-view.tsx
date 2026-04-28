@@ -6,14 +6,14 @@ import { useQuery } from '@tanstack/react-query';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { affiliateService } from 'src/services/affiliate-service';
+
+import { Iconify } from 'src/components/iconify';
 
 import { AffiliateEarnings } from '../affiliate-earnings';
 import { AffiliateReferrals } from '../affiliate-referrals';

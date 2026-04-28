@@ -150,3 +150,13 @@ export interface OmniMessageReceivedEvent {
   metadata?: any;
   organizationId: string;
 }
+
+export interface ImageAssetInput {
+  name: string;
+  url: string;
+  thumbnail?: string;
+  mimeType?: string;
+  size?: number;
+  category?: string;
+  tags?: string[];
+}

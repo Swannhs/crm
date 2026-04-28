@@ -1,25 +1,25 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 import TableContainer from '@mui/material/TableContainer';
 
-import { omniMarketingService } from 'src/services/omni-service';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
+import { omniMarketingService } from 'src/services/omni-service';
+
 import { Label } from 'src/components/label';
+import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
@@ -31,7 +31,7 @@ export function OmniBroadcastView() {
   });
 
   if (isLoading) {
-    return <Box sx={{ p: 5, textAlign: 'center' }}><CircularProgress /></Box>;
+    return <Box sx={{ p: 5, textAlign: 'center' }}><LinearProgress /></Box>;
   }
 
   return (

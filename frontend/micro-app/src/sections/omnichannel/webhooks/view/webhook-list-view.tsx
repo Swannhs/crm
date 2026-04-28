@@ -1,30 +1,31 @@
 'use client';
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { omniAutomationService } from 'src/services/omni-service';
+
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
+import { omniAutomationService } from 'src/services/omni-service';
+
 import { Label } from 'src/components/label';
-import { Scrollbar } from 'src/components/scrollbar';
+import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
+import { Scrollbar } from 'src/components/scrollbar';
 
 // ----------------------------------------------------------------------
 
@@ -43,7 +44,7 @@ export function WebhookListView() {
   };
 
   if (isLoading) {
-    return <Box sx={{ p: 5, textAlign: 'center' }}><CircularProgress /></Box>;
+    return <Box sx={{ p: 5, textAlign: 'center' }}><LinearProgress /></Box>;
   }
 
   return (

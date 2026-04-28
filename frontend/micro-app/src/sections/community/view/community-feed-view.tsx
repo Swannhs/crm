@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -13,8 +14,9 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { communityService } from 'src/services/community-service';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { communityService } from 'src/services/community-service';
+
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------

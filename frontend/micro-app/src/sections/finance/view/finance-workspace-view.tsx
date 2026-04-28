@@ -1,10 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
 import { z as zod } from 'zod';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -15,23 +15,30 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
 
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
-import { billingService } from 'src/services/billing-service';
-import { financeService } from 'src/services/finance-service';
-import { showToast } from 'src/components/toast';
-import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
-import { Form, RHFTextField } from 'src/components/hook-form';
+import { useRouter, useSearchParams } from 'src/routes/hooks';
+
 import { fCurrency } from 'src/utils/format-number';
+
+import { billingService } from 'src/services/billing-service';
+import { contactService } from 'src/services/contact-service';
+import { financeService } from 'src/services/finance-service';
+
+import { showToast } from 'src/components/toast';
+import { Form, RHFTextField } from 'src/components/hook-form';
+
+import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
 
 const InvoiceSchema = zod.object({
+  partner_id: zod.number().min(1, 'Customer is required'),
   customerName: zod.string().min(1, 'Customer name is required'),
-  totalAmount: zod.coerce.number().min(1, 'Amount must be positive'),
+  totalAmount: zod.coerce.number().min(0.01, 'Amount must be positive'),
   dueDate: zod.string().min(1, 'Due date is required'),
+  description: zod.string().optional(),
 });
 
 type Props = {
@@ -43,14 +50,34 @@ type Props = {
 export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Props) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preFilledCustomerId = searchParams.get('customer');
 
   const methods = useForm({
     resolver: zodResolver(InvoiceSchema),
     defaultValues: {
+      partner_id: 0,
       customerName: '',
       totalAmount: 0,
-      dueDate: '',
+      dueDate: new Date().toISOString().slice(0, 10),
+      description: 'Invoice for services',
     },
+  });
+
+  const { reset, setValue } = methods;
+
+  // Pre-fill customer logic
+  useQuery({
+    queryKey: ['pre-fill-customer', preFilledCustomerId],
+    queryFn: async () => {
+      const contact = await contactService.getContact(preFilledCustomerId!);
+      if (contact) {
+        setValue('partner_id', Number(contact.id));
+        setValue('customerName', contact.fullName);
+      }
+      return contact;
+    },
+    enabled: Boolean(preFilledCustomerId) && mode === 'new',
   });
 
   const invoiceQuery = useQuery({
@@ -79,17 +106,29 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
 
   const saveMutation = useMutation({
     mutationFn: async (values: any) => {
-      const payload = {
-        amount_cents: Math.round(values.totalAmount * 100),
-        metadata: {
-          customerName: values.customerName,
-          dueDate: values.dueDate,
-        },
-      };
-
       if (mode === 'edit' && invoiceId) {
-        return billingService.updateInvoice(invoiceId, payload);
+        const updatePayload = {
+          partner_id: values.partner_id,
+          invoice_date_due: values.dueDate,
+          narration: values.description || 'Invoice updated from dashboard',
+        };
+        return billingService.updateInvoice(invoiceId, updatePayload);
       }
+
+      // Odoo create payload
+      const payload = {
+        partner_id: values.partner_id,
+        invoice_date: new Date().toISOString().slice(0, 10),
+        invoice_date_due: values.dueDate,
+        move_type: 'out_invoice',
+        invoice_line_ids: [
+          [0, 0, {
+            name: values.description || 'Service Fee',
+            quantity: 1,
+            price_unit: values.totalAmount,
+          }]
+        ]
+      };
 
       return billingService.createInvoice(payload);
     },
@@ -109,6 +148,39 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
       });
     },
   });
+
+  const postMutation = useMutation({
+    mutationFn: async () => {
+      if (!invoiceId) throw new Error('Invoice ID is required');
+      return billingService.postInvoice(invoiceId);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['invoice', invoiceId] });
+      await queryClient.invalidateQueries({ queryKey: ['invoice-list'] });
+      showToast({ message: 'Invoice posted successfully.', severity: 'success' });
+    },
+    onError: (error: any) => {
+      showToast({ message: error?.message || 'Failed to post invoice', severity: 'error' });
+    },
+  });
+
+  const handleDownloadInvoice = async () => {
+    if (!invoiceId || !invoice) return;
+    try {
+      const blob = await billingService.downloadInvoice(invoiceId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${invoice.no || `invoice-${invoiceId}`}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showToast({ message: 'Invoice PDF downloaded.', severity: 'success' });
+    } catch (error: any) {
+      showToast({ message: error?.message || 'Failed to download invoice', severity: 'error' });
+    }
+  };
 
   const title = useMemo(() => {
     if (mode === 'new') return 'Create Invoice';
@@ -138,7 +210,7 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
   if (invoiceId && invoiceQuery.isLoading) {
     return (
       <Box sx={{ py: 8, textAlign: 'center' }}>
-        <CircularProgress />
+        <LinearProgress />
       </Box>
     );
   }
@@ -161,6 +233,20 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
             <Typography variant="body2">Status: {invoice.status || 'Draft'}</Typography>
             <Typography variant="body2">Due: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}</Typography>
             <Typography variant="h4">{fCurrency(invoice.totalDue || invoice.totalAmount || 0)}</Typography>
+            <Stack direction="row" spacing={1}>
+              {String(invoice.status || '').toLowerCase() === 'draft' && (
+                <Button
+                  variant="contained"
+                  onClick={() => postMutation.mutate()}
+                  disabled={postMutation.isPending}
+                >
+                  Post Invoice
+                </Button>
+              )}
+              <Button variant="outlined" onClick={handleDownloadInvoice}>
+                Download PDF
+              </Button>
+            </Stack>
             {(mode === 'payment' || mode === 'confirm') && (
               <Alert severity={mode === 'confirm' ? 'success' : 'info'}>
                 {mode === 'confirm'
@@ -181,13 +267,15 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
 
   if (mode === 'new' || mode === 'edit') {
     const defaultValues = {
-      customerName: invoice?.customerName || '',
-      totalAmount: invoice?.totalAmount || invoice?.totalDue || 0,
-      dueDate: invoice?.dueDate ? new Date(invoice.dueDate).toISOString().slice(0, 10) : '',
+      partner_id: invoice?.partner_id?.[0] || 0,
+      customerName: invoice?.partner_id?.[1] || invoice?.customerName || '',
+      totalAmount: invoice?.amount_total || invoice?.totalAmount || 0,
+      dueDate: invoice?.invoice_date_due || invoice?.dueDate || new Date().toISOString().slice(0, 10),
+      description: 'Invoice for services',
     };
 
     if (methods.getValues('customerName') !== defaultValues.customerName && invoice) {
-      methods.reset(defaultValues);
+      reset(defaultValues);
     }
 
     return (
@@ -199,18 +287,43 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
         <Card sx={{ p: 3 }}>
           <Form methods={methods} onSubmit={methods.handleSubmit((values) => saveMutation.mutate(values))}>
             <Stack spacing={3}>
-              <RHFTextField name="customerName" label="Customer Name" />
-              <RHFTextField name="totalAmount" label="Amount" type="number" />
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>Customer</Typography>
+                <RHFTextField name="customerName" label="Customer Name" disabled />
+                <Typography variant="caption" color="text.secondary">ID: {methods.watch('partner_id')}</Typography>
+              </Box>
+              
+              <RHFTextField name="description" label="Description / Service Name" multiline rows={2} />
+              
+              <RHFTextField name="totalAmount" label="Total Amount ($)" type="number" />
+              
               <TextField
                 type="date"
                 label="Due Date"
                 InputLabelProps={{ shrink: true }}
                 value={methods.watch('dueDate')}
-                onChange={(event) => methods.setValue('dueDate', event.target.value, { shouldValidate: true })}
+                onChange={(event) => setValue('dueDate', event.target.value, { shouldValidate: true })}
               />
               <Button type="submit" variant="contained" disabled={saveMutation.isPending}>
                 {mode === 'edit' ? 'Save Invoice' : 'Create Invoice'}
               </Button>
+              {mode === 'edit' && (
+                <Stack direction="row" spacing={1}>
+                  {String(invoice?.status || '').toLowerCase() === 'draft' && (
+                    <Button
+                      variant="soft"
+                      color="success"
+                      onClick={() => postMutation.mutate()}
+                      disabled={postMutation.isPending}
+                    >
+                      Post Invoice
+                    </Button>
+                  )}
+                  <Button variant="outlined" onClick={handleDownloadInvoice} disabled={!invoiceId}>
+                    Download PDF
+                  </Button>
+                </Stack>
+              )}
             </Stack>
           </Form>
         </Card>
@@ -231,22 +344,29 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
               {section === 'payouts' ? 'Payout History' : 'Invoices'}
             </Typography>
             <Stack spacing={2}>
-              {((section === 'payouts' ? paymentsQuery.data : invoicesQuery.data) || []).map((item: any) => (
-                <Box key={item._id || item.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral' }}>
-                  <Typography variant="subtitle2">
-                    {item.customerName || item.metadata?.customerName || item.description || item.no || item.id}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {fCurrency(item.totalDue || item.amount || (item.amountCents || item.amount_cents || 0) / 100)}
-                  </Typography>
-                </Box>
-              ))}
+              {(() => {
+                const data = section === 'payouts' ? paymentsQuery.data : (invoicesQuery.data as any)?.data;
+                const list = Array.isArray(data) ? data : [];
+                
+                if (list.length === 0 && !invoicesQuery.isLoading && !paymentsQuery.isLoading) {
+                  return (
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      No records are available for this finance route yet.
+                    </Typography>
+                  );
+                }
 
-              {!invoicesQuery.isLoading && !paymentsQuery.isLoading && ((section === 'payouts' ? paymentsQuery.data : invoicesQuery.data) || []).length === 0 && (
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  No records are available for this finance route yet.
-                </Typography>
-              )}
+                return list.map((item: any) => (
+                  <Box key={item._id || item.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral' }}>
+                    <Typography variant="subtitle2">
+                      {item.customerName || item.metadata?.customerName || item.description || item.no || item.id}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {fCurrency(item.totalDue || item.amount || (item.amountCents || item.amount_cents || 0) / 100)}
+                    </Typography>
+                  </Box>
+                ));
+              })()}
             </Stack>
           </Card>
         </Grid>
@@ -258,7 +378,7 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
                 Summary
               </Typography>
               {revenueQuery.isLoading ? (
-                <CircularProgress size={24} />
+                <LinearProgress size={24} />
               ) : (
                 <Stack spacing={1.5}>
                   <Typography variant="body2">Reported metrics are sourced from the current finance APIs.</Typography>

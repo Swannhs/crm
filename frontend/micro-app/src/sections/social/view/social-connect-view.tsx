@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
+import { Grid } from '@mui/material';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -13,12 +14,13 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
 import { socialService } from 'src/services/social-service';
 
+import { Iconify } from 'src/components/iconify';
+
+import { SocialPlanner } from '../social-planner';
 import { SocialAccounts } from '../social-accounts';
 import { SocialComposer } from '../social-composer';
-import { SocialPlanner } from '../social-planner';
 
 // ----------------------------------------------------------------------
 
@@ -113,5 +115,3 @@ function AnalyticsCard({ title, value, icon, color }: any) {
     </Card>
   );
 }
-
-import { Grid } from '@mui/material';

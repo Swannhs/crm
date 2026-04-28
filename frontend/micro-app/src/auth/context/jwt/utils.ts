@@ -1,6 +1,7 @@
 import { paths } from 'src/routes/paths';
 
 import axios from 'src/utils/axios';
+
 import { showToast } from 'src/components/toast';
 
 import { STORAGE_KEY } from './constant';

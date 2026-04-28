@@ -1,0 +1,24 @@
+FROM node:24-alpine
+
+ARG SERVICE_NAME
+ARG SERVICE_PORT
+
+ENV SERVICE_NAME=${SERVICE_NAME}
+ENV PORT=${SERVICE_PORT}
+ENV NODE_ENV=development
+
+WORKDIR /workspace/services/${SERVICE_NAME}
+
+RUN apk add --no-cache openssl libc6-compat \
+  && corepack enable
+
+EXPOSE ${SERVICE_PORT}
+
+ENV SHARED_INSTALL_TIMEOUT_SECONDS=1800
+ENV SHARED_INSTALL_STALE_SECONDS=180
+ENV SHARED_INSTALL_POLL_SECONDS=2
+
+COPY services/${SERVICE_NAME}/docker/entrypoint.dev.sh /usr/local/bin/node-service-dev-entrypoint.sh
+RUN chmod +x /usr/local/bin/node-service-dev-entrypoint.sh
+
+CMD ["/usr/local/bin/node-service-dev-entrypoint.sh"]

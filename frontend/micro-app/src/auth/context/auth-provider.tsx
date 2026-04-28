@@ -1,6 +1,7 @@
 'use client';
 
 import { CONFIG } from 'src/config-global';
+
 import { AuthProvider as JwtAuthProvider } from './jwt';
 import { AuthProvider as KeycloakAuthProvider } from './keycloak';
 

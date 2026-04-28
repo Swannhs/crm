@@ -16,6 +16,7 @@ import {
   UserIntegrationSettingsService,
   MetaIntegrationService,
   VoiceIntegrationService,
+  ImageLibraryService,
   OdooIntegrationService
 } from '../services/index.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
@@ -735,6 +736,40 @@ export class OdooController {
       return res.json({ success: true, data });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+}
+
+export class ImageLibraryController {
+  private svc = new ImageLibraryService();
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const category = req.query.category ? String(req.query.category) : undefined;
+      const limit = Number(req.query.limit || 200);
+      const data = await this.svc.list(req.identity.orgId, category, limit);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.create(req.identity.userId, req.identity.orgId, req.body);
+      return res.status(201).json({ success: true, data });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  async remove(req: AuthenticatedRequest, res: Response) {
+    try {
+      const id = getRouteParam(req.params.id);
+      const data = await this.svc.remove(req.identity.orgId, id);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
     }
   }
 }

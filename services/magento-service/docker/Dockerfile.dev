@@ -1,3 +1,36 @@
-FROM shinsenter/magento:latest
+FROM php:8.2-apache
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN sed -i 's|https://deb.debian.org|http://deb.debian.org|g; s|https://security.debian.org|http://security.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update -o Acquire::ForceIPv4=true -o Acquire::Retries=10 \
+  && apt-get install -y \
+  git \
+  unzip \
+  zip \
+  curl \
+  libicu-dev \
+  libzip-dev \
+  libxml2-dev \
+  libxslt1-dev \
+  libonig-dev \
+  libpng-dev \
+  libjpeg-dev \
+  libfreetype6-dev \
+  libcurl4-openssl-dev \
+  libssl-dev \
+  default-mysql-client \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install -j"$(nproc)" bcmath intl pdo_mysql soap xsl zip gd sockets opcache ftp \
+  && a2enmod rewrite headers expires \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
+COPY services/magento-service/docker/entrypoint.magento2.sh /usr/local/bin/entrypoint.magento2.sh
+RUN chmod +x /usr/local/bin/entrypoint.magento2.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.magento2.sh"]
+CMD ["apache2-foreground"]

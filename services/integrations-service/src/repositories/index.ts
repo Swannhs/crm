@@ -13,6 +13,8 @@ import type {
   VoiceIntegrationInput,
   WhatsAppInstanceInput,
   TelegramSessionInput
+  ,
+  ImageAssetInput
 } from '../types/index.js';
 
 export class IntegrationConnectionRepository {
@@ -351,5 +353,33 @@ export class TelegramSessionRepository {
 
   async delete(sessionId: string) {
     return db.telegramSession.delete({ where: { sessionId } });
+  }
+}
+
+export class ImageAssetRepository {
+  async create(data: ImageAssetInput & { userId: string; organizationId?: string }) {
+    return db.imageAsset.create({
+      data: {
+        ...data,
+        tags: data.tags ?? [],
+      },
+    });
+  }
+
+  async listByOrg(organizationId: string, category?: string, limit = 200) {
+    return db.imageAsset.findMany({
+      where: {
+        organizationId,
+        ...(category ? { category } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: Math.min(Math.max(limit, 1), 500),
+    });
+  }
+
+  async deleteById(id: string, organizationId: string) {
+    return db.imageAsset.deleteMany({
+      where: { id, organizationId },
+    });
   }
 }

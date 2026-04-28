@@ -290,6 +290,21 @@ exports.Prisma.TelegramSessionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ImageAssetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  name: 'name',
+  url: 'url',
+  thumbnail: 'thumbnail',
+  mimeType: 'mimeType',
+  size: 'size',
+  category: 'category',
+  tags: 'tags',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -330,7 +345,8 @@ exports.Prisma.ModelName = {
   MetaIntegration: 'MetaIntegration',
   VoiceIntegration: 'VoiceIntegration',
   WhatsAppInstance: 'WhatsAppInstance',
-  TelegramSession: 'TelegramSession'
+  TelegramSession: 'TelegramSession',
+  ImageAsset: 'ImageAsset'
 };
 
 /**
