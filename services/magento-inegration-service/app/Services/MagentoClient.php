@@ -74,14 +74,61 @@ class MagentoClient implements MagentoClientContract
      */
     public function restGet(string $path, array $query = []): array
     {
+        return $this->restRequest('get', $path, [], $query);
+    }
+
+    /**
+     * @throws ConnectionException|RuntimeException
+     */
+    public function restPost(string $path, array $payload = [], array $query = []): array
+    {
+        return $this->restRequest('post', $path, $payload, $query);
+    }
+
+    /**
+     * @throws ConnectionException|RuntimeException
+     */
+    public function restPut(string $path, array $payload = [], array $query = []): array
+    {
+        return $this->restRequest('put', $path, $payload, $query);
+    }
+
+    /**
+     * @throws ConnectionException|RuntimeException
+     */
+    public function restDelete(string $path, array $query = []): array
+    {
+        return $this->restRequest('delete', $path, [], $query);
+    }
+
+    /**
+     * @throws ConnectionException|RuntimeException
+     */
+    private function restRequest(string $method, string $path, array $payload = [], array $query = []): array
+    {
         $token = $this->getAdminToken();
         $url = "{$this->baseUrl()}{$path}";
-        $response = $this->requestWithToken($token)->get($url, $query);
+        $request = $this->requestWithToken($token);
+
+        $response = match (strtolower($method)) {
+            'get' => $request->get($url, $query),
+            'post' => $request->post($url . $this->buildQueryString($query), $payload),
+            'put' => $request->put($url . $this->buildQueryString($query), $payload),
+            'delete' => $request->delete($url, $query),
+            default => throw new RuntimeException("Unsupported Magento REST method: $method"),
+        };
 
         if ($response->status() === 401) {
             Cache::forget(self::TOKEN_CACHE_KEY);
             $token = $this->getAdminToken();
-            $response = $this->requestWithToken($token)->get($url, $query);
+            $request = $this->requestWithToken($token);
+            $response = match (strtolower($method)) {
+                'get' => $request->get($url, $query),
+                'post' => $request->post($url . $this->buildQueryString($query), $payload),
+                'put' => $request->put($url . $this->buildQueryString($query), $payload),
+                'delete' => $request->delete($url, $query),
+                default => throw new RuntimeException("Unsupported Magento REST method: $method"),
+            };
         }
 
         return $this->decodeResponse($response);
@@ -126,5 +173,14 @@ class MagentoClient implements MagentoClientContract
 
         $data = $response->json();
         return is_array($data) ? $data : ['raw' => $response->body()];
+    }
+
+    private function buildQueryString(array $query): string
+    {
+        if ($query === []) {
+            return '';
+        }
+
+        return '?' . http_build_query($query);
     }
 }

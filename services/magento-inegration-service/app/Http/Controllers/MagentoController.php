@@ -6,6 +6,7 @@ use App\Contracts\MagentoClientContract;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class MagentoController extends Controller
@@ -93,6 +94,26 @@ class MagentoController extends Controller
         }
     }
 
+    public function restGetAny(Request $request, string $path): JsonResponse
+    {
+        return $this->proxyRestAny('get', $path, [], $request->query());
+    }
+
+    public function restPostAny(Request $request, string $path): JsonResponse
+    {
+        return $this->proxyRestAny('post', $path, (array) $request->input('payload', []), $request->query());
+    }
+
+    public function restPutAny(Request $request, string $path): JsonResponse
+    {
+        return $this->proxyRestAny('put', $path, (array) $request->input('payload', []), $request->query());
+    }
+
+    public function restDeleteAny(Request $request, string $path): JsonResponse
+    {
+        return $this->proxyRestAny('delete', $path, [], $request->query());
+    }
+
     private function proxyRest(string $path, array $query): JsonResponse
     {
         try {
@@ -103,5 +124,41 @@ class MagentoController extends Controller
         } catch (RuntimeException $e) {
             return response()->json(['message' => 'Magento request failed', 'error' => $e->getMessage()], 502);
         }
+    }
+
+    private function proxyRestAny(string $method, string $path, array $payload = [], array $query = []): JsonResponse
+    {
+        $normalizedPath = $this->normalizeMagentoPath($path);
+
+        try {
+            $data = match ($method) {
+                'get' => $this->magentoClient->restGet($normalizedPath, $query),
+                'post' => $this->magentoClient->restPost($normalizedPath, $payload, $query),
+                'put' => $this->magentoClient->restPut($normalizedPath, $payload, $query),
+                'delete' => $this->magentoClient->restDelete($normalizedPath, $query),
+                default => throw new RuntimeException("Unsupported REST method: $method"),
+            };
+
+            return response()->json(['data' => $data]);
+        } catch (ConnectionException $e) {
+            return response()->json(['message' => 'Magento connection failed', 'error' => $e->getMessage()], 502);
+        } catch (RuntimeException $e) {
+            return response()->json(['message' => 'Magento request failed', 'error' => $e->getMessage()], 502);
+        }
+    }
+
+    private function normalizeMagentoPath(string $path): string
+    {
+        $trimmed = ltrim(trim($path), '/');
+
+        if ($trimmed === '') {
+            throw new RuntimeException('Magento REST path cannot be empty');
+        }
+
+        if (!Str::startsWith($trimmed, 'rest/')) {
+            return '/rest/' . $trimmed;
+        }
+
+        return '/' . $trimmed;
     }
 }
