@@ -104,15 +104,27 @@ services:
       OPENSEARCH_PORT: 9200
       ELASTICSEARCH_HOST: magento-search
       ELASTICSEARCH_PORT: 9200
+      MAGENTO_GIT_URL: ${MAGENTO_GIT_URL:-https://github.com/magento/magento2.git}
+      MAGENTO_GIT_REF: ${MAGENTO_GIT_REF:-2.4-develop}
+      MAGENTO_ADMIN_FIRSTNAME: ${MAGENTO_ADMIN_FIRSTNAME:-Admin}
+      MAGENTO_ADMIN_LASTNAME: ${MAGENTO_ADMIN_LASTNAME:-User}
+      MAGENTO_ADMIN_EMAIL: ${MAGENTO_ADMIN_EMAIL:-admin@example.com}
+      MAGENTO_BACKEND_FRONTNAME: ${MAGENTO_BACKEND_FRONTNAME:-admin}
     depends_on:
       magento-db:
         condition: service_healthy
       magento-search:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 90s
     volumes:
-      - ${MAGENTO_SOURCE_DIR:-../../../services/magento-service}:/var/www/html
+      - ${MAGENTO_SOURCE_DIR:-magento_app_data}:/var/www/html
 
 volumes:
   odoo_web_data:
   magento_search_data:
-
+  magento_app_data:

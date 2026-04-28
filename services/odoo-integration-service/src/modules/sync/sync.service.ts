@@ -4,7 +4,7 @@ import axios from 'axios';
 
 @Injectable()
 export class SyncService {
-  private readonly magentoUrl = process.env.MAGENTO_INTEGRATION_URL || 'http://ms-magento-integration-service:7190';
+  private readonly magentoUrl = process.env.MAGENTO_INTEGRATION_URL || 'http://ms-magento-inegration-service:7210/api';
 
   constructor(private readonly odooClient: OdooClientService) {}
 

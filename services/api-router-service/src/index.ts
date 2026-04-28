@@ -140,6 +140,36 @@ async function getCompatEmployeesFromOdoo(req: Request): Promise<CompatEmployeeR
   return rows.map(toCompatEmployeeRow);
 }
 
+function getForwardHeaders(req: Request) {
+  return {
+    Authorization: req.header("Authorization") ?? "",
+    "X-Org-Id": req.header("X-Org-Id") ?? "",
+    "X-User-Id": req.header("X-User-Id") ?? "",
+  };
+}
+
+async function fetchUpstreamJson(req: Request, url: string) {
+  const upstream = await fetch(url, {
+    method: "GET",
+    headers: getForwardHeaders(req),
+  });
+
+  if (!upstream.ok) {
+    throw new Error(`Upstream failed (${upstream.status}) for ${url}`);
+  }
+
+  return upstream.json();
+}
+
+async function fetchUpstreamJsonSafe(req: Request, url: string) {
+  try {
+    const data = await fetchUpstreamJson(req, url);
+    return { ok: true as const, data, error: null as string | null };
+  } catch (error: any) {
+    return { ok: false as const, data: null, error: String(error?.message ?? "Unknown upstream error") };
+  }
+}
+
 const domainRoutes: Record<string, string> = {
   "community": "http://community-service:7030",
   "community-group": "http://community-service:7030",
@@ -402,6 +432,127 @@ async function handleApiCompat(req: Request, res: Response) {
 
     if (module === "super-admin-finance") {
       return proxyTo(req, res, { baseUrl: "http://finance-service:7170", targetPath: withQuery(req, `/api/super-admin-finance${rest}`) });
+    }
+
+    if (module === "sales-dashboard") {
+      const magentoOrdersUrl = "http://magento-inegration-service:7210/api/v1/magento/orders?pageSize=100&currentPage=1";
+      const odooOrdersUrl = "http://odoo-integration-service:7200/v1/odoo/sales/orders?pageSize=100&page=1";
+      const odooCrmUrl = "http://odoo-integration-service:7200/v1/odoo/crm?pageSize=100&page=1";
+
+      if (req.method === "GET" && rest === "/summary") {
+        const [magentoRes, odooRes, crmRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooCrmUrl),
+        ]);
+
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+
+        const magentoRevenue = magentoItems.reduce((sum: number, order: any) => sum + Number(order?.grand_total ?? 0), 0);
+        const odooRevenue = odooItems.reduce((sum: number, order: any) => sum + Number(order?.amount_total ?? 0), 0);
+
+        const totalOrders = magentoItems.length + odooItems.length;
+        const totalRevenue = magentoRevenue + odooRevenue;
+        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+        const hotLeads = crmItems.filter((lead: any) => Number(lead?.probability ?? 0) >= 70).length;
+        const opportunities = crmItems.length;
+
+        return res.json({
+          data: {
+            totalOrders,
+            totalRevenue,
+            avgOrderValue,
+            hotLeads,
+            opportunities,
+            sources: {
+              magentoOrders: magentoItems.length,
+              odooOrders: odooItems.length,
+            },
+            upstream: {
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/orders") {
+        const [magentoRes, odooRes] = await Promise.all([
+          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchUpstreamJsonSafe(req, odooOrdersUrl),
+        ]);
+
+        const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
+        const odooItems = Array.isArray(odooRes.data?.data) ? odooRes.data.data : [];
+
+        const normalizedMagento = magentoItems.map((order: any) => ({
+          id: String(order?.entity_id ?? order?.increment_id ?? ""),
+          ref: String(order?.increment_id ?? order?.entity_id ?? ""),
+          customer: String(order?.customer_firstname && order?.customer_lastname
+            ? `${order.customer_firstname} ${order.customer_lastname}`
+            : order?.customer_email ?? "Magento Customer"),
+          amount: Number(order?.grand_total ?? 0),
+          status: String(order?.status ?? "unknown"),
+          date: String(order?.created_at ?? ""),
+          source: "magento",
+        }));
+
+        const normalizedOdoo = odooItems.map((order: any) => ({
+          id: String(order?.id ?? ""),
+          ref: String(order?.name ?? order?.id ?? ""),
+          customer: String(Array.isArray(order?.partner_id) ? order.partner_id[1] : "Odoo Customer"),
+          amount: Number(order?.amount_total ?? 0),
+          status: String(order?.state ?? "unknown"),
+          date: String(order?.date_order ?? ""),
+          source: "odoo",
+        }));
+
+        const rows = [...normalizedMagento, ...normalizedOdoo]
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              magento: { ok: magentoRes.ok, error: magentoRes.error },
+              odooSales: { ok: odooRes.ok, error: odooRes.error },
+            },
+          },
+        });
+      }
+
+      if (req.method === "GET" && rest === "/leads") {
+        const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+        const rows = crmItems.map((lead: any) => ({
+          id: String(lead?.id ?? ""),
+          name: String(lead?.name ?? "Unnamed lead"),
+          stage: String(Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "Unstaged"),
+          priority: Number(lead?.probability ?? 0) >= 70 ? "high" : "normal",
+          expectedRevenue: Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0),
+          type: String(lead?.type ?? "opportunity"),
+          email: String(lead?.email_from ?? ""),
+          phone: String(lead?.phone ?? ""),
+        }));
+        return res.json({
+          data: rows,
+          meta: {
+            upstream: {
+              odooCrm: { ok: crmRes.ok, error: crmRes.error },
+            },
+          },
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: GET /summary, GET /orders, GET /leads",
+      });
     }
 
     // Fallback: proxy to legacy monolith

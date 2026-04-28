@@ -1,135 +1,142 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';
+import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
-import { useTheme, alpha } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
 import { fCurrency } from 'src/utils/format-number';
 
-import { useGetDeals } from 'src/hooks/use-deals';
-
 import { Iconify } from 'src/components/iconify';
+import { useSalesLeads, useSalesOrders, useSalesSummary } from 'src/hooks/use-sales-dashboard';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
-// ----------------------------------------------------------------------
+import type { SalesLeadRow, SalesSummary, SalesOrderRow } from 'src/services/sales-dashboard-service';
 
 export function SalesWorkspaceView() {
   const [activeTab, setActiveTab] = useState('pipeline');
+  const summaryQuery = useSalesSummary();
+  const ordersQuery = useSalesOrders();
+  const leadsQuery = useSalesLeads();
 
-  const { deals, dealsLoading } = useGetDeals();
+  const loading = summaryQuery.isLoading || ordersQuery.isLoading || leadsQuery.isLoading;
+  const summary = summaryQuery.data;
+  const orders = ordersQuery.data ?? [];
+  const leads = leadsQuery.data ?? [];
 
   const TABS = [
     { value: 'pipeline', label: 'Sales Pipeline', icon: 'solar:graph-up-bold' },
     { value: 'leads', label: 'Lead Management', icon: 'solar:users-group-rounded-bold' },
     { value: 'funnels', label: 'Conversion Funnels', icon: 'solar:filters-bold' },
     { value: 'analytics', label: 'Revenue Analytics', icon: 'solar:chart-2-bold' },
-    { value: 'settings', label: 'Pipeline Settings', icon: 'solar:settings-bold' },
   ];
 
   return (
     <FeatureRouteShell
       title="Sales Orchestration"
-      description="Manage organizational sales pipelines, track lead lifecycles, and monitor revenue conversion through high-fidelity deal tracking."
+      description="Live Odoo and Magento sales operations, merged into one dashboard."
       links={[
-        { href: '#', label: 'Active Deals' },
-        { href: '#', label: 'Lead Sources' },
-        { href: '#', label: 'Conversion Reports' },
+        { href: '#', label: `Magento Orders: ${summary?.sources?.magentoOrders ?? 0}` },
+        { href: '#', label: `Odoo Orders: ${summary?.sources?.odooOrders ?? 0}` },
+        { href: '#', label: `Opportunities: ${summary?.opportunities ?? 0}` },
       ]}
       action={
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Iconify icon="solar:add-circle-bold" />}
-        >
-          New Lead
+        <Button variant="contained" color="primary" startIcon={<Iconify icon="solar:refresh-bold" />} onClick={() => {
+          summaryQuery.refetch();
+          ordersQuery.refetch();
+          leadsQuery.refetch();
+        }}>
+          Refresh Data
         </Button>
       }
     >
+      <Grid container spacing={2} sx={{ mt: 0.5 }}>
+        <KpiCard title="Total Revenue" value={fCurrency(summary?.totalRevenue ?? 0)} icon="solar:wad-of-money-bold-duotone" />
+        <KpiCard title="Total Orders" value={String(summary?.totalOrders ?? 0)} icon="solar:bag-4-bold-duotone" />
+        <KpiCard title="AOV" value={fCurrency(summary?.avgOrderValue ?? 0)} icon="solar:chart-square-bold-duotone" />
+        <KpiCard title="Hot Leads" value={String(summary?.hotLeads ?? 0)} icon="solar:fire-bold-duotone" />
+      </Grid>
+
       <Box sx={{ mt: 3 }}>
-        <Tabs
-          value={activeTab}
-          onChange={(e, v) => setActiveTab(v)}
-          sx={{ mb: 3, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}
-        >
+        <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} sx={{ mb: 3, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
           {TABS.map((tab) => (
-            <Tab 
-              key={tab.value} 
-              value={tab.value} 
-              label={tab.label} 
-              icon={<Iconify icon={tab.icon} width={20} />} 
-              iconPosition="start"
-            />
+            <Tab key={tab.value} value={tab.value} label={tab.label} icon={<Iconify icon={tab.icon} width={20} />} iconPosition="start" />
           ))}
         </Tabs>
 
-        {dealsLoading ? (
-          <PipelineSkeleton />
-        ) : (
-          <>
-            {activeTab === 'pipeline' && <SalesPipelineTab deals={deals} />}
-            {activeTab === 'leads' && <SalesLeadsTab />}
-            {activeTab === 'funnels' && <SalesFunnelsTab />}
-          </>
-        )}
+        {loading ? <PipelineSkeleton /> : null}
+        {!loading && activeTab === 'pipeline' ? <SalesPipelineTab orders={orders} /> : null}
+        {!loading && activeTab === 'leads' ? <SalesLeadsTab leads={leads} /> : null}
+        {!loading && activeTab === 'funnels' ? <SalesFunnelsTab orders={orders} leads={leads} /> : null}
+        {!loading && activeTab === 'analytics' ? <SalesAnalyticsTab summary={summary} /> : null}
       </Box>
     </FeatureRouteShell>
   );
 }
 
-// --- Tab Components ---
+function KpiCard({ title, value, icon }: { title: string; value: string; icon: string }) {
+  return (
+    <Grid item xs={12} md={3}>
+      <Card sx={{ p: 2.5 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography variant="caption" color="text.secondary">{title}</Typography>
+            <Typography variant="h5">{value}</Typography>
+          </Box>
+          <Iconify icon={icon} width={28} />
+        </Stack>
+      </Card>
+    </Grid>
+  );
+}
 
-function SalesPipelineTab({ deals }: { deals: any[] }) {
-  const STAGES = [
-    { id: 'prospect', label: 'Prospecting' },
-    { id: 'qualification', label: 'Qualification' },
-    { id: 'proposal', label: 'Proposal' },
-    { id: 'negotiation', label: 'Negotiation' },
-    { id: 'closed_won', label: 'Closed Won' },
-    { id: 'closed_lost', label: 'Closed Lost' },
-  ];
+function SalesPipelineTab({ orders }: { orders: SalesOrderRow[] }) {
+  const groups = useMemo(() => {
+    const statusMap = new Map<string, SalesOrderRow[]>();
+    orders.forEach((order) => {
+      const key = (order.status || 'unknown').toLowerCase();
+      const current = statusMap.get(key) ?? [];
+      current.push(order);
+      statusMap.set(key, current);
+    });
+    return Array.from(statusMap.entries());
+  }, [orders]);
 
   return (
     <Box sx={{ display: 'flex', gap: 3, overflowX: 'auto', pb: 3 }}>
-       {STAGES.map((stage) => {
-         const stageDeals = deals.filter((d) => d.stage === stage.id);
-         
-         return (
-            <Box key={stage.id} sx={{ minWidth: 280, width: 280, flexShrink: 0 }}>
-               <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="subtitle1">{stage.label}</Typography>
-                  <Chip label={stageDeals.length} size="small" variant="soft" />
-               </Box>
-               <Stack spacing={2}>
-                  {stageDeals.map((deal) => (
-                     <Card key={deal.id} sx={{ p: 2, cursor: 'pointer', '&:hover': { boxShadow: (theme) => theme.customShadows.z12 } }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>{deal.name}</Typography>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center">
-                           <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>
-                             {fCurrency(deal.amount)}
-                           </Typography>
-                           <Iconify 
-                             icon={deal.priority === 'high' || deal.priority === 'urgent' ? "solar:flag-bold" : "solar:flag-linear"} 
-                             width={14} 
-                             color={deal.priority === 'high' || deal.priority === 'urgent' ? "error.main" : "text.disabled"} 
-                           />
-                        </Stack>
-                     </Card>
-                  ))}
-                  <Button fullWidth variant="dashed" startIcon={<Iconify icon="solar:add-circle-bold" />}>Add Deal</Button>
-               </Stack>
-            </Box>
-         );
-       })}
+      {groups.map(([status, rows]) => (
+        <Box key={status} sx={{ minWidth: 300, width: 300, flexShrink: 0 }}>
+          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>{status}</Typography>
+            <Chip label={rows.length} size="small" variant="soft" />
+          </Box>
+          <Stack spacing={2}>
+            {rows.slice(0, 8).map((order) => (
+              <Card key={order.id} sx={{ p: 2 }}>
+                <Typography variant="subtitle2">{order.ref}</Typography>
+                <Typography variant="caption" color="text.secondary">{order.customer}</Typography>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1 }}>
+                  <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700 }}>
+                    {fCurrency(order.amount)}
+                  </Typography>
+                  <Chip size="small" label={order.source} color={order.source === 'magento' ? 'warning' : 'info'} variant="soft" />
+                </Stack>
+              </Card>
+            ))}
+          </Stack>
+        </Box>
+      ))}
     </Box>
   );
 }
@@ -137,11 +144,11 @@ function SalesPipelineTab({ deals }: { deals: any[] }) {
 function PipelineSkeleton() {
   return (
     <Box sx={{ display: 'flex', gap: 3, overflowX: 'auto', pb: 3 }}>
-      {[...Array(5)].map((_, i) => (
+      {[...Array(4)].map((_, i) => (
         <Box key={i} sx={{ minWidth: 280, width: 280, flexShrink: 0 }}>
           <Stack spacing={2}>
             <Skeleton variant="text" width="60%" height={32} />
-            {[...Array(3)].map((_, j) => (
+            {[...Array(3)].map((__, j) => (
               <Card key={j} sx={{ p: 2 }}>
                 <Skeleton variant="text" width="80%" />
                 <Skeleton variant="text" width="40%" />
@@ -154,65 +161,75 @@ function PipelineSkeleton() {
   );
 }
 
-function SalesLeadsTab() {
+function SalesLeadsTab({ leads }: { leads: SalesLeadRow[] }) {
   return (
     <Card sx={{ p: 0 }}>
-       <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Lead Directory</Typography>
-          <TextField size="small" placeholder="Search leads..." sx={{ minWidth: 240 }} />
-       </Box>
-       <Divider />
-       <Stack>
-          {[
-            { name: 'John Smith', source: 'Website Form', status: 'Warm', date: '2 hours ago' },
-            { name: 'Sarah Wilson', source: 'Facebook Ads', status: 'Hot', date: '5 hours ago' },
-          ].map((lead, i) => (
-             <Box key={i} sx={{ p: 2.5, borderBottom: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ mr: 2 }}>{lead.name[0]}</Avatar>
-                <Box sx={{ flexGrow: 1 }}>
-                   <Typography variant="subtitle2">{lead.name}</Typography>
-                   <Typography variant="caption" color="text.secondary">Source: {lead.source} • {lead.date}</Typography>
-                </Box>
-                <Chip label={lead.status} size="small" color={lead.status === 'Hot' ? 'error' : 'warning'} variant="soft" />
-                <Button variant="soft" size="small" sx={{ ml: 2 }}>Nurture</Button>
-             </Box>
-          ))}
-       </Stack>
+      <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6">Lead Directory (Odoo CRM)</Typography>
+        <TextField size="small" placeholder="Search leads..." sx={{ minWidth: 240 }} />
+      </Box>
+      <Divider />
+      <Stack>
+        {leads.slice(0, 12).map((lead) => (
+          <Box key={lead.id} sx={{ p: 2.5, borderBottom: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center' }}>
+            <Avatar sx={{ mr: 2 }}>{lead.name[0]}</Avatar>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="subtitle2">{lead.name}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Stage: {lead.stage} • Expected: {fCurrency(lead.expectedRevenue)}
+              </Typography>
+            </Box>
+            <Chip label={lead.type} size="small" color={lead.type === 'opportunity' ? 'success' : 'default'} variant="soft" />
+          </Box>
+        ))}
+      </Stack>
     </Card>
   );
 }
 
-function SalesFunnelsTab() {
+function SalesFunnelsTab({ orders, leads }: { orders: SalesOrderRow[]; leads: SalesLeadRow[] }) {
+  const opportunities = leads.filter((lead) => lead.type === 'opportunity').length;
+  const converted = orders.length;
+  const conversionRate = opportunities > 0 ? (converted / opportunities) * 100 : 0;
+
   return (
     <Grid container spacing={3}>
-       <Grid item xs={12} md={8}>
-          <Card sx={{ p: 4, height: 400, bgcolor: 'background.neutral', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-             <Box sx={{ textAlign: 'center' }}>
-                <Iconify icon="solar:filters-bold-duotone" width={64} color="primary.main" sx={{ mb: 2 }} />
-                <Typography variant="h5">Visual Conversion Funnel</Typography>
-                <Typography variant="body2" color="text.secondary">Orchestrating high-fidelity data visualization for lead-to-deal conversion...</Typography>
-             </Box>
-          </Card>
-       </Grid>
-       <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3 }}>
-             <Typography variant="h6" sx={{ mb: 2 }}>Funnel Metrics</Typography>
-             <Stack spacing={2}>
-                <Box>
-                   <Typography variant="caption" color="text.secondary">Total Conversions</Typography>
-                   <Typography variant="h4">12.5%</Typography>
-                </Box>
-                <Box>
-                   <Typography variant="caption" color="text.secondary">Average Deal Size</Typography>
-                   <Typography variant="h4">$8,420</Typography>
-                </Box>
-             </Stack>
-          </Card>
-       </Grid>
+      <Grid item xs={12} md={8}>
+        <Card sx={{ p: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>Conversion Snapshot</Typography>
+          <Stack spacing={2}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">Leads + Opportunities</Typography>
+              <Typography variant="h4">{leads.length}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="text.secondary">Converted Orders (Magento + Odoo)</Typography>
+              <Typography variant="h4">{orders.length}</Typography>
+            </Box>
+          </Stack>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={4}>
+        <Card sx={{ p: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>Funnel Metrics</Typography>
+          <Typography variant="caption" color="text.secondary">Opportunity to Order</Typography>
+          <Typography variant="h3">{conversionRate.toFixed(1)}%</Typography>
+        </Card>
+      </Grid>
     </Grid>
   );
 }
 
-import Chip from '@mui/material/Chip';
-import TextField from '@mui/material/TextField';
-import Avatar from '@mui/material/Avatar';
+function SalesAnalyticsTab({ summary }: { summary: SalesSummary | undefined }) {
+  return (
+    <Card sx={{ p: 3 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>Revenue Analytics</Typography>
+      <Stack spacing={1}>
+        <Typography variant="body2">Total Revenue: {fCurrency(summary?.totalRevenue ?? 0)}</Typography>
+        <Typography variant="body2">Average Order Value: {fCurrency(summary?.avgOrderValue ?? 0)}</Typography>
+        <Typography variant="body2">Magento Orders: {summary?.sources?.magentoOrders ?? 0}</Typography>
+        <Typography variant="body2">Odoo Orders: {summary?.sources?.odooOrders ?? 0}</Typography>
+      </Stack>
+    </Card>
+  );
+}

@@ -28,7 +28,7 @@ The CRM platform does not implement a separate shop-service for these responsibi
 
 CRM integrates with Magento through:
 
-- `services/magento-integration-service`
+- `services/magento-inegration-service`
 - Nginx route: `/api/magento/*`
 - Magento REST/GraphQL APIs
 
@@ -114,8 +114,9 @@ The Magento integration service will default to internal base URL `http://magent
 
 Magento runs from source code mounted to:
 
-- default: `<repo>/services/magento-service` -> `/var/www/html` in container
-- override host source path with `MAGENTO_SOURCE_DIR`
+- default: Docker named volume `magento_app_data` -> `/var/www/html`
+- on first boot, container clones `https://github.com/magento/magento2` and installs Magento automatically
+- override host source path with `MAGENTO_SOURCE_DIR` if you want to mount your own checkout
 
 Example override:
 
@@ -123,7 +124,16 @@ Example override:
 MAGENTO_SOURCE_DIR=../../my-magento-src ./manage.sh dev up
 ```
 
-On first run, if the mounted source directory is empty, the Magento container bootstraps Magento Open Source into it.
+On first run, if `/var/www/html` is empty, the Magento container:
+- clones Magento 2 from `MAGENTO_GIT_URL` at `MAGENTO_GIT_REF`
+- runs `composer install`
+- runs `bin/magento setup:install` against `magento-db` and `magento-search`
+
+You can pin the branch/tag with:
+
+```bash
+MAGENTO_GIT_REF=2.4.7-p1 ./manage.sh dev up
+```
 
 If you already have Magento running elsewhere, keep using your external URL:
 

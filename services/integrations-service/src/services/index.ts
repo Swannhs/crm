@@ -31,7 +31,7 @@ import type {
   OdooIntegrationInput
 } from '../types/index.js';
 
-const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL || 'http://ms-magento-integration-service:7190';
+const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL || 'http://ms-magento-inegration-service:7210/api';
 const ODOO_SERVICE_URL = process.env.ODOO_INTEGRATION_SERVICE_URL || 'http://ms-odoo-integration-service:7200';
 
 export class IntegrationConnectionService {
