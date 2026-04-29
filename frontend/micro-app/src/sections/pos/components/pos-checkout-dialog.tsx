@@ -14,16 +14,11 @@ type Props = {
   open: boolean;
   onClose: () => void;
   totalAmount: number;
+  paymentMethods?: Array<{ value: string; label: string }>;
   onConfirmPayment: (paymentMethod: string, amount: number) => Promise<void>;
 };
 
-const PAYMENT_METHODS = [
-  { value: 'cash', label: 'Cash' },
-  { value: 'card', label: 'Credit Card' },
-  { value: 'bank_transfer', label: 'Bank Transfer' },
-];
-
-export function PosCheckoutDialog({ open, onClose, totalAmount, onConfirmPayment }: Props) {
+export function PosCheckoutDialog({ open, onClose, totalAmount, paymentMethods, onConfirmPayment }: Props) {
   const [method, setMethod] = useState('');
   const [amountGiven, setAmountGiven] = useState<string>(totalAmount.toString());
   const [loading, setLoading] = useState(false);
@@ -37,7 +32,11 @@ export function PosCheckoutDialog({ open, onClose, totalAmount, onConfirmPayment
     }
   }, [open, totalAmount]);
 
+  const hasPaymentMethods = Array.isArray(paymentMethods) && paymentMethods.length > 0;
+
   const handleConfirm = async () => {
+    if (!hasPaymentMethods) return;
+
     if (!method) {
       setError('Please select a payment method.');
       return;
@@ -71,41 +70,49 @@ export function PosCheckoutDialog({ open, onClose, totalAmount, onConfirmPayment
             Total Due: ${totalAmount.toFixed(2)}
           </Typography>
 
-          <TextField
-            select
-            fullWidth
-            label="Payment Method"
-            value={method}
-            onChange={(e) => setMethod(e.target.value)}
-            margin="normal"
-            disabled={loading}
-          >
-            {PAYMENT_METHODS.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <TextField
-            fullWidth
-            type="number"
-            label="Amount Given"
-            value={amountGiven}
-            onChange={(e) => setAmountGiven(e.target.value)}
-            margin="normal"
-            disabled={loading}
-            inputProps={{ min: totalAmount, step: 0.01 }}
-          />
-
-          <Typography variant="body1" sx={{ mt: 2 }} color={change > 0 ? 'success.main' : 'text.secondary'}>
-            Change: ${change.toFixed(2)}
-          </Typography>
-
-          {error && (
+          {!hasPaymentMethods ? (
             <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-              {error}
+              Payment methods are unavailable.
             </Typography>
+          ) : (
+            <>
+              <TextField
+                select
+                fullWidth
+                label="Payment Method"
+                value={method}
+                onChange={(e) => setMethod(e.target.value)}
+                margin="normal"
+                disabled={loading}
+              >
+                {paymentMethods.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                fullWidth
+                type="number"
+                label="Amount Given"
+                value={amountGiven}
+                onChange={(e) => setAmountGiven(e.target.value)}
+                margin="normal"
+                disabled={loading}
+                inputProps={{ min: totalAmount, step: 0.01 }}
+              />
+
+              <Typography variant="body1" sx={{ mt: 2 }} color={change > 0 ? 'success.main' : 'text.secondary'}>
+                Change: ${change.toFixed(2)}
+              </Typography>
+
+              {error && (
+                <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+                  {error}
+                </Typography>
+              )}
+            </>
           )}
         </Box>
       </DialogContent>
@@ -113,7 +120,7 @@ export function PosCheckoutDialog({ open, onClose, totalAmount, onConfirmPayment
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button onClick={handleConfirm} variant="contained" disabled={loading}>
+        <Button onClick={handleConfirm} variant="contained" disabled={loading || !hasPaymentMethods}>
           {loading ? <CircularProgress size={24} color="inherit" /> : 'Confirm Payment'}
         </Button>
       </DialogActions>
