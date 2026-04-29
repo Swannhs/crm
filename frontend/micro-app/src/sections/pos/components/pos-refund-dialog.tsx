@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -23,6 +23,14 @@ export function PosRefundDialog({ open, onClose, orderId, maxAmount, onRefund }:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (open) {
+      setAmount(maxAmount.toString());
+      setReason('');
+      setError(null);
+    }
+  }, [open, maxAmount]);
+
   const handleConfirm = async () => {
     if (!reason.trim()) {
       setError('A refund reason is required.');
@@ -38,7 +46,6 @@ export function PosRefundDialog({ open, onClose, orderId, maxAmount, onRefund }:
     setError(null);
     try {
       await onRefund(reason, refundAmount);
-      setReason('');
       onClose();
     } catch (err: any) {
       setError(err.message || 'Refund failed');

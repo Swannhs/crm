@@ -54,7 +54,7 @@ export function PosRegister() {
           if (res?.id) setCartId(res.id);
         }
       } catch (e) {
-        // Failing silently for cart init if endpoint unavailable as handled by service flags
+        // Failing silently for cart init if endpoint unavailable
       }
     }
     initCart();
@@ -79,7 +79,6 @@ export function PosRegister() {
       setCart([]);
       setSelectedCustomer(null);
 
-      // Optional: renew cart
       try {
          const newCart = await posService.createCart();
          if (newCart?.id) setCartId(newCart.id);
@@ -87,12 +86,10 @@ export function PosRegister() {
 
       queryClient.invalidateQueries({ queryKey: ['pos-orders'] });
 
-      // Auto-show receipt
       if (res.receiptData) {
         setReceiptData(res.receiptData);
         setReceiptOpen(true);
       } else if (res.id) {
-        // fetch receipt
         try {
           const receipt = await posService.getReceipt(res.id);
           setReceiptData(receipt.data || receipt);
@@ -157,7 +154,6 @@ export function PosRegister() {
           await posService.updateCartItem(cartId, existingLineId, { qty: (item?.qty || 1) + 1 });
         } else {
           const res = await posService.addToCart(cartId, { productId, qty: 1 });
-          // Optional: replace tempId with real line ID from server
           if (res?.lineId) {
              setCart(prev => prev.map(item => item.id === tempId ? { ...item, id: res.lineId } : item));
           }
@@ -191,6 +187,17 @@ export function PosRegister() {
     }
   };
 
+  const handleClearCart = async () => {
+    setCart([]);
+    setConfirmClearOpen(false);
+    if (cartId) {
+      try {
+        const newCart = await posService.createCart();
+        if (newCart?.id) setCartId(newCart.id);
+      } catch (e) {}
+    }
+  };
+
   // Totals
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
   const tax = subtotal * 0.08; // Example tax, in real app fetch from config
@@ -205,18 +212,6 @@ export function PosRegister() {
       amountGiven: amount,
       totalAmount: total,
     });
-  };
-
-  const handleClearCart = async () => {
-    setCart([]);
-    setConfirmClearOpen(false);
-    if (cartId) {
-      try {
-        // If an endpoint to clear the whole cart exists, use it, else recreate it.
-        const newCart = await posService.createCart();
-        if (newCart?.id) setCartId(newCart.id);
-      } catch (e) {}
-    }
   };
 
   return (
@@ -282,7 +277,7 @@ export function PosRegister() {
             onViewReceipt={async (id) => {
               try {
                 const receipt = await posService.getReceipt(id);
-                setReceiptContent(receipt.html || 'Receipt generated');
+                setReceiptData(receipt.data || receipt);
                 setReceiptOpen(true);
               } catch (e) {
                 showToast('Failed to load receipt', 'error');
@@ -315,7 +310,7 @@ export function PosRegister() {
       <PosReceiptDialog
         open={receiptOpen}
         onClose={() => setReceiptOpen(false)}
-        htmlContent={receiptContent}
+        data={receiptData}
       />
       {selectedOrder && (
         <PosRefundDialog

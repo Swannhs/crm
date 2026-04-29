@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -28,6 +28,14 @@ export function PosCheckoutDialog({ open, onClose, totalAmount, onConfirmPayment
   const [amountGiven, setAmountGiven] = useState<string>(totalAmount.toString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setAmountGiven(totalAmount.toString());
+      setMethod('');
+      setError(null);
+    }
+  }, [open, totalAmount]);
 
   const handleConfirm = async () => {
     if (!method) {

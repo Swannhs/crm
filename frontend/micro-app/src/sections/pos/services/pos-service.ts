@@ -1,6 +1,5 @@
 import axios from 'src/utils/axios';
 
-// Strictly use /api/pos/* endpoints
 const API = {
   CONTEXT: '/api/pos/context',
   PRODUCTS: '/api/pos/products',
