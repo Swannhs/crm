@@ -105,11 +105,7 @@ export function PosRegister() {
       showToast('Order successful!', 'success');
       setCart([]);
       setSelectedCustomer(null);
-
-      try {
-         const newCart = await posService.createCart();
-         if (newCart?.id) setCartId(newCart.id);
-      } catch (e) {}
+      setCartId(null); // Force initCart effect to run and handle failures properly
 
       queryClient.invalidateQueries({ queryKey: ['pos-orders'] });
 
@@ -145,6 +141,14 @@ export function PosRegister() {
   // API synchronized Cart logic - strictly Backend first
   const handleAddToCart = async (product: any) => {
     if (!cartId) return;
+
+    // Revalidate product price before allowing add
+    const priceNum = typeof product.price === 'string' ? Number(product.price) : product.price;
+    if (typeof priceNum !== 'number' || !Number.isFinite(priceNum)) {
+      showToast('Cannot add product with invalid or missing price.', 'error');
+      return;
+    }
+
     setCartSyncing(true);
     const productId = product.id || product.sku;
 
@@ -163,7 +167,7 @@ export function PosRegister() {
               id: res.lineId || res.id,
               productId,
               name: product.name,
-              price: Number(product.price),
+              price: priceNum,
               qty: 1,
             },
           ]);
@@ -173,6 +177,19 @@ export function PosRegister() {
       showToast(e.message || 'Failed to add item to cart', 'error');
     } finally {
       setCartSyncing(false);
+    }
+  };
+
+  const handleBarcodeSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const match = products?.find((p: any) => p.barcode === searchQuery || p.sku === searchQuery);
+      if (match) {
+        handleAddToCart(match);
+        setSearchQuery('');
+      } else if (searchQuery) {
+        showToast('No exact match found for barcode/SKU.', 'warning');
+      }
     }
   };
 
@@ -232,6 +249,7 @@ export function PosRegister() {
   const total = subtotal + (tax || 0);
 
   const handleCheckoutConfirm = async (paymentMethod: string, amount: number) => {
+    // Add backend cart quote/summary later for exact totals
     await checkoutMutation.mutateAsync({
       cartId,
       customerId: selectedCustomer?.id === 'walk-in-ui-only' ? null : selectedCustomer?.id,
@@ -244,9 +262,15 @@ export function PosRegister() {
   // Safe checks
   const isPosReady = !isLoadingContext && !isErrorContext;
   const isCartReady = !!cartId && !cartInitError;
-  const canCheckout = isPosReady && isCartReady && cart.length > 0 && !cartSyncing && !checkoutMutation.isPending;
+  const hasPaymentMethods = Array.isArray(context?.paymentMethods) && context.paymentMethods.length > 0;
+  const hasTaxRate = typeof context?.taxRate === 'number' && Number.isFinite(context.taxRate);
+
+  // Disable checkout when tax/payment context is incomplete, unless backend returns final cart totals (which isn't fully implemented yet)
+  const canCheckout = isPosReady && isCartReady && hasPaymentMethods && hasTaxRate && cart.length > 0 && !cartSyncing && !checkoutMutation.isPending;
   const checkoutDisabledReason = !isPosReady ? 'POS settings unavailable'
     : !isCartReady ? 'Cart sync failed'
+    : !hasPaymentMethods ? 'Payment methods unavailable'
+    : !hasTaxRate ? 'Tax configuration unavailable'
     : cart.length === 0 ? 'Cart is empty'
     : cartSyncing ? 'Cart is syncing...'
     : '';
@@ -274,6 +298,7 @@ export function PosRegister() {
                 placeholder="Search products by name, SKU or barcode..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleBarcodeSubmit}
                 size="small"
               />
             </Box>
