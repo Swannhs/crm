@@ -38,9 +38,6 @@ import type {
 const MAGENTO_SERVICE_URL = process.env.MAGENTO_INTEGRATION_SERVICE_URL;
 const ODOO_SERVICE_URL = process.env.ODOO_INTEGRATION_SERVICE_URL;
 
-if (!MAGENTO_SERVICE_URL) {
-  throw new Error('Missing MAGENTO_INTEGRATION_SERVICE_URL');
-}
 if (!ODOO_SERVICE_URL) {
   throw new Error('Missing ODOO_INTEGRATION_SERVICE_URL');
 }
@@ -315,6 +312,9 @@ export class MagentoIntegrationService {
   private connRepo = new IntegrationConnectionRepository();
 
   private async request(identity: Identity, path: string, method = 'GET', body?: any, query?: any) {
+    if (!MAGENTO_SERVICE_URL) {
+      throw new Error('Magento integration is disabled. Set MAGENTO_INTEGRATION_SERVICE_URL to enable it.');
+    }
     const url = new URL(`${MAGENTO_SERVICE_URL}${path}`);
     if (query) {
       Object.entries(query).forEach(([k, v]) => url.searchParams.set(k, String(v)));

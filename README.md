@@ -20,50 +20,18 @@ Services should rely on these headers for multi-tenant request scoping.
 
 ## eCommerce / shop architecture
 
-Magento is the eCommerce system for this platform.
-
-Magento owns catalog, categories, cart, checkout, orders, payments, inventory, shipping, tax, and promotions.
-
-The CRM platform does not implement a separate shop-service for these responsibilities.
-
-CRM integrates with Magento through:
-
-- `services/magento-integration-service`
-- Nginx route: `/api/magento/*`
-- Magento REST/GraphQL APIs
-
-Magento runs as a separate Docker stack/project by default.
-
-For local development, you can opt in to a full local Magento Open Source addon (Magento app + MySQL + OpenSearch) with this repository's orchestrator script.
-That addon is for local dev/demo only and is not the production CRM runtime model.
-
-Odoo is also expected to run as an external system in normal environments.
-
-Canonical gateway route is `/api/magento/*`.
-Legacy `/api/shop/*` and `/api/integrations/magento/*` compatibility aliases were removed in this branch.
+Magento integration is currently disabled in this repository's local/prod Docker configuration.
 
 ### Capability ownership
 
 | Capability | Source of truth |
 |---|---|
-| Products | Magento |
-| Categories | Magento |
-| Prices | Magento |
-| Cart | Magento |
-| Checkout | Magento |
-| Orders | Magento |
-| Payments | Magento/payment gateway |
-| Inventory | Magento |
-| Shipping | Magento |
-| Tax | Magento |
-| Promotions/coupons | Magento |
 | Contacts | Odoo |
 | Companies | Odoo |
 | Sales activities | Odoo |
 | Customer notes/timeline | Odoo |
 | Organization users/roles | Organization service |
 | Billing summaries/reporting | Odoo accounting/invoice data |
-| Magento connection and sync state | Magento integration service |
 
 ### Remaining service scope notes
 
@@ -101,44 +69,6 @@ Use the unified manager:
 
 ```bash
 ./manage.sh dev up
-```
-
-Magento and its local infrastructure are exposed at:
-
-- `http://localhost:8088`
-- `https://localhost:8448`
-- `localhost:33306` (Magento MySQL)
-- `localhost:9201` (Magento OpenSearch)
-
-The Magento integration service will default to internal base URL `http://magento`.
-
-Magento runs from source code mounted to:
-
-- default: Docker named volume `magento_app_data` -> `/var/www/html`
-- on first boot, container clones `https://github.com/magento/magento2` and installs Magento automatically
-- override host source path with `MAGENTO_SOURCE_DIR` if you want to mount your own checkout
-
-Example override:
-
-```bash
-MAGENTO_SOURCE_DIR=../../my-magento-src ./manage.sh dev up
-```
-
-On first run, if `/var/www/html` is empty, the Magento container:
-- clones Magento 2 from `MAGENTO_GIT_URL` at `MAGENTO_GIT_REF`
-- runs `composer install`
-- runs `bin/magento setup:install` against `magento-db` and `magento-search`
-
-You can pin the branch/tag with:
-
-```bash
-MAGENTO_GIT_REF=2.4.7-p1 ./manage.sh dev up
-```
-
-If you already have Magento running elsewhere, keep using your external URL:
-
-```bash
-MAGENTO_BASE_URL='http://host.docker.internal:8088' ./manage.sh dev up
 ```
 
 This mode keeps the current repo-mounted workflow:

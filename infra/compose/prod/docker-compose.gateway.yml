@@ -10,10 +10,8 @@ services:
     depends_on:
       - organization-service
       - integrations-service
-      - magento-integration-service
       - odoo-integration-service
       - realtime-service
       - email-sync-service
       - api-router-service
     restart: unless-stopped
-

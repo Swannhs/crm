@@ -49,7 +49,6 @@ import {
   buildCartLine,
   cartStorageKey,
   normalizeOrder,
-  orderStorageKey,
   tableStorageKey,
   getAvailableStock,
   settingsStorageKey,
@@ -162,7 +161,6 @@ export function CommerceWorkspaceView({
   const [detailQuantity, setDetailQuantity] = useState(1);
   const [appliedCouponCode, setAppliedCouponCode] = useState('');
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
-  const [localOrders, setLocalOrders] = useState<LocalOrder[]>([]);
   const [tableLayouts, setTableLayouts] = useState<Array<{ id: string; name: string; seats: number; status: 'available' | 'occupied' | 'reserved' }>>([]);
 
   const productQueryKey = ['commerce-products', mode, resolvedShopKey];
@@ -231,7 +229,6 @@ export function CommerceWorkspaceView({
 
   useEffect(() => {
     setCartItems(readStorage<CartLine[]>(cartStorageKey(resolvedShopKey), []));
-    setLocalOrders(readStorage<LocalOrder[]>(orderStorageKey(resolvedShopKey), []));
     settingsMethods.reset(readStorage<SettingsFormValues>(settingsStorageKey(resolvedShopKey), DEFAULT_SETTINGS));
     setTableLayouts(
       readStorage<Array<{ id: string; name: string; seats: number; status?: 'available' | 'occupied' | 'reserved' }>>(
@@ -429,8 +426,9 @@ export function CommerceWorkspaceView({
     },
   });
 
-  const createOrderMutation = useMutation({
-    mutationFn: (payload: any) => commerceService.createOrder(resolvedShopKey, payload),
+  const createMagentoOrderMutation = useMutation({
+    mutationFn: (payload: Parameters<typeof commerceService.createPosOrderFromCart>[1]) =>
+      commerceService.createPosOrderFromCart(resolvedShopKey, payload),
   });
 
   const uploadProductImageMutation = useMutation({
@@ -496,11 +494,10 @@ export function CommerceWorkspaceView({
     [ordersQuery.data]
   );
 
-  const mergedOrders = useMemo(() => {
-    const map = new Map<string, LocalOrder>();
-    [...orders, ...localOrders].forEach((item) => map.set(item.id, item));
-    return Array.from(map.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  }, [localOrders, orders]);
+  const mergedOrders = useMemo(
+    () => [...orders].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [orders]
+  );
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -634,12 +631,8 @@ export function CommerceWorkspaceView({
     return Math.min(cartSubtotalCents, activeCoupon.value || 0);
   }, [activeCoupon, cartSubtotalCents]);
 
-  const taxRate = settingsMethods.watch('taxRate') || DEFAULT_SETTINGS.taxRate;
-  const cartTotalCents = Math.max(
-    0,
-    cartSubtotalCents - discountCents + Math.round((cartSubtotalCents - discountCents) * (taxRate / 100))
-  );
-  const taxAmountCents = Math.round((cartSubtotalCents - discountCents) * (taxRate / 100));
+  const taxAmountCents = 0;
+  const cartTotalCents = Math.max(0, cartSubtotalCents - discountCents);
 
   const selectedOrder = useMemo(
     () => mergedOrders.find((item) => item.id === orderId || item.id === receiptId),
@@ -728,11 +721,6 @@ export function CommerceWorkspaceView({
   const persistCart = (nextValue: CartLine[]) => {
     setCartItems(nextValue);
     writeStorage(cartStorageKey(resolvedShopKey), nextValue);
-  };
-
-  const persistOrders = (nextValue: LocalOrder[]) => {
-    setLocalOrders(nextValue);
-    writeStorage(orderStorageKey(resolvedShopKey), nextValue);
   };
 
   const persistTables = (nextValue: Array<{ id: string; name: string; seats: number; status: 'available' | 'occupied' | 'reserved' }>) => {
@@ -935,26 +923,22 @@ export function CommerceWorkspaceView({
     persistTables(tableLayouts.filter((item) => item.id !== tableId));
   };
 
-  const updateOrderState = (targetId: string, changes: Partial<LocalOrder>) => {
+  const updateOrderState = (targetId: string) => {
     const existing = mergedOrders.find((item) => item.id === targetId);
     if (!existing) return;
-
-    persistOrders([
-      ...localOrders.filter((item) => item.id !== targetId),
-      {
-        ...existing,
-        ...changes,
-      },
-    ]);
+    showToast({
+      message: 'Order status updates must be performed in Magento.',
+      severity: 'info',
+    });
   };
 
   const markOrderProcessing = (targetId: string) => {
-    updateOrderState(targetId, { status: 'processing', paymentStatus: 'paid' });
+    updateOrderState(targetId);
     showToast({ message: 'Order moved to processing.', severity: 'success' });
   };
 
   const markOrderCompleted = (targetId: string) => {
-    updateOrderState(targetId, { status: 'completed', paymentStatus: 'paid' });
+    updateOrderState(targetId);
     showToast({ message: 'Order marked completed.', severity: 'success' });
   };
 
@@ -969,67 +953,42 @@ export function CommerceWorkspaceView({
       return;
     }
 
-    const localOrder: LocalOrder = {
-      id: crypto.randomUUID(),
-      source: authenticated ? 'server' : 'local',
-      status: 'pending',
-      paymentStatus: 'unpaid',
-      totalAmountCents: cartTotalCents,
-      createdAt: new Date().toISOString(),
-      shippingAddress: {
-        customerName: values.customerName,
-        email: values.email,
-        phone: values.phone,
-        line1: values.line1,
-        city: values.city,
-        state: values.state,
-        postalCode: values.postalCode,
-        country: values.country,
-      },
-      items: cartItems.map((item) => ({
-        id: item.id,
-        productId: item.productId,
-        productName: item.variantName ? `${item.name} (${item.variantName})` : item.name,
-        quantity: item.quantity,
-        unitPriceCents: item.unitPriceCents,
-      })),
-    };
+    const lineItems = cartItems.map((item) => {
+      const product = products.find((p) => p.id === item.productId);
+      const sku = item.variantId || product?.sku || item.productId;
+      return {
+        sku,
+        qty: item.quantity,
+      };
+    });
 
-    if (authenticated) {
-      try {
-        const createdOrder = await createOrderMutation.mutateAsync({
-          contact_id: contactId,
-          coupon_code: activeCoupon?.code || null,
-          discount_cents: discountCents,
-          items: cartItems.map((item) => ({
-            product_id: item.productId,
-            product_name: item.variantName ? `${item.name} (${item.variantName})` : item.name,
-            quantity: item.quantity,
-            unit_price_cents: item.unitPriceCents,
-          })),
-          shipping_address: localOrder.shippingAddress,
-        });
-
-        const normalized = normalizeOrder(createdOrder);
-        persistOrders([...localOrders.filter((item) => item.id !== normalized.id), normalized]);
-        clearCart();
-        showToast({ message: 'Order created successfully.', severity: 'success' });
-        router.push(paths.public.orderPayment(normalized.id));
-        return;
-      } catch {
-        // Fall through to local draft order.
-      }
+    const hasMissingSku = lineItems.some((line) => !line.sku);
+    if (hasMissingSku) {
+      showToast({ message: 'One or more cart items do not have a Magento SKU.', severity: 'error' });
+      return;
     }
 
-    persistOrders([...localOrders, localOrder]);
-    clearCart();
-    showToast({
-      message: authenticated
-        ? 'Order was saved locally because the backend checkout failed.'
-        : 'Draft order saved locally. Complete payment to finish the flow.',
-      severity: authenticated ? 'warning' : 'success',
+    const nameParts = values.customerName.trim().split(/\s+/);
+    const firstname = nameParts[0] || 'Guest';
+    const lastname = nameParts.slice(1).join(' ') || 'Customer';
+
+    const createdOrder = await createMagentoOrderMutation.mutateAsync({
+      email: values.email,
+      firstname,
+      lastname,
+      telephone: values.phone || '',
+      street: values.line1,
+      city: values.city,
+      region: values.state,
+      postcode: values.postalCode,
+      countryId: values.country,
+      items: lineItems,
     });
-    router.push(paths.public.orderPayment(localOrder.id));
+
+    clearCart();
+    queryClient.invalidateQueries({ queryKey: ['commerce-orders'] });
+    showToast({ message: 'Magento order created successfully.', severity: 'success' });
+    router.push(paths.public.orderPayment(String(createdOrder.orderId)));
   };
 
   const handleCompletePayment = () => {
@@ -1131,10 +1090,8 @@ export function CommerceWorkspaceView({
         <CommerceCheckoutPanel
           checkoutMethods={checkoutMethods}
           onSubmit={checkoutMethods.handleSubmit(handleCheckout)}
-          isPending={createOrderMutation.isPending}
+          isPending={createMagentoOrderMutation.isPending}
           cartItemsLength={cartItems.length}
-          cartTotalCents={cartTotalCents}
-          authenticated={authenticated}
           cartSummary={cartSummary}
         />
       ) : mode === 'order-payment' ? (
@@ -1493,8 +1450,8 @@ export function CommerceWorkspaceView({
         open={orderDialog.value}
         onClose={orderDialog.onFalse}
         order={mergedOrders.find((o) => o.id === selectedOrderId)}
-        onStatusUpdate={(id, status, pStatus) => {
-          updateOrderState(id, { status, paymentStatus: pStatus || 'paid' });
+        onStatusUpdate={(id, _status, _pStatus) => {
+          updateOrderState(id);
           showToast({ message: 'Order status updated.', severity: 'success' });
         }}
         onReceipt={(id) => router.push(paths.public.onlineShopReceipt(id, 'order'))}

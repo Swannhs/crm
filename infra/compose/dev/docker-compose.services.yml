@@ -48,7 +48,6 @@ services:
       KEYCLOAK_TOKEN_URL: http://keycloak:8080/realms/mymanager/protocol/openid-connect/token
       KEYCLOAK_CLIENT_ID: mymanager-web
       ODOO_INTEGRATION_BASE_URL: http://odoo-integration-service:7200
-      MAGENTO_INTEGRATION_BASE_URL: http://magento-integration-service:7210
       BOOKING_SERVICE_BASE_URL: http://booking-service:7040
       SCORING_SERVICE_BASE_URL: http://scoring-service:7180
       COMMUNITY_SERVICE_BASE_URL: http://community-service:7030
@@ -108,7 +107,6 @@ services:
       PORT: 7140
       KAFKA_BROKERS: kafka:9092
       DATABASE_URL: postgres://integrations:integrations@integrations-db:5432/integrations
-      MAGENTO_INTEGRATION_SERVICE_URL: http://magento-integration-service:7210/api
       ODOO_INTEGRATION_SERVICE_URL: http://odoo-integration-service:7200
     depends_on:
       kafka:
@@ -119,33 +117,6 @@ services:
         condition: service_started
     ports:
       - "7140:7140"
-
-  magento-integration-service:
-    image: php:8.4-cli
-    container_name: magento-integration-service
-    profiles: ["magento"]
-    working_dir: /workspace/services/magento-integration-service
-    command: sh -c "php artisan serve --host=0.0.0.0 --port=$${PORT:-7210}"
-    volumes:
-      - ../../../services/magento-integration-service:/workspace/services/magento-integration-service
-    environment:
-      PORT: 7210
-      APP_ENV: local
-      APP_DEBUG: "true"
-      MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-http://magento}
-      MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
-      MAGENTO_ADMIN_USERNAME: ${MAGENTO_ADMIN_USERNAME:-admin}
-      MAGENTO_ADMIN_PASSWORD: ${MAGENTO_ADMIN_PASSWORD:-Admin123!}
-      MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
-      MAGENTO_TIMEOUT_SECONDS: 20
-    healthcheck:
-      test: ["CMD-SHELL", "php -r '$$c=@file_get_contents(\"http://127.0.0.1:7210/up\"); if($$c===false){exit(1);} echo $$c;' >/dev/null 2>&1 || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
-    ports:
-      - "7210:7210"
 
   odoo-integration-service:
     build:
@@ -168,7 +139,6 @@ services:
       ODOO_USERNAME: ${ODOO_USERNAME:-admin}
       ODOO_PASSWORD: ${ODOO_PASSWORD:-admin}
       ODOO_API_KEY: ${ODOO_API_KEY:-}
-      MAGENTO_API_BASE_URL: http://magento-integration-service:7210/api
       DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
     depends_on:
       odoo-integration-db:

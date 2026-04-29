@@ -2,8 +2,6 @@
 set -euo pipefail
 
 APP_DIR="/var/www/html"
-MAGENTO_GIT_URL="${MAGENTO_GIT_URL:-https://github.com/magento/magento2.git}"
-MAGENTO_GIT_REF="${MAGENTO_GIT_REF:-2.4.7-p3}"
 MAGENTO_BASE_URL="${MAGENTO_BASE_URL:-http://localhost:8088}"
 MAGENTO_BACKEND_FRONTNAME="${MAGENTO_BACKEND_FRONTNAME:-admin}"
 
@@ -29,14 +27,17 @@ wait_for_db() {
   done
 }
 
-bootstrap_source_if_missing() {
-  if [ -f "${APP_DIR}/composer.json" ]; then
+require_host_source() {
+  if [ -f "${APP_DIR}/bin/magento" ]; then
     return
   fi
 
-  echo "Magento source missing. Cloning ${MAGENTO_GIT_URL} (${MAGENTO_GIT_REF})..."
-  rm -rf "${APP_DIR:?}/"*
-  git clone --depth 1 --branch "${MAGENTO_GIT_REF}" "${MAGENTO_GIT_URL}" "${APP_DIR}"
+  echo "Magento source is missing at ${APP_DIR}."
+  echo "Clone Magento on your host machine first:"
+  echo "  git clone https://github.com/magento/magento2.git services/magento-service"
+  echo "  cd services/magento-service && git checkout 2.4-develop"
+  echo "Then restart Docker."
+  exit 1
 }
 
 install_magento_if_needed() {
@@ -85,7 +86,7 @@ set_permissions() {
 }
 
 wait_for_db
-bootstrap_source_if_missing
+require_host_source
 install_magento_if_needed
 set_permissions
 

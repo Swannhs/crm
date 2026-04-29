@@ -73,6 +73,11 @@ export async function deleteColumn(id: string) {
   return response.data;
 }
 
+export async function reorderColumns(boardId: string, orderedColumnIds: Array<string | number>) {
+  const response = await axiosInstance.post(`/api/projects/v1/boards/${boardId}/columns/reorder`, { orderedColumnIds });
+  return response.data?.data ?? response.data ?? [];
+}
+
 // Cards / Tasks
 export async function getCards(boardId: string) {
   const response = await axiosInstance.get(`/api/projects/v1/boards/${boardId}/cards`);
@@ -119,6 +124,21 @@ export async function createSubtask(taskId: string, data: any) {
   return response.data;
 }
 
+export async function getComments(taskId: string) {
+  const response = await axiosInstance.get(`/api/projects/v1/tasks/${taskId}/comments`);
+  return response.data?.data ?? response.data ?? [];
+}
+
+export async function addComment(taskId: string, data: any) {
+  const response = await axiosInstance.post(`/api/projects/v1/tasks/${taskId}/comments`, data);
+  return response.data;
+}
+
+export async function addReply(commentId: string, data: any) {
+  const response = await axiosInstance.post(`/api/projects/v1/comments/${commentId}/replies`, data);
+  return response.data;
+}
+
 export const projectService = {
   getProjects,
   getProject,
@@ -126,14 +146,24 @@ export const projectService = {
   updateProject,
   deleteProject,
   getProjectBoards,
+  getTasks,
+  createTask,
   createBoard,
+  getBoard,
   getColumns,
   createColumn,
   updateColumn,
   deleteColumn,
+  reorderColumns,
   getCards,
-  getBoard,
   createCard,
   updateCard,
   deleteCard,
+  getWorklogs,
+  logWork,
+  getSubtasks,
+  createSubtask,
+  getComments,
+  addComment,
+  addReply,
 };

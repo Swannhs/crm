@@ -19,6 +19,8 @@ import IconButton from '@mui/material/IconButton';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
@@ -60,11 +62,15 @@ export function ProjectDetailsView({ id }: Props) {
   const [menuData, setMenuData] = useState<any>(null);
 
   const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null);
+  const [dragOverColumnOrderId, setDragOverColumnOrderId] = useState<string | null>(null);
   const [quickAddTaskColumnId, setQuickAddTaskColumnId] = useState<string | null>(null);
   const [quickAddTaskTitle, setQuickAddTaskTitle] = useState('');
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const [editingColumnName, setEditingColumnName] = useState('');
   const [currentTab, setCurrentTab] = useState('board');
+  const [reorderError, setReorderError] = useState<string | null>(null);
+  const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
+  const [draggingColumnId, setDraggingColumnId] = useState<string | null>(null);
 
   const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
@@ -122,12 +128,23 @@ export function ProjectDetailsView({ id }: Props) {
     },
   });
 
+  const reorderColumnsMutation = useMutation({
+    mutationFn: (orderedColumnIds: Array<string | number>) =>
+      projectService.reorderColumns(activeBoard?.id, orderedColumnIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['board-columns', activeBoard?.id] });
+    },
+    onError: () => {
+      setReorderError('Failed to reorder columns. Please try again.');
+    },
+  });
+
   const addCardMutation = useMutation({
-    mutationFn: ({ columnId, title }: { columnId: string; title: string }) => 
-      projectService.createCard(activeBoard?.id, { columnId, title }),
+    mutationFn: ({ columnId, title, priority }: { columnId: string; title: string; priority?: string }) => 
+      projectService.createCard(activeBoard?.id, { columnId, title, priority }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['board-cards', activeBoard?.id] });
-      taskDialog.onFalse();
+      taskDrawer.onFalse();
       setTaskTitle('');
       setTaskDescription('');
       setSelectedCard(null);
@@ -235,36 +252,81 @@ export function ProjectDetailsView({ id }: Props) {
   };
 
   const handleMoveCard = async (cardId: string, newColumnId: string) => {
-    const card = cards.find((c: any) => c.id === cardId);
-    if (card && card.columnId !== newColumnId) {
+    const normalizedCardId = String(cardId);
+    const normalizedTargetColumnId = String(newColumnId);
+    const card = cards.find((c: any) => String(c.id) === normalizedCardId);
+    if (card && String(card.columnId) !== normalizedTargetColumnId) {
       await updateCardMutation.mutateAsync({ 
-        id: cardId, 
-        data: { ...card, columnId: newColumnId } 
+        id: normalizedCardId,
+        data: { ...card, columnId: normalizedTargetColumnId } 
       });
     }
   };
 
-  const onDragStart = (e: React.DragEvent, cardId: string) => {
-    e.dataTransfer.setData('cardId', cardId);
+  const onCardDragStart = (e: React.DragEvent, cardId: string) => {
+    e.stopPropagation();
+    setDraggingCardId(String(cardId));
+    e.dataTransfer.setData('application/x-dnd-type', 'card');
+    e.dataTransfer.setData('application/x-card-id', String(cardId));
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const onDragOver = (e: React.DragEvent, columnId: string) => {
+  const onCardDragEnd = () => {
+    setDraggingCardId(null);
+    setDragOverColumnId(null);
+  };
+
+  const onColumnHandleDragStart = (e: React.DragEvent, columnId: string) => {
+    e.stopPropagation();
+    setDraggingColumnId(String(columnId));
+    e.dataTransfer.setData('application/x-dnd-type', 'column');
+    e.dataTransfer.setData('application/x-column-id', String(columnId));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const onColumnDragEnd = () => {
+    setDraggingColumnId(null);
+    setDragOverColumnOrderId(null);
+  };
+
+  const onColumnDragOver = (e: React.DragEvent, columnId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    setDragOverColumnId(columnId);
+    if (draggingColumnId) {
+      setDragOverColumnOrderId(String(columnId));
+    } else if (draggingCardId) {
+      setDragOverColumnId(String(columnId));
+    }
   };
 
-  const onDragLeave = () => {
-    setDragOverColumnId(null);
+  const onColumnDragLeave = () => {
+    if (draggingCardId) setDragOverColumnId(null);
+    if (!draggingColumnId) {
+      setDragOverColumnOrderId(null);
+    }
   };
 
-  const onDrop = (e: React.DragEvent, newColumnId: string) => {
+  const onDropOnColumn = async (e: React.DragEvent, targetColumnId: string) => {
     e.preventDefault();
-    setDragOverColumnId(null);
-    const cardId = e.dataTransfer.getData('cardId');
-    if (cardId) {
-      handleMoveCard(cardId, newColumnId);
+    if (draggingColumnId) {
+      const ids = columns.map((col: any) => String(col.id));
+      const sourceIndex = ids.findIndex((id: string) => id === draggingColumnId);
+      const targetIndex = ids.findIndex((id: string) => id === String(targetColumnId));
+      if (sourceIndex >= 0 && targetIndex >= 0 && sourceIndex !== targetIndex) {
+        const reordered = [...ids];
+        const [moved] = reordered.splice(sourceIndex, 1);
+        reordered.splice(targetIndex, 0, moved);
+        await reorderColumnsMutation.mutateAsync(reordered);
+      }
+      setDraggingColumnId(null);
+      setDragOverColumnOrderId(null);
+      return;
+    }
+
+    if (draggingCardId) {
+      await handleMoveCard(draggingCardId, targetColumnId);
+      setDraggingCardId(null);
+      setDragOverColumnId(null);
     }
   };
 
@@ -333,14 +395,18 @@ export function ProjectDetailsView({ id }: Props) {
                 width: 320, 
                 flexShrink: 0,
                 borderRadius: 2,
-                transition: (theme) => theme.transitions.create(['background-color']),
-                ...(dragOverColumnId === column.id && {
+                transition: (theme) => theme.transitions.create(['background-color', 'transform', 'box-shadow']),
+                ...(dragOverColumnId === String(column.id) && {
                   bgcolor: 'action.hover',
-                })
+                }),
+                ...(dragOverColumnOrderId === String(column.id) && {
+                  transform: 'translateY(-4px)',
+                  boxShadow: (theme) => theme.customShadows.z8,
+                }),
               }}
-              onDragOver={(e) => onDragOver(e, column.id)}
-              onDragLeave={onDragLeave}
-              onDrop={(e) => onDrop(e, column.id)}
+              onDragOver={(e) => onColumnDragOver(e, String(column.id))}
+              onDragLeave={onColumnDragLeave}
+              onDrop={(e) => onDropOnColumn(e, String(column.id))}
             >
               <Stack
                 direction="row"
@@ -373,8 +439,18 @@ export function ProjectDetailsView({ id }: Props) {
                   </Typography>
                 )}
                 <Typography variant="caption" sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: 'action.selected', mr: 1 }}>
-                  {cards.filter((c: any) => c.columnId === column.id).length}
+                  {cards.filter((c: any) => String(c.columnId) === String(column.id)).length}
                 </Typography>
+                <IconButton
+                  size="small"
+                  draggable={!reorderColumnsMutation.isPending}
+                  onDragStart={(e) => onColumnHandleDragStart(e, column.id)}
+                  onDragEnd={onColumnDragEnd}
+                  sx={{ cursor: 'grab' }}
+                  title="Drag to reorder column"
+                >
+                  <Iconify icon="solar:hamburger-menu-bold" />
+                </IconButton>
                 <IconButton size="small" onClick={(e) => handleOpenMenu(e, 'column', column)}>
                    <Iconify icon="eva:more-vertical-fill" />
                 </IconButton>
@@ -382,12 +458,13 @@ export function ProjectDetailsView({ id }: Props) {
 
               <Stack spacing={2}>
                 {cards
-                  .filter((c: any) => c.columnId === column.id)
+                  .filter((c: any) => String(c.columnId) === String(column.id))
                   .map((card: any) => (
                     <Card 
                       key={card.id} 
                       draggable
-                      onDragStart={(e) => onDragStart(e, card.id)}
+                      onDragStart={(e) => onCardDragStart(e, card.id)}
+                      onDragEnd={onCardDragEnd}
                       onClick={() => handleEditCard(card)}
                       sx={{ 
                         p: 2, 
@@ -457,7 +534,7 @@ export function ProjectDetailsView({ id }: Props) {
                     </Card>
                   ))}
                 
-                {dragOverColumnId === column.id && (
+                {dragOverColumnId === String(column.id) && (
                   <Box 
                     sx={{ 
                       height: 80, 
@@ -640,6 +717,17 @@ export function ProjectDetailsView({ id }: Props) {
           taskDrawer.onFalse();
         }}
       />
+
+      <Snackbar
+        open={Boolean(reorderError)}
+        autoHideDuration={3000}
+        onClose={() => setReorderError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" variant="filled" onClose={() => setReorderError(null)}>
+          {reorderError}
+        </Alert>
+      </Snackbar>
     </DashboardContent>
   );
 }

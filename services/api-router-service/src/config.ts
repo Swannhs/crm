@@ -10,7 +10,6 @@ export const API_ROUTER_CONFIG = {
   keycloakTokenUrl: requiredEnv('KEYCLOAK_TOKEN_URL'),
   keycloakClientId: requiredEnv('KEYCLOAK_CLIENT_ID'),
   odooIntegrationBaseUrl: requiredEnv('ODOO_INTEGRATION_BASE_URL'),
-  magentoIntegrationBaseUrl: requiredEnv('MAGENTO_INTEGRATION_BASE_URL'),
   bookingServiceBaseUrl: requiredEnv('BOOKING_SERVICE_BASE_URL'),
   scoringServiceBaseUrl: requiredEnv('SCORING_SERVICE_BASE_URL'),
   communityServiceBaseUrl: requiredEnv('COMMUNITY_SERVICE_BASE_URL'),

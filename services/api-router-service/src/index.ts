@@ -238,9 +238,13 @@ async function fetchAllOdooInvoicesForGraph(req: Request, opts?: { months?: numb
 }
 
 async function fetchMagentoOrders(req: Request, query: URLSearchParams = new URLSearchParams()) {
-  const base = new URL("/api/v1/magento/orders", API_ROUTER_CONFIG.magentoIntegrationBaseUrl);
-  query.forEach((value, key) => base.searchParams.set(key, value));
-  return fetchUpstreamJsonSafe(req, base.toString());
+  void req;
+  void query;
+  return {
+    ok: false,
+    data: { data: { items: [] as any[] } },
+    error: "Magento integration service is disabled.",
+  };
 }
 
 function toNum(value: unknown): number {
@@ -381,8 +385,8 @@ async function handleApiCompat(req: Request, res: Response) {
       return res.status(410).json({
         message: "Deprecated commerce compatibility module.",
         module,
-        canonical: "/api/magento/* (CRM/admin integration)",
-        storefront: "Use Magento storefront/GraphQL APIs for public commerce flows.",
+        canonical: "/api/odoo/*",
+        storefront: "Magento integration is disabled in this environment.",
       });
     }
 
@@ -563,26 +567,11 @@ async function handleApiCompat(req: Request, res: Response) {
       }
 
       if (req.method === "GET" && /^\/magento\/orders\/[^/]+$/.test(rest)) {
-        const id = rest.split("/")[3];
-        return proxyTo(req, res, {
-          baseUrl: API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
-          targetPath: `/api/v1/magento/rest/V1/orders/${id}`,
-        });
+        return res.status(410).json({ message: "Magento integration is disabled." });
       }
 
       if (req.method === "GET" && /^\/magento\/customers\/[^/]+\/orders$/.test(rest)) {
-        const customerId = rest.split("/")[3];
-        const query = new URLSearchParams({
-          "searchCriteria[pageSize]": String(req.query.pageSize ?? 50),
-          "searchCriteria[currentPage]": String(req.query.currentPage ?? 1),
-          "searchCriteria[filter_groups][0][filters][0][field]": "customer_id",
-          "searchCriteria[filter_groups][0][filters][0][value]": customerId,
-          "searchCriteria[filter_groups][0][filters][0][condition_type]": "eq",
-        });
-        return proxyTo(req, res, {
-          baseUrl: API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
-          targetPath: `/api/v1/magento/rest/default/V1/orders?${query.toString()}`,
-        });
+        return res.status(410).json({ message: "Magento integration is disabled." });
       }
 
       if (req.method === "GET" && rest === "/reconciliation") {
@@ -808,10 +797,6 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "sales-dashboard") {
-      const magentoOrdersUrl = toAbsoluteUrl(
-        API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
-        "/api/v1/magento/orders?pageSize=100&currentPage=1"
-      );
       const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
       const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
       const normalizeSalesStage = (rawStage: unknown): string => {
@@ -828,7 +813,7 @@ async function handleApiCompat(req: Request, res: Response) {
 
       if (req.method === "GET" && rest === "/summary") {
         const [magentoRes, odooRes, crmRes] = await Promise.all([
-          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
           fetchUpstreamJsonSafe(req, odooOrdersUrl),
           fetchUpstreamJsonSafe(req, odooCrmUrl),
         ]);
@@ -868,7 +853,7 @@ async function handleApiCompat(req: Request, res: Response) {
 
       if (req.method === "GET" && rest === "/orders") {
         const [magentoRes, odooRes] = await Promise.all([
-          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
           fetchUpstreamJsonSafe(req, odooOrdersUrl),
         ]);
 
@@ -1020,7 +1005,7 @@ async function handleApiCompat(req: Request, res: Response) {
 
       if (req.method === "GET" && rest === "/analytics") {
         const [magentoRes, odooRes, crmRes] = await Promise.all([
-          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
           fetchUpstreamJsonSafe(req, odooOrdersUrl),
           fetchUpstreamJsonSafe(req, odooCrmUrl),
         ]);
@@ -1123,10 +1108,6 @@ async function handleApiCompat(req: Request, res: Response) {
       const monthsByRange: Record<string, number> = { "7d": 1, "30d": 1, "90d": 3, "180d": 6 };
       const months = monthsByRange[range] ?? 1;
 
-      const magentoOrdersUrl = toAbsoluteUrl(
-        API_ROUTER_CONFIG.magentoIntegrationBaseUrl,
-        "/api/v1/magento/orders?pageSize=100&currentPage=1"
-      );
       const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
       const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
       const contactsAnalyticsUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/contacts/analytics");
@@ -1136,7 +1117,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const [billingSummaryRes, contactsAnalyticsRes, magentoRes, odooRes, crmRes, bookingsRes] = await Promise.all([
           fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=200")),
           fetchUpstreamJsonSafe(req, contactsAnalyticsUrl),
-          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
           fetchUpstreamJsonSafe(req, odooOrdersUrl),
           fetchUpstreamJsonSafe(req, odooCrmUrl),
           fetchUpstreamJsonSafe(req, bookingsUrl),
@@ -1232,7 +1213,7 @@ async function handleApiCompat(req: Request, res: Response) {
 
         if (metric === "orders") {
           const [magentoRes, odooRes] = await Promise.all([
-            fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+            fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
             fetchUpstreamJsonSafe(req, odooOrdersUrl),
           ]);
           const magentoItems = Array.isArray(magentoRes.data?.data?.items) ? magentoRes.data.data.items : [];
@@ -1295,7 +1276,7 @@ async function handleApiCompat(req: Request, res: Response) {
         const limit = Math.max(1, Math.min(50, Number(req.query.limit ?? 12)));
         const [contactsRes, magentoRes, invoicesRes, bookingsRes] = await Promise.all([
           fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/contacts?page=1&pageSize=30")),
-          fetchUpstreamJsonSafe(req, magentoOrdersUrl),
+          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
           fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/invoices?page=1&pageSize=30")),
           fetchUpstreamJsonSafe(req, bookingsUrl),
         ]);

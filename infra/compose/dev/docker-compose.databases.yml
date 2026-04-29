@@ -102,23 +102,6 @@ services:
       timeout: 5s
       retries: 5
 
-  magento-integration-db:
-    image: postgres:17-alpine
-    container_name: magento-integration-db
-    profiles: ["magento"]
-    environment:
-      POSTGRES_DB: magento_integration
-      POSTGRES_USER: magento_integration
-      POSTGRES_PASSWORD: magento_integration
-    ports:
-      - "5458:5432"
-    volumes:
-      - ../../data/postgres/magento-integration-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U magento_integration -d magento_integration"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   booking-db:
     image: postgres:17-alpine
@@ -154,25 +137,5 @@ services:
       timeout: 5s
       retries: 20
 
-  magento-db:
-    image: mysql:8.0
-    container_name: magento-db
-    profiles: ["magento"]
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MAGENTO_DB_ROOT_PASSWORD:-magento_root}
-      MYSQL_DATABASE: ${MAGENTO_DB_NAME:-magento}
-      MYSQL_USER: ${MAGENTO_DB_USER:-magento}
-      MYSQL_PASSWORD: ${MAGENTO_DB_PASSWORD:-magento}
-    ports:
-      - "${MAGENTO_DB_PORT:-33306}:3306"
-    volumes:
-      - magento_db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD >/dev/null 2>&1 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-
 volumes:
   odoo_db_data:
-  magento_db_data:

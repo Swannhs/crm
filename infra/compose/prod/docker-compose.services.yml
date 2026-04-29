@@ -64,7 +64,6 @@ services:
       KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       ODOO_INTEGRATION_BASE_URL: ${ODOO_INTEGRATION_BASE_URL}
-      MAGENTO_INTEGRATION_BASE_URL: ${MAGENTO_INTEGRATION_BASE_URL}
       BOOKING_SERVICE_BASE_URL: ${BOOKING_SERVICE_BASE_URL}
       SCORING_SERVICE_BASE_URL: ${SCORING_SERVICE_BASE_URL}
       COMMUNITY_SERVICE_BASE_URL: ${COMMUNITY_SERVICE_BASE_URL}
@@ -264,41 +263,15 @@ services:
     environment:
       NODE_ENV: production
       PORT: ${INTEGRATIONS_SERVICE_PORT:-7140}
-      MAGENTO_INTEGRATION_SERVICE_URL: http://magento-integration-service:7190
       ODOO_INTEGRATION_SERVICE_URL: http://odoo-integration-service:7200
       DATABASE_URL: postgres://integrations:integrations@integrations-db:5432/integrations
       KAFKA_BROKERS: kafka:9092
     depends_on:
       integrations-db:
         condition: service_healthy
-      magento-integration-service:
-        condition: service_started
       odoo-integration-service:
         condition: service_started
       kafka:
-        condition: service_started
-    restart: unless-stopped
-
-  magento-integration-service:
-    build:
-      context: ../../..
-      dockerfile: services/magento-integration-service/docker/Dockerfile.prod
-      args:
-        SERVICE_NAME: magento-integration-service
-        SERVICE_PORT: 7190
-    environment:
-      NODE_ENV: production
-      PORT: ${MAGENTO_INTEGRATION_SERVICE_PORT:-7190}
-      MAGENTO_BASE_URL: ${MAGENTO_BASE_URL:-http://magento}
-      MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
-      MAGENTO_STORE_CODE: ${MAGENTO_STORE_CODE:-default}
-      MAGENTO_ADMIN_USERNAME: ${MAGENTO_ADMIN_USERNAME:-admin}
-      MAGENTO_ADMIN_PASSWORD: ${MAGENTO_ADMIN_PASSWORD:-admin123}
-      DATABASE_URL: postgres://magento_integration:magento_integration@magento-integration-db:5432/magento_integration
-    depends_on:
-      magento-integration-db:
-        condition: service_healthy
-      magento:
         condition: service_started
     restart: unless-stopped
 
@@ -314,13 +287,10 @@ services:
       ODOO_USERNAME: ${ODOO_USERNAME:-admin}
       ODOO_PASSWORD: ${ODOO_PASSWORD:-admin}
       ODOO_API_KEY: ${ODOO_API_KEY:-}
-      MAGENTO_API_BASE_URL: http://magento-integration-service:7190
       DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
     depends_on:
       odoo-integration-db:
         condition: service_healthy
-      magento-integration-service:
-        condition: service_started
       odoo:
         condition: service_started
     restart: unless-stopped

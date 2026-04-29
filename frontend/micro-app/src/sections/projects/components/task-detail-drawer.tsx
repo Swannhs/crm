@@ -46,6 +46,9 @@ export function TaskDetailDrawer({ open, onClose, task, columns, onUpdate, onDel
   const [subtasks, setSubtasks] = useState<any[]>([]);
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [replyByCommentId, setReplyByCommentId] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (task) {
@@ -60,8 +63,15 @@ export function TaskDetailDrawer({ open, onClose, task, columns, onUpdate, onDel
     if (task?.id && open) {
       projectService.getWorklogs(task.id).then(setWorklogs);
       projectService.getSubtasks(task.id).then(setSubtasks);
+      projectService.getComments(task.id).then(setComments);
     }
   }, [task?.id, open]);
+
+  const refreshComments = async () => {
+    if (!task?.id) return;
+    const data = await projectService.getComments(task.id);
+    setComments(data);
+  };
 
   const handleAddSubtask = async () => {
     if (!newSubtaskTitle.trim()) return;
@@ -96,6 +106,25 @@ export function TaskDetailDrawer({ open, onClose, task, columns, onUpdate, onDel
       await onUpdate({ name: taskName, description, priority, columnId });
       onClose();
     } catch (e) { console.error(e); } finally { setIsSaving(false); }
+  };
+
+  const handleAddComment = async () => {
+    if (!task?.id || !newComment.trim()) return;
+    try {
+      await projectService.addComment(task.id, { content: newComment, author: 'You' });
+      setNewComment('');
+      await refreshComments();
+    } catch (e) { console.error(e); }
+  };
+
+  const handleAddReply = async (commentId: string) => {
+    const content = String(replyByCommentId[commentId] ?? '').trim();
+    if (!content) return;
+    try {
+      await projectService.addReply(commentId, { content, author: 'You' });
+      setReplyByCommentId((prev) => ({ ...prev, [commentId]: '' }));
+      await refreshComments();
+    } catch (e) { console.error(e); }
   };
 
   const drawerProps = useMemo(() => ({
@@ -196,6 +225,66 @@ export function TaskDetailDrawer({ open, onClose, task, columns, onUpdate, onDel
                      <Typography variant="body2">{st.name || st.title}</Typography>
                   </Stack>
                 ))}
+             </Stack>
+          </Stack>
+
+          <Divider sx={{ borderStyle: 'dashed' }} />
+
+          <Stack spacing={2}>
+             <Typography variant="subtitle2">Comments</Typography>
+             <Stack direction="row" spacing={1}>
+               <TextField
+                 fullWidth
+                 size="small"
+                 placeholder="Write a comment..."
+                 value={newComment}
+                 onChange={(e) => setNewComment(e.target.value)}
+                 onKeyDown={(e) => {
+                   if (e.key === 'Enter' && !e.shiftKey) {
+                     e.preventDefault();
+                     handleAddComment();
+                   }
+                 }}
+               />
+               <Button variant="contained" onClick={handleAddComment}>Post</Button>
+             </Stack>
+
+             <Stack spacing={1.5}>
+               {comments.map((comment: any) => (
+                 <Box key={comment.id} sx={{ p: 1.5, borderRadius: 1.5, bgcolor: 'background.neutral' }}>
+                   <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                     {comment.author} • {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : 'now'}
+                   </Typography>
+                   <Typography variant="body2" sx={{ mt: 0.5 }}>{comment.content}</Typography>
+
+                   <Stack spacing={1} sx={{ mt: 1.5, pl: 2, borderLeft: (theme) => `1px solid ${theme.palette.divider}` }}>
+                     {(comment.replies || []).map((reply: any) => (
+                       <Box key={reply.id}>
+                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                           {reply.author} • {reply.createdAt ? new Date(reply.createdAt).toLocaleString() : 'now'}
+                         </Typography>
+                         <Typography variant="body2">{reply.content}</Typography>
+                       </Box>
+                     ))}
+                     <Stack direction="row" spacing={1}>
+                       <TextField
+                         fullWidth
+                         size="small"
+                         placeholder="Write a reply..."
+                         value={replyByCommentId[comment.id] || ''}
+                         onChange={(e) => setReplyByCommentId((prev) => ({ ...prev, [comment.id]: e.target.value }))}
+                         onKeyDown={(e) => {
+                           if (e.key === 'Enter' && !e.shiftKey) {
+                             e.preventDefault();
+                             handleAddReply(comment.id);
+                           }
+                         }}
+                       />
+                       <Button onClick={() => handleAddReply(comment.id)}>Reply</Button>
+                     </Stack>
+                   </Stack>
+                 </Box>
+               ))}
              </Stack>
           </Stack>
 

@@ -55,5 +55,4 @@ kubectl delete -k infra/k8s/overlays/dev
 | Invoices/payments/accounting | Odoo |
 | Inventory | Odoo |
 | Organization/workspace/user tenancy | Custom organization/auth layer |
-| Magento bridge | `magento-integration-service` |
 | Odoo bridge | `odoo-integration-service` |

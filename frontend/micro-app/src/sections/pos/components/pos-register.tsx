@@ -90,11 +90,6 @@ function extractCartItems(payload: any): CartItem[] | null {
   return mapped;
 }
 
-function extractLineId(payload: any): string | null {
-  const id = payload?.lineId || payload?.id || payload?.item?.id || payload?.line?.id;
-  return id ? String(id) : null;
-}
-
 export function PosRegister() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('register');
@@ -238,12 +233,6 @@ export function PosRegister() {
       return;
     }
 
-    const price = toValidNumber(product?.price);
-    if (price === null) {
-      showToast('Price unavailable for this product', 'error');
-      return;
-    }
-
     const productId = product?.id || product?.sku;
     if (!productId) {
       showToast('Invalid product', 'error');
@@ -277,22 +266,7 @@ export function PosRegister() {
       setCart(syncedItems);
       return;
     }
-
-    const lineId = extractLineId(response);
-    if (!lineId) {
-      throw new Error('Cart sync failed: missing line id from backend response.');
-    }
-
-    setCart((prev) => [
-      ...prev,
-      {
-        id: lineId,
-        productId: String(productId),
-        name: product.name,
-        price,
-        qty: 1,
-      },
-    ]);
+    throw new Error('Cart sync failed: backend did not return synchronized cart lines.');
   };
 
   const handleUpdateQuantity = async (lineId: string, qty: number) => {
@@ -314,9 +288,9 @@ export function PosRegister() {
     const syncedItems = extractCartItems(response);
     if (syncedItems) {
       setCart(syncedItems);
-    } else {
-      setCart((prev) => prev.map((item) => (item.id === lineId ? { ...item, qty } : item)));
+      return;
     }
+    throw new Error('Cart sync failed: backend did not return synchronized cart lines.');
   };
 
   const handleRemoveItem = async (lineId: string) => {
@@ -332,9 +306,9 @@ export function PosRegister() {
     const syncedItems = extractCartItems(response);
     if (syncedItems) {
       setCart(syncedItems);
-    } else {
-      setCart((prev) => prev.filter((item) => item.id !== lineId));
+      return;
     }
+    throw new Error('Cart sync failed: backend did not return synchronized cart lines.');
   };
 
   const handleClearCart = async () => {
@@ -398,7 +372,6 @@ export function PosRegister() {
       customerId: selectedCustomer?.id === 'walk-in-ui-only' ? null : selectedCustomer?.id || null,
       paymentMethod,
       amountGiven: amount,
-      clientCartSnapshot: cart,
     });
   };
 

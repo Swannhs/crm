@@ -49,6 +49,21 @@ const webhookCtrl = new WebhookController();
 const odooCtrl = new OdooController();
 const imageLibraryCtrl = new ImageLibraryController();
 
+function scheduleOmniSendConsumerStart(logger: any, attempt = 1) {
+  const maxBackoffMs = 30000;
+  const delayMs = Math.min(maxBackoffMs, Math.max(1000, attempt * 2000));
+
+  startOmniSendConsumer(logger)
+    .then(() => {
+      logger.info({ attempt }, "omni send consumer started");
+    })
+    .catch((err) => {
+      logger.error({ err, attempt, retryInMs: delayMs }, "Failed to start omni send consumer, will retry");
+      const timer = setTimeout(() => scheduleOmniSendConsumerStart(logger, attempt + 1), delayMs);
+      timer.unref?.();
+    });
+}
+
 // --- Webhooks (Public) ---
 app.get("/v1/webhook/whatsapp", (req, res) => webhookCtrl.verifyMeta(req, res));
 app.post("/v1/webhook/whatsapp", (req, res) => webhookCtrl.handleMeta(req, res));
@@ -163,9 +178,5 @@ app.get("/health", (_req, res) => res.json({ status: "ok", service: "integration
 const port = Number(process.env.PORT || 7140);
 server.listen(port, "0.0.0.0", async () => {
   logger.info({ port }, "integrations-service listening");
-  try {
-    await startOmniSendConsumer(logger);
-  } catch (err) {
-    logger.error({ err }, "Failed to start omni send consumer");
-  }
+  scheduleOmniSendConsumerStart(logger);
 });

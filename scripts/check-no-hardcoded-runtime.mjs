@@ -18,7 +18,6 @@ const SKIP_PARTS = ['node_modules', 'dist', 'coverage', '__tests__', '/test/', '
 const forbiddenLiterals = [
   'owner@example.com',
   'user-123',
-  `magento-ine${'gration-service'}`,
 ];
 
 const hardcodedServiceUrlPattern = /http:\/\/[a-z0-9-]+-service:\d+/gi;

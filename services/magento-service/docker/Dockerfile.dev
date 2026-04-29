@@ -1,9 +1,9 @@
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN sed -i 's|https://deb.debian.org|http://deb.debian.org|g; s|https://security.debian.org|http://security.debian.org|g' /etc/apt/sources.list.d/debian.sources \
-  && apt-get update -o Acquire::ForceIPv4=true -o Acquire::Retries=10 \
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update -o Acquire::Retries=10 \
   && apt-get install -y \
   git \
   unzip \
@@ -19,9 +19,10 @@ RUN sed -i 's|https://deb.debian.org|http://deb.debian.org|g; s|https://security
   libfreetype6-dev \
   libcurl4-openssl-dev \
   libssl-dev \
+  libsodium-dev \
   default-mysql-client \
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
-  && docker-php-ext-install -j"$(nproc)" bcmath intl pdo_mysql soap xsl zip gd sockets opcache ftp \
+  && docker-php-ext-install -j"$(nproc)" bcmath gd intl mbstring opcache pdo_mysql soap sockets xsl zip sodium \
   && a2enmod rewrite headers expires \
   && rm -rf /var/lib/apt/lists/*
 

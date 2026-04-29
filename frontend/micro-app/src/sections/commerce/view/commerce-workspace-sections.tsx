@@ -1603,7 +1603,7 @@ export function CommerceSettingsPanel({
           <Box sx={{ p: 3 }}>
             <Typography variant="h6">Store settings</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              These settings are used by the shop workspace and stored locally for now.
+              Tax and payment configuration are managed by backend services and Magento.
             </Typography>
           </Box>
           <Divider />
@@ -1616,9 +1616,10 @@ export function CommerceSettingsPanel({
               </Stack>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <RHFTextField name="currency" label="Currency" />
-                <RHFTextField name="taxRate" label="Tax rate (%)" type="number" />
               </Stack>
-              <RHFTextField name="checkoutNote" label="Checkout note" multiline rows={4} />
+              <Alert severity="info">
+                Tax rate and payment methods are read from Magento during checkout.
+              </Alert>
               <Button type="submit" variant="contained">
                 Save settings
               </Button>
@@ -1906,7 +1907,7 @@ export function CommerceCartSummary({
             </Stack>
             <Divider />
             <Stack direction="row" justifyContent="space-between">
-              <Typography variant="subtitle1">Total</Typography>
+              <Typography variant="subtitle1">Estimated total</Typography>
               <Typography variant="subtitle1">{fCurrency(cartTotalCents / 100)}</Typography>
             </Stack>
           </Stack>
@@ -2181,8 +2182,6 @@ type CheckoutPanelProps = {
   onSubmit: () => void;
   isPending: boolean;
   cartItemsLength: number;
-  cartTotalCents: number;
-  authenticated: boolean;
   cartSummary: React.ReactNode;
 };
 
@@ -2191,8 +2190,6 @@ export function CommerceCheckoutPanel({
   onSubmit,
   isPending,
   cartItemsLength,
-  cartTotalCents,
-  authenticated,
   cartSummary,
 }: CheckoutPanelProps) {
   return (
@@ -2223,14 +2220,8 @@ export function CommerceCheckoutPanel({
               </Stack>
               <RHFTextField name="postalCode" label="Postal code" />
 
-              {!authenticated && (
-                <Alert severity="info">
-                  This checkout will save a local order draft unless you are signed into the protected app session.
-                </Alert>
-              )}
-
               <Button type="submit" variant="contained" disabled={isPending || cartItemsLength === 0}>
-                {isPending ? <CircularProgress size={20} color="inherit" /> : `Create order for ${fCurrency(cartTotalCents / 100)}`}
+                {isPending ? <CircularProgress size={20} color="inherit" /> : 'Create Magento order'}
               </Button>
             </Stack>
           </Form>
