@@ -1,17 +1,12 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
-interface PosEmptyStateProps {
+type Props = {
   message?: string;
   description?: string;
-  icon?: React.ReactNode;
-}
+};
 
-export const PosEmptyState: React.FC<PosEmptyStateProps> = ({
-  message = 'No data yet',
-  description,
-  icon
-}) => {
+export function PosEmptyState({ message = 'No data yet', description }: Props) {
   return (
     <Box
       display="flex"
@@ -22,7 +17,6 @@ export const PosEmptyState: React.FC<PosEmptyStateProps> = ({
       p={4}
       textAlign="center"
     >
-      {icon && <Box mb={2} color="text.secondary">{icon}</Box>}
       <Typography variant="h6" color="text.secondary" gutterBottom>
         {message}
       </Typography>
@@ -33,4 +27,4 @@ export const PosEmptyState: React.FC<PosEmptyStateProps> = ({
       )}
     </Box>
   );
-};
+}

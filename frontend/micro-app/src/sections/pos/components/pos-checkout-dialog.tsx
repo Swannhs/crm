@@ -1,37 +1,114 @@
-import React from 'react';
-import { Box, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { SUPPORTED_FEATURES } from '../services/pos-service';
+import { useState } from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import MenuItem from '@mui/material/MenuItem';
+import CircularProgress from '@mui/material/CircularProgress';
 
-interface PosCheckoutDialogProps {
+type Props = {
   open: boolean;
   onClose: () => void;
-}
+  totalAmount: number;
+  onConfirmPayment: (paymentMethod: string, amount: number) => Promise<void>;
+};
 
-export const PosCheckoutDialog: React.FC<PosCheckoutDialogProps> = ({ open, onClose }) => {
+const PAYMENT_METHODS = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'card', label: 'Credit Card' },
+  { value: 'bank_transfer', label: 'Bank Transfer' },
+];
+
+export function PosCheckoutDialog({ open, onClose, totalAmount, onConfirmPayment }: Props) {
+  const [method, setMethod] = useState('');
+  const [amountGiven, setAmountGiven] = useState<string>(totalAmount.toString());
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleConfirm = async () => {
+    if (!method) {
+      setError('Please select a payment method.');
+      return;
+    }
+    const amount = parseFloat(amountGiven);
+    if (isNaN(amount) || amount < totalAmount) {
+      setError('Amount given must be greater than or equal to the total.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      await onConfirmPayment(method, amount);
+      onClose(); // only close on success
+    } catch (err: any) {
+      setError(err.message || 'Payment failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const change = Math.max(0, parseFloat(amountGiven || '0') - totalAmount);
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={!loading ? onClose : undefined} fullWidth maxWidth="xs">
       <DialogTitle>Checkout</DialogTitle>
       <DialogContent>
-        {!SUPPORTED_FEATURES.CHECKOUT ? (
-          <Typography color="error">
-            Checkout API is currently unavailable.
+        <Box py={2}>
+          <Typography variant="h6" gutterBottom>
+            Total Due: ${totalAmount.toFixed(2)}
           </Typography>
-        ) : (
-          <Box>
-            <Typography variant="subtitle1" gutterBottom>Select Payment Method</Typography>
-            <Box display="flex" gap={1}>
-              {/* Payment methods will be dynamic from API context once available */}
-              <Typography color="text.secondary">No payment methods configured.</Typography>
-            </Box>
-          </Box>
-        )}
+
+          <TextField
+            select
+            fullWidth
+            label="Payment Method"
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+            margin="normal"
+            disabled={loading}
+          >
+            {PAYMENT_METHODS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            fullWidth
+            type="number"
+            label="Amount Given"
+            value={amountGiven}
+            onChange={(e) => setAmountGiven(e.target.value)}
+            margin="normal"
+            disabled={loading}
+            inputProps={{ min: totalAmount, step: 0.01 }}
+          />
+
+          <Typography variant="body1" sx={{ mt: 2 }} color={change > 0 ? 'success.main' : 'text.secondary'}>
+            Change: ${change.toFixed(2)}
+          </Typography>
+
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
+        </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" disabled={!SUPPORTED_FEATURES.CHECKOUT}>
-          Complete Payment
+        <Button onClick={onClose} disabled={loading}>
+          Cancel
+        </Button>
+        <Button onClick={handleConfirm} variant="contained" disabled={loading}>
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Confirm Payment'}
         </Button>
       </DialogActions>
     </Dialog>
   );
-};
+}

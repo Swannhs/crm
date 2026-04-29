@@ -1,37 +1,69 @@
-import React from 'react';
-import { Box, Typography, Button, Divider } from '@mui/material';
-import { SUPPORTED_FEATURES } from '../services/pos-service';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import { Iconify } from 'src/components/iconify';
 import { PosEmptyState } from './pos-empty-state';
 
-export const PosCart: React.FC = () => {
-  if (!SUPPORTED_FEATURES.CART) {
-    return <PosEmptyState message="Cart API not configured" description="The endpoint /api/pos/cart is currently unsupported." />;
+type CartItem = {
+  id: string; // unique cart line id
+  productId: string;
+  name: string;
+  price: number;
+  qty: number;
+};
+
+type Props = {
+  items: CartItem[];
+  onUpdateQuantity: (lineId: string, qty: number) => void;
+  onRemoveItem: (lineId: string) => void;
+  onClearCart: () => void;
+};
+
+export function PosCart({ items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
+  if (!items || items.length === 0) {
+    return <PosEmptyState message="Cart is empty" />;
   }
 
   return (
     <Box display="flex" flexDirection="column" height="100%">
-      <Box p={2} borderBottom={1} borderColor="divider" display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6">Cart</Typography>
-        <Button size="small" color="error" disabled>Clear</Button>
-      </Box>
-      <Box flex={1} overflow="auto" p={2}>
-        <PosEmptyState message="Cart is empty" />
+      <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h6">Current Order</Typography>
+        <Button size="small" color="error" onClick={onClearCart}>
+          Clear All
+        </Button>
       </Box>
       <Divider />
-      <Box p={2}>
-        <Box display="flex" justifyContent="space-between" mb={1}>
-          <Typography color="text.secondary">Subtotal</Typography>
-          <Typography>0.00</Typography>
-        </Box>
-        <Box display="flex" justifyContent="space-between" mb={1}>
-          <Typography color="text.secondary">Tax</Typography>
-          <Typography>0.00</Typography>
-        </Box>
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <Typography variant="subtitle1" fontWeight="bold">Total</Typography>
-          <Typography variant="subtitle1" fontWeight="bold">0.00</Typography>
-        </Box>
+      <Box flex={1} overflow="auto" p={2}>
+        <Stack spacing={2}>
+          {items.map((item) => (
+            <Box key={item.id} display="flex" justifyContent="space-between" alignItems="center">
+              <Box flex={1}>
+                <Typography variant="subtitle2" noWrap>
+                  {item.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  ${item.price.toFixed(2)}
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <IconButton size="small" onClick={() => onUpdateQuantity(item.id, item.qty - 1)}>
+                  <Iconify icon="eva:minus-fill" />
+                </IconButton>
+                <Typography variant="body2">{item.qty}</Typography>
+                <IconButton size="small" onClick={() => onUpdateQuantity(item.id, item.qty + 1)}>
+                  <Iconify icon="eva:plus-fill" />
+                </IconButton>
+                <IconButton size="small" color="error" onClick={() => onRemoveItem(item.id)}>
+                  <Iconify icon="eva:trash-2-outline" />
+                </IconButton>
+              </Box>
+            </Box>
+          ))}
+        </Stack>
       </Box>
     </Box>
   );
-};
+}
