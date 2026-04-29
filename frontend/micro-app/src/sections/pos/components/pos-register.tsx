@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -8,6 +8,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { posService } from '../services/pos-service';
 
@@ -35,6 +36,9 @@ export function PosRegister() {
   const [cartId, setCartId] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
+  const [cartInitError, setCartInitError] = useState(false);
+  const [cartSyncing, setCartSyncing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Dialogs
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -45,22 +49,12 @@ export function PosRegister() {
   const [receiptData, setReceiptData] = useState<any>(null);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
-  // Initialize Remote Cart if not exists
-  useEffect(() => {
-    async function initCart() {
-      try {
-        if (!cartId) {
-          const res = await posService.createCart();
-          if (res?.id) setCartId(res.id);
-        }
-      } catch (e) {
-        // Failing silently for cart init if endpoint unavailable
-      }
-    }
-    initCart();
-  }, [cartId]);
-
   // Queries
+  const { data: context, isLoading: isLoadingContext, isError: isErrorContext } = useQuery({
+    queryKey: ['pos-context'],
+    queryFn: () => posService.getContext(),
+  });
+
   const { data: products, isLoading: isLoadingProducts, isError: isErrorProducts, refetch: refetchProducts } = useQuery({
     queryKey: ['pos-products'],
     queryFn: () => posService.getProducts(),
@@ -70,6 +64,39 @@ export function PosRegister() {
     queryKey: ['pos-orders'],
     queryFn: () => posService.getOrders(),
   });
+
+  // Initialize Remote Cart if not exists
+  useEffect(() => {
+    let mounted = true;
+    async function initCart() {
+      try {
+        if (!cartId && !cartInitError) {
+          const res = await posService.createCart();
+          if (mounted && res?.id) {
+            setCartId(res.id);
+            setCartInitError(false);
+          }
+        }
+      } catch (e) {
+        if (mounted) setCartInitError(true);
+        showToast('Failed to initialize cart. POS operations disabled.', 'error');
+      }
+    }
+    initCart();
+    return () => { mounted = false; };
+  }, [cartId, cartInitError]);
+
+  const filteredProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) return [];
+    if (!searchQuery) return products;
+    const lowerQuery = searchQuery.toLowerCase();
+    return products.filter(
+      (p: any) =>
+        p.name?.toLowerCase().includes(lowerQuery) ||
+        p.sku?.toLowerCase().includes(lowerQuery) ||
+        p.barcode?.toLowerCase().includes(lowerQuery)
+    );
+  }, [products, searchQuery]);
 
   // Mutations
   const checkoutMutation = useMutation({
@@ -101,7 +128,6 @@ export function PosRegister() {
     },
     onError: (error: any) => {
       showToast(error.message || 'Checkout failed', 'error');
-      throw error;
     }
   });
 
@@ -113,106 +139,118 @@ export function PosRegister() {
     },
     onError: (error: any) => {
       showToast(error.message || 'Refund failed', 'error');
-      throw error;
     }
   });
 
-  // API synchronized Cart logic
+  // API synchronized Cart logic - strictly Backend first
   const handleAddToCart = async (product: any) => {
-    // 1. Optimistic local update
+    if (!cartId) return;
+    setCartSyncing(true);
     const productId = product.id || product.sku;
-    const tempId = Math.random().toString(36).substr(2, 9);
-    let isUpdate = false;
-    let existingLineId = '';
 
-    setCart((prev) => {
-      const existing = prev.find((item) => item.productId === productId);
+    try {
+      const existing = cart.find((item) => item.productId === productId);
       if (existing) {
-        isUpdate = true;
-        existingLineId = existing.id;
-        return prev.map((item) =>
-          item.id === existing.id ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
-      return [
-        ...prev,
-        {
-          id: tempId,
-          productId,
-          name: product.name,
-          price: Number(product.price || 0),
-          qty: 1,
-        },
-      ];
-    });
-
-    // 2. Server sync
-    if (cartId) {
-      try {
-        if (isUpdate) {
-          const item = cart.find(i => i.id === existingLineId);
-          await posService.updateCartItem(cartId, existingLineId, { qty: (item?.qty || 1) + 1 });
-        } else {
-          const res = await posService.addToCart(cartId, { productId, qty: 1 });
-          if (res?.lineId) {
-             setCart(prev => prev.map(item => item.id === tempId ? { ...item, id: res.lineId } : item));
-          }
+        const newQty = existing.qty + 1;
+        await posService.updateCartItem(cartId, existing.id, { qty: newQty });
+        setCart((prev) => prev.map((item) => (item.id === existing.id ? { ...item, qty: newQty } : item)));
+      } else {
+        const res = await posService.addToCart(cartId, { productId, qty: 1 });
+        if (res?.lineId || res?.id) {
+          setCart((prev) => [
+            ...prev,
+            {
+              id: res.lineId || res.id,
+              productId,
+              name: product.name,
+              price: Number(product.price),
+              qty: 1,
+            },
+          ]);
         }
-      } catch (e) {
-        // Fallback local if api is unsupported/fails
       }
+    } catch (e: any) {
+      showToast(e.message || 'Failed to add item to cart', 'error');
+    } finally {
+      setCartSyncing(false);
     }
   };
 
   const handleUpdateQuantity = async (lineId: string, qty: number) => {
+    if (!cartId) return;
     if (qty <= 0) {
       handleRemoveItem(lineId);
       return;
     }
-    setCart((prev) => prev.map((item) => (item.id === lineId ? { ...item, qty } : item)));
 
-    if (cartId) {
-      try {
-         await posService.updateCartItem(cartId, lineId, { qty });
-      } catch (e) {}
+    setCartSyncing(true);
+    try {
+      await posService.updateCartItem(cartId, lineId, { qty });
+      setCart((prev) => prev.map((item) => (item.id === lineId ? { ...item, qty } : item)));
+    } catch (e: any) {
+      showToast(e.message || 'Failed to update quantity', 'error');
+    } finally {
+      setCartSyncing(false);
     }
   };
 
   const handleRemoveItem = async (lineId: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== lineId));
-    if (cartId) {
-      try {
-         await posService.removeCartItem(cartId, lineId);
-      } catch (e) {}
+    if (!cartId) return;
+    setCartSyncing(true);
+    try {
+      await posService.removeCartItem(cartId, lineId);
+      setCart((prev) => prev.filter((item) => item.id !== lineId));
+    } catch (e: any) {
+      showToast(e.message || 'Failed to remove item', 'error');
+    } finally {
+      setCartSyncing(false);
     }
   };
 
   const handleClearCart = async () => {
-    setCart([]);
     setConfirmClearOpen(false);
-    if (cartId) {
-      try {
-        const newCart = await posService.createCart();
-        if (newCart?.id) setCartId(newCart.id);
-      } catch (e) {}
+    if (!cartId) return;
+
+    setCartSyncing(true);
+    try {
+      const newCart = await posService.createCart();
+      if (newCart?.id) {
+        setCartId(newCart.id);
+        setCart([]);
+      }
+    } catch (e: any) {
+      showToast(e.message || 'Failed to clear cart', 'error');
+    } finally {
+      setCartSyncing(false);
     }
   };
 
   // Totals
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const tax = subtotal * 0.08; // Example tax, in real app fetch from config
-  const total = subtotal + tax;
+  const taxRate = typeof context?.taxRate === 'number' && Number.isFinite(context.taxRate) ? context.taxRate : null;
+  const tax = taxRate !== null ? subtotal * taxRate : null;
+  const total = subtotal + (tax || 0);
 
   const handleCheckoutConfirm = async (paymentMethod: string, amount: number) => {
     await checkoutMutation.mutateAsync({
       cartId,
-      items: cart,
       customerId: selectedCustomer?.id === 'walk-in-ui-only' ? null : selectedCustomer?.id,
       paymentMethod,
       amountGiven: amount,
-      totalAmount: total,
+      clientCartSnapshot: cart,
     });
   };
+
+  // Safe checks
+  const isPosReady = !isLoadingContext && !isErrorContext;
+  const isCartReady = !!cartId && !cartInitError;
+  const canCheckout = isPosReady && isCartReady && cart.length > 0 && !cartSyncing && !checkoutMutation.isPending;
+  const checkoutDisabledReason = !isPosReady ? 'POS settings unavailable'
+    : !isCartReady ? 'Cart sync failed'
+    : cart.length === 0 ? 'Cart is empty'
+    : cartSyncing ? 'Cart is syncing...'
+    : '';
+
 
   return (
     <Box display="flex" flexDirection="column" height="100vh" overflow="hidden" bgcolor="background.default">
@@ -229,14 +267,26 @@ export function PosRegister() {
       {activeTab === 'register' && (
         <Box display="flex" flex={1} overflow="hidden">
           {/* Products */}
-          <Box flex={2} borderRight={1} borderColor="divider" bgcolor="background.paper" overflow="hidden">
-            <PosProductGrid
-              products={products}
-              isLoading={isLoadingProducts}
-              isError={isErrorProducts}
-              onRetry={refetchProducts}
-              onAddToCart={handleAddToCart}
-            />
+          <Box flex={2} borderRight={1} borderColor="divider" bgcolor="background.paper" display="flex" flexDirection="column" overflow="hidden">
+            <Box p={2} borderBottom={1} borderColor="divider">
+              <TextField
+                fullWidth
+                placeholder="Search products by name, SKU or barcode..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                size="small"
+              />
+            </Box>
+            <Box flex={1} overflow="auto">
+              <PosProductGrid
+                products={filteredProducts}
+                isLoading={isLoadingProducts}
+                isError={isErrorProducts}
+                onRetry={refetchProducts}
+                onAddToCart={handleAddToCart}
+                disabled={!isCartReady || cartSyncing}
+              />
+            </Box>
           </Box>
 
           {/* Sidebar */}
@@ -261,6 +311,8 @@ export function PosRegister() {
                 tax={tax}
                 total={total}
                 onCheckout={() => setCheckoutOpen(true)}
+                disabled={!canCheckout}
+                disabledReason={checkoutDisabledReason}
               />
             </Box>
           </Box>
@@ -305,6 +357,7 @@ export function PosRegister() {
         open={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
         totalAmount={total}
+        paymentMethods={context?.paymentMethods}
         onConfirmPayment={handleCheckoutConfirm}
       />
       <PosReceiptDialog

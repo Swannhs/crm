@@ -5,15 +5,21 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { PosEmptyState } from './pos-empty-state';
 import { PosErrorState } from './pos-error-state';
 
+function toValidNumber(value: unknown): number | null {
+  const num = typeof value === 'string' ? Number(value) : value;
+  return typeof num === 'number' && Number.isFinite(num) ? num : null;
+}
+
 type Props = {
   products: any[];
   isLoading: boolean;
   isError: boolean;
   onAddToCart: (product: any) => void;
   onRetry?: () => void;
+  disabled?: boolean;
 };
 
-export function PosProductGrid({ products, isLoading, isError, onAddToCart, onRetry }: Props) {
+export function PosProductGrid({ products, isLoading, isError, onAddToCart, onRetry, disabled }: Props) {
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
@@ -41,25 +47,40 @@ export function PosProductGrid({ products, isLoading, isError, onAddToCart, onRe
       }}
       p={2}
     >
-      {products.map((product) => (
-        <Card
-          key={product.id || product.sku}
-          sx={{
-            p: 2,
-            cursor: 'pointer',
-            textAlign: 'center',
-            '&:hover': { boxShadow: (theme) => theme.customShadows.z8 },
-          }}
-          onClick={() => onAddToCart(product)}
-        >
-          <Typography variant="subtitle2" noWrap>
-            {product.name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            ${Number(product.price || 0).toFixed(2)}
-          </Typography>
-        </Card>
-      ))}
+      {products.map((product) => {
+        const validPrice = toValidNumber(product.price);
+        const hasValidPrice = validPrice !== null;
+        const isDisabled = disabled || !hasValidPrice;
+
+        return (
+          <Card
+            key={product.id || product.sku}
+            sx={{
+              p: 2,
+              cursor: isDisabled ? 'not-allowed' : 'pointer',
+              opacity: isDisabled ? 0.6 : 1,
+              textAlign: 'center',
+              '&:hover': isDisabled ? {} : { boxShadow: (theme) => theme.customShadows.z8 },
+            }}
+            onClick={() => {
+              if (!isDisabled) onAddToCart(product);
+            }}
+          >
+            <Typography variant="subtitle2" noWrap>
+              {product.name}
+            </Typography>
+            {hasValidPrice ? (
+              <Typography variant="body2" color="text.secondary">
+                ${validPrice.toFixed(2)}
+              </Typography>
+            ) : (
+              <Typography variant="body2" color="error">
+                Price unavailable
+              </Typography>
+            )}
+          </Card>
+        );
+      })}
     </Box>
   );
 }

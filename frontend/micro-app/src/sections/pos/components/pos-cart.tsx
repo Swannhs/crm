@@ -20,9 +20,10 @@ type Props = {
   onUpdateQuantity: (lineId: string, qty: number) => void;
   onRemoveItem: (lineId: string) => void;
   onClearCart: () => void;
+  disabled?: boolean;
 };
 
-export function PosCart({ items, onUpdateQuantity, onRemoveItem, onClearCart }: Props) {
+export function PosCart({ items, onUpdateQuantity, onRemoveItem, onClearCart, disabled }: Props) {
   if (!items || items.length === 0) {
     return <PosEmptyState message="Cart is empty" />;
   }
@@ -31,7 +32,7 @@ export function PosCart({ items, onUpdateQuantity, onRemoveItem, onClearCart }: 
     <Box display="flex" flexDirection="column" height="100%">
       <Box p={2} display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h6">Current Order</Typography>
-        <Button size="small" color="error" onClick={onClearCart}>
+        <Button size="small" color="error" onClick={onClearCart} disabled={disabled}>
           Clear All
         </Button>
       </Box>
@@ -49,14 +50,14 @@ export function PosCart({ items, onUpdateQuantity, onRemoveItem, onClearCart }: 
                 </Typography>
               </Box>
               <Box display="flex" alignItems="center" gap={1}>
-                <IconButton size="small" onClick={() => onUpdateQuantity(item.id, item.qty - 1)}>
+                <IconButton size="small" onClick={() => onUpdateQuantity(item.id, item.qty - 1)} disabled={disabled}>
                   <Iconify icon="eva:minus-fill" />
                 </IconButton>
                 <Typography variant="body2">{item.qty}</Typography>
-                <IconButton size="small" onClick={() => onUpdateQuantity(item.id, item.qty + 1)}>
+                <IconButton size="small" onClick={() => onUpdateQuantity(item.id, item.qty + 1)} disabled={disabled}>
                   <Iconify icon="eva:plus-fill" />
                 </IconButton>
-                <IconButton size="small" color="error" onClick={() => onRemoveItem(item.id)}>
+                <IconButton size="small" color="error" onClick={() => onRemoveItem(item.id)} disabled={disabled}>
                   <Iconify icon="eva:trash-2-outline" />
                 </IconButton>
               </Box>
