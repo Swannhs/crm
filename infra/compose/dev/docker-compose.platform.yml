@@ -124,9 +124,8 @@ services:
       retries: 20
       start_period: 90s
     volumes:
-      - ${MAGENTO_SOURCE_DIR:-magento_app_data}:/var/www/html
+      - ../../../magento-src:/var/www/html
 
 volumes:
   odoo_web_data:
   magento_search_data:
-  magento_app_data:

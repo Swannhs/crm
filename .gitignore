@@ -78,3 +78,4 @@ services/magento-service/*
 !services/magento-service/docker/
 !services/magento-service/docker/Dockerfile.dev
 ```
+magento-src/
