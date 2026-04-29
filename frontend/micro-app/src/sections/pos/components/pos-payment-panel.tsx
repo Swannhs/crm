@@ -8,7 +8,7 @@ type Props = {
   total: number;
   onCheckout: () => void;
   disabled?: boolean;
-  disabledReason?: string;
+  disabledReason?: string | null;
 };
 
 export function PosPaymentPanel({ subtotal, tax, total, onCheckout, disabled, disabledReason }: Props) {
@@ -20,19 +20,12 @@ export function PosPaymentPanel({ subtotal, tax, total, onCheckout, disabled, di
       </Box>
       <Box display="flex" justifyContent="space-between" mb={1}>
         <Typography color="text.secondary">Tax</Typography>
-        <Typography color={tax === null ? 'text.disabled' : 'text.primary'}>
-          {tax === null ? 'Calculated at checkout' : `$${tax.toFixed(2)}`}
-        </Typography>
+        <Typography>{tax === null ? 'Unavailable' : `$${tax.toFixed(2)}`}</Typography>
       </Box>
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h6">Total</Typography>
         <Typography variant="h6">${total.toFixed(2)}</Typography>
       </Box>
-      {disabledReason && (
-        <Typography color="error" variant="caption" display="block" mb={1}>
-          {disabledReason}
-        </Typography>
-      )}
       <Button
         fullWidth
         variant="contained"
@@ -43,6 +36,11 @@ export function PosPaymentPanel({ subtotal, tax, total, onCheckout, disabled, di
       >
         Checkout
       </Button>
+      {disabledReason && (
+        <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+          {disabledReason}
+        </Typography>
+      )}
     </Box>
   );
 }

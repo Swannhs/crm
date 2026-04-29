@@ -14,11 +14,17 @@ type Props = {
   open: boolean;
   onClose: () => void;
   totalAmount: number;
-  paymentMethods?: Array<{ value: string; label: string }>;
+  paymentMethods: Array<{ value: string; label: string }>;
   onConfirmPayment: (paymentMethod: string, amount: number) => Promise<void>;
 };
 
-export function PosCheckoutDialog({ open, onClose, totalAmount, paymentMethods, onConfirmPayment }: Props) {
+export function PosCheckoutDialog({
+  open,
+  onClose,
+  totalAmount,
+  paymentMethods,
+  onConfirmPayment,
+}: Props) {
   const [method, setMethod] = useState('');
   const [amountGiven, setAmountGiven] = useState<string>(totalAmount.toString());
   const [loading, setLoading] = useState(false);
@@ -32,13 +38,13 @@ export function PosCheckoutDialog({ open, onClose, totalAmount, paymentMethods, 
     }
   }, [open, totalAmount]);
 
-  const hasPaymentMethods = Array.isArray(paymentMethods) && paymentMethods.length > 0;
-
   const handleConfirm = async () => {
-    if (!hasPaymentMethods) return;
-
     if (!method) {
       setError('Please select a payment method.');
+      return;
+    }
+    if (!paymentMethods.length) {
+      setError('Payment methods are unavailable.');
       return;
     }
     const amount = parseFloat(amountGiven);
@@ -70,49 +76,46 @@ export function PosCheckoutDialog({ open, onClose, totalAmount, paymentMethods, 
             Total Due: ${totalAmount.toFixed(2)}
           </Typography>
 
-          {!hasPaymentMethods ? (
-            <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+          <TextField
+            select
+            fullWidth
+            label="Payment Method"
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+            margin="normal"
+            disabled={loading || !paymentMethods.length}
+          >
+            {paymentMethods.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          {!paymentMethods.length && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
               Payment methods are unavailable.
             </Typography>
-          ) : (
-            <>
-              <TextField
-                select
-                fullWidth
-                label="Payment Method"
-                value={method}
-                onChange={(e) => setMethod(e.target.value)}
-                margin="normal"
-                disabled={loading}
-              >
-                {paymentMethods.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+          )}
 
-              <TextField
-                fullWidth
-                type="number"
-                label="Amount Given"
-                value={amountGiven}
-                onChange={(e) => setAmountGiven(e.target.value)}
-                margin="normal"
-                disabled={loading}
-                inputProps={{ min: totalAmount, step: 0.01 }}
-              />
+          <TextField
+            fullWidth
+            type="number"
+            label="Amount Given"
+            value={amountGiven}
+            onChange={(e) => setAmountGiven(e.target.value)}
+            margin="normal"
+            disabled={loading}
+            inputProps={{ min: totalAmount, step: 0.01 }}
+          />
 
-              <Typography variant="body1" sx={{ mt: 2 }} color={change > 0 ? 'success.main' : 'text.secondary'}>
-                Change: ${change.toFixed(2)}
-              </Typography>
+          <Typography variant="body1" sx={{ mt: 2 }} color={change > 0 ? 'success.main' : 'text.secondary'}>
+            Change: ${change.toFixed(2)}
+          </Typography>
 
-              {error && (
-                <Typography color="error" variant="body2" sx={{ mt: 2 }}>
-                  {error}
-                </Typography>
-              )}
-            </>
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
           )}
         </Box>
       </DialogContent>
@@ -120,7 +123,7 @@ export function PosCheckoutDialog({ open, onClose, totalAmount, paymentMethods, 
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button onClick={handleConfirm} variant="contained" disabled={loading || !hasPaymentMethods}>
+        <Button onClick={handleConfirm} variant="contained" disabled={loading || !paymentMethods.length}>
           {loading ? <CircularProgress size={24} color="inherit" /> : 'Confirm Payment'}
         </Button>
       </DialogActions>

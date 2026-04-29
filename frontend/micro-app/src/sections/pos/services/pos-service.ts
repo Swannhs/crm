@@ -17,8 +17,8 @@ export const posService = {
   },
 
   // Products
-  getProducts: async () => {
-    const response = await axios.get(API.PRODUCTS);
+  getProducts: async (query?: string) => {
+    const response = await axios.get(API.PRODUCTS, { params: { query } });
     return response.data?.data ?? response.data ?? [];
   },
 

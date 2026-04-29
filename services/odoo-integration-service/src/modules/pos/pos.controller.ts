@@ -22,6 +22,29 @@ export class PosController {
     return this.posService.getSettings(shopId);
   }
 
+  @Get('context')
+  @ApiOperation({ summary: 'Compatibility: Get POS register context' })
+  getContext(@Query('shopId') shopId?: string) {
+    const resolvedShopId = this.resolveShopId(shopId);
+    const settings = this.posService.getSettings(resolvedShopId);
+    return {
+      shopId: resolvedShopId,
+      currency: settings.currency,
+      taxRate: settings.taxRate,
+      serviceChargeRate: settings.serviceChargeRate,
+      paymentMethods: [
+        { value: 'cash', label: 'Cash' },
+        { value: 'card', label: 'Card' },
+        { value: 'wallet', label: 'Wallet' },
+        { value: 'other', label: 'Other' },
+      ],
+      checkoutRules: {
+        requirePaymentMethod: true,
+        requireCartId: true,
+      },
+    };
+  }
+
   @Get('settings/tip-shifts')
   @ApiOperation({ summary: 'Get POS tip shifts' })
   getTipShifts(@Query('shopId') shopId: string) {
