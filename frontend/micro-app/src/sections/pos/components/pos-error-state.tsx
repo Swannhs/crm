@@ -1,15 +1,13 @@
-import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 
-interface PosErrorStateProps {
+type Props = {
   message?: string;
   onRetry?: () => void;
-}
+};
 
-export const PosErrorState: React.FC<PosErrorStateProps> = ({
-  message = 'Unavailable',
-  onRetry
-}) => {
+export function PosErrorState({ message = 'Unavailable', onRetry }: Props) {
   return (
     <Box
       display="flex"
@@ -20,7 +18,7 @@ export const PosErrorState: React.FC<PosErrorStateProps> = ({
       p={4}
       textAlign="center"
     >
-      <Typography variant="h6" color="error" gutterBottom>
+      <Typography variant="subtitle1" color="error" gutterBottom>
         {message}
       </Typography>
       {onRetry && (
@@ -30,4 +28,4 @@ export const PosErrorState: React.FC<PosErrorStateProps> = ({
       )}
     </Box>
   );
-};
+}

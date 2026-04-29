@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from 'src/utils/axios';
 
-// API Endpoints Mapping
+// Strictly use /api/pos/* endpoints
 const API = {
   CONTEXT: '/api/pos/context',
   PRODUCTS: '/api/pos/products',
@@ -10,91 +10,68 @@ const API = {
   ORDERS: '/api/pos/orders',
 };
 
-// Feature Support Flags (Based on backend analysis)
-export const SUPPORTED_FEATURES = {
-  CONTEXT: false,
-  PRODUCTS: false,
-  CUSTOMERS: true,
-  CART: false,
-  CHECKOUT: false,
-  ORDERS: false,
-};
-
 export const posService = {
   // Context
   getContext: async () => {
-    if (!SUPPORTED_FEATURES.CONTEXT) throw new Error('API Endpoint Not Supported');
     const response = await axios.get(API.CONTEXT);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   // Products
   getProducts: async () => {
-    if (!SUPPORTED_FEATURES.PRODUCTS) throw new Error('API Endpoint Not Supported');
     const response = await axios.get(API.PRODUCTS);
-    return response.data;
+    return response.data?.data ?? response.data ?? [];
   },
 
   // Customers
   getCustomers: async (query?: string) => {
-    if (!SUPPORTED_FEATURES.CUSTOMERS) throw new Error('API Endpoint Not Supported');
     const response = await axios.get(API.CUSTOMERS, { params: { query } });
-    return response.data;
+    return response.data?.data ?? response.data ?? [];
   },
   createCustomer: async (data: { name: string; phone?: string; email?: string }) => {
-    if (!SUPPORTED_FEATURES.CUSTOMERS) throw new Error('API Endpoint Not Supported');
     const response = await axios.post(API.CUSTOMERS, data);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   // Cart
   createCart: async () => {
-    if (!SUPPORTED_FEATURES.CART) throw new Error('API Endpoint Not Supported');
     const response = await axios.post(API.CART);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
   addToCart: async (cartId: string, item: any) => {
-    if (!SUPPORTED_FEATURES.CART) throw new Error('API Endpoint Not Supported');
     const response = await axios.post(`${API.CART}/${cartId}/items`, item);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
   updateCartItem: async (cartId: string, lineId: string, data: any) => {
-    if (!SUPPORTED_FEATURES.CART) throw new Error('API Endpoint Not Supported');
     const response = await axios.patch(`${API.CART}/${cartId}/items/${lineId}`, data);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
   removeCartItem: async (cartId: string, lineId: string) => {
-    if (!SUPPORTED_FEATURES.CART) throw new Error('API Endpoint Not Supported');
     const response = await axios.delete(`${API.CART}/${cartId}/items/${lineId}`);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   // Checkout
   checkout: async (data: any) => {
-    if (!SUPPORTED_FEATURES.CHECKOUT) throw new Error('API Endpoint Not Supported');
     const response = await axios.post(API.CHECKOUT, data);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 
   // Orders
   getOrders: async () => {
-    if (!SUPPORTED_FEATURES.ORDERS) throw new Error('API Endpoint Not Supported');
     const response = await axios.get(API.ORDERS);
-    return response.data;
+    return response.data?.data ?? response.data ?? [];
   },
   getOrderById: async (id: string) => {
-    if (!SUPPORTED_FEATURES.ORDERS) throw new Error('API Endpoint Not Supported');
     const response = await axios.get(`${API.ORDERS}/${id}`);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
   refundOrder: async (id: string, data: { reason: string; amount: number }) => {
-    if (!SUPPORTED_FEATURES.ORDERS) throw new Error('API Endpoint Not Supported');
     const response = await axios.post(`${API.ORDERS}/${id}/refund`, data);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
   getReceipt: async (id: string) => {
-    if (!SUPPORTED_FEATURES.ORDERS) throw new Error('API Endpoint Not Supported');
     const response = await axios.get(`${API.ORDERS}/${id}/receipt`);
-    return response.data;
+    return response.data?.data ?? response.data;
   },
 };
