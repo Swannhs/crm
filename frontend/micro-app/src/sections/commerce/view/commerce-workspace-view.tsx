@@ -129,7 +129,8 @@ export function CommerceWorkspaceView({
 
   const resolvedOrgId =
     (user as any)?.org_id || (user as any)?.orgId || (user as any)?.organizationId || '';
-  const resolvedShopKey = shopId || shopPath || resolvedOrgId || 'shop';
+  const queryShopKey = shopId || shopPath || resolvedOrgId;
+  const resolvedShopKey = queryShopKey || 'shop';
   const posRouteShopId = shopId || resolvedOrgId || resolvedShopKey || 'shop';
   const checkoutRouteKey = shopPath || shopId || resolvedShopKey;
   const isKnownSection = section
@@ -252,14 +253,14 @@ export function CommerceWorkspaceView({
 
   const storefrontProductsQuery = useQuery({
     queryKey: ['commerce-products', mode, resolvedShopKey],
-    enabled: Boolean(resolvedShopKey) && isStorefrontMode,
-    queryFn: () => publicCommerceService.getProducts(shopId || shopPath || resolvedOrgId || resolvedShopKey),
+    enabled: Boolean(queryShopKey) && isStorefrontMode,
+    queryFn: () => publicCommerceService.getProducts(queryShopKey as string),
   });
   const adminProductsQuery = useQuery({
     queryKey: ['commerce-products', mode, resolvedShopKey, productPage, productRowsPerPage, debouncedSearch],
-    enabled: Boolean(resolvedShopKey) && !isStorefrontMode,
+    enabled: Boolean(queryShopKey) && !isStorefrontMode,
     queryFn: () =>
-      commerceService.getProductsPage(resolvedShopKey, {
+      commerceService.getProductsPage(queryShopKey as string, {
         currentPage: productPage + 1,
         pageSize: productRowsPerPage,
         search: debouncedSearch,
@@ -1116,7 +1117,7 @@ export function CommerceWorkspaceView({
         )}
       </Stack>
 
-      {(isStorefrontMode ? storefrontProductsQuery.isError : adminProductsQuery.isError) && (
+      {Boolean(queryShopKey) && (isStorefrontMode ? storefrontProductsQuery.isError : adminProductsQuery.isError) && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           Product data could not be loaded for this shop. Verify the shop identifier or backend mapping.
         </Alert>

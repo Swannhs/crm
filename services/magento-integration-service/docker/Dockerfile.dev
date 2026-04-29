@@ -2,7 +2,7 @@ FROM php:8.4-cli
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN sed -i 's|https://deb.debian.org|http://deb.debian.org|g; s|https://security.debian.org|http://security.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list.d/debian.sources \
   && apt-get update -o Acquire::ForceIPv4=true -o Acquire::Retries=10 \
   && apt-get install -y \
   git \

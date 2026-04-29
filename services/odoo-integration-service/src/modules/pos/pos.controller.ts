@@ -10,6 +10,11 @@ import { PosService } from './pos.service.js';
 @Controller('pos')
 export class PosController {
   constructor(private readonly posService: PosService) {}
+  private readonly defaultShopId = 'default-shop';
+
+  private resolveShopId(shopId?: string) {
+    return shopId || this.defaultShopId;
+  }
 
   @Get('settings')
   @ApiOperation({ summary: 'Get POS settings' })
@@ -27,6 +32,74 @@ export class PosController {
   @ApiOperation({ summary: 'Get POS catalog' })
   getCatalog(@Query('shopId') shopId: string) {
     return this.posService.getCatalog(shopId);
+  }
+
+  @Get('products')
+  @ApiOperation({ summary: 'Compatibility: Get POS products' })
+  getProducts(@Query('shopId') shopId?: string) {
+    return this.posService.getCatalog(this.resolveShopId(shopId));
+  }
+
+  @Post('cart')
+  @ApiOperation({ summary: 'Compatibility: Create POS cart' })
+  createCart(@Body() body: { shopId?: string } = {}) {
+    const resolvedShopId = this.resolveShopId(body?.shopId);
+    const tables = this.posService.getTables(resolvedShopId);
+    const table = tables[0] ?? this.posService.createTable({ shopId: resolvedShopId, tableName: 'Takeout' });
+
+    return this.posService.createTableOrder({
+      shopId: resolvedShopId,
+      tableId: table.id,
+      tableName: table.tableName,
+      channel: 'takeaway',
+      source: 'odoo_pos',
+      fulfillmentStatus: 'draft',
+      orderStatus: 'open',
+      lines: [],
+    });
+  }
+
+  @Post('cart/:cartId/items')
+  @ApiOperation({ summary: 'Compatibility: Add item to POS cart' })
+  addCartItem(
+    @Param('cartId') cartId: string,
+    @Body() body: { productId?: string; qty?: number; note?: string },
+  ) {
+    const order = this.posService.getTableOrder(cartId);
+    const product = body?.productId
+      ? this.posService.getCatalog(order.shopId).find((item) => item.id === body.productId || item.sku === body.productId)
+      : undefined;
+
+    const result = this.posService.addOrderItem(cartId, {
+      menuItemId: product?.id,
+      name: product?.name || body?.productId || 'Item',
+      quantity: Number(body?.qty || 1),
+      unitPrice: Number(product?.unitPrice || 0),
+      taxRate: Number(product?.taxRate || 0),
+      note: body?.note,
+    });
+
+    const createdLine = result.lines[result.lines.length - 1];
+    return { ...result, lineId: createdLine?.id };
+  }
+
+  @Patch('cart/:cartId/items/:lineId')
+  @ApiOperation({ summary: 'Compatibility: Update POS cart item' })
+  updateCartItem(
+    @Param('cartId') cartId: string,
+    @Param('lineId') lineId: string,
+    @Body() body: { qty?: number },
+  ) {
+    const order = this.posService.getTableOrder(cartId);
+    const qty = Math.max(1, Number(body?.qty || 1));
+    const lines = order.lines.map((line) => (line.id === lineId ? { ...line, quantity: qty } : line));
+    return this.posService.updateTableOrder({ id: cartId, lines });
+  }
+
+  @Delete('cart/:cartId/items/:lineId')
+  @ApiOperation({ summary: 'Compatibility: Remove POS cart item' })
+  removeCartItem(@Param('cartId') cartId: string, @Param('lineId') lineId: string) {
+    return this.posService.removeOrderItem(cartId, lineId);
   }
 
   @Get('customers')
@@ -146,9 +219,21 @@ export class PosController {
     return this.posService.getTableOrders(shopId);
   }
 
+  @Get('orders')
+  @ApiOperation({ summary: 'Compatibility: List POS orders' })
+  getOrders(@Query('shopId') shopId?: string) {
+    return this.posService.getTableOrders(this.resolveShopId(shopId));
+  }
+
   @Get('table-orders/:id')
   @ApiOperation({ summary: 'Get table order details' })
   getTableOrder(@Param('id') id: string) {
+    return this.posService.getTableOrder(id);
+  }
+
+  @Get('orders/:id')
+  @ApiOperation({ summary: 'Compatibility: Get POS order details' })
+  getOrder(@Param('id') id: string) {
     return this.posService.getTableOrder(id);
   }
 
@@ -200,9 +285,21 @@ export class PosController {
     return this.posService.refundOrder(id, body || {});
   }
 
+  @Post('orders/:id/refund')
+  @ApiOperation({ summary: 'Compatibility: Create POS order refund' })
+  refundOrderCompat(@Param('id') id: string, @Body() body: any) {
+    return this.posService.refundOrder(id, body || {});
+  }
+
   @Get('table-orders/:id/receipt')
   @ApiOperation({ summary: 'Get order receipt' })
   getReceipt(@Param('id') id: string) {
+    return this.posService.getReceipt(id);
+  }
+
+  @Get('orders/:id/receipt')
+  @ApiOperation({ summary: 'Compatibility: Get POS receipt' })
+  getReceiptCompat(@Param('id') id: string) {
     return this.posService.getReceipt(id);
   }
 

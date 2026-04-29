@@ -121,11 +121,11 @@ services:
       - "7140:7140"
 
   magento-integration-service:
-    build:
-      context: ../../..
-      dockerfile: services/magento-integration-service/docker/Dockerfile.dev
+    image: php:8.4-cli
     container_name: magento-integration-service
     profiles: ["magento"]
+    working_dir: /workspace/services/magento-integration-service
+    command: sh -c "php artisan serve --host=0.0.0.0 --port=$${PORT:-7210}"
     volumes:
       - ../../../services/magento-integration-service:/workspace/services/magento-integration-service
     environment:
@@ -138,9 +138,6 @@ services:
       MAGENTO_ADMIN_PASSWORD: ${MAGENTO_ADMIN_PASSWORD:-Admin123!}
       MAGENTO_ACCESS_TOKEN: ${MAGENTO_ACCESS_TOKEN:-}
       MAGENTO_TIMEOUT_SECONDS: 20
-    depends_on:
-      magento:
-        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "php -r '$$c=@file_get_contents(\"http://127.0.0.1:7210/up\"); if($$c===false){exit(1);} echo $$c;' >/dev/null 2>&1 || exit 1"]
       interval: 15s

@@ -120,6 +120,9 @@ class MagentoController extends Controller
             $data = $this->magentoClient->restGet($path, $query);
             return response()->json(['data' => $data]);
         } catch (ConnectionException $e) {
+            if ($fallback = $this->buildOfflineFallback($path, $query)) {
+                return response()->json($fallback);
+            }
             return response()->json(['message' => 'Magento connection failed', 'error' => $e->getMessage()], 502);
         } catch (RuntimeException $e) {
             return response()->json(['message' => 'Magento request failed', 'error' => $e->getMessage()], 502);
@@ -141,6 +144,9 @@ class MagentoController extends Controller
 
             return response()->json(['data' => $data]);
         } catch (ConnectionException $e) {
+            if ($fallback = $this->buildOfflineFallback($normalizedPath, $query)) {
+                return response()->json($fallback);
+            }
             return response()->json(['message' => 'Magento connection failed', 'error' => $e->getMessage()], 502);
         } catch (RuntimeException $e) {
             return response()->json(['message' => 'Magento request failed', 'error' => $e->getMessage()], 502);
@@ -160,5 +166,59 @@ class MagentoController extends Controller
         }
 
         return '/' . $trimmed;
+    }
+
+    private function buildOfflineFallback(string $path, array $query): ?array
+    {
+        if (!app()->environment('local')) {
+            return null;
+        }
+
+        $normalizedPath = strtolower($path);
+
+        if (str_contains($normalizedPath, '/v1/orders')) {
+            return [
+                'data' => [
+                    'items' => [],
+                    'search_criteria' => [
+                        'current_page' => (int) ($query['searchCriteria[currentPage]'] ?? 1),
+                        'page_size' => (int) ($query['searchCriteria[pageSize]'] ?? 20),
+                    ],
+                    'total_count' => 0,
+                ],
+                'fallback' => true,
+            ];
+        }
+
+        if (str_contains($normalizedPath, '/v1/products')) {
+            return [
+                'data' => [
+                    'items' => [],
+                    'search_criteria' => [
+                        'current_page' => (int) ($query['searchCriteria[currentPage]'] ?? 1),
+                        'page_size' => (int) ($query['searchCriteria[pageSize]'] ?? 20),
+                    ],
+                    'total_count' => 0,
+                ],
+                'fallback' => true,
+            ];
+        }
+
+        if (str_contains($normalizedPath, '/v1/categories')) {
+            return [
+                'data' => [
+                    'id' => 0,
+                    'name' => 'Root Catalog',
+                    'is_active' => true,
+                    'position' => 0,
+                    'level' => 0,
+                    'product_count' => 0,
+                    'children_data' => [],
+                ],
+                'fallback' => true,
+            ];
+        }
+
+        return null;
     }
 }
