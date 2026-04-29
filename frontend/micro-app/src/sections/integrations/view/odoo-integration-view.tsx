@@ -251,19 +251,19 @@ export function OdooIntegrationView() {
 
         <Grid item xs={12}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Magento -> Odoo sync</Typography>
+            <Typography variant="h6" sx={{ mb: 2 }}>Magento -&gt; Odoo sync</Typography>
             <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
               <Button variant="outlined" onClick={() => runSyncAction('dry-customers')} disabled={syncCustomersMutation.isPending || syncOrdersMutation.isPending}>
-                Dry-run Magento customers -> Odoo
+                Dry-run Magento customers -&gt; Odoo
               </Button>
               <Button variant="outlined" onClick={() => runSyncAction('dry-orders')} disabled={syncCustomersMutation.isPending || syncOrdersMutation.isPending}>
-                Dry-run Magento orders -> Odoo
+                Dry-run Magento orders -&gt; Odoo
               </Button>
               <Button variant="contained" color="warning" onClick={() => { setPendingSyncAction('push-customers'); setSyncDialogOpen(true); }} disabled={syncCustomersMutation.isPending || syncOrdersMutation.isPending}>
-                Push Magento customers -> Odoo
+                Push Magento customers -&gt; Odoo
               </Button>
               <Button variant="contained" color="warning" onClick={() => { setPendingSyncAction('push-orders'); setSyncDialogOpen(true); }} disabled={syncCustomersMutation.isPending || syncOrdersMutation.isPending}>
-                Push Magento orders -> Odoo
+                Push Magento orders -&gt; Odoo
               </Button>
             </Stack>
 
