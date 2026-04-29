@@ -30,13 +30,16 @@ wait_for_db() {
 }
 
 bootstrap_source_if_missing() {
-  if [ -f "${APP_DIR}/composer.json" ]; then
+  if [ -f "${APP_DIR}/bin/magento" ]; then
     return
   fi
 
-  echo "Magento source missing. Cloning ${MAGENTO_GIT_URL} (${MAGENTO_GIT_REF})..."
-  rm -rf "${APP_DIR:?}/"*
-  git clone --depth 1 --branch "${MAGENTO_GIT_REF}" "${MAGENTO_GIT_URL}" "${APP_DIR}"
+  echo "Magento source is missing at ${APP_DIR}."
+  echo "Clone Magento on your host machine first:"
+  echo "  git clone https://github.com/magento/magento2.git magento-src"
+  echo "  cd magento-src && git checkout 2.4-develop"
+  echo "Then restart Docker."
+  exit 1
 }
 
 install_magento_if_needed() {

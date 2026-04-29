@@ -113,7 +113,7 @@ services:
       magento-search:
         condition: service_started
     volumes:
-      - ${MAGENTO_SOURCE_DIR:-../../../services/magento-service}:/var/www/html
+      - ../../../magento-src:/var/www/html
     restart: unless-stopped
 
 volumes:
