@@ -15,6 +15,7 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
+import Switch from '@mui/material/Switch';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -40,12 +41,21 @@ type WorkspaceProps = { section?: string };
 type NameMode = null | 'campaign' | 'source' | 'medium';
 
 type PendingDelete = null | { kind: 'source' | 'medium'; id: string; name: string };
+type PendingCampaignDelete = null | { id: string; name: string };
 
 export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
   const queryClient = useQueryClient();
   const defaultTab = section === 'sources' ? 'sources' : section === 'mediums' ? 'mediums' : section === 'analytics' ? 'analytics' : 'campaigns';
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [campaignSearch, setCampaignSearch] = useState('');
+  const [campaignPage, setCampaignPage] = useState(0);
+  const [campaignRowsPerPage, setCampaignRowsPerPage] = useState(10);
+  const [sourceSearch, setSourceSearch] = useState('');
+  const [sourcePage, setSourcePage] = useState(0);
+  const [sourceRowsPerPage, setSourceRowsPerPage] = useState(10);
+  const [mediumSearch, setMediumSearch] = useState('');
+  const [mediumPage, setMediumPage] = useState(0);
+  const [mediumRowsPerPage, setMediumRowsPerPage] = useState(10);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
   const [nameDialogMode, setNameDialogMode] = useState<NameMode>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -61,18 +71,34 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
   const [busyCampaignId, setBusyCampaignId] = useState<string | null>(null);
   const [busySourceId, setBusySourceId] = useState<string | null>(null);
   const [busyMediumId, setBusyMediumId] = useState<string | null>(null);
+  const [pendingCampaignDelete, setPendingCampaignDelete] = useState<PendingCampaignDelete>(null);
 
   const campaignsQuery = useQuery({
-    queryKey: ['marketing-campaigns', campaignSearch],
-    queryFn: () => marketingService.getCampaigns({ search: campaignSearch, pageSize: 200 }),
+    queryKey: ['marketing-campaigns', campaignSearch, campaignPage, campaignRowsPerPage],
+    queryFn: () =>
+      marketingService.getCampaignsPage({
+        search: campaignSearch,
+        page: campaignPage + 1,
+        pageSize: campaignRowsPerPage,
+      }),
   });
   const sourcesQuery = useQuery({
-    queryKey: ['marketing-sources'],
-    queryFn: () => marketingService.getSources({ pageSize: 200 }),
+    queryKey: ['marketing-sources', sourceSearch, sourcePage, sourceRowsPerPage],
+    queryFn: () =>
+      marketingService.getSourcesPage({
+        search: sourceSearch,
+        page: sourcePage + 1,
+        pageSize: sourceRowsPerPage,
+      }),
   });
   const mediumsQuery = useQuery({
-    queryKey: ['marketing-mediums'],
-    queryFn: () => marketingService.getMediums({ pageSize: 200 }),
+    queryKey: ['marketing-mediums', mediumSearch, mediumPage, mediumRowsPerPage],
+    queryFn: () =>
+      marketingService.getMediumsPage({
+        search: mediumSearch,
+        page: mediumPage + 1,
+        pageSize: mediumRowsPerPage,
+      }),
   });
   const analyticsQuery = useQuery({
     queryKey: ['marketing-analytics', dateFrom, dateTo],
@@ -107,18 +133,7 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
   });
   const updateCampaignMutation = useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => marketingService.updateCampaign(id, { name }),
-    onMutate: async ({ id, name }) => {
-      setBusyCampaignId(id);
-      await queryClient.cancelQueries({ queryKey: ['marketing-campaigns'] });
-      const previous = queryClient.getQueryData<any[]>(['marketing-campaigns', campaignSearch]);
-      if (Array.isArray(previous)) {
-        queryClient.setQueryData(
-          ['marketing-campaigns', campaignSearch],
-          previous.map((item: any) => (String(item?.id) === String(id) ? { ...item, name, updatedAt: new Date().toISOString() } : item))
-        );
-      }
-      return { previous };
-    },
+    onMutate: ({ id }) => setBusyCampaignId(id),
     onSuccess: () => {
       refreshAll();
       closeNameDialog();
@@ -126,21 +141,6 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
       setInlineCampaignName('');
       setBusyCampaignId(null);
       showToast({ severity: 'success', message: 'Campaign updated.' });
-    },
-    onError: (err: Error, _vars, context: any) => {
-      if (context?.previous) queryClient.setQueryData(['marketing-campaigns', campaignSearch], context.previous);
-      setBusyCampaignId(null);
-      showToast({ severity: 'error', message: err.message });
-    },
-    onSettled: () => setBusyCampaignId(null),
-  });
-  const deleteCampaignMutation = useMutation({
-    mutationFn: (id: string) => marketingService.deleteCampaign(id),
-    onMutate: (id: string) => setBusyCampaignId(id),
-    onSuccess: () => {
-      refreshAll();
-      setBusyCampaignId(null);
-      showToast({ severity: 'success', message: 'Campaign deleted.' });
     },
     onError: (err: Error) => {
       setBusyCampaignId(null);
@@ -150,25 +150,15 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
   });
   const campaignActionMutation = useMutation({
     mutationFn: ({ id, action }: { id: string; action: 'launch' | 'pause' | 'archive' }) => marketingService.setCampaignAction(id, action),
-    onMutate: async ({ id, action }) => {
+    onMutate: ({ id }) => {
       setBusyCampaignId(id);
-      await queryClient.cancelQueries({ queryKey: ['marketing-campaigns'] });
-      const previous = queryClient.getQueryData<any[]>(['marketing-campaigns', campaignSearch]);
-      if (Array.isArray(previous)) {
-        queryClient.setQueryData(
-          ['marketing-campaigns', campaignSearch],
-          previous.map((item: any) => (String(item?.id) === String(id) ? { ...item, active: action === 'launch' } : item))
-        );
-      }
-      return { previous };
     },
     onSuccess: () => {
       refreshAll();
       setBusyCampaignId(null);
       showToast({ severity: 'success', message: 'Campaign status updated.' });
     },
-    onError: (err: Error, _vars, context: any) => {
-      if (context?.previous) queryClient.setQueryData(['marketing-campaigns', campaignSearch], context.previous);
+    onError: (err: Error) => {
       setBusyCampaignId(null);
       showToast({ severity: 'error', message: err.message });
     },
@@ -185,7 +175,8 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
     onError: (err: Error) => showToast({ severity: 'error', message: err.message }),
   });
   const updateSourceMutation = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) => marketingService.updateSource(id, { name }),
+    mutationFn: ({ id, name, active }: { id: string; name?: string; active?: boolean }) =>
+      marketingService.updateSource(id, { name, active }),
     onMutate: (vars) => setBusySourceId(vars.id),
     onSuccess: () => {
       refreshAll();
@@ -225,7 +216,8 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
     onError: (err: Error) => showToast({ severity: 'error', message: err.message }),
   });
   const updateMediumMutation = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) => marketingService.updateMedium(id, { name }),
+    mutationFn: ({ id, name, active }: { id: string; name?: string; active?: boolean }) =>
+      marketingService.updateMedium(id, { name, active }),
     onMutate: (vars) => setBusyMediumId(vars.id),
     onSuccess: () => {
       refreshAll();
@@ -255,9 +247,15 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
     onSettled: () => setBusyMediumId(null),
   });
 
-  const campaigns = useMemo(() => (Array.isArray(campaignsQuery.data) ? campaignsQuery.data : []), [campaignsQuery.data]);
-  const sources = useMemo(() => (Array.isArray(sourcesQuery.data) ? sourcesQuery.data : []), [sourcesQuery.data]);
-  const mediums = useMemo(() => (Array.isArray(mediumsQuery.data) ? mediumsQuery.data : []), [mediumsQuery.data]);
+  const campaignRows = useMemo(
+    () => (Array.isArray(campaignsQuery.data?.items) ? campaignsQuery.data.items : []),
+    [campaignsQuery.data?.items]
+  );
+  const campaignTotal = Number(campaignsQuery.data?.total ?? 0);
+  const sources = useMemo(() => (Array.isArray(sourcesQuery.data?.items) ? sourcesQuery.data.items : []), [sourcesQuery.data?.items]);
+  const sourcesTotal = Number(sourcesQuery.data?.total ?? 0);
+  const mediums = useMemo(() => (Array.isArray(mediumsQuery.data?.items) ? mediumsQuery.data.items : []), [mediumsQuery.data?.items]);
+  const mediumsTotal = Number(mediumsQuery.data?.total ?? 0);
   const analytics = analyticsQuery.data;
 
   const openNameDialog = (mode: NameMode, current?: { id?: string; name?: string }) => {
@@ -315,7 +313,15 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
           {activeTab === 'campaigns' && (
             <Card sx={{ p: 3 }}>
               <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" sx={{ mb: 2 }}>
-                <TextField size="small" label="Search campaigns" value={campaignSearch} onChange={(e) => setCampaignSearch(e.target.value)} />
+                <TextField
+                  size="small"
+                  label="Search campaigns"
+                  value={campaignSearch}
+                  onChange={(e) => {
+                    setCampaignSearch(e.target.value);
+                    setCampaignPage(0);
+                  }}
+                />
                 <Button
                   variant="contained"
                   startIcon={<Iconify icon="solar:add-circle-bold" />}
@@ -328,7 +334,7 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
                 <Table>
                   <TableHead><TableRow><TableCell>Name</TableCell><TableCell>Status</TableCell><TableCell>Updated</TableCell><TableCell align="right">Actions</TableCell></TableRow></TableHead>
                   <TableBody>
-                    {campaigns.map((campaign: any) => (
+                    {campaignRows.map((campaign: any) => (
                       <TableRow key={campaign.id}>
                         <TableCell>
                           {inlineCampaignEditId === campaign.id ? (
@@ -375,7 +381,13 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
                             </Stack>
                           )}
                         </TableCell>
-                        <TableCell><Chip size="small" color={campaign.active ? 'success' : 'warning'} label={campaign.active ? 'Active' : 'Paused'} /></TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            color={campaign.status === 'archived' ? 'default' : campaign.status === 'paused' ? 'warning' : 'success'}
+                            label={campaign.status === 'archived' ? 'Archived' : campaign.status === 'paused' ? 'Paused' : 'Active'}
+                          />
+                        </TableCell>
                         <TableCell>{campaign.updatedAt || '-'}</TableCell>
                         <TableCell align="right">
                           <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -393,31 +405,70 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
                             <Button size="small" variant="outlined" disabled={busyCampaignId === campaign.id} onClick={() => campaignActionMutation.mutate({ id: campaign.id, action: 'launch' })}>Launch</Button>
                             <Button size="small" variant="outlined" disabled={busyCampaignId === campaign.id} onClick={() => campaignActionMutation.mutate({ id: campaign.id, action: 'pause' })}>Pause</Button>
                             <Button size="small" color="warning" variant="outlined" disabled={busyCampaignId === campaign.id} onClick={() => campaignActionMutation.mutate({ id: campaign.id, action: 'archive' })}>Archive</Button>
-                            <IconButton color="error" disabled={busyCampaignId === campaign.id} onClick={() => deleteCampaignMutation.mutate(campaign.id)}>
+                            <IconButton
+                              color="error"
+                              disabled={busyCampaignId === campaign.id}
+                              onClick={() => setPendingCampaignDelete({ id: campaign.id, name: campaign.name })}
+                            >
                               {busyCampaignId === campaign.id ? <CircularProgress size={18} /> : <Iconify icon="solar:trash-bin-trash-bold" />}
                             </IconButton>
                           </Stack>
                         </TableCell>
                       </TableRow>
                     ))}
-                    {campaigns.length === 0 && <TableRow><TableCell colSpan={4} sx={{ py: 5, textAlign: 'center' }}>No campaigns found.</TableCell></TableRow>}
+                    {campaignRows.length === 0 && <TableRow><TableCell colSpan={4} sx={{ py: 5, textAlign: 'center' }}>No campaigns found.</TableCell></TableRow>}
                   </TableBody>
                 </Table>
               </TableContainer>
+              <TablePagination
+                component="div"
+                count={campaignTotal}
+                page={campaignPage}
+                onPageChange={(_event, nextPage) => setCampaignPage(nextPage)}
+                rowsPerPage={campaignRowsPerPage}
+                onRowsPerPageChange={(event) => {
+                  setCampaignRowsPerPage(Number(event.target.value));
+                  setCampaignPage(0);
+                }}
+                rowsPerPageOptions={[10, 20, 50]}
+              />
             </Card>
           )}
 
           {activeTab === 'sources' && (
             <Card sx={{ p: 3 }}>
-              <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
-                <Typography variant="h6">Sources</Typography>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" sx={{ mb: 2 }}>
+                <TextField
+                  size="small"
+                  label="Search sources"
+                  value={sourceSearch}
+                  onChange={(e) => {
+                    setSourceSearch(e.target.value);
+                    setSourcePage(0);
+                  }}
+                />
                 <Button variant="contained" onClick={() => openNameDialog('source')}>New source</Button>
               </Stack>
               <Divider sx={{ mb: 2 }} />
               <Stack spacing={1.25}>
                 {sources.map((source: any) => (
                   <Stack key={source.id} direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1.5, borderRadius: 1, bgcolor: 'background.neutral' }}>
-                    <Typography>{source.name}</Typography>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Typography>{source.name}</Typography>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {source.active ? 'Active' : 'Inactive'}
+                        </Typography>
+                        <Switch
+                          size="small"
+                          checked={source.active !== false}
+                          disabled={busySourceId === source.id}
+                          onChange={(event) =>
+                            updateSourceMutation.mutate({ id: source.id, name: source.name, active: event.target.checked })
+                          }
+                        />
+                      </Stack>
+                    </Stack>
                     <Stack direction="row" spacing={1}>
                       <IconButton color="info" disabled={busySourceId === source.id} onClick={() => openNameDialog('source', { id: source.id, name: source.name })}><Iconify icon="solar:pen-2-bold" /></IconButton>
                       <IconButton color="error" disabled={busySourceId === source.id} onClick={() => setPendingDelete({ kind: 'source', id: source.id, name: source.name })}>
@@ -428,20 +479,55 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
                 ))}
                 {sources.length === 0 && <Alert severity="info">No sources configured.</Alert>}
               </Stack>
+              <TablePagination
+                component="div"
+                count={sourcesTotal}
+                page={sourcePage}
+                onPageChange={(_event, nextPage) => setSourcePage(nextPage)}
+                rowsPerPage={sourceRowsPerPage}
+                onRowsPerPageChange={(event) => {
+                  setSourceRowsPerPage(Number(event.target.value));
+                  setSourcePage(0);
+                }}
+                rowsPerPageOptions={[10, 20, 50]}
+              />
             </Card>
           )}
 
           {activeTab === 'mediums' && (
             <Card sx={{ p: 3 }}>
-              <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
-                <Typography variant="h6">Mediums</Typography>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" sx={{ mb: 2 }}>
+                <TextField
+                  size="small"
+                  label="Search mediums"
+                  value={mediumSearch}
+                  onChange={(e) => {
+                    setMediumSearch(e.target.value);
+                    setMediumPage(0);
+                  }}
+                />
                 <Button variant="contained" onClick={() => openNameDialog('medium')}>New medium</Button>
               </Stack>
               <Divider sx={{ mb: 2 }} />
               <Stack spacing={1.25}>
                 {mediums.map((medium: any) => (
                   <Stack key={medium.id} direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1.5, borderRadius: 1, bgcolor: 'background.neutral' }}>
-                    <Typography>{medium.name}</Typography>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <Typography>{medium.name}</Typography>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {medium.active ? 'Active' : 'Inactive'}
+                        </Typography>
+                        <Switch
+                          size="small"
+                          checked={medium.active !== false}
+                          disabled={busyMediumId === medium.id}
+                          onChange={(event) =>
+                            updateMediumMutation.mutate({ id: medium.id, name: medium.name, active: event.target.checked })
+                          }
+                        />
+                      </Stack>
+                    </Stack>
                     <Stack direction="row" spacing={1}>
                       <IconButton color="info" disabled={busyMediumId === medium.id} onClick={() => openNameDialog('medium', { id: medium.id, name: medium.name })}><Iconify icon="solar:pen-2-bold" /></IconButton>
                       <IconButton color="error" disabled={busyMediumId === medium.id} onClick={() => setPendingDelete({ kind: 'medium', id: medium.id, name: medium.name })}>
@@ -452,6 +538,18 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
                 ))}
                 {mediums.length === 0 && <Alert severity="info">No mediums configured.</Alert>}
               </Stack>
+              <TablePagination
+                component="div"
+                count={mediumsTotal}
+                page={mediumPage}
+                onPageChange={(_event, nextPage) => setMediumPage(nextPage)}
+                rowsPerPage={mediumRowsPerPage}
+                onRowsPerPageChange={(event) => {
+                  setMediumRowsPerPage(Number(event.target.value));
+                  setMediumPage(0);
+                }}
+                rowsPerPageOptions={[10, 20, 50]}
+              />
             </Card>
           )}
 
@@ -508,6 +606,30 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
             }}
           >
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(pendingCampaignDelete)} onClose={() => setPendingCampaignDelete(null)}>
+        <DialogTitle>Archive campaign?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            This will archive {pendingCampaignDelete?.name || 'this campaign'} and keep its data.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingCampaignDelete(null)}>Cancel</Button>
+          <Button
+            color="warning"
+            variant="contained"
+            disabled={campaignActionMutation.isPending}
+            onClick={() => {
+              if (!pendingCampaignDelete) return;
+              campaignActionMutation.mutate({ id: pendingCampaignDelete.id, action: 'archive' });
+              setPendingCampaignDelete(null);
+            }}
+          >
+            Archive
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,9 +1,9 @@
-import { MarketingOverviewView } from 'src/sections/marketing/view/marketing-overview-view';
+import { MarketingDashboardView } from 'src/sections/marketing/view/marketing-dashboard-view';
 
 // ----------------------------------------------------------------------
 
 export const metadata = { title: `Marketing - Dashboard` };
 
 export default function Page() {
-  return <MarketingOverviewView />;
+  return <MarketingDashboardView />;
 }

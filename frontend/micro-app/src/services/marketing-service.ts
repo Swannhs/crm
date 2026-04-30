@@ -5,8 +5,16 @@ export type MarketingCampaign = {
   name: string;
   title?: string;
   active: boolean;
+  status?: 'active' | 'paused' | 'archived';
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type MarketingCampaignPage = {
+  items: MarketingCampaign[];
+  total: number;
+  currentPage: number;
+  pageSize: number;
 };
 
 export type MarketingSource = {
@@ -17,12 +25,26 @@ export type MarketingSource = {
   updatedAt?: string;
 };
 
+export type MarketingSourcePage = {
+  items: MarketingSource[];
+  total: number;
+  currentPage: number;
+  pageSize: number;
+};
+
 export type MarketingMedium = {
   id: string;
   name: string;
   active: boolean;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type MarketingMediumPage = {
+  items: MarketingMedium[];
+  total: number;
+  currentPage: number;
+  pageSize: number;
 };
 
 export type MarketingAnalytics = {
@@ -50,8 +72,9 @@ const toCampaign = (row: any): MarketingCampaign => ({
   name: String(row?.name || row?.title || 'Untitled Campaign'),
   title: row?.title ? String(row.title) : undefined,
   active: row?.active !== false,
-  createdAt: row?.create_date ? String(row.create_date) : undefined,
-  updatedAt: row?.write_date ? String(row.write_date) : undefined,
+  status: row?.status === 'archived' ? 'archived' : row?.status === 'paused' ? 'paused' : 'active',
+  createdAt: row?.createdAt ? String(row.createdAt) : row?.create_date ? String(row.create_date) : undefined,
+  updatedAt: row?.updatedAt ? String(row.updatedAt) : row?.write_date ? String(row.write_date) : undefined,
 });
 
 const toSource = (row: any): MarketingSource => ({
@@ -71,6 +94,11 @@ const toMedium = (row: any): MarketingMedium => ({
 });
 
 export async function getCampaigns(params?: { page?: number; pageSize?: number; search?: string }) {
+  const page = await getCampaignsPage(params);
+  return page.items;
+}
+
+export async function getCampaignsPage(params?: { page?: number; pageSize?: number; search?: string }): Promise<MarketingCampaignPage> {
   const response = await axiosInstance.get('/api/odoo/marketing/campaigns', {
     params: {
       page: params?.page ?? 1,
@@ -79,7 +107,12 @@ export async function getCampaigns(params?: { page?: number; pageSize?: number; 
     },
   });
   const rows = Array.isArray(response.data?.data) ? response.data.data : [];
-  return rows.map(toCampaign);
+  return {
+    items: rows.map(toCampaign),
+    total: Number(response.data?.total ?? rows.length),
+    currentPage: Number(params?.page ?? 1),
+    pageSize: Number(params?.pageSize ?? 100),
+  };
 }
 
 export async function createCampaign(data: { name: string; title?: string; active?: boolean }) {
@@ -103,6 +136,11 @@ export async function setCampaignAction(id: string, action: 'launch' | 'pause' |
 }
 
 export async function getSources(params?: { page?: number; pageSize?: number; search?: string }) {
+  const page = await getSourcesPage(params);
+  return page.items;
+}
+
+export async function getSourcesPage(params?: { page?: number; pageSize?: number; search?: string }): Promise<MarketingSourcePage> {
   const response = await axiosInstance.get('/api/odoo/marketing/sources', {
     params: {
       page: params?.page ?? 1,
@@ -111,7 +149,12 @@ export async function getSources(params?: { page?: number; pageSize?: number; se
     },
   });
   const rows = Array.isArray(response.data?.data) ? response.data.data : [];
-  return rows.map(toSource);
+  return {
+    items: rows.map(toSource),
+    total: Number(response.data?.total ?? rows.length),
+    currentPage: Number(params?.page ?? 1),
+    pageSize: Number(params?.pageSize ?? 100),
+  };
 }
 
 export async function createSource(data: { name: string; active?: boolean }) {
@@ -130,6 +173,11 @@ export async function deleteSource(id: string) {
 }
 
 export async function getMediums(params?: { page?: number; pageSize?: number; search?: string }) {
+  const page = await getMediumsPage(params);
+  return page.items;
+}
+
+export async function getMediumsPage(params?: { page?: number; pageSize?: number; search?: string }): Promise<MarketingMediumPage> {
   const response = await axiosInstance.get('/api/odoo/marketing/mediums', {
     params: {
       page: params?.page ?? 1,
@@ -138,7 +186,12 @@ export async function getMediums(params?: { page?: number; pageSize?: number; se
     },
   });
   const rows = Array.isArray(response.data?.data) ? response.data.data : [];
-  return rows.map(toMedium);
+  return {
+    items: rows.map(toMedium),
+    total: Number(response.data?.total ?? rows.length),
+    currentPage: Number(params?.page ?? 1),
+    pageSize: Number(params?.pageSize ?? 100),
+  };
 }
 
 export async function createMedium(data: { name: string; active?: boolean }) {
@@ -228,15 +281,18 @@ export async function getAdAccounts() {
 
 export const marketingService = {
   getCampaigns,
+  getCampaignsPage,
   createCampaign,
   updateCampaign,
   deleteCampaign,
   setCampaignAction,
   getSources,
+  getSourcesPage,
   createSource,
   updateSource,
   deleteSource,
   getMediums,
+  getMediumsPage,
   createMedium,
   updateMedium,
   deleteMedium,
