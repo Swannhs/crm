@@ -13,6 +13,10 @@ export class MarketingService {
   private readonly mailingModel = 'mailing.mailing';
   private readonly mailingListModel = 'mailing.list';
   private readonly templateModel = 'mail.template';
+  private readonly mailModel = 'mail.mail';
+  private readonly mailServerModel = 'ir.mail_server';
+  private readonly mailingContactModel = 'mailing.contact';
+  private readonly mailingTraceModel = 'mailing.trace';
   private readonly sourceModel = 'utm.source';
   private readonly mediumModel = 'utm.medium';
   private readonly leadModel = 'crm.lead';
@@ -26,6 +30,8 @@ export class MarketingService {
   ];
   private readonly mailingListFields = ['id', 'name', 'active', 'contact_nbr', 'contact_count']; // Try multiple variations
   private readonly templateFields = ['id', 'name', 'subject', 'body_html', 'model_id'];
+  private readonly mailingContactFields = ['id', 'name', 'email', 'phone', 'opt_out', 'create_date'];
+  private readonly mailingTraceFields = ['id', 'state', 'opened', 'clicked', 'trace_status', 'create_date'];
   private readonly sourceFields = ['id', 'name', 'active', 'create_date', 'write_date'];
   private readonly mediumFields = ['id', 'name', 'active', 'create_date', 'write_date'];
 
@@ -151,6 +157,31 @@ export class MarketingService {
     return this.odooClient.execute(this.mailingModel, 'action_put_in_queue', [[id]]);
   }
 
+  async sendTestMail(campaignId: number, to: string) {
+    const mailing = await this.getOrCreateCampaignMailing(campaignId);
+    const subject = String(mailing?.subject || '').trim();
+    const bodyHtml = String(mailing?.body_html || '').trim();
+    if (!subject || !bodyHtml) {
+      throw new Error('Campaign content is incomplete. Subject and content are required.');
+    }
+
+    const senderConfigured = await this.isSenderConfigured();
+    if (!senderConfigured.configured) {
+      throw new Error(senderConfigured.message || 'Marketing sender is not configured.');
+    }
+
+    const createdId = await this.odooClient.execute(this.mailModel, 'create', [{
+      subject,
+      body_html: bodyHtml,
+      email_to: String(to).trim(),
+      reply_to: mailing?.reply_to || undefined,
+      auto_delete: true,
+    }]);
+
+    await this.odooClient.execute(this.mailModel, 'send', [[Number(createdId)]]);
+    return { success: true };
+  }
+
   async scheduleMailing(id: number, date: string) {
     return this.odooClient.execute(this.mailingModel, 'write', [[id], { schedule_date: date }]);
   }
@@ -185,6 +216,151 @@ export class MarketingService {
     );
 
     return created[0];
+  }
+
+  async getCampaignMailing(campaignId: number) {
+    const rows = await this.odooClient.searchRead(
+      this.mailingModel,
+      [['campaign_id', '=', campaignId]],
+      this.mailingFields,
+      { limit: 1, order: 'id desc' }
+    );
+    return rows[0] ?? null;
+  }
+
+  async isSenderConfigured() {
+    try {
+      const count = await this.odooClient.execute(this.mailServerModel, 'search_count', [[]]);
+      if (Number(count || 0) > 0) return { configured: true };
+      return { configured: false, message: 'Marketing sender is not configured.' };
+    } catch (error) {
+      return { configured: false, message: 'Marketing sender is not configured.' };
+    }
+  }
+
+  async getComplianceStatus(campaignId: number) {
+    const mailing = await this.getCampaignMailing(campaignId);
+    if (!mailing) {
+      return {
+        available: true,
+        compliantRecipients: 0,
+        totalRecipients: 0,
+        blockedRecipients: 0,
+        message: 'No audience selected.',
+      };
+    }
+
+    const listIds = Array.isArray(mailing?.contact_list_ids)
+      ? mailing.contact_list_ids.map((x: any) => Number(Array.isArray(x) ? x[0] : x)).filter((n: number) => Number.isFinite(n) && n > 0)
+      : [];
+
+    if (listIds.length === 0) {
+      return {
+        available: true,
+        compliantRecipients: 0,
+        totalRecipients: 0,
+        blockedRecipients: 0,
+        message: 'No audience selected.',
+      };
+    }
+
+    try {
+      const contacts = await this.odooClient.searchRead(
+        this.mailingContactModel,
+        [['list_ids', 'in', listIds]],
+        this.mailingContactFields,
+        { limit: 5000, order: 'id desc' }
+      );
+
+      const totalRecipients = Array.isArray(contacts) ? contacts.length : 0;
+      const compliantRecipients = Array.isArray(contacts)
+        ? contacts.filter((c: any) => !Boolean(c?.opt_out) && Boolean(String(c?.email || '').trim())).length
+        : 0;
+      const blockedRecipients = Math.max(0, totalRecipients - compliantRecipients);
+
+      return {
+        available: true,
+        compliantRecipients,
+        totalRecipients,
+        blockedRecipients,
+        message: blockedRecipients > 0 ? 'Some recipients are blocked by consent/unsubscribe rules.' : 'All recipients are compliant.',
+      };
+    } catch (error) {
+      return {
+        available: false,
+        compliantRecipients: 0,
+        totalRecipients: 0,
+        blockedRecipients: 0,
+        message: 'Compliance checks are not available yet.',
+      };
+    }
+  }
+
+  async previewSegment(filters: any) {
+    void filters;
+    return { message: 'Segment preview is not available yet.', available: false };
+  }
+
+  async previewSegmentById(segmentId: number) {
+    try {
+      const contacts = await this.odooClient.searchRead(
+        this.mailingContactModel,
+        [['list_ids', 'in', [segmentId]]],
+        this.mailingContactFields,
+        { limit: 25, order: 'id desc' }
+      );
+
+      const sampleContacts = (Array.isArray(contacts) ? contacts : []).slice(0, 10).map((c: any) => ({
+        id: String(c?.id || ''),
+        name: c?.name ? String(c.name) : undefined,
+        email: c?.email ? String(c.email) : undefined,
+        phone: c?.phone ? String(c.phone) : undefined,
+        consentStatus: c?.opt_out ? 'opted_out' : 'subscribed',
+      }));
+
+      return {
+        count: Array.isArray(contacts) ? contacts.length : 0,
+        sampleContacts,
+      };
+    } catch (error) {
+      return { message: 'Segment preview is not available yet.', available: false };
+    }
+  }
+
+  async campaignDeliveryAnalytics(campaignId: number) {
+    const mailing = await this.getCampaignMailing(campaignId);
+    if (!mailing?.id) return {};
+
+    try {
+      const traces = await this.odooClient.searchRead(
+        this.mailingTraceModel,
+        [['mailing_id', '=', Number(mailing.id)]],
+        this.mailingTraceFields,
+        { limit: 10000, order: 'id desc' }
+      );
+
+      const rows = Array.isArray(traces) ? traces : [];
+      const recipients = rows.length;
+      const delivered = rows.filter((r: any) => String(r?.state || '').toLowerCase() === 'sent').length;
+      const opened = rows.filter((r: any) => Boolean(r?.opened)).length;
+      const clicked = rows.filter((r: any) => Boolean(r?.clicked)).length;
+      const bounced = rows.filter((r: any) => {
+        const status = String(r?.trace_status || r?.state || '').toLowerCase();
+        return status.includes('bounce') || status.includes('exception');
+      }).length;
+      const unsubscribed = rows.filter((r: any) => String(r?.trace_status || '').toLowerCase().includes('unsubscribe')).length;
+
+      return {
+        recipients,
+        delivered,
+        opened,
+        clicked,
+        bounced,
+        unsubscribed,
+      };
+    } catch (error) {
+      return {};
+    }
   }
 
   async updateCampaignContent(id: number, data: any) {

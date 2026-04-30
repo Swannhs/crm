@@ -1,5 +1,6 @@
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -78,6 +79,11 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
   const [isSending, setIsSending] = useState(false);
 
   const createCampaign = useCreateCampaign();
+  const complianceQuery = useQuery({
+    queryKey: ['marketing-campaign-compliance', campaign?.id],
+    enabled: Boolean(campaign?.id),
+    queryFn: () => marketingService.getCampaignComplianceStatus(String(campaign?.id)),
+  });
 
   const defaultValues = useMemo(
     () => ({
@@ -151,6 +157,14 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
     Boolean(values.segmentId) &&
     Boolean(values.content) &&
     (values.type !== 'email' || (Boolean(values.subject) && Boolean(values.senderEmail)));
+
+  const complianceReady =
+    !isEdit ||
+    (complianceQuery.data &&
+      typeof complianceQuery.data?.compliantRecipients === 'number' &&
+      complianceQuery.data.compliantRecipients > 0);
+
+  const deliveryEnabled = canDeliver && complianceReady;
 
   const handleSendTest = async () => {
     if (!campaign?.id || !testRecipient) return;
@@ -305,7 +319,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                         color="info"
                         startIcon={<Iconify icon="solar:paper-plane-bold" />}
                         onClick={() => setTestSendOpen(true)}
-                        disabled={!canDeliver}
+                        disabled={!deliveryEnabled}
                       >
                         Send Test
                       </Button>
@@ -316,7 +330,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                         color="warning"
                         startIcon={<Iconify icon="solar:calendar-bold" />}
                         onClick={() => setScheduleOpen(true)}
-                        disabled={!canDeliver}
+                        disabled={!deliveryEnabled}
                       >
                         Schedule
                       </Button>
@@ -337,7 +351,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                         startIcon={<Iconify icon="solar:rocket-bold" />}
                         onClick={handleSendNow}
                         loading={isSending}
-                        disabled={!canDeliver}
+                        disabled={!deliveryEnabled}
                       >
                         Send Now
                       </LoadingButton>
@@ -348,7 +362,11 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                 <Card sx={{ p: 2, bgcolor: 'background.neutral' }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
                     <Iconify icon="solar:info-circle-bold" width={16} sx={{ mr: 0.5 }} />
-                    Compliance checks are not available yet.
+                    {isEdit
+                      ? complianceQuery.isError
+                        ? 'Compliance checks are not available yet.'
+                        : complianceQuery.data?.message || 'Compliance check pending.'
+                      : 'Save draft to run compliance checks.'}
                   </Typography>
                 </Card>
               </Stack>
@@ -371,7 +389,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTestSendOpen(false)}>Cancel</Button>
-          <LoadingButton variant="contained" onClick={handleSendTest} loading={isSending} disabled={!testRecipient || !canDeliver}>
+          <LoadingButton variant="contained" onClick={handleSendTest} loading={isSending} disabled={!testRecipient || !deliveryEnabled}>
             Send Test
           </LoadingButton>
         </DialogActions>
@@ -394,7 +412,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setScheduleOpen(false)}>Cancel</Button>
-          <LoadingButton variant="contained" onClick={handleSchedule} loading={isSending} disabled={!scheduleTime || !canDeliver}>
+          <LoadingButton variant="contained" onClick={handleSchedule} loading={isSending} disabled={!scheduleTime || !deliveryEnabled}>
             Schedule
           </LoadingButton>
         </DialogActions>

@@ -102,19 +102,20 @@ export interface MarketingSummary {
 }
 
 export interface CampaignAnalytics {
-  delivered: number;
-  opened: number;
-  clicked: number;
-  bounced: number;
-  unsubscribed: number;
-  complained: number;
-  converted: number;
-  deliveryRate: number;
-  openRate: number;
-  clickRate: number;
-  unsubscribeRate: number;
-  bounceRate: number;
-  conversionCount: number;
+  delivered?: number;
+  opened?: number;
+  clicked?: number;
+  bounced?: number;
+  unsubscribed?: number;
+  complained?: number;
+  converted?: number;
+  deliveryRate?: number;
+  openRate?: number;
+  clickRate?: number;
+  unsubscribeRate?: number;
+  bounceRate?: number;
+  conversionCount?: number;
+  recipients?: number;
 }
 
 export const hasNumber = (value: unknown): value is number =>

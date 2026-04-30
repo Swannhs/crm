@@ -136,6 +136,13 @@ export class MarketingController {
     if (!mailing?.contact_list_ids || mailing.contact_list_ids.length === 0) {
       throw new BadRequestException('Audience is required before sending.');
     }
+    const senderConfigured = await this.marketingService.isSenderConfigured();
+    if (!senderConfigured.configured) throw new NotImplementedException(senderConfigured.message || 'Marketing sender is not configured.');
+    const compliance = await this.marketingService.getComplianceStatus(id);
+    if (!compliance.available) throw new NotImplementedException(compliance.message || 'Compliance checks are not available yet.');
+    if ((compliance.compliantRecipients || 0) <= 0) {
+      throw new BadRequestException('No compliant recipients available for delivery.');
+    }
     return this.marketingService.sendMailing(mailing.id);
   }
 
@@ -157,6 +164,13 @@ export class MarketingController {
     if (!mailing?.contact_list_ids || mailing.contact_list_ids.length === 0) {
       throw new BadRequestException('Audience is required before scheduling.');
     }
+    const senderConfigured = await this.marketingService.isSenderConfigured();
+    if (!senderConfigured.configured) throw new NotImplementedException(senderConfigured.message || 'Marketing sender is not configured.');
+    const compliance = await this.marketingService.getComplianceStatus(id);
+    if (!compliance.available) throw new NotImplementedException(compliance.message || 'Compliance checks are not available yet.');
+    if ((compliance.compliantRecipients || 0) <= 0) {
+      throw new BadRequestException('No compliant recipients available for delivery.');
+    }
     await this.marketingService.scheduleMailing(mailing.id, scheduleAt);
     return this.getCampaign(id);
   }
@@ -167,7 +181,7 @@ export class MarketingController {
     if (!recipient) throw new BadRequestException('Recipient is required.');
     const campaign = await this.marketingService.getCampaign(id);
     if (!campaign) throw new BadRequestException('Campaign not found.');
-    throw new NotImplementedException('Marketing sender is not configured.');
+    return this.marketingService.sendTestMail(id, recipient);
   }
 
   @Post('campaigns/:id/cancel-schedule')
@@ -233,8 +247,15 @@ export class MarketingController {
   }
 
   @Post('segments/preview')
-  async previewSegment() {
-    throw new NotImplementedException('Segment preview is not available yet.');
+  async previewSegment(@Body() payload: any) {
+    const segmentId = Number(payload?.segmentId);
+    if (Number.isFinite(segmentId) && segmentId > 0) {
+      const result = await this.marketingService.previewSegmentById(segmentId);
+      if (result?.available === false) throw new NotImplementedException('Segment preview is not available yet.');
+      return result;
+    }
+    const result = await this.marketingService.previewSegment(payload?.filters);
+    throw new NotImplementedException(result?.message || 'Segment preview is not available yet.');
   }
 
   // --- Templates ---
@@ -337,9 +358,9 @@ export class MarketingController {
   @Get('campaigns/:id/analytics')
   async getCampaignAnalytics(
     @Param('id', ParseIntPipe) id: number,
-    @Query() paginationDto: PaginationDto,
+    @Query() _paginationDto: PaginationDto,
   ) {
-    return this.marketingService.campaignInsights(id, paginationDto);
+    return this.marketingService.campaignDeliveryAnalytics(id);
   }
 
   @Get('campaigns/:id/insights')
@@ -348,5 +369,12 @@ export class MarketingController {
     @Query() paginationDto: PaginationDto,
   ) {
     return this.marketingService.campaignInsights(id, paginationDto);
+  }
+
+  @Get('campaigns/:id/compliance-status')
+  async getCampaignComplianceStatus(@Param('id', ParseIntPipe) id: number) {
+    const result = await this.marketingService.getComplianceStatus(id);
+    if (!result.available) throw new NotImplementedException(result.message || 'Compliance checks are not available yet.');
+    return result;
   }
 }

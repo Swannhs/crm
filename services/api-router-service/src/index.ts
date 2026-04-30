@@ -418,6 +418,11 @@ async function handleApiCompat(req: Request, res: Response) {
       return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
     }
 
+    if (module === "marketing") {
+      const targetPath = withQuery(req, `/v1/marketing${rest}`);
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
+    }
+
     if (module === "image-library") {
       if (req.method === "GET" && (rest === "" || rest === "/")) {
         return proxyTo(req, res, {

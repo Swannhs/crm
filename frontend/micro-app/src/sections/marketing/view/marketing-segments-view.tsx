@@ -78,7 +78,7 @@ export function MarketingSegmentsView() {
 
   const handlePreview = async () => {
     try {
-      const preview = await marketingService.previewSegment({ filters: [] });
+      const preview = await marketingService.previewSegment({ segmentId: selectedSegment?.id });
       const count = typeof preview?.count === 'number' ? preview.count : undefined;
       setPreviewMessage(typeof count === 'number' ? `Estimated contacts: ${count}` : 'Segment preview is not available yet.');
     } catch (error: any) {

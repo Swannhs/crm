@@ -123,7 +123,7 @@ export const marketingService = {
     await axiosInstance.delete(`${API_BASE}/segments/${id}`, axiosConfig);
   },
   previewSegment: async (filters: any): Promise<MarketingSegmentPreview> => {
-    const response = await axiosInstance.post(`${API_BASE}/segments/preview`, { filters }, axiosConfig);
+    const response = await axiosInstance.post(`${API_BASE}/segments/preview`, filters, axiosConfig);
     return response.data?.data ?? response.data;
   },
 
@@ -200,5 +200,6 @@ export const marketingService = {
 
   // Analytics
   getCampaignAnalytics: async (id: string): Promise<CampaignAnalytics> => safeGet(`${API_BASE}/campaigns/${id}/analytics`, null),
+  getCampaignComplianceStatus: async (id: string) => safeGet(`${API_BASE}/campaigns/${id}/compliance-status`, null),
   getOverallAnalytics: async () => safeGet(`${API_BASE}/analytics`, null),
 };
