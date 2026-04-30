@@ -103,7 +103,7 @@ export function MarketingDashboardView() {
 
       {isNotAvailable && (
         <Alert severity="info" sx={{ mb: 3 }} icon={<Iconify icon="solar:info-circle-bold" />}>
-          Marketing backend services are currently not available. Some features may be limited or show placeholder data.
+          Marketing backend services are currently not available. Some features are temporarily disabled until services recover.
         </Alert>
       )}
 

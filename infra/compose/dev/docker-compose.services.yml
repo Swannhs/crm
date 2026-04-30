@@ -140,6 +140,8 @@ services:
       ODOO_PASSWORD: ${ODOO_PASSWORD:-admin}
       ODOO_API_KEY: ${ODOO_API_KEY:-}
       DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
+      MARKETING_WEBHOOK_PROVIDERS: ${MARKETING_WEBHOOK_PROVIDERS:-}
+      MARKETING_WEBHOOK_SECRET: ${MARKETING_WEBHOOK_SECRET:-}
     depends_on:
       odoo-integration-db:
         condition: service_healthy

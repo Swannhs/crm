@@ -245,11 +245,11 @@ export async function getCampaignInsights(
 
 // Legacy compatibility methods still used in builder/workflow surfaces.
 export async function getOptinForms() {
-  return [];
+  throw new Error('Opt-in forms are not available yet.');
 }
 
 export async function getAutomations() {
-  return [];
+  throw new Error('Marketing automations are not available yet.');
 }
 
 export async function getWorkflowWorkspaces() {
@@ -268,15 +268,18 @@ export async function getWorkflowActivity(workflowId: string) {
 }
 
 export async function getEmailTemplates() {
-  return [];
+  const response = await axiosInstance.get('/api/marketing/templates');
+  return response.data?.data ?? response.data ?? [];
 }
 
 export async function getSmsCampaigns() {
-  return [];
+  const response = await axiosInstance.get('/api/marketing/campaigns');
+  const rows = Array.isArray(response.data?.data) ? response.data.data : Array.isArray(response.data) ? response.data : [];
+  return rows.filter((row: any) => String(row?.type || '').toLowerCase() === 'sms');
 }
 
 export async function getAdAccounts() {
-  return [];
+  throw new Error('Ad account integrations are not available yet.');
 }
 
 export const marketingService = {

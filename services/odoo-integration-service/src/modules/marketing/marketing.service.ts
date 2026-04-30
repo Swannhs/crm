@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OdooClientService } from '../odoo-base/odoo-client.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
+import { PrismaService } from '../../common/prisma/prisma.service.js';
 
 @Injectable()
 export class MarketingService {
@@ -35,7 +36,10 @@ export class MarketingService {
   private readonly sourceFields = ['id', 'name', 'active', 'create_date', 'write_date'];
   private readonly mediumFields = ['id', 'name', 'active', 'create_date', 'write_date'];
 
-  constructor(private readonly odooClient: OdooClientService) {}
+  constructor(
+    private readonly odooClient: OdooClientService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   private async getCampaignFieldFlags() {
     if (this.campaignStatusField !== undefined && this.campaignColorFieldAvailable !== undefined) {
@@ -238,7 +242,7 @@ export class MarketingService {
     }
   }
 
-  async getComplianceStatus(campaignId: number) {
+  async getComplianceStatus(campaignId: number, orgId?: string) {
     const mailing = await this.getCampaignMailing(campaignId);
     if (!mailing) {
       return {
@@ -273,10 +277,25 @@ export class MarketingService {
       );
 
       const totalRecipients = Array.isArray(contacts) ? contacts.length : 0;
-      const compliantRecipients = Array.isArray(contacts)
+
+      let compliantRecipients = Array.isArray(contacts)
         ? contacts.filter((c: any) => !Boolean(c?.opt_out) && Boolean(String(c?.email || '').trim())).length
         : 0;
-      const blockedRecipients = Math.max(0, totalRecipients - compliantRecipients);
+      let blockedRecipients = Math.max(0, totalRecipients - compliantRecipients);
+
+      if (orgId) {
+        for (const c of Array.isArray(contacts) ? contacts : []) {
+          const email = String(c?.email || '').trim().toLowerCase();
+          if (!email) continue;
+          const suppression = await (this.prisma as any).marketingSuppressionEntry.findFirst({
+            where: { orgId, channel: 'email', value: email },
+          });
+          if (suppression) {
+            compliantRecipients = Math.max(0, compliantRecipients - 1);
+            blockedRecipients += 1;
+          }
+        }
+      }
 
       return {
         available: true,
@@ -294,11 +313,6 @@ export class MarketingService {
         message: 'Compliance checks are not available yet.',
       };
     }
-  }
-
-  async previewSegment(filters: any) {
-    void filters;
-    return { message: 'Segment preview is not available yet.', available: false };
   }
 
   async previewSegmentById(segmentId: number) {
@@ -363,7 +377,441 @@ export class MarketingService {
     }
   }
 
-  async updateCampaignContent(id: number, data: any) {
+  private async mapFiltersToDomain(filters: Array<{ field: string; operator: string; value: any }>) {
+    const allowedFields = new Set([
+      'lifecycleStage',
+      'tag',
+      'source',
+      'email',
+      'createdAt',
+      'lastActivityAt',
+      'hasOrders',
+      'hasBookings',
+      'marketingConsent',
+    ]);
+    const allowedOperators = new Set([
+      'equals',
+      'not_equals',
+      'contains',
+      'starts_with',
+      'ends_with',
+      'greater_than',
+      'less_than',
+      'between',
+      'in',
+      'not_in',
+    ]);
+
+    const domain: any[] = [];
+    const fieldsInfo = await this.odooClient.execute(this.mailingContactModel, 'fields_get', [[]]);
+    const hasField = (field: string) => Boolean(fieldsInfo?.[field]);
+    for (const raw of filters) {
+      const field = String(raw?.field || '');
+      const operator = String(raw?.operator || '');
+      if (!allowedFields.has(field)) {
+        throw new Error(`Unsupported filter field: ${field}`);
+      }
+      if (!allowedOperators.has(operator)) {
+        throw new Error(`Unsupported filter operator: ${operator}`);
+      }
+
+      if (field === 'lifecycleStage') {
+        if (!hasField('lifecycle_stage')) throw new Error('Unsupported filter field: lifecycleStage');
+        if (operator === 'equals') domain.push(['lifecycle_stage', '=', String(raw?.value || '')]);
+        else if (operator === 'not_equals') domain.push(['lifecycle_stage', '!=', String(raw?.value || '')]);
+        else throw new Error(`Unsupported operator for lifecycleStage: ${operator}`);
+      }
+      if (field === 'tag') {
+        if (!hasField('tag_ids')) throw new Error('Unsupported filter field: tag');
+        const values = Array.isArray(raw?.value) ? raw.value.map((x: any) => Number(x)).filter((n: number) => Number.isFinite(n)) : [Number(raw?.value)];
+        if (!values.length) throw new Error('Invalid tag filter value.');
+        if (operator === 'in' || operator === 'equals') domain.push(['tag_ids', 'in', values]);
+        else if (operator === 'not_in' || operator === 'not_equals') domain.push(['tag_ids', 'not in', values]);
+        else throw new Error(`Unsupported operator for tag: ${operator}`);
+      }
+      if (field === 'source') {
+        if (!hasField('source_id')) throw new Error('Unsupported filter field: source');
+        if (operator === 'equals') domain.push(['source_id', '=', Number(raw?.value)]);
+        else if (operator === 'not_equals') domain.push(['source_id', '!=', Number(raw?.value)]);
+        else throw new Error(`Unsupported operator for source: ${operator}`);
+      }
+      if (field === 'email') {
+        if (operator === 'contains') domain.push(['email', 'ilike', `%${String(raw?.value || '')}%`]);
+        else if (operator === 'starts_with') domain.push(['email', 'ilike', `${String(raw?.value || '')}%`]);
+        else if (operator === 'ends_with') domain.push(['email', 'ilike', `%${String(raw?.value || '')}`]);
+        else if (operator === 'equals') domain.push(['email', '=', String(raw?.value || '')]);
+        else if (operator === 'not_equals') domain.push(['email', '!=', String(raw?.value || '')]);
+        else throw new Error(`Unsupported operator for email: ${operator}`);
+      }
+      if (field === 'createdAt') {
+        if (operator === 'greater_than') domain.push(['create_date', '>', String(raw?.value || '')]);
+        else if (operator === 'less_than') domain.push(['create_date', '<', String(raw?.value || '')]);
+        else if (operator === 'between' && Array.isArray(raw?.value) && raw.value.length === 2) {
+          domain.push(['create_date', '>=', String(raw.value[0])]);
+          domain.push(['create_date', '<=', String(raw.value[1])]);
+        } else if (operator === 'equals') domain.push(['create_date', '=', String(raw?.value || '')]);
+        else throw new Error(`Unsupported operator for createdAt: ${operator}`);
+      }
+      if (field === 'lastActivityAt') {
+        if (!hasField('write_date')) throw new Error('Unsupported filter field: lastActivityAt');
+        if (operator === 'greater_than') domain.push(['write_date', '>', String(raw?.value || '')]);
+        else if (operator === 'less_than') domain.push(['write_date', '<', String(raw?.value || '')]);
+        else if (operator === 'between' && Array.isArray(raw?.value) && raw.value.length === 2) {
+          domain.push(['write_date', '>=', String(raw.value[0])]);
+          domain.push(['write_date', '<=', String(raw.value[1])]);
+        } else if (operator === 'equals') domain.push(['write_date', '=', String(raw?.value || '')]);
+        else throw new Error(`Unsupported operator for lastActivityAt: ${operator}`);
+      }
+      if (field === 'marketingConsent') {
+        // Odoo mailing.contact keeps suppression via opt_out.
+        const desired = Boolean(raw?.value);
+        domain.push(['opt_out', '=', !desired]);
+      }
+    }
+    return domain;
+  }
+
+  private async filterContactsByPartnerActivity(baseRows: any[], filters: Array<{ field: string; operator: string; value: any }>) {
+    const wantsOrders = filters.find((f) => f.field === 'hasOrders');
+    const wantsBookings = filters.find((f) => f.field === 'hasBookings');
+    if (!wantsOrders && !wantsBookings) return baseRows;
+
+    const fieldsInfo = await this.odooClient.execute(this.mailingContactModel, 'fields_get', [[]]);
+    if (!fieldsInfo?.partner_id) {
+      throw new Error('Unsupported filter field: hasOrders');
+    }
+    const contacts = await this.odooClient.searchRead(
+      this.mailingContactModel,
+      [['id', 'in', baseRows.map((r: any) => Number(r.id)).filter((n: number) => Number.isFinite(n))]],
+      ['id', 'partner_id']
+    );
+
+    const partnerMap = new Map<number, number>();
+    for (const row of Array.isArray(contacts) ? contacts : []) {
+      const contactId = Number(row?.id);
+      const partnerId = Number(Array.isArray(row?.partner_id) ? row.partner_id[0] : row?.partner_id);
+      if (Number.isFinite(contactId) && Number.isFinite(partnerId) && partnerId > 0) partnerMap.set(contactId, partnerId);
+    }
+    const partnerIds = Array.from(new Set(Array.from(partnerMap.values())));
+
+    let orderPartnerIds = new Set<number>();
+    if (wantsOrders && partnerIds.length > 0) {
+      const orders = await this.odooClient.searchRead(
+        this.salesOrderModel,
+        [['partner_id', 'in', partnerIds]],
+        ['id', 'partner_id'],
+        { limit: 10000, order: 'id desc' }
+      );
+      orderPartnerIds = new Set(
+        (Array.isArray(orders) ? orders : [])
+          .map((o: any) => Number(Array.isArray(o?.partner_id) ? o.partner_id[0] : o?.partner_id))
+          .filter((n: number) => Number.isFinite(n))
+      );
+    }
+
+    let bookingPartnerIds = new Set<number>();
+    if (wantsBookings && partnerIds.length > 0) {
+      const events = await this.odooClient.searchRead(
+        'calendar.event',
+        [['partner_ids', 'in', partnerIds]],
+        ['id', 'partner_ids'],
+        { limit: 10000, order: 'id desc' }
+      );
+      const acc = new Set<number>();
+      for (const evt of Array.isArray(events) ? events : []) {
+        const ids = Array.isArray(evt?.partner_ids) ? evt.partner_ids : [];
+        ids.map((id: any) => Number(id)).filter((n: number) => Number.isFinite(n)).forEach((n: number) => acc.add(n));
+      }
+      bookingPartnerIds = acc;
+    }
+
+    return baseRows.filter((row: any) => {
+      const partnerId = partnerMap.get(Number(row?.id));
+      if (!partnerId) return false;
+      if (wantsOrders) {
+        const expected = Boolean(wantsOrders.value);
+        const has = orderPartnerIds.has(partnerId);
+        if (expected !== has) return false;
+      }
+      if (wantsBookings) {
+        const expected = Boolean(wantsBookings.value);
+        const has = bookingPartnerIds.has(partnerId);
+        if (expected !== has) return false;
+      }
+      return true;
+    });
+  }
+
+  async previewSegment(filters: any) {
+    const list = Array.isArray(filters) ? filters : [];
+    const domain = await this.mapFiltersToDomain(list.filter((f: any) => f?.field !== 'hasOrders' && f?.field !== 'hasBookings'));
+    const contacts = await this.odooClient.searchRead(
+      this.mailingContactModel,
+      domain,
+      this.mailingContactFields,
+      { limit: 5000, order: 'id desc' }
+    );
+    const filtered = await this.filterContactsByPartnerActivity(Array.isArray(contacts) ? contacts : [], list);
+    const total = filtered.length;
+
+    const sampleContacts = filtered.slice(0, 10).map((c: any) => ({
+      id: String(c?.id || ''),
+      name: c?.name ? String(c.name) : undefined,
+      email: c?.email ? String(c.email) : undefined,
+      phone: c?.phone ? String(c.phone) : undefined,
+      consentStatus: c?.opt_out ? 'opted_out' : 'subscribed',
+    }));
+
+    return {
+      count: Number(total || 0),
+      sampleContacts,
+    };
+  }
+
+  async getSuppressionList(orgId: string) {
+    return (this.prisma as any).marketingSuppressionEntry.findMany({
+      where: { orgId },
+      orderBy: { createdAt: 'desc' },
+      take: 500,
+    });
+  }
+
+  async addSuppressionEntry(orgId: string, payload: any) {
+    const channel = String(payload?.channel || '').toLowerCase();
+    if (!['email', 'sms'].includes(channel)) throw new Error('Invalid suppression channel.');
+    const value = String(payload?.value || '').trim();
+    if (!value) throw new Error('Suppression value is required.');
+    return (this.prisma as any).marketingSuppressionEntry.create({
+      data: {
+        orgId,
+        channel,
+        value: value.toLowerCase(),
+        reason: String(payload?.reason || 'manual'),
+        source: payload?.source ? String(payload.source) : undefined,
+      },
+    });
+  }
+
+  async removeSuppressionEntry(orgId: string, id: string) {
+    const existing = await (this.prisma as any).marketingSuppressionEntry.findFirst({ where: { id, orgId } });
+    if (!existing) return null;
+    return (this.prisma as any).marketingSuppressionEntry.delete({ where: { id } });
+  }
+
+  async upsertContactConsent(orgId: string, contactId: string, payload: any, userId?: string) {
+    return (this.prisma as any).marketingContactConsent.upsert({
+      where: { orgId_contactId: { orgId, contactId } },
+      update: {
+        emailOptIn: payload?.emailOptIn,
+        smsOptIn: payload?.smsOptIn,
+        unsubscribed: payload?.unsubscribed === true,
+        updatedByUser: userId || undefined,
+      },
+      create: {
+        orgId,
+        contactId,
+        emailOptIn: payload?.emailOptIn,
+        smsOptIn: payload?.smsOptIn,
+        unsubscribed: payload?.unsubscribed === true,
+        updatedByUser: userId || undefined,
+      },
+    });
+  }
+
+  async evaluateRecipientEligibility(orgId: string, input: { channel: 'email' | 'sms'; email?: string; phone?: string; contactId?: string }) {
+    const channel = input.channel;
+    const email = input.email ? String(input.email).trim().toLowerCase() : '';
+    const phone = input.phone ? String(input.phone).trim() : '';
+
+    if (channel === 'email' && !email) return { eligible: false, code: 'missing_email', reason: 'Recipient email is missing.' };
+    if (channel === 'sms' && !phone) return { eligible: false, code: 'missing_phone', reason: 'Recipient phone is missing.' };
+
+    const suppressions = await (this.prisma as any).marketingSuppressionEntry.findMany({
+      where: {
+        orgId,
+        channel,
+        value: channel === 'email' ? email : phone,
+      },
+      take: 1,
+    });
+    if (suppressions.length > 0) {
+      const reason = String(suppressions[0]?.reason || 'suppressed');
+      if (reason === 'bounce') return { eligible: false, code: 'bounced', reason: 'Recipient suppressed due to bounce.' };
+      if (reason === 'complaint') return { eligible: false, code: 'complained', reason: 'Recipient suppressed due to complaint.' };
+      if (reason === 'unsubscribed') return { eligible: false, code: 'unsubscribed', reason: 'Recipient has unsubscribed.' };
+      return { eligible: false, code: 'suppressed', reason: 'Recipient is suppressed.' };
+    }
+
+    if (input.contactId) {
+      const consent = await (this.prisma as any).marketingContactConsent.findUnique({
+        where: { orgId_contactId: { orgId, contactId: String(input.contactId) } },
+      });
+      if (consent?.unsubscribed) return { eligible: false, code: 'unsubscribed', reason: 'Recipient has unsubscribed.' };
+      if (channel === 'email' && consent?.emailOptIn === false) return { eligible: false, code: 'missing_consent', reason: 'Email consent missing.' };
+      if (channel === 'sms' && consent?.smsOptIn === false) return { eligible: false, code: 'missing_consent', reason: 'SMS consent missing.' };
+    }
+
+    return { eligible: true };
+  }
+
+  async storeTemplateUsage(orgId: string, payload: any) {
+    return (this.prisma as any).marketingCampaignTemplateUsage.create({
+      data: {
+        orgId,
+        campaignId: String(payload.campaignId),
+        templateId: String(payload.templateId),
+        templateVersionId: payload?.templateVersionId ? String(payload.templateVersionId) : undefined,
+        templateNameSnapshot: String(payload.templateNameSnapshot || ''),
+        subjectSnapshot: payload?.subjectSnapshot ? String(payload.subjectSnapshot) : undefined,
+        previewTextSnapshot: payload?.previewTextSnapshot ? String(payload.previewTextSnapshot) : undefined,
+        contentSnapshot: payload?.contentSnapshot ? String(payload.contentSnapshot) : undefined,
+        appliedByUserId: payload?.appliedByUserId ? String(payload.appliedByUserId) : undefined,
+      },
+    });
+  }
+
+  async getCampaignTemplateUsage(orgId: string, campaignId: string) {
+    return (this.prisma as any).marketingCampaignTemplateUsage.findMany({
+      where: { orgId, campaignId: String(campaignId) },
+      orderBy: { appliedAt: 'desc' },
+      take: 20,
+    });
+  }
+
+  async getTemplateUsage(orgId: string, templateId: string) {
+    return (this.prisma as any).marketingCampaignTemplateUsage.findMany({
+      where: { orgId, templateId: String(templateId) },
+      orderBy: { appliedAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  async ingestDeliveryEvent(orgId: string, provider: string, event: any) {
+    const providerEventId = event?.providerEventId ? String(event.providerEventId) : undefined;
+    const providerMessageId = event?.providerMessageId ? String(event.providerMessageId) : undefined;
+    if (providerEventId) {
+      const existing = await (this.prisma as any).marketingDeliveryEvent.findFirst({
+        where: { orgId, provider, providerEventId },
+      });
+      if (existing) return existing;
+    }
+    if (providerMessageId) {
+      const existingByMessage = await (this.prisma as any).marketingDeliveryEvent.findFirst({
+        where: {
+          orgId,
+          provider,
+          providerMessageId,
+          eventType: String(event?.eventType || ''),
+        },
+      });
+      if (existingByMessage) return existingByMessage;
+    }
+
+    const created = await (this.prisma as any).marketingDeliveryEvent.create({
+      data: {
+        orgId,
+        campaignId: String(event.campaignId),
+        recipientId: event?.recipientId ? String(event.recipientId) : undefined,
+        recipientEmail: event?.recipientEmail ? String(event.recipientEmail).toLowerCase() : undefined,
+        recipientPhone: event?.recipientPhone ? String(event.recipientPhone) : undefined,
+        provider,
+        providerEventId,
+        providerMessageId,
+        eventType: String(event.eventType),
+        url: event?.url ? String(event.url) : undefined,
+        reason: event?.reason ? String(event.reason) : undefined,
+        rawPayload: event?.rawPayload ?? undefined,
+        occurredAt: event?.occurredAt ? new Date(event.occurredAt) : new Date(),
+      },
+    });
+
+    const type = String(event?.eventType || '').toLowerCase();
+    if (['bounced', 'complained', 'unsubscribed'].includes(type)) {
+      const channel = event?.recipientPhone ? 'sms' : 'email';
+      const value = channel === 'sms' ? String(event?.recipientPhone || '') : String(event?.recipientEmail || '').toLowerCase();
+      if (value) {
+        await this.addSuppressionEntry(orgId, {
+          channel,
+          value,
+          reason: type === 'bounced' ? 'bounce' : type === 'complained' ? 'complaint' : 'unsubscribed',
+          source: `webhook:${provider}`,
+        });
+      }
+    }
+
+    return created;
+  }
+
+  async getDeliveryEvents(orgId: string, campaignId: string) {
+    return (this.prisma as any).marketingDeliveryEvent.findMany({
+      where: { orgId, campaignId: String(campaignId) },
+      orderBy: { occurredAt: 'desc' },
+      take: 500,
+    });
+  }
+
+  async campaignEventAnalytics(orgId: string, campaignId: string) {
+    const events = await this.getDeliveryEvents(orgId, campaignId);
+    const campaignIdNum = Number(campaignId);
+    const eventMetrics = events.length ? (() => {
+      const count = (type: string) => events.filter((e: any) => String(e?.eventType || '').toLowerCase() === type).length;
+      const recipients = new Set(events.map((e: any) => String(e?.recipientEmail || e?.recipientPhone || e?.recipientId || '')).filter(Boolean)).size;
+      const sent = count('sent');
+      const delivered = count('delivered');
+      const opened = count('opened');
+      const clicked = count('clicked');
+      const bounced = count('bounced');
+      const complained = count('complained');
+      const unsubscribed = count('unsubscribed');
+      const failed = count('failed');
+
+      return {
+        recipients,
+        sent,
+        delivered,
+        opened,
+        clicked,
+        bounced,
+        complained,
+        unsubscribed,
+        failed,
+        openRate: delivered > 0 ? Number(((opened / delivered) * 100).toFixed(1)) : undefined,
+        clickRate: delivered > 0 ? Number(((clicked / delivered) * 100).toFixed(1)) : undefined,
+        bounceRate: sent > 0 ? Number(((bounced / sent) * 100).toFixed(1)) : undefined,
+        unsubscribeRate: delivered > 0 ? Number(((unsubscribed / delivered) * 100).toFixed(1)) : undefined,
+      };
+    })() : {};
+
+    if (!Number.isFinite(campaignIdNum) || campaignIdNum <= 0) return eventMetrics;
+
+    const [opportunities, orders] = await Promise.all([
+      this.odooClient.searchRead(
+        this.leadModel,
+        [['campaign_id', '=', campaignIdNum], ['type', '=', 'opportunity']],
+        ['id'],
+        { limit: 10000, order: 'id desc' }
+      ),
+      this.odooClient.searchRead(
+        this.salesOrderModel,
+        [['campaign_id', '=', campaignIdNum], ['state', 'in', ['sale', 'done']]],
+        ['id', 'amount_total'],
+        { limit: 10000, order: 'id desc' }
+      ),
+    ]);
+
+    const conversions = Array.isArray(opportunities) ? opportunities.length : undefined;
+    const revenue = Array.isArray(orders)
+      ? orders.reduce((sum: number, row: any) => sum + Number(row?.amount_total || 0), 0)
+      : undefined;
+
+    return {
+      ...eventMetrics,
+      conversions,
+      revenue,
+    };
+  }
+
+  async updateCampaignContent(id: number, data: any, context?: { orgId?: string; userId?: string }) {
     const mailing = await this.getOrCreateCampaignMailing(id);
     const payload: Record<string, any> = {};
 
@@ -377,6 +825,24 @@ export class MarketingService {
 
     if (Object.keys(payload).length > 0) {
       await this.odooClient.execute(this.mailingModel, 'write', [[mailing.id], payload]);
+    }
+
+    if (data?.templateId !== undefined && context?.orgId) {
+      const templateId = Number(data.templateId);
+      if (Number.isFinite(templateId) && templateId > 0) {
+        const template = await this.getTemplate(templateId);
+        if (template) {
+          await this.storeTemplateUsage(context.orgId, {
+            campaignId: String(id),
+            templateId: String(templateId),
+            templateNameSnapshot: String(template?.name || ''),
+            subjectSnapshot: data?.subject ?? template?.subject ?? undefined,
+            previewTextSnapshot: data?.previewText ?? undefined,
+            contentSnapshot: data?.content ?? template?.body_html ?? undefined,
+            appliedByUserId: context?.userId,
+          });
+        }
+      }
     }
 
     await this.updateCampaign(id, {

@@ -77,10 +77,10 @@ export function MarketingSegmentForm({ segment, onSubmit, onCancel }: Props) {
           <MenuItem value="source">Source</MenuItem>
           <MenuItem value="email_contains">Email contains</MenuItem>
           <MenuItem value="created_date">Created date</MenuItem>
-          <MenuItem value="last_activity_date" disabled>Last activity date (Unavailable)</MenuItem>
-          <MenuItem value="has_orders" disabled>Has orders (Unavailable)</MenuItem>
-          <MenuItem value="has_bookings" disabled>Has bookings (Unavailable)</MenuItem>
-          <MenuItem value="marketing_consent" disabled>Marketing consent (Unavailable)</MenuItem>
+          <MenuItem value="last_activity_date">Last activity date</MenuItem>
+          <MenuItem value="has_orders">Has orders</MenuItem>
+          <MenuItem value="has_bookings">Has bookings</MenuItem>
+          <MenuItem value="marketing_consent">Marketing consent</MenuItem>
         </RHFTextField>
 
         <Box>

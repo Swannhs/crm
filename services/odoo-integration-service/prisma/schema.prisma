@@ -70,3 +70,70 @@ model ContactShift {
   status    String    @default("Approved") // Pending, Approved, Rejected
   createdAt DateTime  @default(now())
 }
+
+model MarketingSuppressionEntry {
+  id        String   @id @default(uuid())
+  orgId     String
+  channel   String   // email | sms
+  value     String
+  reason    String   // unsubscribed | bounce | complaint | manual | other
+  source    String?
+  createdAt DateTime @default(now())
+
+  @@index([orgId, channel, value])
+}
+
+model MarketingContactConsent {
+  id            String   @id @default(uuid())
+  orgId         String
+  contactId     String
+  emailOptIn    Boolean?
+  smsOptIn      Boolean?
+  unsubscribed  Boolean  @default(false)
+  updatedByUser String?
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  @@unique([orgId, contactId])
+  @@index([orgId, unsubscribed])
+}
+
+model MarketingCampaignTemplateUsage {
+  id                   String   @id @default(uuid())
+  orgId                String
+  campaignId           String
+  templateId           String
+  templateVersionId    String?
+  templateNameSnapshot String
+  subjectSnapshot      String?
+  previewTextSnapshot  String?
+  contentSnapshot      String?
+  appliedByUserId      String?
+  appliedAt            DateTime @default(now())
+  createdAt            DateTime @default(now())
+
+  @@index([orgId, campaignId, appliedAt])
+  @@index([orgId, templateId, appliedAt])
+}
+
+model MarketingDeliveryEvent {
+  id                String   @id @default(uuid())
+  orgId             String
+  campaignId        String
+  recipientId       String?
+  recipientEmail    String?
+  recipientPhone    String?
+  provider          String?
+  providerEventId   String?
+  providerMessageId String?
+  eventType         String
+  url               String?
+  reason            String?
+  rawPayload        Json?
+  occurredAt        DateTime
+  createdAt         DateTime @default(now())
+
+  @@index([orgId, campaignId, occurredAt])
+  @@index([orgId, provider, providerEventId])
+  @@index([orgId, provider, providerMessageId])
+}

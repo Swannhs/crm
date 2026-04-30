@@ -152,9 +152,69 @@ exports.Prisma.ContactShiftScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MarketingSuppressionEntryScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  channel: 'channel',
+  value: 'value',
+  reason: 'reason',
+  source: 'source',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MarketingContactConsentScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  contactId: 'contactId',
+  emailOptIn: 'emailOptIn',
+  smsOptIn: 'smsOptIn',
+  unsubscribed: 'unsubscribed',
+  updatedByUser: 'updatedByUser',
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MarketingCampaignTemplateUsageScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  campaignId: 'campaignId',
+  templateId: 'templateId',
+  templateVersionId: 'templateVersionId',
+  templateNameSnapshot: 'templateNameSnapshot',
+  subjectSnapshot: 'subjectSnapshot',
+  previewTextSnapshot: 'previewTextSnapshot',
+  contentSnapshot: 'contentSnapshot',
+  appliedByUserId: 'appliedByUserId',
+  appliedAt: 'appliedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MarketingDeliveryEventScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  campaignId: 'campaignId',
+  recipientId: 'recipientId',
+  recipientEmail: 'recipientEmail',
+  recipientPhone: 'recipientPhone',
+  provider: 'provider',
+  providerEventId: 'providerEventId',
+  providerMessageId: 'providerMessageId',
+  eventType: 'eventType',
+  url: 'url',
+  reason: 'reason',
+  rawPayload: 'rawPayload',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -167,6 +227,12 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
 
 exports.Prisma.ModelName = {
   ContactMap: 'ContactMap',
@@ -174,7 +240,11 @@ exports.Prisma.ModelName = {
   ContactFile: 'ContactFile',
   ContactTask: 'ContactTask',
   ContactActivity: 'ContactActivity',
-  ContactShift: 'ContactShift'
+  ContactShift: 'ContactShift',
+  MarketingSuppressionEntry: 'MarketingSuppressionEntry',
+  MarketingContactConsent: 'MarketingContactConsent',
+  MarketingCampaignTemplateUsage: 'MarketingCampaignTemplateUsage',
+  MarketingDeliveryEvent: 'MarketingDeliveryEvent'
 };
 /**
  * Create the Client
@@ -187,7 +257,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/swann/WebstormProjects/mymanager-main/microservices/services/odoo-integration-service/generated-prisma",
+      "value": "/workspace/services/odoo-integration-service/generated-prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -196,7 +266,7 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "linux-musl-openssl-3.0.x",
         "native": true
       },
       {
@@ -205,11 +275,12 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/swann/WebstormProjects/mymanager-main/microservices/services/odoo-integration-service/prisma/schema.prisma",
+    "sourceFilePath": "/workspace/services/odoo-integration-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../.env"
+    "rootEnvPath": null,
+    "schemaEnvPath": "../.env"
   },
   "relativePath": "../prisma",
   "clientVersion": "6.19.3",
@@ -218,7 +289,6 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -227,13 +297,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../generated-prisma\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel ContactMap {\n  uuid      String   @id @default(uuid())\n  odooId    Int      @unique\n  status    String?  @default(\"new\")\n  createdAt DateTime @default(now())\n}\n\nmodel Pet {\n  id        String    @id @default(uuid())\n  contactId Int // Odoo partner_id\n  name      String\n  breed     String?\n  age       String? // Keep for legacy/manual entry\n  birthDate DateTime?\n  photo     String?\n  createdAt DateTime  @default(now())\n}\n\nmodel ContactFile {\n  id        String   @id @default(uuid())\n  contactId Int // Odoo partner_id\n  name      String\n  size      String\n  url       String\n  type      String?\n  createdAt DateTime @default(now())\n}\n\nmodel ContactTask {\n  id        String   @id @default(uuid())\n  contactId Int // Odoo partner_id\n  title     String\n  dueDate   String?\n  priority  String?  @default(\"Medium\")\n  status    String   @default(\"pending\")\n  createdAt DateTime @default(now())\n}\n\nmodel ContactActivity {\n  id        String   @id @default(uuid())\n  contactId Int // Odoo partner_id\n  type      String // note, call, system, email\n  title     String\n  content   String?\n  author    String   @default(\"System\")\n  color     String?  @default(\"info\")\n  icon      String?\n  createdAt DateTime @default(now())\n}\n\nmodel ContactShift {\n  id        String    @id @default(uuid())\n  contactId Int // Odoo partner_id\n  clockIn   DateTime  @default(now())\n  clockOut  DateTime?\n  status    String    @default(\"Approved\") // Pending, Approved, Rejected\n  createdAt DateTime  @default(now())\n}\n",
-  "inlineSchemaHash": "564aee9e839c9bff1158aef7c3828a8625eb32dea03a66ab5c99a589fdc1c2dd",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../generated-prisma\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel ContactMap {\n  uuid      String   @id @default(uuid())\n  odooId    Int      @unique\n  status    String?  @default(\"new\")\n  createdAt DateTime @default(now())\n}\n\nmodel Pet {\n  id        String    @id @default(uuid())\n  contactId Int // Odoo partner_id\n  name      String\n  breed     String?\n  age       String? // Keep for legacy/manual entry\n  birthDate DateTime?\n  photo     String?\n  createdAt DateTime  @default(now())\n}\n\nmodel ContactFile {\n  id        String   @id @default(uuid())\n  contactId Int // Odoo partner_id\n  name      String\n  size      String\n  url       String\n  type      String?\n  createdAt DateTime @default(now())\n}\n\nmodel ContactTask {\n  id        String   @id @default(uuid())\n  contactId Int // Odoo partner_id\n  title     String\n  dueDate   String?\n  priority  String?  @default(\"Medium\")\n  status    String   @default(\"pending\")\n  createdAt DateTime @default(now())\n}\n\nmodel ContactActivity {\n  id        String   @id @default(uuid())\n  contactId Int // Odoo partner_id\n  type      String // note, call, system, email\n  title     String\n  content   String?\n  author    String   @default(\"System\")\n  color     String?  @default(\"info\")\n  icon      String?\n  createdAt DateTime @default(now())\n}\n\nmodel ContactShift {\n  id        String    @id @default(uuid())\n  contactId Int // Odoo partner_id\n  clockIn   DateTime  @default(now())\n  clockOut  DateTime?\n  status    String    @default(\"Approved\") // Pending, Approved, Rejected\n  createdAt DateTime  @default(now())\n}\n\nmodel MarketingSuppressionEntry {\n  id        String   @id @default(uuid())\n  orgId     String\n  channel   String // email | sms\n  value     String\n  reason    String // unsubscribed | bounce | complaint | manual | other\n  source    String?\n  createdAt DateTime @default(now())\n\n  @@index([orgId, channel, value])\n}\n\nmodel MarketingContactConsent {\n  id            String   @id @default(uuid())\n  orgId         String\n  contactId     String\n  emailOptIn    Boolean?\n  smsOptIn      Boolean?\n  unsubscribed  Boolean  @default(false)\n  updatedByUser String?\n  updatedAt     DateTime @updatedAt\n  createdAt     DateTime @default(now())\n\n  @@unique([orgId, contactId])\n  @@index([orgId, unsubscribed])\n}\n\nmodel MarketingCampaignTemplateUsage {\n  id                   String   @id @default(uuid())\n  orgId                String\n  campaignId           String\n  templateId           String\n  templateVersionId    String?\n  templateNameSnapshot String\n  subjectSnapshot      String?\n  previewTextSnapshot  String?\n  contentSnapshot      String?\n  appliedByUserId      String?\n  appliedAt            DateTime @default(now())\n  createdAt            DateTime @default(now())\n\n  @@index([orgId, campaignId, appliedAt])\n  @@index([orgId, templateId, appliedAt])\n}\n\nmodel MarketingDeliveryEvent {\n  id                String   @id @default(uuid())\n  orgId             String\n  campaignId        String\n  recipientId       String?\n  recipientEmail    String?\n  recipientPhone    String?\n  provider          String?\n  providerEventId   String?\n  providerMessageId String?\n  eventType         String\n  url               String?\n  reason            String?\n  rawPayload        Json?\n  occurredAt        DateTime\n  createdAt         DateTime @default(now())\n\n  @@index([orgId, campaignId, occurredAt])\n  @@index([orgId, provider, providerEventId])\n  @@index([orgId, provider, providerMessageId])\n}\n",
+  "inlineSchemaHash": "caa389d492fd932933ec9f5806727416b9e40182efe0aa6443ed6d916beefe99",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"ContactMap\":{\"fields\":[{\"name\":\"uuid\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"odooId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Pet\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"breed\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"age\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"birthDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"photo\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactFile\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"size\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactTask\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dueDate\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priority\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactActivity\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"content\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"author\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"color\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"icon\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactShift\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"clockIn\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"clockOut\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"ContactMap\":{\"fields\":[{\"name\":\"uuid\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"odooId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Pet\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"breed\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"age\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"birthDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"photo\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactFile\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"size\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactTask\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dueDate\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"priority\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactActivity\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"content\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"author\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"color\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"icon\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ContactShift\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"clockIn\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"clockOut\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"MarketingSuppressionEntry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orgId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"channel\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"value\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"reason\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"source\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"MarketingContactConsent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orgId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contactId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"emailOptIn\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"smsOptIn\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"unsubscribed\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"updatedByUser\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"MarketingCampaignTemplateUsage\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orgId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"campaignId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"templateId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"templateVersionId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"templateNameSnapshot\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subjectSnapshot\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"previewTextSnapshot\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"contentSnapshot\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"appliedByUserId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"appliedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"MarketingDeliveryEvent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orgId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"campaignId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"recipientId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"recipientEmail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"recipientPhone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerEventId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerMessageId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"eventType\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"reason\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"rawPayload\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"occurredAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

@@ -296,7 +296,8 @@ const deprecatedCommerceModules = new Set([
 ]);
 
 async function handleApiCompat(req: Request, res: Response) {
-  const module = req.params.module;
+  const moduleParam = req.params.module;
+  const module = Array.isArray(moduleParam) ? moduleParam[0] : moduleParam;
   const rest = req.params[0] ? `/${req.params[0]}` : "";
 
   if (module === "public" && req.method === "GET" && rest === "/help-center/articles") {

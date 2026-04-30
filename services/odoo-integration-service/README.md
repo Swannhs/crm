@@ -31,6 +31,28 @@
 $ npm install
 ```
 
+## Database migrations (marketing advanced)
+
+```bash
+# generate Prisma client
+npm run prisma:generate
+
+# check migration status
+npm run prisma:migrate:status
+
+# apply migrations in deployed environment
+npm run prisma:migrate:deploy
+```
+
+## Marketing webhook configuration
+
+Set these environment variables for webhook ingestion:
+
+```bash
+MARKETING_WEBHOOK_PROVIDERS=sendgrid,mailgun,postmark
+MARKETING_WEBHOOK_SECRET=your_hmac_secret
+```
+
 ## Compile and run the project
 
 ```bash

@@ -52,6 +52,7 @@ export const CampaignSchema = zod.object({
   type: zod.string().min(1, 'Type is required'),
   subject: zod.string().optional(),
   previewText: zod.string().optional(),
+  templateId: zod.string().optional(),
   segmentId: zod.string().min(1, 'Audience is required'),
   content: zod.string().min(1, 'Content is required'),
   senderName: zod.string().optional(),
@@ -84,6 +85,11 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
     enabled: Boolean(campaign?.id),
     queryFn: () => marketingService.getCampaignComplianceStatus(String(campaign?.id)),
   });
+  const senderStatusQuery = useQuery({
+    queryKey: ['marketing-sender-status'],
+    enabled: Boolean(campaign?.id),
+    queryFn: () => marketingService.getSenderStatus(),
+  });
 
   const defaultValues = useMemo(
     () => ({
@@ -91,6 +97,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
       type: campaign?.type || 'email',
       subject: campaign?.subject || '',
       previewText: campaign?.previewText || '',
+      templateId: campaign?.templateId || '',
       segmentId: campaign?.segmentId || '',
       content: campaign?.content || '',
       senderName: campaign?.senderName || '',
@@ -144,6 +151,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
   });
 
   const handleSelectTemplate = (template: MarketingTemplate) => {
+    setValue('templateId', String(template.id || ''), { shouldValidate: false });
     setValue('content', template.content || '', { shouldValidate: true });
     if (template.subject) setValue('subject', template.subject, { shouldValidate: true });
   };
@@ -164,7 +172,8 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
       typeof complianceQuery.data?.compliantRecipients === 'number' &&
       complianceQuery.data.compliantRecipients > 0);
 
-  const deliveryEnabled = canDeliver && complianceReady;
+  const senderReady = !isEdit || Boolean(senderStatusQuery.data?.configured);
+  const deliveryEnabled = canDeliver && complianceReady && senderReady;
 
   const handleSendTest = async () => {
     if (!campaign?.id || !testRecipient) return;
@@ -363,7 +372,9 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                   <Typography variant="caption" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
                     <Iconify icon="solar:info-circle-bold" width={16} sx={{ mr: 0.5 }} />
                     {isEdit
-                      ? complianceQuery.isError
+                      ? senderStatusQuery.isError
+                        ? 'Sender configuration is required.'
+                        : complianceQuery.isError
                         ? 'Compliance checks are not available yet.'
                         : complianceQuery.data?.message || 'Compliance check pending.'
                       : 'Save draft to run compliance checks.'}

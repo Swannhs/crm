@@ -1,10 +1,10 @@
-import { MarketingCampaignsView } from 'src/sections/marketing/view/marketing-campaigns-view';
 import { MarketingSegmentsView } from 'src/sections/marketing/view/marketing-segments-view';
+import { MarketingCampaignsView } from 'src/sections/marketing/view/marketing-campaigns-view';
 import { MarketingTemplatesView } from 'src/sections/marketing/view/marketing-templates-view';
 import { MarketingAnalyticsView } from 'src/sections/marketing/view/marketing-analytics-view';
+import { MarketingWorkspaceView } from 'src/sections/marketing/view/marketing-workspace-view';
 import { MarketingAutomationView } from 'src/sections/marketing/view/marketing-automation-view';
 import { MarketingComplianceView } from 'src/sections/marketing/view/marketing-compliance-view';
-import { MarketingCampaignDetailView } from 'src/sections/marketing/view/marketing-campaign-detail-view';
 
 export const metadata = {
   title: 'Dashboard: Marketing Section',
@@ -41,6 +41,14 @@ export default function Page({ params }: Props) {
 
   if (section === 'analytics') {
     return <MarketingAnalyticsView />;
+  }
+
+  if (section === 'sources') {
+    return <MarketingWorkspaceView section="sources" />;
+  }
+
+  if (section === 'mediums') {
+    return <MarketingWorkspaceView section="mediums" />;
   }
 
   return <MarketingCampaignsView />;

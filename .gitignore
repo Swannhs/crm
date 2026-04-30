@@ -54,6 +54,7 @@ venv/
 .coverage
 coverage/
 htmlcov/
+graphify-out/
 
 # Node.js
 node_modules/

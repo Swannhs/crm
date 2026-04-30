@@ -180,9 +180,69 @@ exports.Prisma.ContactShiftScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MarketingSuppressionEntryScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  channel: 'channel',
+  value: 'value',
+  reason: 'reason',
+  source: 'source',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MarketingContactConsentScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  contactId: 'contactId',
+  emailOptIn: 'emailOptIn',
+  smsOptIn: 'smsOptIn',
+  unsubscribed: 'unsubscribed',
+  updatedByUser: 'updatedByUser',
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MarketingCampaignTemplateUsageScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  campaignId: 'campaignId',
+  templateId: 'templateId',
+  templateVersionId: 'templateVersionId',
+  templateNameSnapshot: 'templateNameSnapshot',
+  subjectSnapshot: 'subjectSnapshot',
+  previewTextSnapshot: 'previewTextSnapshot',
+  contentSnapshot: 'contentSnapshot',
+  appliedByUserId: 'appliedByUserId',
+  appliedAt: 'appliedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MarketingDeliveryEventScalarFieldEnum = {
+  id: 'id',
+  orgId: 'orgId',
+  campaignId: 'campaignId',
+  recipientId: 'recipientId',
+  recipientEmail: 'recipientEmail',
+  recipientPhone: 'recipientPhone',
+  provider: 'provider',
+  providerEventId: 'providerEventId',
+  providerMessageId: 'providerMessageId',
+  eventType: 'eventType',
+  url: 'url',
+  reason: 'reason',
+  rawPayload: 'rawPayload',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -195,6 +255,12 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+
 
 exports.Prisma.ModelName = {
   ContactMap: 'ContactMap',
@@ -202,7 +268,11 @@ exports.Prisma.ModelName = {
   ContactFile: 'ContactFile',
   ContactTask: 'ContactTask',
   ContactActivity: 'ContactActivity',
-  ContactShift: 'ContactShift'
+  ContactShift: 'ContactShift',
+  MarketingSuppressionEntry: 'MarketingSuppressionEntry',
+  MarketingContactConsent: 'MarketingContactConsent',
+  MarketingCampaignTemplateUsage: 'MarketingCampaignTemplateUsage',
+  MarketingDeliveryEvent: 'MarketingDeliveryEvent'
 };
 
 /**

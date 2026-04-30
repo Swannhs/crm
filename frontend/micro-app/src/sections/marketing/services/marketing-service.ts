@@ -29,6 +29,11 @@ const safeGet = async (url: string, fallback: any) => {
   }
 };
 
+const strictGet = async (url: string) => {
+  const response = await axiosInstance.get(url, axiosConfig);
+  return response.data?.data ?? response.data;
+};
+
 const normalizeCampaign = (row: any): MarketingCampaign => {
   const rawStatus = String(row?.status || '').toLowerCase();
   const status =
@@ -90,20 +95,20 @@ const normalizeTemplate = (row: any): MarketingTemplate => ({
 export const marketingService = {
   // Dashboard
   getSummary: async (): Promise<MarketingSummary & { isFallback?: boolean }> => safeGet(`${API_BASE}/summary`, {
-      totalContacts: 0,
-      activeCampaigns: 0,
-      scheduledCampaigns: 0,
-      sentCampaigns: 0,
-      openRate: 0,
-      clickRate: 0,
-      conversionRate: 0,
-      channelHealth: 'healthy',
+      totalContacts: undefined,
+      activeCampaigns: undefined,
+      scheduledCampaigns: undefined,
+      sentCampaigns: undefined,
+      openRate: undefined,
+      clickRate: undefined,
+      conversionRate: undefined,
+      channelHealth: 'warning',
     }),
   getActivity: async () => safeGet(`${API_BASE}/activity`, []),
 
   // Segments
   getSegments: async (): Promise<MarketingSegment[]> => {
-    const payload = await safeGet(`${API_BASE}/segments`, []);
+    const payload = await strictGet(`${API_BASE}/segments`);
     const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : [];
     return rows.map(normalizeSegment);
   },
@@ -129,7 +134,7 @@ export const marketingService = {
 
   // Campaigns
   getCampaigns: async (): Promise<MarketingCampaign[] & { isFallback?: boolean }> => {
-    const payload = await safeGet(`${API_BASE}/campaigns`, []);
+    const payload = await strictGet(`${API_BASE}/campaigns`);
     const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : [];
     return rows.map(normalizeCampaign) as MarketingCampaign[] & { isFallback?: boolean };
   },
@@ -174,7 +179,7 @@ export const marketingService = {
 
   // Templates
   getTemplates: async (): Promise<MarketingTemplate[]> => {
-    const payload = await safeGet(`${API_BASE}/templates`, []);
+    const payload = await strictGet(`${API_BASE}/templates`);
     const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : [];
     return rows.map(normalizeTemplate);
   },
@@ -197,9 +202,17 @@ export const marketingService = {
     const response = await axiosInstance.post(`${API_BASE}/templates/${id}/duplicate`, {}, axiosConfig);
     return normalizeTemplate(response.data?.data ?? response.data);
   },
+  getTemplateUsage: async (id: string) => strictGet(`${API_BASE}/templates/${id}/usage`),
 
   // Analytics
   getCampaignAnalytics: async (id: string): Promise<CampaignAnalytics> => safeGet(`${API_BASE}/campaigns/${id}/analytics`, null),
   getCampaignComplianceStatus: async (id: string) => safeGet(`${API_BASE}/campaigns/${id}/compliance-status`, null),
+  getSenderStatus: async () => safeGet(`${API_BASE}/sender-status`, null),
+  getCampaignTemplateUsage: async (id: string) => strictGet(`${API_BASE}/campaigns/${id}/template-usage`),
+  getCampaignDeliveryEvents: async (id: string) => strictGet(`${API_BASE}/campaigns/${id}/delivery-events`),
+  getSuppressionList: async () => strictGet(`${API_BASE}/suppression-list`),
+  addSuppressionEntry: async (payload: any) => axiosInstance.post(`${API_BASE}/suppression-list`, payload, axiosConfig).then((r) => r.data?.data ?? r.data),
+  removeSuppressionEntry: async (id: string) => axiosInstance.delete(`${API_BASE}/suppression-list/${id}`, axiosConfig).then((r) => r.data?.data ?? r.data),
+  updateContactConsent: async (id: string, payload: any) => axiosInstance.post(`${API_BASE}/contacts/${id}/consent`, payload, axiosConfig).then((r) => r.data?.data ?? r.data),
   getOverallAnalytics: async () => safeGet(`${API_BASE}/analytics`, null),
 };
