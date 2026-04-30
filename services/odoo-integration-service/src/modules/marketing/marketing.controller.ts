@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Query, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Query, Param, ParseIntPipe, UseGuards, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiHeader } from '@nestjs/swagger';
 import { MarketingService } from './marketing.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
@@ -21,8 +21,8 @@ export class MarketingController {
       activeCampaigns: stats.activeCampaigns,
       scheduledCampaigns: 0,
       sentCampaigns: stats.totalCampaigns - stats.activeCampaigns,
-      openRate: 0,
-      clickRate: 0,
+      openRate: undefined,
+      clickRate: undefined,
       conversionRate: stats.conversionRate,
       channelHealth: 'healthy',
     };
@@ -128,21 +128,63 @@ export class MarketingController {
   @ApiOperation({ summary: 'Send campaign mailing' })
   async sendCampaign(@Param('id', ParseIntPipe) id: number) {
     const mailings = await this.marketingService.listMailings(id);
-    if (mailings.length === 0) throw new Error('No mailing found for this campaign');
-    return this.marketingService.sendMailing(mailings[0].id);
+    if (mailings.length === 0) throw new BadRequestException('Campaign content is missing. Save builder content first.');
+    const mailing = mailings[0];
+    if (!mailing?.subject || !mailing?.body_html) {
+      throw new BadRequestException('Campaign content is incomplete. Subject and content are required.');
+    }
+    if (!mailing?.contact_list_ids || mailing.contact_list_ids.length === 0) {
+      throw new BadRequestException('Audience is required before sending.');
+    }
+    return this.marketingService.sendMailing(mailing.id);
   }
 
   @Post('campaigns/:id/schedule')
   @ApiOperation({ summary: 'Schedule campaign mailing' })
-  async scheduleCampaign(@Param('id', ParseIntPipe) id: number, @Body() body: { time: string }) {
+  async scheduleCampaign(@Param('id', ParseIntPipe) id: number, @Body() body: { time?: string; scheduledAt?: string }) {
+    const scheduleAt = body?.scheduledAt || body?.time;
+    if (!scheduleAt) throw new BadRequestException('scheduledAt is required.');
+    const scheduled = new Date(scheduleAt);
+    if (Number.isNaN(scheduled.getTime()) || scheduled.getTime() <= Date.now()) {
+      throw new BadRequestException('scheduledAt must be a valid future datetime.');
+    }
     const mailings = await this.marketingService.listMailings(id);
-    if (mailings.length === 0) throw new Error('No mailing found for this campaign');
-    return this.marketingService.scheduleMailing(mailings[0].id, body.time);
+    if (mailings.length === 0) throw new BadRequestException('Campaign content is missing. Save builder content first.');
+    const mailing = mailings[0];
+    if (!mailing?.subject || !mailing?.body_html) {
+      throw new BadRequestException('Campaign content is incomplete. Subject and content are required.');
+    }
+    if (!mailing?.contact_list_ids || mailing.contact_list_ids.length === 0) {
+      throw new BadRequestException('Audience is required before scheduling.');
+    }
+    await this.marketingService.scheduleMailing(mailing.id, scheduleAt);
+    return this.getCampaign(id);
   }
 
   @Post('campaigns/:id/send-test')
-  async sendTest(@Param('id', ParseIntPipe) id: number, @Body() body: { email: string }) {
-    return { success: true };
+  async sendTest(@Param('id', ParseIntPipe) id: number, @Body() body: { email?: string; to?: string }) {
+    const recipient = String(body?.to || body?.email || '').trim();
+    if (!recipient) throw new BadRequestException('Recipient is required.');
+    const campaign = await this.marketingService.getCampaign(id);
+    if (!campaign) throw new BadRequestException('Campaign not found.');
+    throw new NotImplementedException('Marketing sender is not configured.');
+  }
+
+  @Post('campaigns/:id/cancel-schedule')
+  async cancelSchedule(@Param('id', ParseIntPipe) id: number) {
+    const mailings = await this.marketingService.listMailings(id);
+    if (mailings.length === 0) throw new BadRequestException('No scheduled mailing found for this campaign.');
+    await this.marketingService.cancelScheduledMailing(mailings[0].id);
+    return this.getCampaign(id);
+  }
+
+  @Patch('campaigns/:id/content')
+  async updateCampaignContent(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
+    const campaign = await this.marketingService.updateCampaignContent(id, data);
+    return campaign;
   }
 
   // --- Segments (Mailing Lists) ---
@@ -190,6 +232,11 @@ export class MarketingController {
     return this.marketingService.deleteSegment(id);
   }
 
+  @Post('segments/preview')
+  async previewSegment() {
+    throw new NotImplementedException('Segment preview is not available yet.');
+  }
+
   // --- Templates ---
 
   @Get('templates')
@@ -218,6 +265,26 @@ export class MarketingController {
       content: t.body_html,
       category: 'newsletter',
     };
+  }
+
+  @Post('templates')
+  async createTemplate(@Body() data: any) {
+    return this.marketingService.createTemplate(data);
+  }
+
+  @Patch('templates/:id')
+  async updateTemplate(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.marketingService.updateTemplate(id, data);
+  }
+
+  @Delete('templates/:id')
+  async deleteTemplate(@Param('id', ParseIntPipe) id: number) {
+    return this.marketingService.deleteTemplate(id);
+  }
+
+  @Post('templates/:id/duplicate')
+  async duplicateTemplate(@Param('id', ParseIntPipe) id: number) {
+    return this.marketingService.duplicateTemplate(id);
   }
 
   // --- Sources & Mediums ---

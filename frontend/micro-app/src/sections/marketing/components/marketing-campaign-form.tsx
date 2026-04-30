@@ -1,36 +1,37 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z as zod } from 'zod';
-import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useMemo, useState, useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
+import Grid from '@mui/material/Grid';
+import Tabs from '@mui/material/Tabs';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
+import Dialog from '@mui/material/Dialog';
 import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Chip from '@mui/material/Chip';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { Form, RHFTextField } from 'src/components/hook-form';
+
 import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
+import { Form, RHFTextField } from 'src/components/hook-form';
 
-import { MarketingCampaign, MarketingSegment, MarketingTemplate } from '../types';
-import { useCreateCampaign, useUpdateCampaign } from '../hooks/use-marketing';
+import { useCreateCampaign } from '../hooks/use-marketing';
 import { marketingService } from '../services/marketing-service';
 import { MarketingTemplatePicker } from './marketing-template-picker';
 import { MarketingCampaignPreview } from './marketing-campaign-preview';
+import { MarketingSegment, MarketingCampaign, MarketingTemplate } from '../types';
 
 // ----------------------------------------------------------------------
 
@@ -50,34 +51,33 @@ export const CampaignSchema = zod.object({
   type: zod.string().min(1, 'Type is required'),
   subject: zod.string().optional(),
   previewText: zod.string().optional(),
-  segmentId: zod.string().min(1, 'Segment is required'),
+  segmentId: zod.string().min(1, 'Audience is required'),
   content: zod.string().min(1, 'Content is required'),
-  sender: zod.string().optional(),
+  senderName: zod.string().optional(),
+  senderEmail: zod.string().optional(),
 }).refine((data) => {
-  if (data.type === 'email' && !data.subject) {
+  if (data.type === 'email' && (!data.subject || !data.senderEmail)) {
     return false;
   }
   return true;
 }, {
-  message: 'Subject is required for email campaigns',
-  path: ['subject'],
+  message: 'Subject and sender email are required for email campaigns',
+  path: ['senderEmail'],
 });
 
 export function MarketingCampaignForm({ campaign, segments }: Props) {
   const router = useRouter();
   const isEdit = !!campaign;
-  
+
   const [tab, setTab] = useState('edit');
   const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [testSendOpen, setTestSendOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
-  const [testEmail, setTestEmail] = useState('');
+  const [testRecipient, setTestRecipient] = useState('');
   const [scheduleTime, setScheduleTime] = useState('');
-  
   const [isSending, setIsSending] = useState(false);
 
   const createCampaign = useCreateCampaign();
-  const updateCampaign = useUpdateCampaign();
 
   const defaultValues = useMemo(
     () => ({
@@ -87,7 +87,8 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
       previewText: campaign?.previewText || '',
       segmentId: campaign?.segmentId || '',
       content: campaign?.content || '',
-      sender: campaign?.sender || '',
+      senderName: campaign?.senderName || '',
+      senderEmail: campaign?.senderEmail || '',
     }),
     [campaign]
   );
@@ -115,19 +116,30 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      if (isEdit) {
-        await updateCampaign.mutateAsync({ id: campaign.id, data });
+      if (isEdit && campaign?.id) {
+        await marketingService.updateCampaignContent(campaign.id, data);
       } else {
-        await createCampaign.mutateAsync(data);
+        const created = await createCampaign.mutateAsync(data as any);
+        const createdId =
+          typeof created === 'number'
+            ? String(created)
+            : created?.id
+            ? String(created.id)
+            : '';
+        if (createdId) {
+          await marketingService.updateCampaignContent(createdId, data);
+        }
       }
+      showToast({ severity: 'success', message: 'Campaign draft saved.' });
       router.push(paths.dashboard.marketingSection('campaigns'));
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      showToast({ severity: 'error', message: error?.response?.data?.message || 'Failed to save campaign.' });
     }
   });
 
   const handleSelectTemplate = (template: MarketingTemplate) => {
-    setValue('content', template.content, { shouldValidate: true });
+    setValue('content', template.content || '', { shouldValidate: true });
+    if (template.subject) setValue('subject', template.subject, { shouldValidate: true });
   };
 
   const handleInsertToken = (token: string) => {
@@ -135,15 +147,20 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
     setValue('content', currentContent + token);
   };
 
+  const canDeliver =
+    Boolean(values.segmentId) &&
+    Boolean(values.content) &&
+    (values.type !== 'email' || (Boolean(values.subject) && Boolean(values.senderEmail)));
+
   const handleSendTest = async () => {
-    if (!campaign?.id || !testEmail) return;
+    if (!campaign?.id || !testRecipient) return;
     try {
       setIsSending(true);
-      await marketingService.sendTest(campaign.id, testEmail);
-      showToast({ severity: 'success', message: 'Test email sent!' });
+      await marketingService.sendTestCampaign(campaign.id, { to: testRecipient });
+      showToast({ severity: 'success', message: 'Test campaign sent.' });
       setTestSendOpen(false);
-    } catch (error) {
-      showToast({ severity: 'error', message: 'Failed to send test email.' });
+    } catch (error: any) {
+      showToast({ severity: 'error', message: error?.response?.data?.message || 'Send test is unavailable.' });
     } finally {
       setIsSending(false);
     }
@@ -153,12 +170,12 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
     if (!campaign?.id || !scheduleTime) return;
     try {
       setIsSending(true);
-      await marketingService.scheduleCampaign(campaign.id, scheduleTime);
-      showToast({ severity: 'success', message: 'Campaign scheduled!' });
+      await marketingService.scheduleCampaign(campaign.id, { scheduledAt: scheduleTime });
+      showToast({ severity: 'success', message: 'Campaign scheduled.' });
       setScheduleOpen(false);
       router.push(paths.dashboard.marketingSection('campaigns'));
-    } catch (error) {
-      showToast({ severity: 'error', message: 'Failed to schedule campaign.' });
+    } catch (error: any) {
+      showToast({ severity: 'error', message: error?.response?.data?.message || 'Schedule is unavailable.' });
     } finally {
       setIsSending(false);
     }
@@ -168,11 +185,24 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
     if (!campaign?.id) return;
     try {
       setIsSending(true);
-      await marketingService.sendCampaign(campaign.id);
-      showToast({ severity: 'success', message: 'Campaign is sending!' });
+      await marketingService.sendCampaignNow(campaign.id);
+      showToast({ severity: 'success', message: 'Campaign queued for delivery.' });
       router.push(paths.dashboard.marketingSection('campaigns'));
-    } catch (error) {
-      showToast({ severity: 'error', message: 'Failed to send campaign.' });
+    } catch (error: any) {
+      showToast({ severity: 'error', message: error?.response?.data?.message || 'Send is unavailable.' });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleCancelSchedule = async () => {
+    if (!campaign?.id) return;
+    try {
+      setIsSending(true);
+      await marketingService.cancelScheduledCampaign(campaign.id);
+      showToast({ severity: 'success', message: 'Campaign schedule canceled.' });
+    } catch (error: any) {
+      showToast({ severity: 'error', message: error?.response?.data?.message || 'Cancel schedule is unavailable.' });
     } finally {
       setIsSending(false);
     }
@@ -185,7 +215,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
         onChange={(_e, v) => setTab(v)}
         sx={{ mb: 3, borderBottom: (theme) => `solid 1px ${theme.palette.divider}` }}
       >
-        <Tab icon={<Iconify icon="solar:pen-bold" width={20} />} label="Edit Content" value="edit" />
+        <Tab icon={<Iconify icon="solar:pen-bold" width={20} />} label="Builder" value="edit" />
         <Tab icon={<Iconify icon="solar:eye-bold" width={20} />} label="Preview" value="preview" />
       </Tabs>
 
@@ -196,7 +226,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
               <Card sx={{ p: 3 }}>
                 <Stack spacing={3}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <Typography variant="subtitle1">Campaign Details</Typography>
+                    <Typography variant="subtitle1">Campaign Builder</Typography>
                     <Button
                       variant="soft"
                       startIcon={<Iconify icon="solar:clapperboard-edit-bold" />}
@@ -207,7 +237,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                   </Stack>
 
                   <RHFTextField name="name" label="Campaign Name" />
-                  
+
                   {values.type === 'email' && (
                     <>
                       <RHFTextField name="subject" label="Email Subject" />
@@ -244,38 +274,30 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                       <MenuItem value="email">Email</MenuItem>
                       <MenuItem value="sms">SMS</MenuItem>
                       <MenuItem value="broadcast">Broadcast</MenuItem>
+                      <MenuItem value="multi_channel">Multi Channel</MenuItem>
                     </RHFTextField>
 
-                    <RHFTextField select name="segmentId" label="Target Segment">
+                    <RHFTextField select name="segmentId" label="Audience Segment">
                       <MenuItem value="">Select Segment</MenuItem>
                       {segments.map((segment) => (
                         <MenuItem key={segment.id} value={segment.id}>
-                          {segment.name} ({segment.contactCount})
+                          {segment.name}
                         </MenuItem>
                       ))}
                     </RHFTextField>
 
-                    <RHFTextField name="sender" label="Sender Email/Name" />
+                    <RHFTextField name="senderName" label="Sender Name" />
+                    <RHFTextField name="senderEmail" label="Sender Email" />
 
-                    <LoadingButton
-                      fullWidth
-                      type="submit"
-                      variant="contained"
-                      size="large"
-                      loading={isSubmitting}
-                    >
-                      {isEdit ? 'Save Changes' : 'Create Campaign'}
+                    <LoadingButton fullWidth type="submit" variant="contained" size="large" loading={isSubmitting}>
+                      Save Draft
                     </LoadingButton>
-
-                    <Button fullWidth variant="outlined" size="large">
-                      Save as Draft
-                    </Button>
                   </Stack>
                 </Card>
 
                 {isEdit && (
                   <Card sx={{ p: 3 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 2 }}>Sending Options</Typography>
+                    <Typography variant="subtitle1" sx={{ mb: 2 }}>Delivery Actions</Typography>
                     <Stack spacing={2}>
                       <Button
                         fullWidth
@@ -283,6 +305,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                         color="info"
                         startIcon={<Iconify icon="solar:paper-plane-bold" />}
                         onClick={() => setTestSendOpen(true)}
+                        disabled={!canDeliver}
                       >
                         Send Test
                       </Button>
@@ -293,8 +316,18 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                         color="warning"
                         startIcon={<Iconify icon="solar:calendar-bold" />}
                         onClick={() => setScheduleOpen(true)}
+                        disabled={!canDeliver}
                       >
                         Schedule
+                      </Button>
+
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        color="inherit"
+                        onClick={handleCancelSchedule}
+                      >
+                        Cancel Schedule
                       </Button>
 
                       <LoadingButton
@@ -304,6 +337,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                         startIcon={<Iconify icon="solar:rocket-bold" />}
                         onClick={handleSendNow}
                         loading={isSending}
+                        disabled={!canDeliver}
                       >
                         Send Now
                       </LoadingButton>
@@ -314,7 +348,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
                 <Card sx={{ p: 2, bgcolor: 'background.neutral' }}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center' }}>
                     <Iconify icon="solar:info-circle-bold" width={16} sx={{ mr: 0.5 }} />
-                    Ensure you have marketing consent for all recipients.
+                    Compliance checks are not available yet.
                   </Typography>
                 </Card>
               </Stack>
@@ -327,35 +361,27 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
         </Card>
       )}
 
-      {/* Test Send Dialog */}
       <Dialog open={testSendOpen} onClose={() => setTestSendOpen(false)}>
-        <DialogTitle>Send Test Email</DialogTitle>
+        <DialogTitle>Send Test</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-            Enter an email address to receive a test version of this campaign.
+            Enter recipient email for a test delivery.
           </Typography>
-          <TextField
-            autoFocus
-            fullWidth
-            label="Email Address"
-            value={testEmail}
-            onChange={(e) => setTestEmail(e.target.value)}
-          />
+          <TextField autoFocus fullWidth label="Recipient" value={testRecipient} onChange={(e) => setTestRecipient(e.target.value)} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTestSendOpen(false)}>Cancel</Button>
-          <LoadingButton variant="contained" onClick={handleSendTest} loading={isSending} disabled={!testEmail}>
+          <LoadingButton variant="contained" onClick={handleSendTest} loading={isSending} disabled={!testRecipient || !canDeliver}>
             Send Test
           </LoadingButton>
         </DialogActions>
       </Dialog>
 
-      {/* Schedule Dialog */}
       <Dialog open={scheduleOpen} onClose={() => setScheduleOpen(false)}>
         <DialogTitle>Schedule Campaign</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-            Choose a date and time for this campaign to be sent.
+            Choose a future datetime for scheduling.
           </Typography>
           <TextField
             fullWidth
@@ -368,7 +394,7 @@ export function MarketingCampaignForm({ campaign, segments }: Props) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setScheduleOpen(false)}>Cancel</Button>
-          <LoadingButton variant="contained" onClick={handleSchedule} loading={isSending} disabled={!scheduleTime}>
+          <LoadingButton variant="contained" onClick={handleSchedule} loading={isSending} disabled={!scheduleTime || !canDeliver}>
             Schedule
           </LoadingButton>
         </DialogActions>

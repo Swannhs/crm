@@ -1,26 +1,66 @@
 'use client';
 
+import { useState } from 'react';
+
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import CardMedia from '@mui/material/CardMedia';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
 import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+
 import { Iconify } from 'src/components/iconify';
-import { Label } from 'src/components/label';
+import { showToast } from 'src/components/toast';
 
 import { useMarketingTemplates } from '../hooks/use-marketing';
-
-// ----------------------------------------------------------------------
+import { marketingService } from '../services/marketing-service';
+import { MarketingEmptyState, MarketingErrorState } from '../components/marketing-state-blocks';
 
 export function MarketingTemplatesView() {
-  const { data: templates = [], isLoading } = useMarketingTemplates();
+  const { data: templates = [], isLoading, error, refetch } = useMarketingTemplates();
+  const [creating, setCreating] = useState(false);
+
+  const handleCreate = async () => {
+    try {
+      setCreating(true);
+      await marketingService.createTemplate({ name: 'New Template', type: 'email', content: '' });
+      showToast({ severity: 'success', message: 'Template created.' });
+      refetch();
+    } catch (err: any) {
+      showToast({ severity: 'error', message: err?.response?.data?.message || 'Templates are not available yet.' });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDuplicate = async (id: string) => {
+    try {
+      await marketingService.duplicateTemplate(id);
+      showToast({ severity: 'success', message: 'Template duplicated.' });
+      refetch();
+    } catch (err: any) {
+      showToast({ severity: 'error', message: err?.response?.data?.message || 'Duplicate is not available.' });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await marketingService.deleteTemplate(id);
+      showToast({ severity: 'success', message: 'Template deleted.' });
+      refetch();
+    } catch (err: any) {
+      showToast({ severity: 'error', message: err?.response?.data?.message || 'Delete is not available.' });
+    }
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -35,66 +75,62 @@ export function MarketingTemplatesView() {
             Templates
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Reusable templates for your email and SMS campaigns.
+            Reusable campaign templates.
           </Typography>
         </Box>
 
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-        >
+        <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleCreate} disabled={creating}>
           Create Template
         </Button>
       </Stack>
 
-      <Grid container spacing={3}>
-        {templates.map((template) => (
-          <Grid key={template.id} item xs={12} sm={6} md={4} lg={3}>
-            <Card>
-              <CardMedia
-                component="img"
-                height="200"
-                image={template.previewImage || 'https://placehold.co/600x400?text=Template+Preview'}
-                alt={template.name}
-              />
-              <CardContent>
-                <Typography variant="subtitle2" noWrap>
-                  {template.name}
-                </Typography>
-                <Box sx={{ mt: 1 }}>
-                  <Label variant="soft" color="info">
-                    {template.category}
-                  </Label>
-                </Box>
-              </CardContent>
-              <CardActions sx={{ justifyContent: 'flex-end' }}>
-                <IconButton size="small">
-                  <Iconify icon="solar:pen-bold" />
-                </IconButton>
-                <IconButton size="small">
-                  <Iconify icon="solar:copy-bold" />
-                </IconButton>
-                <IconButton size="small" color="error">
-                  <Iconify icon="solar:trash-bin-trash-bold" />
-                </IconButton>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
+      {error && <MarketingErrorState title="Template request failed" description="Templates are not available yet." />}
 
-        {templates.length === 0 && !isLoading && (
-          <Grid item xs={12}>
-            <Box sx={{ textAlign: 'center', py: 10 }}>
-              <Typography variant="h6" gutterBottom>
-                No templates found
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Create your first template to speed up campaign creation.
-              </Typography>
-            </Box>
-          </Grid>
-        )}
-      </Grid>
+      {!isLoading && !error && templates.length === 0 && (
+        <Card sx={{ p: 2 }}>
+          <MarketingEmptyState title="No templates" description="Templates are not available yet." />
+        </Card>
+      )}
+
+      {templates.length > 0 && (
+        <Card>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell>Subject</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {templates.map((template) => (
+                  <TableRow key={template.id} hover>
+                    <TableCell>{template.name}</TableCell>
+                    <TableCell>{template.type}</TableCell>
+                    <TableCell>{template.category || '-'}</TableCell>
+                    <TableCell>{template.subject || '-'}</TableCell>
+                    <TableCell align="right">
+                      <IconButton onClick={() => handleDuplicate(template.id)}>
+                        <Iconify icon="solar:copy-bold" />
+                      </IconButton>
+                      <IconButton color="error" onClick={() => handleDelete(template.id)}>
+                        <Iconify icon="solar:trash-bin-trash-bold" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+
+      <Alert severity="info" sx={{ mt: 2 }}>
+        Use template selection from the campaign builder to apply content.
+      </Alert>
     </DashboardContent>
   );
 }

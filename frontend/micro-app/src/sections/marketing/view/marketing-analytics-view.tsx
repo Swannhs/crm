@@ -1,35 +1,25 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
+
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { MarketingSummaryCards } from '../components/marketing-summary-cards';
-import { MarketingCampaignAnalytics } from '../components/marketing-campaign-analytics';
+
 import { useMarketingSummary } from '../hooks/use-marketing';
+import { marketingService } from '../services/marketing-service';
+import { MarketingSummaryCards } from '../components/marketing-summary-cards';
+import { MarketingUnavailableState } from '../components/marketing-state-blocks';
+import { MarketingCampaignAnalytics } from '../components/marketing-campaign-analytics';
 
 export function MarketingAnalyticsView() {
   const { data: summary, isLoading } = useMarketingSummary();
-
-  // Mock data for overall analytics
-  const overallAnalytics = {
-    delivered: 12500,
-    opened: 4500,
-    clicked: 1200,
-    bounced: 150,
-    unsubscribed: 45,
-    complained: 5,
-    converted: 85,
-    deliveryRate: 98.5,
-    openRate: 36,
-    clickRate: 9.6,
-    unsubscribeRate: 0.36,
-    bounceRate: 1.2,
-    conversionCount: 85,
-  };
+  const analyticsQuery = useQuery({
+    queryKey: ['marketing-overall-analytics'],
+    queryFn: marketingService.getOverallAnalytics,
+  });
 
   return (
     <DashboardContent maxWidth="xl">
@@ -38,7 +28,7 @@ export function MarketingAnalyticsView() {
           Marketing Analytics
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Detailed performance metrics for your marketing efforts across all campaigns.
+          Real campaign delivery and conversion metrics.
         </Typography>
       </Box>
 
@@ -48,33 +38,17 @@ export function MarketingAnalyticsView() {
           <MarketingSummaryCards summary={summary} />
         </Box>
 
-        <Box>
-          <Typography variant="h6" sx={{ mb: 2 }}>Channel Performance</Typography>
-          <MarketingCampaignAnalytics analytics={overallAnalytics} />
-        </Box>
-
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Card sx={{ p: 3, height: 400, display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="subtitle1" sx={{ mb: 2 }}>Campaign Growth</Typography>
-              <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.neutral', borderRadius: 1.5 }}>
-                <Typography variant="h6" sx={{ color: 'text.disabled' }}>
-                  [Chart: Campaigns Sent vs Conversions]
-                </Typography>
-              </Box>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ p: 3, height: 400, display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="subtitle1" sx={{ mb: 2 }}>Channel Health</Typography>
-              <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.neutral', borderRadius: 1.5 }}>
-                <Typography variant="h6" sx={{ color: 'text.disabled' }}>
-                  [Chart: Delivery Health]
-                </Typography>
-              </Box>
-            </Card>
-          </Grid>
-        </Grid>
+        {!analyticsQuery.data ? (
+          <MarketingUnavailableState
+            title="Analytics unavailable"
+            description="Marketing analytics are not available yet."
+          />
+        ) : (
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>Delivery Performance</Typography>
+            <MarketingCampaignAnalytics analytics={analyticsQuery.data} loading={isLoading || analyticsQuery.isLoading} />
+          </Box>
+        )}
       </Stack>
     </DashboardContent>
   );

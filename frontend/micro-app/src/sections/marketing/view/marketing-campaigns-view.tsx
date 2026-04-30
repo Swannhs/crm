@@ -1,19 +1,21 @@
 'use client';
 
-import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 
 import { paths } from 'src/routes/paths';
+
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
+
 import { Label } from 'src/components/label';
+import { Iconify } from 'src/components/iconify';
 
 import { useMarketingCampaigns } from '../hooks/use-marketing';
 import { MarketingCampaignList } from '../components/marketing-campaign-list';
@@ -21,7 +23,7 @@ import { MarketingBackendStatus } from '../components/marketing-backend-status';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = ['all', 'draft', 'scheduled', 'sending', 'sent', 'failed'];
+const STATUS_OPTIONS = ['all', 'draft', 'scheduled', 'sending', 'sent', 'paused', 'archived', 'failed'];
 
 // ----------------------------------------------------------------------
 
@@ -57,7 +59,7 @@ export function MarketingCampaignsView() {
             Campaigns
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Manage and monitor your marketing campaigns across all channels.
+            Campaigns, attribution, and conversion analytics in one workspace.
           </Typography>
         </Box>
 

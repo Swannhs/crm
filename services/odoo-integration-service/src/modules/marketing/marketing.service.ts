@@ -155,6 +155,64 @@ export class MarketingService {
     return this.odooClient.execute(this.mailingModel, 'write', [[id], { schedule_date: date }]);
   }
 
+  async cancelScheduledMailing(id: number) {
+    return this.odooClient.execute(this.mailingModel, 'write', [[id], { schedule_date: false }]);
+  }
+
+  async getOrCreateCampaignMailing(campaignId: number) {
+    const existing = await this.odooClient.searchRead(
+      this.mailingModel,
+      [['campaign_id', '=', campaignId]],
+      this.mailingFields,
+      { limit: 1, order: 'id desc' }
+    );
+
+    if (existing.length > 0) return existing[0];
+
+    const createdId = await this.odooClient.execute(this.mailingModel, 'create', [{
+      subject: 'Untitled campaign',
+      body_html: '',
+      mailing_type: 'mail',
+      campaign_id: campaignId,
+      reply_to_mode: 'update',
+    }]);
+
+    const created = await this.odooClient.searchRead(
+      this.mailingModel,
+      [['id', '=', Number(createdId)]],
+      this.mailingFields,
+      { limit: 1 }
+    );
+
+    return created[0];
+  }
+
+  async updateCampaignContent(id: number, data: any) {
+    const mailing = await this.getOrCreateCampaignMailing(id);
+    const payload: Record<string, any> = {};
+
+    if (data?.subject !== undefined) payload.subject = String(data.subject || '').trim();
+    if (data?.content !== undefined) payload.body_html = String(data.content || '');
+    if (data?.segmentId !== undefined) {
+      const segmentId = Number(data.segmentId);
+      payload.contact_list_ids = Number.isFinite(segmentId) && segmentId > 0 ? [[6, 0, [segmentId]]] : [[5, 0, 0]];
+    }
+    if (data?.senderEmail !== undefined) payload.reply_to = String(data.senderEmail || '').trim();
+
+    if (Object.keys(payload).length > 0) {
+      await this.odooClient.execute(this.mailingModel, 'write', [[mailing.id], payload]);
+    }
+
+    await this.updateCampaign(id, {
+      name: data?.name,
+      title: data?.title,
+      status: data?.status,
+      active: data?.active,
+    });
+
+    return this.getCampaign(id);
+  }
+
   // --- Segments (Mailing Lists) ---
 
   async listSegments() {
@@ -234,6 +292,32 @@ export class MarketingService {
   async getTemplate(id: number) {
     const [template] = await this.odooClient.searchRead(this.templateModel, [['id', '=', id]], this.templateFields);
     return template;
+  }
+
+  async createTemplate(data: any) {
+    const payload: Record<string, any> = {
+      name: String(data?.name || '').trim(),
+      subject: String(data?.subject || '').trim(),
+      body_html: String(data?.content || ''),
+    };
+    return this.odooClient.execute(this.templateModel, 'create', [payload]);
+  }
+
+  async updateTemplate(id: number, data: any) {
+    const payload: Record<string, any> = {};
+    if (data?.name !== undefined) payload.name = String(data.name || '').trim();
+    if (data?.subject !== undefined) payload.subject = String(data.subject || '').trim();
+    if (data?.content !== undefined) payload.body_html = String(data.content || '');
+    if (Object.keys(payload).length === 0) return true;
+    return this.odooClient.execute(this.templateModel, 'write', [[id], payload]);
+  }
+
+  async deleteTemplate(id: number) {
+    return this.odooClient.execute(this.templateModel, 'unlink', [[id]]);
+  }
+
+  async duplicateTemplate(id: number) {
+    return this.odooClient.execute(this.templateModel, 'copy', [[id]]);
   }
 
   // --- Dashboard & Analytics ---

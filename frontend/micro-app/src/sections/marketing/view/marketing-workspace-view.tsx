@@ -295,7 +295,7 @@ export function MarketingWorkspaceView({ section }: WorkspaceProps = {}) {
   return (
     <FeatureRouteShell
       title="Marketing Workspace"
-      description="Campaigns, attribution, and analytics powered by Odoo."
+      description="Campaigns, attribution, and conversion analytics in one workspace."
       links={[{ href: '#', label: 'Campaigns' }, { href: '#', label: 'Sources' }, { href: '#', label: 'Analytics' }]}
       action={<Button variant="contained" startIcon={<Iconify icon="solar:add-circle-bold" />} onClick={() => openNameDialog('campaign')}>New campaign</Button>}
     >

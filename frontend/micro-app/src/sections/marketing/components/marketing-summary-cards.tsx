@@ -1,12 +1,12 @@
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { Iconify } from 'src/components/iconify';
-import { MarketingSummary } from '../types';
+
+import { MarketingSummary, formatOptionalNumber } from '../types';
 
 type Props = {
   summary?: MarketingSummary;
@@ -18,37 +18,37 @@ export function MarketingSummaryCards({ summary }: Props) {
   const items = [
     {
       title: 'Total Contacts',
-      value: summary?.totalContacts ?? 0,
+      value: formatOptionalNumber(summary?.totalContacts),
       icon: 'solar:users-group-rounded-bold-duotone',
       color: 'primary',
     },
     {
       title: 'Active Campaigns',
-      value: summary?.activeCampaigns ?? 0,
+      value: formatOptionalNumber(summary?.activeCampaigns),
       icon: 'solar:play-bold-duotone',
       color: 'success',
     },
     {
       title: 'Scheduled',
-      value: summary?.scheduledCampaigns ?? 0,
+      value: formatOptionalNumber(summary?.scheduledCampaigns),
       icon: 'solar:calendar-bold-duotone',
       color: 'info',
     },
     {
       title: 'Sent',
-      value: summary?.sentCampaigns ?? 0,
+      value: formatOptionalNumber(summary?.sentCampaigns),
       icon: 'solar:paper-plane-bold-duotone',
       color: 'warning',
     },
     {
       title: 'Open Rate',
-      value: `${summary?.openRate ?? 0}%`,
+      value: typeof summary?.openRate === 'number' ? `${summary.openRate}%` : 'Unavailable',
       icon: 'solar:letter-opened-bold-duotone',
       color: 'error',
     },
     {
       title: 'Click Rate',
-      value: `${summary?.clickRate ?? 0}%`,
+      value: typeof summary?.clickRate === 'number' ? `${summary.clickRate}%` : 'Unavailable',
       icon: 'solar:cursor-bold-duotone',
       color: 'secondary',
     },

@@ -1,15 +1,17 @@
+import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z as zod } from 'zod';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 
-import { Form, RHFTextField, RHFSwitch } from 'src/components/hook-form';
 import { Iconify } from 'src/components/iconify';
+import { Form, RHFSwitch, RHFTextField } from 'src/components/hook-form';
+
 import { MarketingSegment } from '../types';
 
 // ----------------------------------------------------------------------
@@ -18,6 +20,7 @@ export const SegmentSchema = zod.object({
   name: zod.string().min(1, 'Name is required'),
   isPublic: zod.boolean().default(true),
   description: zod.string().optional(),
+  primaryFilter: zod.string().optional(),
 });
 
 type Props = {
@@ -31,6 +34,7 @@ export function MarketingSegmentForm({ segment, onSubmit, onCancel }: Props) {
     name: segment?.name || '',
     isPublic: true,
     description: segment?.description || '',
+    primaryFilter: '',
   };
 
   const methods = useForm({
@@ -65,6 +69,19 @@ export function MarketingSegmentForm({ segment, onSubmit, onCancel }: Props) {
           multiline 
           rows={3} 
         />
+
+        <RHFTextField name="primaryFilter" select label="Primary Filter">
+          <MenuItem value="">No filter selected</MenuItem>
+          <MenuItem value="lifecycle_stage">Lifecycle stage</MenuItem>
+          <MenuItem value="tag">Tag</MenuItem>
+          <MenuItem value="source">Source</MenuItem>
+          <MenuItem value="email_contains">Email contains</MenuItem>
+          <MenuItem value="created_date">Created date</MenuItem>
+          <MenuItem value="last_activity_date" disabled>Last activity date (Unavailable)</MenuItem>
+          <MenuItem value="has_orders" disabled>Has orders (Unavailable)</MenuItem>
+          <MenuItem value="has_bookings" disabled>Has bookings (Unavailable)</MenuItem>
+          <MenuItem value="marketing_consent" disabled>Marketing consent (Unavailable)</MenuItem>
+        </RHFTextField>
 
         <Box>
           <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 'bold', textTransform: 'uppercase', mb: 1, display: 'block' }}>

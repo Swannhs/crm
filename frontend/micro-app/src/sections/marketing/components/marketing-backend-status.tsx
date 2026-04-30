@@ -14,7 +14,7 @@ export function MarketingBackendStatus({ isAvailable }: Props) {
       sx={{ mb: 3 }} 
       icon={<Iconify icon="solar:info-circle-bold" />}
     >
-      Marketing backend services are currently not available. Showing local/placeholder data.
+      Some marketing services are currently unavailable. Unsupported actions are disabled until backend support is available.
     </Alert>
   );
 }

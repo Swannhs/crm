@@ -1,20 +1,18 @@
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
-import CardActionArea from '@mui/material/CardActionArea';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import CardActionArea from '@mui/material/CardActionArea';
+
+import { Label } from 'src/components/label';
 
 import { MarketingTemplate } from '../types';
 import { useMarketingTemplates } from '../hooks/use-marketing';
-import { Label } from 'src/components/label';
 
 type Props = {
   open: boolean;
@@ -44,18 +42,12 @@ export function MarketingTemplatePicker({ open, onClose, onSelect }: Props) {
                   onSelect(template);
                   onClose();
                 }}>
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={template.previewImage || 'https://placehold.co/600x400?text=Template+Preview'}
-                    alt={template.name}
-                  />
                   <CardContent sx={{ p: 1.5 }}>
                     <Typography variant="subtitle2" noWrap>
                       {template.name}
                     </Typography>
                     <Label variant="soft" color="info" sx={{ mt: 0.5 }}>
-                      {template.category}
+                      {template.type}
                     </Label>
                   </CardContent>
                 </CardActionArea>

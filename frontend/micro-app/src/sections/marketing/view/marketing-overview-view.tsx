@@ -47,7 +47,7 @@ export function MarketingOverviewView() {
         <Box>
           <Typography variant="h4">Marketing Dashboard</Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Odoo-backed campaigns, attribution, and conversion analytics.
+            Campaigns, attribution, and conversion analytics in one workspace.
           </Typography>
         </Box>
         <Stack direction="row" spacing={1.5}>

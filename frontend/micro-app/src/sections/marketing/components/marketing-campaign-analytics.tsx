@@ -7,7 +7,8 @@ import { alpha, useTheme } from '@mui/material/styles';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
-import { CampaignAnalytics } from '../types';
+
+import { CampaignAnalytics, formatOptionalNumber } from '../types';
 
 type Props = {
   analytics?: CampaignAnalytics;
@@ -28,43 +29,43 @@ export function MarketingCampaignAnalytics({ analytics, loading }: Props) {
   const items = [
     {
       label: 'Delivered',
-      value: analytics?.delivered ?? 0,
-      rate: `${analytics?.deliveryRate ?? 0}%`,
+      value: formatOptionalNumber(analytics?.delivered),
+      rate: typeof analytics?.deliveryRate === 'number' ? `${analytics.deliveryRate}%` : 'Unavailable',
       icon: 'solar:check-circle-bold-duotone',
       color: 'success',
     },
     {
       label: 'Opened',
-      value: analytics?.opened ?? 0,
-      rate: `${analytics?.openRate ?? 0}%`,
+      value: formatOptionalNumber(analytics?.opened),
+      rate: typeof analytics?.openRate === 'number' ? `${analytics.openRate}%` : 'Unavailable',
       icon: 'solar:letter-opened-bold-duotone',
       color: 'info',
     },
     {
       label: 'Clicked',
-      value: analytics?.clicked ?? 0,
-      rate: `${analytics?.clickRate ?? 0}%`,
+      value: formatOptionalNumber(analytics?.clicked),
+      rate: typeof analytics?.clickRate === 'number' ? `${analytics.clickRate}%` : 'Unavailable',
       icon: 'solar:cursor-bold-duotone',
       color: 'primary',
     },
     {
       label: 'Converted',
-      value: analytics?.converted ?? 0,
-      rate: `${analytics?.conversionCount ?? 0} conversions`,
+      value: formatOptionalNumber(analytics?.converted),
+      rate: typeof analytics?.conversionCount === 'number' ? `${analytics.conversionCount} conversions` : 'Unavailable',
       icon: 'solar:bag-bold-duotone',
       color: 'warning',
     },
     {
       label: 'Bounced',
-      value: analytics?.bounced ?? 0,
-      rate: `${analytics?.bounceRate ?? 0}%`,
+      value: formatOptionalNumber(analytics?.bounced),
+      rate: typeof analytics?.bounceRate === 'number' ? `${analytics.bounceRate}%` : 'Unavailable',
       icon: 'solar:danger-bold-duotone',
       color: 'error',
     },
     {
       label: 'Unsubscribed',
-      value: analytics?.unsubscribed ?? 0,
-      rate: `${analytics?.unsubscribeRate ?? 0}%`,
+      value: formatOptionalNumber(analytics?.unsubscribed),
+      rate: typeof analytics?.unsubscribeRate === 'number' ? `${analytics.unsubscribeRate}%` : 'Unavailable',
       icon: 'solar:user-minus-bold-duotone',
       color: 'secondary',
     },

@@ -2,10 +2,11 @@ import axiosInstance from 'src/utils/axios';
 
 import { 
   MarketingSegment, 
-  MarketingSummary, 
+  MarketingSummary,
   MarketingCampaign, 
   MarketingTemplate, 
-  CampaignAnalytics 
+  CampaignAnalytics, 
+  MarketingSegmentPreview 
 } from '../types';
 
 const API_BASE = '/api/marketing';
@@ -35,6 +36,8 @@ const normalizeCampaign = (row: any): MarketingCampaign => {
     rawStatus === 'scheduled' ||
     rawStatus === 'sending' ||
     rawStatus === 'sent' ||
+    rawStatus === 'paused' ||
+    rawStatus === 'archived' ||
     rawStatus === 'failed'
       ? rawStatus
       : row?.active === false
@@ -43,7 +46,7 @@ const normalizeCampaign = (row: any): MarketingCampaign => {
 
   const rawType = String(row?.type || '').toLowerCase();
   const type =
-    rawType === 'email' || rawType === 'sms' || rawType === 'broadcast' || rawType === 'multi-channel'
+    rawType === 'email' || rawType === 'sms' || rawType === 'broadcast' || rawType === 'multi_channel'
       ? rawType
       : 'email';
 
@@ -53,11 +56,36 @@ const normalizeCampaign = (row: any): MarketingCampaign => {
     type,
     status,
     subject: row?.subject ? String(row.subject) : row?.title ? String(row.title) : undefined,
-    scheduleTime: row?.scheduleTime || row?.schedule_date || undefined,
+    scheduledAt: row?.scheduledAt || row?.scheduleTime || row?.schedule_date || undefined,
+    sentAt: row?.sentAt || undefined,
     createdAt: row?.createdAt || row?.create_date || new Date().toISOString(),
     updatedAt: row?.updatedAt || row?.write_date || new Date().toISOString(),
+    metrics: row?.metrics,
   };
 };
+
+const normalizeSegment = (row: any): MarketingSegment => ({
+  id: String(row?.id || ''),
+  name: String(row?.name || 'Untitled Segment'),
+  description: row?.description ? String(row.description) : undefined,
+  type: row?.type === 'dynamic' ? 'dynamic' : 'static',
+  filters: Array.isArray(row?.filters) ? row.filters : undefined,
+  contactCount: typeof row?.contactCount === 'number' ? row.contactCount : undefined,
+  createdAt: row?.createdAt || row?.create_date || undefined,
+  updatedAt: row?.updatedAt || row?.write_date || undefined,
+});
+
+const normalizeTemplate = (row: any): MarketingTemplate => ({
+  id: String(row?.id || ''),
+  name: String(row?.name || 'Untitled Template'),
+  type: row?.type === 'sms' ? 'sms' : 'email',
+  category: row?.category,
+  subject: row?.subject ? String(row.subject) : undefined,
+  previewText: row?.previewText ? String(row.previewText) : undefined,
+  content: row?.content ? String(row.content) : row?.body_html ? String(row.body_html) : undefined,
+  createdAt: row?.createdAt || row?.create_date || undefined,
+  updatedAt: row?.updatedAt || row?.write_date || undefined,
+});
 
 export const marketingService = {
   // Dashboard
@@ -74,21 +102,27 @@ export const marketingService = {
   getActivity: async () => safeGet(`${API_BASE}/activity`, []),
 
   // Segments
-  getSegments: async (): Promise<MarketingSegment[]> => safeGet(`${API_BASE}/segments`, []),
-  getSegment: async (id: string): Promise<MarketingSegment> => safeGet(`${API_BASE}/segments/${id}`, null),
+  getSegments: async (): Promise<MarketingSegment[]> => {
+    const payload = await safeGet(`${API_BASE}/segments`, []);
+    const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : [];
+    return rows.map(normalizeSegment);
+  },
+  getSegment: async (id: string): Promise<MarketingSegment> => {
+    const payload = await safeGet(`${API_BASE}/segments/${id}`, null);
+    return payload ? normalizeSegment(payload) : null;
+  },
   createSegment: async (data: Partial<MarketingSegment>) => {
     const response = await axiosInstance.post(`${API_BASE}/segments`, data, axiosConfig);
-    return response.data?.data ?? response.data;
+    return normalizeSegment(response.data?.data ?? response.data);
   },
   updateSegment: async (id: string, data: Partial<MarketingSegment>) => {
     const response = await axiosInstance.patch(`${API_BASE}/segments/${id}`, data, axiosConfig);
-    return response.data?.data ?? response.data;
+    return normalizeSegment(response.data?.data ?? response.data);
   },
   deleteSegment: async (id: string) => {
-    const response = await axiosInstance.delete(`${API_BASE}/segments/${id}`, axiosConfig);
-    return response.data?.data ?? response.data;
+    await axiosInstance.delete(`${API_BASE}/segments/${id}`, axiosConfig);
   },
-  previewSegment: async (filters: any) => {
+  previewSegment: async (filters: any): Promise<MarketingSegmentPreview> => {
     const response = await axiosInstance.post(`${API_BASE}/segments/preview`, { filters }, axiosConfig);
     return response.data?.data ?? response.data;
   },
@@ -112,44 +146,56 @@ export const marketingService = {
     return response.data?.data ?? response.data;
   },
   deleteCampaign: async (id: string) => {
-    const response = await axiosInstance.delete(`${API_BASE}/campaigns/${id}`, axiosConfig);
-    return response.data?.data ?? response.data;
+    await axiosInstance.delete(`${API_BASE}/campaigns/${id}`, axiosConfig);
   },
   duplicateCampaign: async (id: string) => {
     const response = await axiosInstance.post(`${API_BASE}/campaigns/${id}/duplicate`, {}, axiosConfig);
     return response.data?.data ?? response.data;
   },
-  sendTest: async (id: string, email: string) => {
-    const response = await axiosInstance.post(`${API_BASE}/campaigns/${id}/send-test`, { email }, axiosConfig);
-    return response.data?.data ?? response.data;
+  updateCampaignContent: async (id: string, data: Partial<MarketingCampaign>): Promise<MarketingCampaign> => {
+    const response = await axiosInstance.patch(`${API_BASE}/campaigns/${id}/content`, data, axiosConfig);
+    return normalizeCampaign(response.data?.data ?? response.data);
   },
-  scheduleCampaign: async (id: string, time: string) => {
-    const response = await axiosInstance.post(`${API_BASE}/campaigns/${id}/schedule`, { time }, axiosConfig);
-    return response.data?.data ?? response.data;
+  sendTestCampaign: async (id: string, payload: { to: string }) => {
+    await axiosInstance.post(`${API_BASE}/campaigns/${id}/send-test`, payload, axiosConfig);
   },
-  cancelSchedule: async (id: string) => {
-    const response = await axiosInstance.post(`${API_BASE}/campaigns/${id}/cancel`, {}, axiosConfig);
-    return response.data?.data ?? response.data;
+  scheduleCampaign: async (id: string, payload: { scheduledAt: string }): Promise<MarketingCampaign> => {
+    const response = await axiosInstance.post(`${API_BASE}/campaigns/${id}/schedule`, payload, axiosConfig);
+    return normalizeCampaign(response.data?.data ?? response.data);
   },
-  sendCampaign: async (id: string) => {
+  cancelScheduledCampaign: async (id: string): Promise<MarketingCampaign> => {
+    const response = await axiosInstance.post(`${API_BASE}/campaigns/${id}/cancel-schedule`, {}, axiosConfig);
+    return normalizeCampaign(response.data?.data ?? response.data);
+  },
+  sendCampaignNow: async (id: string): Promise<MarketingCampaign> => {
     const response = await axiosInstance.post(`${API_BASE}/campaigns/${id}/send`, {}, axiosConfig);
-    return response.data?.data ?? response.data;
+    return normalizeCampaign(response.data?.data ?? response.data);
   },
 
   // Templates
-  getTemplates: async (): Promise<MarketingTemplate[]> => safeGet(`${API_BASE}/templates`, []),
-  getTemplate: async (id: string): Promise<MarketingTemplate> => safeGet(`${API_BASE}/templates/${id}`, null),
+  getTemplates: async (): Promise<MarketingTemplate[]> => {
+    const payload = await safeGet(`${API_BASE}/templates`, []);
+    const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : [];
+    return rows.map(normalizeTemplate);
+  },
+  getTemplate: async (id: string): Promise<MarketingTemplate> => {
+    const payload = await safeGet(`${API_BASE}/templates/${id}`, null);
+    return payload ? normalizeTemplate(payload) : null;
+  },
   createTemplate: async (data: Partial<MarketingTemplate>) => {
     const response = await axiosInstance.post(`${API_BASE}/templates`, data, axiosConfig);
-    return response.data?.data ?? response.data;
+    return normalizeTemplate(response.data?.data ?? response.data);
   },
   updateTemplate: async (id: string, data: Partial<MarketingTemplate>) => {
     const response = await axiosInstance.patch(`${API_BASE}/templates/${id}`, data, axiosConfig);
-    return response.data?.data ?? response.data;
+    return normalizeTemplate(response.data?.data ?? response.data);
   },
   deleteTemplate: async (id: string) => {
-    const response = await axiosInstance.delete(`${API_BASE}/templates/${id}`, axiosConfig);
-    return response.data?.data ?? response.data;
+    await axiosInstance.delete(`${API_BASE}/templates/${id}`, axiosConfig);
+  },
+  duplicateTemplate: async (id: string): Promise<MarketingTemplate> => {
+    const response = await axiosInstance.post(`${API_BASE}/templates/${id}/duplicate`, {}, axiosConfig);
+    return normalizeTemplate(response.data?.data ?? response.data);
   },
 
   // Analytics

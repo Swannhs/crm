@@ -3,29 +3,33 @@
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
-import TableContainer from '@mui/material/TableContainer';
+import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import TableContainer from '@mui/material/TableContainer';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { Iconify } from 'src/components/iconify';
+
 import { Label } from 'src/components/label';
+import { Iconify } from 'src/components/iconify';
 import { showToast } from 'src/components/toast';
 
-import { useMarketingSegments, useCreateSegment, useDeleteSegment, useUpdateSegment } from '../hooks/use-marketing';
-import { MarketingSegmentForm } from '../components/marketing-segment-form';
 import { MarketingSegment } from '../types';
+import { marketingService } from '../services/marketing-service';
+import { MarketingEmptyState } from '../components/marketing-state-blocks';
+import { MarketingSegmentForm } from '../components/marketing-segment-form';
+import { useCreateSegment, useDeleteSegment, useUpdateSegment, useMarketingSegments } from '../hooks/use-marketing';
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +41,7 @@ export function MarketingSegmentsView() {
   
   const [open, setOpen] = useState(false);
   const [selectedSegment, setSelectedSegment] = useState<MarketingSegment | undefined>();
+  const [previewMessage, setPreviewMessage] = useState<string | null>(null);
 
   const segments = Array.isArray(data) ? data : [];
 
@@ -56,7 +61,7 @@ export function MarketingSegmentsView() {
         showToast({ severity: 'success', message: 'Segment created successfully' });
       }
       handleClose();
-    } catch (error) {
+    } catch {
       showToast({ severity: 'error', message: `Failed to ${selectedSegment ? 'update' : 'create'} segment` });
     }
   };
@@ -66,8 +71,18 @@ export function MarketingSegmentsView() {
     try {
       await deleteSegment.mutateAsync(id);
       showToast({ severity: 'success', message: 'Segment deleted successfully' });
-    } catch (error) {
+    } catch {
       showToast({ severity: 'error', message: 'Failed to delete segment' });
+    }
+  };
+
+  const handlePreview = async () => {
+    try {
+      const preview = await marketingService.previewSegment({ filters: [] });
+      const count = typeof preview?.count === 'number' ? preview.count : undefined;
+      setPreviewMessage(typeof count === 'number' ? `Estimated contacts: ${count}` : 'Segment preview is not available yet.');
+    } catch (error: any) {
+      setPreviewMessage(error?.response?.data?.message || 'Segment preview is not available yet.');
     }
   };
 
@@ -140,12 +155,7 @@ export function MarketingSegmentsView() {
               {segments.length === 0 && !isLoading && (
                 <TableRow>
                   <TableCell colSpan={4} sx={{ textAlign: 'center', py: 10 }}>
-                    <Typography variant="h6" gutterBottom>
-                      No segments found
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Start by creating a segment to target your audience.
-                    </Typography>
+                    <MarketingEmptyState title="No segments found" description="Create a segment to target your audience." />
                   </TableCell>
                 </TableRow>
               )}
@@ -181,11 +191,15 @@ export function MarketingSegmentsView() {
         </DialogTitle>
         
         <DialogContent sx={{ pb: 3 }}>
+          {previewMessage && <Alert severity="info" sx={{ mb: 2 }}>{previewMessage}</Alert>}
           <MarketingSegmentForm 
             segment={selectedSegment} 
             onSubmit={onSubmit} 
             onCancel={handleClose} 
           />
+          <Button onClick={handlePreview} variant="outlined" startIcon={<Iconify icon="solar:eye-bold" />} sx={{ mt: 2 }}>
+            Preview Segment
+          </Button>
         </DialogContent>
       </Dialog>
     </DashboardContent>
