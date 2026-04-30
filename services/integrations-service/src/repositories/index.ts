@@ -177,6 +177,10 @@ export class ShopifyStoreRepository {
   async deactivate(id: string) {
     return db.shopifyStore.update({ where: { id }, data: { isActive: false } });
   }
+
+  async deactivateManyByUserId(userId: string) {
+    return db.shopifyStore.updateMany({ where: { userId, isActive: true }, data: { isActive: false } });
+  }
 }
 
 export class UberEatsConfigRepository {

@@ -285,10 +285,7 @@ export class ShopifyIntegrationService {
   }
 
   async disconnect(userId: string) {
-    const stores = await this.repo.findByUserId(userId);
-    for (const store of stores) {
-      await this.repo.deactivate(store.id);
-    }
+    await this.repo.deactivateManyByUserId(userId);
     await this.connRepo.delete(userId, 'shopify');
     return { success: true };
   }
