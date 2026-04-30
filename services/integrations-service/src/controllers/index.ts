@@ -756,7 +756,23 @@ export class ImageLibraryController {
 
   async create(req: AuthenticatedRequest, res: Response) {
     try {
-      const data = await this.svc.create(req.identity.userId, req.identity.orgId, req.body);
+      const { name, url, thumbnail, mimeType, size, category, tags } = req.body;
+
+      if (!name || !url) {
+        return res.status(400).json({ success: false, message: 'Image name and url are required' });
+      }
+
+      const payload = {
+        name: String(name),
+        url: String(url),
+        thumbnail: thumbnail ? String(thumbnail) : undefined,
+        mimeType: mimeType ? String(mimeType) : undefined,
+        size: size ? Number(size) : undefined,
+        category: category ? String(category) : undefined,
+        tags: Array.isArray(tags) ? tags.map(String) : undefined,
+      };
+
+      const data = await this.svc.create(req.identity.userId, req.identity.orgId, payload);
       return res.status(201).json({ success: true, data });
     } catch (err: any) {
       return res.status(400).json({ success: false, message: err.message });
