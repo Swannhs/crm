@@ -1,4 +1,4 @@
-import { EmployeeListView } from 'src/sections/employees/view/employee-list-view';
+import { EmployeesWorkspaceView } from 'src/sections/employees/view/employees-workspace-view';
 
 // ----------------------------------------------------------------------
 
@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <EmployeeListView />;
+  return <EmployeesWorkspaceView />;
 }

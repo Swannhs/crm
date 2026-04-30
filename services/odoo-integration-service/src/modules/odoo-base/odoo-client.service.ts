@@ -47,7 +47,8 @@ export class OdooClientService {
 
       return response.data?.result;
     } catch (error) {
-      this.logger.error(`JSON-RPC error at ${service}.${method}: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`JSON-RPC error at ${service}.${method}: ${errorMessage}`);
       throw error;
     }
   }
@@ -73,7 +74,7 @@ export class OdooClientService {
       this.uid = 1;
       return 1;
     } catch (error) {
-      this.logger.warn(`Odoo JSON-RPC authentication failed, falling back to mock mode: ${error.message}`);
+      this.logger.warn(`Odoo JSON-RPC authentication failed, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`);
       this.uid = 1;
       return 1;
     }
@@ -96,7 +97,7 @@ export class OdooClientService {
       }
       return this.handleMockExecute(model, method, args, kwargs);
     } catch (error) {
-      this.logger.warn(`Odoo JSON-RPC execution failed for ${model}.${method}, falling back to mock mode: ${error.message}`);
+      this.logger.warn(`Odoo JSON-RPC execution failed for ${model}.${method}, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`);
       return this.handleMockExecute(model, method, args, kwargs);
     }
   }

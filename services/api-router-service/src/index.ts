@@ -402,6 +402,11 @@ async function handleApiCompat(req: Request, res: Response) {
       }
     }
 
+    if (module === "employees") {
+      const targetPath = withQuery(req, `/v1/odoo/employees${rest}`);
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
+    }
+
     if (domainRoutes[module]) {
       return proxyTo(req, res, { baseUrl: domainRoutes[module], targetPath: `/api/${module}${rest}` });
     }

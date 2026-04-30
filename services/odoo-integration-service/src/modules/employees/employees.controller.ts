@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, ParseIntPipe, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IdentityGuard } from '../../common/guards/identity.guard.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
@@ -60,10 +60,40 @@ export class EmployeesController {
     return this.employeesService.clockIn(data);
   }
 
+  @Post(':id/clock-in')
+  @ApiOperation({ summary: 'Clock in employee (contract alias)' })
+  async clockInByEmployee(@Param('id', ParseIntPipe) id: number, @Body() data?: any) {
+    return this.employeesService.clockIn({ ...(data || {}), employeeId: id });
+  }
+
   @Post('attendance/:attendanceId/clock-out')
   @ApiOperation({ summary: 'Clock out attendance record' })
   async clockOut(@Param('attendanceId', ParseIntPipe) attendanceId: number, @Body() data: any) {
     return this.employeesService.clockOut(attendanceId, data);
+  }
+
+  @Post(':id/clock-out')
+  @ApiOperation({ summary: 'Clock out employee (contract alias)' })
+  async clockOutByEmployee(@Param('id', ParseIntPipe) id: number, @Body() data?: any) {
+    return this.employeesService.clockOutLatestForEmployee(id, data);
+  }
+
+  @Post('attendance')
+  @ApiOperation({ summary: 'Create attendance record (contract alias)' })
+  async createAttendanceRecord(@Body() data: any) {
+    return this.employeesService.createAttendanceRecord(data);
+  }
+
+  @Patch('attendance/:id')
+  @ApiOperation({ summary: 'Update attendance record (contract alias)' })
+  async updateAttendanceRecord(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.employeesService.updateAttendanceRecord(id, data);
+  }
+
+  @Delete('attendance/:id')
+  @ApiOperation({ summary: 'Delete attendance record (contract alias)' })
+  async deleteAttendanceRecord(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.deleteAttendanceRecord(id);
   }
 
   @Get('leave/types')
@@ -78,9 +108,21 @@ export class EmployeesController {
     return this.employeesService.getLeaveRequests(query);
   }
 
+  @Get('time-off')
+  @ApiOperation({ summary: 'List time-off requests (contract alias)' })
+  async getTimeOffRequests(@Query() query: any) {
+    return this.employeesService.getLeaveRequests(query);
+  }
+
   @Post('leave/requests')
   @ApiOperation({ summary: 'Create leave request' })
   async createLeaveRequest(@Body() data: any) {
+    return this.employeesService.createLeaveRequest(data);
+  }
+
+  @Post('time-off')
+  @ApiOperation({ summary: 'Create time-off request (contract alias)' })
+  async createTimeOffRequest(@Body() data: any) {
     return this.employeesService.createLeaveRequest(data);
   }
 
@@ -90,10 +132,28 @@ export class EmployeesController {
     return this.employeesService.approveLeaveRequest(id);
   }
 
+  @Post('time-off/:id/approve')
+  @ApiOperation({ summary: 'Approve time-off request (contract alias)' })
+  async approveTimeOffRequest(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.approveLeaveRequest(id);
+  }
+
   @Post('leave/requests/:id/refuse')
   @ApiOperation({ summary: 'Refuse leave request' })
   async refuseLeaveRequest(@Param('id', ParseIntPipe) id: number) {
     return this.employeesService.refuseLeaveRequest(id);
+  }
+
+  @Post('time-off/:id/reject')
+  @ApiOperation({ summary: 'Reject time-off request (contract alias)' })
+  async rejectTimeOffRequest(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.refuseLeaveRequest(id);
+  }
+
+  @Post('time-off/:id/cancel')
+  @ApiOperation({ summary: 'Cancel time-off request (contract alias)' })
+  async cancelTimeOffRequest(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.cancelLeaveRequest(id);
   }
 
   @Get('shifts')
@@ -118,6 +178,42 @@ export class EmployeesController {
   @ApiOperation({ summary: 'Delete shift' })
   async deleteShift(@Param('id', ParseIntPipe) id: number) {
     return this.employeesService.deleteShift(id);
+  }
+
+  @Get('roles')
+  @ApiOperation({ summary: 'List employee roles' })
+  async getRoles() {
+    return this.employeesService.getRoles();
+  }
+
+  @Post(':id/roles')
+  @ApiOperation({ summary: 'Assign role to employee' })
+  async assignRole(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.employeesService.assignRole(id, Number(data?.roleId));
+  }
+
+  @Delete(':id/roles/:roleId')
+  @ApiOperation({ summary: 'Remove role from employee' })
+  async removeRole(@Param('id', ParseIntPipe) id: number, @Param('roleId', ParseIntPipe) roleId: number) {
+    return this.employeesService.removeRole(id, roleId);
+  }
+
+  @Patch(':id/permissions')
+  @ApiOperation({ summary: 'Update employee permission overrides' })
+  async updatePermissions(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.employeesService.updateEmployeePermissions(id, data);
+  }
+
+  @Get('settings')
+  @ApiOperation({ summary: 'Get HR settings' })
+  async getSettings(@Headers('x-org-id') orgId?: string) {
+    return this.employeesService.getSettings(orgId || '');
+  }
+
+  @Patch('settings')
+  @ApiOperation({ summary: 'Update HR settings' })
+  async updateSettings(@Headers('x-org-id') orgId?: string, @Body() data?: any) {
+    return this.employeesService.updateSettings(orgId || '', data || {});
   }
 
   @Get(':id')
@@ -147,6 +243,18 @@ export class EmployeesController {
     return this.employeesService.updateStatus(id, body.status);
   }
 
+  @Post(':id/archive')
+  @ApiOperation({ summary: 'Archive/deactivate employee (contract alias)' })
+  async archive(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.updateStatus(id, 'inactive');
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete employee (contract alias)' })
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.remove(id);
+  }
+
   @Get(':id/attendance')
   @ApiOperation({ summary: 'List employee attendance' })
   async getAttendanceByEmployee(@Param('id', ParseIntPipe) id: number, @Query() query: any) {
@@ -157,5 +265,26 @@ export class EmployeesController {
   @ApiOperation({ summary: 'List employee shifts' })
   async getShiftsByEmployee(@Param('id', ParseIntPipe) id: number, @Query() query: any) {
     return this.employeesService.getShiftsByEmployee(id, query);
+  }
+
+  @Get(':id/documents')
+  @ApiOperation({ summary: 'List employee documents' })
+  async getEmployeeDocuments(@Param('id', ParseIntPipe) id: number) {
+    return this.employeesService.getEmployeeDocuments(id);
+  }
+
+  @Post(':id/documents')
+  @ApiOperation({ summary: 'Create employee document metadata' })
+  async uploadEmployeeDocument(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.employeesService.uploadEmployeeDocument(id, data);
+  }
+
+  @Delete(':id/documents/:documentId')
+  @ApiOperation({ summary: 'Delete employee document metadata' })
+  async deleteEmployeeDocument(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('documentId') documentId: string,
+  ) {
+    return this.employeesService.deleteEmployeeDocument(id, documentId);
   }
 }
