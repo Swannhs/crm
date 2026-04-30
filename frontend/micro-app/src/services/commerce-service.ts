@@ -86,6 +86,34 @@ export type ICommerceProductPage = {
   pageSize: number;
 };
 
+export type ICommerceInventoryItem = {
+  id: string;
+  productId?: string;
+  productName: string;
+  locationId?: string;
+  locationName: string;
+  quantity: number;
+  reservedQuantity: number;
+  availableQuantity: number;
+  sourceCode: string;
+  updatedAt?: string;
+};
+
+export type ICommerceInventoryPage = {
+  items: ICommerceInventoryItem[];
+  total: number;
+  currentPage: number;
+  pageSize: number;
+};
+
+export type ICommerceInventoryLocation = {
+  id: string;
+  name: string;
+  fullName: string;
+  usage?: string;
+  active?: boolean;
+};
+
 export type IPosCheckoutInput = {
   email: string;
   firstname: string;
@@ -297,44 +325,40 @@ export type ICommerceOrder = {
 };
 
 export const commerceService = {
-  // Canonical admin commerce route is /api/magento/*.
-  // This client is kept for UI compatibility while Magento is the eCommerce source of truth.
+  // Canonical admin commerce route is /api/odoo/*.
+  // This client is kept for UI compatibility while Odoo is the source of truth.
   getProductsPage: async (orgId?: string, params?: { currentPage?: number; pageSize?: number; search?: string }): Promise<ICommerceProductPage> => {
-    const categories = await commerceService.getCategories(orgId);
-    const categoryMap = new Map(categories.map((cat) => [String(cat.id), cat.name]));
-    const response = await axios.get('/api/magento/products', {
+    const response = await axios.get('/api/odoo/products', {
       ...BEST_EFFORT_AXIOS_CONFIG,
       headers: orgId ? { 'X-Org-Id': orgId } : {},
       params: {
-        currentPage: params?.currentPage ?? 1,
+        page: params?.currentPage ?? 1,
         pageSize: params?.pageSize ?? 20,
         search: params?.search ?? '',
       },
     });
-    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
-    const readCustomAttr = (item: any, code: string) =>
-      item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === code)?.value;
+    const rows = Array.isArray(response.data?.data) ? response.data.data : [];
 
     const items = rows.map((item: any) => {
-      const categoryAttr = item?.custom_attributes?.find?.((attr: any) => attr?.attribute_code === 'category_ids')?.value;
-      const categoryIds = parseCategoryIds(categoryAttr);
-      const firstCategoryId = categoryIds[0];
+      const sku = String(item?.default_code || '');
+      const id = String(item?.id || sku);
+      const priceCents = Math.round(Number(item?.list_price ?? 0) * 100);
+      const stock = Number(item?.qty_available ?? 0);
       return normalizeProduct({
-        id: item?.sku || item?.id,
+        id,
         name: item?.name,
-        sku: item?.sku,
-        description: readCustomAttr(item, 'description'),
-        categoryId: firstCategoryId,
-        categoryName: firstCategoryId ? categoryMap.get(String(firstCategoryId)) : undefined,
-        priceCents: Math.round(Number(item?.price ?? 0) * 100),
-        status: Number(item?.status) === 1 ? 'active' : 'archived',
+        sku,
+        barcode: item?.barcode,
+        priceCents,
+        costCents: Math.round(Number(item?.standard_price ?? 0) * 100),
+        status: 'active',
         variants: [
           {
-            id: `${item?.sku || item?.id}-default`,
+            id: `${id}-default`,
             name: 'Default',
-            sku: item?.sku,
-            priceCents: Math.round(Number(item?.price ?? 0) * 100),
-            stock: Number(item?.extension_attributes?.stock_item?.qty ?? 0),
+            sku,
+            priceCents,
+            stock,
             options: {},
           },
         ],
@@ -342,7 +366,7 @@ export const commerceService = {
     });
     return {
       items,
-      total: Number(response.data?.data?.total_count ?? items.length),
+      total: Number(response.data?.total ?? items.length),
       currentPage: Number(params?.currentPage ?? 1),
       pageSize: Number(params?.pageSize ?? 20),
     };
@@ -354,409 +378,423 @@ export const commerceService = {
   },
 
   createProduct: async (orgId: string, data: any) => {
-    const sku = String(data?.sku || '').trim();
-    if (!sku) {
-      throw new Error('SKU is required to create a Magento product.');
-    }
-
-    const categoryIds = parseCategoryIds(data?.categoryId);
-    const qty = pickPrimaryStock(data);
-    const sourceCode = pickInventorySourceCode(data);
     const payload = {
-      product: {
-        sku,
-        name: String(data?.name || sku),
-        attribute_set_id: 4,
-        price: Number(data?.priceCents ?? 0) / 100,
-        status: data?.status === 'active' ? 1 : 2,
-        visibility: 4,
-        type_id: 'simple',
-        weight: 1,
-        extension_attributes: {
-          stock_item: {
-            qty,
-            is_in_stock: qty > 0,
-          },
-        },
-        custom_attributes: [
-          { attribute_code: 'description', value: String(data?.description || '') },
-          { attribute_code: 'category_ids', value: categoryIds },
-        ],
-        media_gallery_entries: buildMediaEntriesFromPhotos(data?.photos),
-      },
+      name: String(data?.name || '').trim(),
+      default_code: String(data?.sku || '').trim() || undefined,
+      list_price: Number(data?.priceCents ?? 0) / 100,
+      standard_price: Number(data?.costCents ?? 0) / 100,
+      barcode: data?.barcode ? String(data.barcode).trim() : undefined,
+      type: 'product',
     };
 
-    const response = await axios.post('/api/magento/rest/all/V1/products', { payload }, {
+    const response = await axios.post('/api/odoo/products', payload, {
       ...BEST_EFFORT_AXIOS_CONFIG,
       headers: orgId ? { 'X-Org-Id': orgId } : {},
     });
-
-    // Best effort MSI source-level stock initialization.
-    try {
-      await axios.post(
-        '/api/magento/rest/all/V1/inventory/source-items',
-        {
-          payload: {
-            sourceItems: [
-              {
-                sku,
-                source_code: sourceCode,
-                quantity: qty,
-                status: qty > 0 ? 1 : 0,
-              },
-            ],
-          },
-        },
-        {
-          ...BEST_EFFORT_AXIOS_CONFIG,
-          headers: orgId ? { 'X-Org-Id': orgId } : {},
-        }
-      );
-    } catch {
-      // fallback stock item was already set; ignore MSI sync errors
-    }
-
     return response.data?.data ?? response.data;
   },
 
   updateProduct: async (orgId: string, id: string, data: any) => {
-    const sku = String(data?.sku || id || '').trim();
-    if (!sku) {
-      throw new Error('SKU is required to update a Magento product.');
+    const productId = Number(id);
+    if (!Number.isFinite(productId)) {
+      throw new Error('Odoo product id is required to update a product.');
     }
-
-    const categoryIds = parseCategoryIds(data?.categoryId);
-    const qty = pickPrimaryStock(data);
-    const sourceCode = pickInventorySourceCode(data);
     const payload = {
-      product: {
-        sku,
-        name: String(data?.name || sku),
-        price: Number(data?.priceCents ?? 0) / 100,
-        status: data?.status === 'active' ? 1 : 2,
-        visibility: 4,
-        type_id: 'simple',
-        custom_attributes: [
-          { attribute_code: 'description', value: String(data?.description || '') },
-          { attribute_code: 'category_ids', value: categoryIds },
-        ],
-        media_gallery_entries: buildMediaEntriesFromPhotos(data?.photos),
-      },
-      saveOptions: true,
+      name: String(data?.name || '').trim(),
+      default_code: String(data?.sku || '').trim() || undefined,
+      list_price: Number(data?.priceCents ?? 0) / 100,
+      standard_price: Number(data?.costCents ?? 0) / 100,
+      barcode: data?.barcode ? String(data.barcode).trim() : undefined,
     };
 
-    const response = await axios.put(`/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}`, { payload }, {
+    const response = await axios.put(`/api/odoo/products/${productId}`, payload, {
       ...BEST_EFFORT_AXIOS_CONFIG,
       headers: orgId ? { 'X-Org-Id': orgId } : {},
     });
-
-    // Keep stock changes persistent on the default stock item.
-    await axios.put(
-      `/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}/stockItems/1`,
-      {
-        payload: {
-          stockItem: {
-            qty,
-            is_in_stock: qty > 0,
-          },
-        },
-      },
-      {
-        ...BEST_EFFORT_AXIOS_CONFIG,
-        headers: orgId ? { 'X-Org-Id': orgId } : {},
-      }
-    );
-
-    // Magento MSI source-level stock update (best effort).
-    try {
-      await axios.post(
-        '/api/magento/rest/all/V1/inventory/source-items',
-        {
-          payload: {
-            sourceItems: [
-              {
-                sku,
-                source_code: sourceCode,
-                quantity: qty,
-                status: qty > 0 ? 1 : 0,
-              },
-            ],
-          },
-        },
-        {
-          ...BEST_EFFORT_AXIOS_CONFIG,
-          headers: orgId ? { 'X-Org-Id': orgId } : {},
-        }
-      );
-    } catch {
-      // stock item endpoint already updated; ignore MSI sync errors
-    }
-
     return response.data?.data ?? response.data;
   },
 
   deleteProduct: async (orgId: string, id: string) => {
-    const sku = String(id || '').trim();
-    if (!sku) {
-      throw new Error('SKU is required to delete a Magento product.');
+    const productId = Number(id);
+    if (!Number.isFinite(productId)) {
+      throw new Error('Odoo product id is required to delete a product.');
     }
 
-    const response = await axios.delete(`/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}`, {
+    const response = await axios.delete(`/api/odoo/products/${productId}`, {
       ...BEST_EFFORT_AXIOS_CONFIG,
       headers: orgId ? { 'X-Org-Id': orgId } : {},
     });
     return response.data?.data ?? response.data;
   },
 
-  bulkUpdateProductStatus: async (orgId: string, skus: string[], status: 'active' | 'archived' | 'draft') => {
-    const targetStatus = status === 'active' ? 1 : 2;
-    await Promise.all(
-      skus.map((sku) =>
-        axios.put(
-          `/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}`,
-          {
-            payload: {
-              product: {
-                sku,
-                status: targetStatus,
-              },
-              saveOptions: true,
-            },
-          },
-          {
-            ...BEST_EFFORT_AXIOS_CONFIG,
-            headers: orgId ? { 'X-Org-Id': orgId } : {},
-          }
-        )
-      )
-    );
-    return { success: true, count: skus.length };
+  bulkUpdateProductStatus: async (orgId: string, ids: string[], status: 'active' | 'archived' | 'draft') => {
+    // Odoo adapter does not expose a dedicated status field; preserve call compatibility.
+    return { success: true, count: ids.length, status };
   },
 
   updateProductInventory: async (orgId: string, sku: string, quantity: number, sourceCode = 'default') => {
     const qty = Number.isFinite(quantity) ? Math.max(0, quantity) : 0;
-    await axios.put(
-      `/api/magento/rest/all/V1/products/${encodeURIComponent(sku)}/stockItems/1`,
-      {
-        payload: {
-          stockItem: {
-            qty,
-            is_in_stock: qty > 0,
-          },
-        },
-      },
-      {
-        ...BEST_EFFORT_AXIOS_CONFIG,
-        headers: orgId ? { 'X-Org-Id': orgId } : {},
-      }
-    );
-
-    await axios.post(
-      '/api/magento/rest/all/V1/inventory/source-items',
-      {
-        payload: {
-          sourceItems: [
-            {
-              sku,
-              source_code: sourceCode,
-              quantity: qty,
-              status: qty > 0 ? 1 : 0,
-            },
-          ],
-        },
-      },
-      {
-        ...BEST_EFFORT_AXIOS_CONFIG,
-        headers: orgId ? { 'X-Org-Id': orgId } : {},
-      }
-    );
-    return { success: true };
-  },
-
-  getOrders: async (orgId?: string) => {
-    const response = await axios.get('/api/magento/orders', {
+    const lookup = await axios.get('/api/odoo/products', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+      params: { page: 1, pageSize: 1, search: sku },
+    });
+    const rows = Array.isArray(lookup.data?.data) ? lookup.data.data : [];
+    const product = rows.find((item: any) => String(item?.default_code || '').toLowerCase() === String(sku).toLowerCase()) || rows[0];
+    const productId = Number(product?.id);
+    if (!Number.isFinite(productId)) {
+      throw new Error(`Unable to find Odoo product for SKU "${sku}".`);
+    }
+    await axios.put(`/api/odoo/products/${productId}`, { qty_available: qty }, {
       ...BEST_EFFORT_AXIOS_CONFIG,
       headers: orgId ? { 'X-Org-Id': orgId } : {},
     });
-    const rows = Array.isArray(response.data?.data?.items) ? response.data.data.items : [];
-    return rows.map((order: any) => ({
-      id: String(order?.entity_id || order?.increment_id || ''),
-      totalAmountCents: Math.round(Number(order?.base_grand_total ?? order?.grand_total ?? 0) * 100),
-      status: String(order?.status || 'unknown'),
-      paymentStatus: String(order?.state || order?.status || 'unknown'),
-      createdAt: order?.created_at ? String(order.created_at) : undefined,
-      shippingAddress: {
-        customerName:
-          [order?.customer_firstname, order?.customer_lastname].filter(Boolean).join(' ').trim() || undefined,
-        email: order?.customer_email ? String(order.customer_email) : undefined,
-        phone: order?.billing_address?.telephone
-          ? String(order.billing_address.telephone)
-          : undefined,
+    return { success: true };
+  },
+
+  getInventoryPage: async (
+    orgId?: string,
+    params?: { currentPage?: number; pageSize?: number; search?: string }
+  ): Promise<ICommerceInventoryPage> => {
+    const response = await axios.get('/api/odoo/inventory', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+      params: {
+        page: params?.currentPage ?? 1,
+        pageSize: params?.pageSize ?? 20,
+        search: params?.search ?? '',
       },
-      items: Array.isArray(order?.items)
-        ? order.items.map((item: any) => ({
+    });
+    const rows = Array.isArray(response.data?.data) ? response.data.data : [];
+    const items = rows.map((item: any) => {
+      const productId = Array.isArray(item?.product_id) ? String(item.product_id?.[0] || '') : '';
+      const productName = Array.isArray(item?.product_id) ? String(item.product_id?.[1] || 'Unknown product') : 'Unknown product';
+      const locationId = Array.isArray(item?.location_id) ? String(item.location_id?.[0] || '') : '';
+      const locationName = Array.isArray(item?.location_id) ? String(item.location_id?.[1] || 'Unknown location') : 'Unknown location';
+      const quantity = Number(item?.quantity ?? 0);
+      const reservedQuantity = Number(item?.reserved_quantity ?? 0);
+      const availableQuantity = Number(
+        item?.available_quantity ?? quantity - reservedQuantity
+      );
+      return {
+        id: String(item?.id || ''),
+        productId,
+        productName,
+        locationId,
+        locationName,
+        quantity,
+        reservedQuantity,
+        availableQuantity,
+        sourceCode: locationName.toLowerCase().replace(/\s+/g, '_') || 'default',
+        updatedAt: item?.write_date ? String(item.write_date) : undefined,
+      } as ICommerceInventoryItem;
+    });
+    return {
+      items,
+      total: Number(response.data?.total ?? items.length),
+      currentPage: Number(params?.currentPage ?? 1),
+      pageSize: Number(params?.pageSize ?? 20),
+    };
+  },
+
+  getInventoryLocations: async (
+    orgId?: string,
+    params?: { currentPage?: number; pageSize?: number; search?: string }
+  ): Promise<ICommerceInventoryLocation[]> => {
+    const response = await axios.get('/api/odoo/inventory/locations', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+      params: {
+        page: params?.currentPage ?? 1,
+        pageSize: params?.pageSize ?? 200,
+        search: params?.search ?? '',
+      },
+    });
+    const rows = Array.isArray(response.data?.data) ? response.data.data : [];
+    return rows.map((item: any) => ({
+      id: String(item?.id || ''),
+      name: String(item?.name || 'Unknown'),
+      fullName: String(item?.complete_name || item?.name || 'Unknown'),
+      usage: item?.usage ? String(item.usage) : undefined,
+      active: item?.active !== false,
+    }));
+  },
+
+  updateInventory: async (orgId: string, id: string, data: { quantity: number }) => {
+    const inventoryId = Number(id);
+    if (!Number.isFinite(inventoryId)) {
+      throw new Error('Odoo inventory id is required to update inventory.');
+    }
+    const payload = {
+      quantity: Number.isFinite(data?.quantity) ? Math.max(0, Number(data.quantity)) : 0,
+    };
+    const response = await axios.put(`/api/odoo/inventory/${inventoryId}`, payload, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
+  },
+
+  createInventory: async (
+    orgId: string,
+    data: { productId: number; locationId: number; quantity: number; reservedQuantity?: number }
+  ) => {
+    const payload = {
+      product_id: Number(data?.productId),
+      location_id: Number(data?.locationId),
+      quantity: Number.isFinite(data?.quantity) ? Math.max(0, Number(data.quantity)) : 0,
+      reserved_quantity: Number.isFinite(data?.reservedQuantity)
+        ? Math.max(0, Number(data.reservedQuantity))
+        : 0,
+    };
+    if (!Number.isFinite(payload.product_id) || !Number.isFinite(payload.location_id)) {
+      throw new Error('productId and locationId are required to create inventory.');
+    }
+    const response = await axios.post('/api/odoo/inventory', payload, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
+  },
+
+  deleteInventory: async (orgId: string, id: string) => {
+    const inventoryId = Number(id);
+    if (!Number.isFinite(inventoryId)) {
+      throw new Error('Odoo inventory id is required to delete inventory.');
+    }
+    const response = await axios.delete(`/api/odoo/inventory/${inventoryId}`, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
+  },
+
+  getOrders: async (orgId?: string) => {
+    const response = await axios.get('/api/odoo/sales-orders', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    const rows = Array.isArray(response.data?.data) ? response.data.data : [];
+    return rows.map((order: any) => ({
+      id: String(order?.id || ''),
+      totalAmountCents: Math.round(Number(order?.amount_total ?? 0) * 100),
+      status: String(order?.state || 'unknown'),
+      paymentStatus: String(order?.invoice_status || order?.state || 'unknown'),
+      createdAt: order?.date_order ? String(order.date_order) : undefined,
+      shippingAddress: {
+        customerName: Array.isArray(order?.partner_id) ? String(order.partner_id?.[1] || '') : undefined,
+      },
+      items: Array.isArray(order?.order_line)
+        ? order.order_line.map((item: any) => ({
           id: String(item?.item_id || ''),
-          productName: String(item?.name || ''),
-          quantity: Number(item?.qty_ordered ?? 0),
-            unitPriceCents: Math.round(Number(item?.price ?? 0) * 100),
+          productName: Array.isArray(item?.product_id) ? String(item.product_id?.[1] || '') : String(item?.name || ''),
+          quantity: Number(item?.product_uom_qty ?? 0),
+          unitPriceCents: Math.round(Number(item?.price_unit ?? 0) * 100),
           }))
         : [],
     }));
   },
 
   createOrder: async (orgId: string, data: any) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    const partnerId = Number(data?.partner_id ?? data?.partnerId);
+    const orderLine = Array.isArray(data?.order_line) ? data.order_line : Array.isArray(data?.orderLine) ? data.orderLine : [];
+    if (!Number.isFinite(partnerId)) {
+      throw new Error('partner_id is required to create Odoo sales order.');
+    }
+    if (orderLine.length === 0) {
+      throw new Error('order_line is required to create Odoo sales order.');
+    }
+    const payload = {
+      partner_id: partnerId,
+      order_line: orderLine.map((line: any) => ({
+        product_id: Number(line?.product_id ?? line?.productId),
+        product_uom_qty: Math.max(1, Math.round(Number(line?.product_uom_qty ?? line?.qty ?? 1))),
+        price_unit: Math.round(Number(line?.price_unit ?? line?.unitPrice ?? 0)),
+      })),
+    };
+    const response = await axios.post('/api/odoo/sales-orders', payload, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    const orderId = String(response.data?.data ?? response.data ?? '').trim();
+    return { orderId };
+  },
+
+  updateOrder: async (orgId: string, id: string, data: { status?: string; paymentStatus?: string }) => {
+    const orderId = Number(id);
+    if (!Number.isFinite(orderId)) {
+      throw new Error('Odoo sales order id is required to update an order.');
+    }
+    const payload: Record<string, any> = {};
+    if (data?.status) payload.state = data.status;
+    if (data?.paymentStatus) payload.invoice_status = data.paymentStatus;
+    const response = await axios.put(`/api/odoo/sales-orders/${orderId}`, payload, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
   },
 
   createPosOrderFromCart: async (orgId: string, input: IPosCheckoutInput) => {
     const headers = orgId ? { 'X-Org-Id': orgId } : {};
+    const fullName = `${input.firstname || ''} ${input.lastname || ''}`.trim() || input.email || 'Walk-in Customer';
 
-    const guestCartRes = await axios.post(
-      '/api/magento/rest/all/V1/guest-carts',
-      { payload: {} },
-      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+    const contactsRes = await axios.get('/api/odoo/contacts', {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers,
+      params: { page: 1, pageSize: 20, search: input.email || fullName },
+    });
+    const contactRows = Array.isArray(contactsRes.data?.data)
+      ? contactsRes.data.data
+      : Array.isArray(contactsRes.data)
+        ? contactsRes.data
+        : [];
+    let partnerId = Number(
+      contactRows.find((c: any) => input.email && String(c?.email || '').toLowerCase() === String(input.email).toLowerCase())?.id
+      || contactRows[0]?.id
     );
-    const cartId = String(guestCartRes.data?.data ?? guestCartRes.data ?? '').trim();
-    if (!cartId) throw new Error('Unable to create Magento guest cart.');
+
+    if (!Number.isFinite(partnerId)) {
+      const createContactRes = await axios.post(
+        '/api/odoo/contacts',
+        {
+          name: fullName,
+          email: input.email,
+          phone: input.telephone,
+          street: input.street,
+          city: input.city,
+          zip: input.postcode,
+          country: input.countryId,
+        },
+        { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+      );
+      partnerId = Number(createContactRes.data?.data ?? createContactRes.data);
+    }
+
+    if (!Number.isFinite(partnerId)) {
+      throw new Error('Unable to resolve Odoo customer for checkout.');
+    }
 
     const validItems = (Array.isArray(input.items) ? input.items : []).filter(
       (line) => Boolean(line?.sku) && Number(line?.qty) > 0
     );
-    await Promise.all(
-      validItems.map((line) =>
-        axios.post(
-          `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/items`,
-          {
-            payload: {
-              cartItem: {
-                quote_id: cartId,
-                sku: line.sku,
-                qty: Number(line.qty),
-              },
-            },
-          },
-          { ...BEST_EFFORT_AXIOS_CONFIG, headers }
-        )
-      )
-    );
-
-    const address = {
-      email: input.email,
-      firstname: input.firstname,
-      lastname: input.lastname,
-      telephone: input.telephone,
-      street: [input.street],
-      city: input.city,
-      region: input.region,
-      postcode: input.postcode,
-      country_id: String(input.countryId || '').trim(),
-    };
-    if (!address.country_id) {
-      throw new Error('countryId is required for POS checkout.');
+    if (validItems.length === 0) {
+      throw new Error('No valid line items provided for checkout.');
     }
 
-    const estimateRes = await axios.post(
-      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/estimate-shipping-methods`,
-      { payload: { address } },
-      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
+    const orderLines = await Promise.all(
+      validItems.map(async (line) => {
+        const productRes = await axios.get('/api/odoo/products', {
+          ...BEST_EFFORT_AXIOS_CONFIG,
+          headers,
+          params: { page: 1, pageSize: 20, search: line.sku },
+        });
+        const productRows = Array.isArray(productRes.data?.data) ? productRes.data.data : [];
+        const product =
+          productRows.find((p: any) => String(p?.default_code || '').toLowerCase() === String(line.sku).toLowerCase())
+          || productRows[0];
+        const productId = Number(product?.id);
+        if (!Number.isFinite(productId)) {
+          throw new Error(`Unable to find Odoo product for SKU "${line.sku}".`);
+        }
+        return {
+          product_id: productId,
+          product_uom_qty: Math.max(1, Math.round(Number(line.qty))),
+          price_unit: Math.round(Number(product?.list_price ?? 0)),
+        };
+      })
     );
-    const methods = Array.isArray(estimateRes.data?.data)
-      ? estimateRes.data.data
-      : Array.isArray(estimateRes.data)
-        ? estimateRes.data
-        : [];
-    if (methods.length === 0 || !methods[0]?.carrier_code || !methods[0]?.method_code) {
-      throw new Error('No Magento shipping method available for the provided address.');
-    }
-    const shippingMethod = {
-      carrier_code: String(methods[0].carrier_code),
-      method_code: String(methods[0].method_code),
-    };
 
-    await axios.post(
-      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/shipping-information`,
+    const createOrderRes = await axios.post(
+      '/api/odoo/sales-orders',
       {
-        payload: {
-          addressInformation: {
-            shipping_address: address,
-            billing_address: address,
-            shipping_carrier_code: shippingMethod.carrier_code,
-            shipping_method_code: shippingMethod.method_code,
-          },
-        },
+        partner_id: partnerId,
+        order_line: orderLines,
       },
       { ...BEST_EFFORT_AXIOS_CONFIG, headers }
     );
-
-    const paymentRes = await axios.get(
-      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/payment-methods`,
-      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
-    );
-    const paymentMethods = Array.isArray(paymentRes.data?.data)
-      ? paymentRes.data.data
-      : Array.isArray(paymentRes.data)
-        ? paymentRes.data
-        : [];
-    if (paymentMethods.length === 0 || !paymentMethods[0]?.code) {
-      throw new Error('No Magento payment method available for checkout.');
+    const orderId = String(createOrderRes.data?.data ?? createOrderRes.data ?? '').trim();
+    if (!orderId) {
+      throw new Error('Odoo order creation failed.');
     }
-    const paymentMethod = String(paymentMethods[0].code);
-
-    const placeOrderRes = await axios.post(
-      `/api/magento/rest/all/V1/guest-carts/${encodeURIComponent(cartId)}/payment-information`,
-      {
-        payload: {
-          email: input.email,
-          paymentMethod: { method: paymentMethod },
-          billing_address: address,
-        },
-      },
-      { ...BEST_EFFORT_AXIOS_CONFIG, headers }
-    );
-    const orderId = String(placeOrderRes.data?.data ?? placeOrderRes.data ?? '').trim();
-    if (!orderId) throw new Error('Magento order placement failed.');
     return { orderId };
   },
 
   getCategories: async (orgId?: string) => {
-    const response = await axios.get('/api/magento/rest/all/V1/categories', {
+    const response = await axios.get('/api/odoo/categories', {
       ...BEST_EFFORT_AXIOS_CONFIG,
       headers: orgId ? { 'X-Org-Id': orgId } : {},
+      params: { page: 1, pageSize: 200 },
     });
-    const root = response.data?.data ?? {};
-    const rows = Array.isArray(root?.children_data) ? root.children_data : [];
-    return flattenMagentoCategories(rows);
+    const rows = Array.isArray(response.data?.data) ? response.data.data : [];
+    return rows.map((item: any) =>
+      normalizeCategory({
+        id: String(item?.id || ''),
+        name: String(item?.name || item?.complete_name || 'Untitled category'),
+        description: item?.complete_name ? String(item.complete_name) : null,
+        isActive: true,
+        updatedAt: item?.write_date ? String(item.write_date) : undefined,
+      })
+    );
   },
 
   createCategory: async (orgId: string, data: any) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    const payload = {
+      name: String(data?.name || '').trim(),
+    };
+    const response = await axios.post('/api/odoo/categories', payload, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
   },
 
   updateCategory: async (orgId: string, id: string, data: any) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    const categoryId = Number(id);
+    if (!Number.isFinite(categoryId)) {
+      throw new Error('Odoo category id is required to update a category.');
+    }
+    const payload = {
+      name: String(data?.name || '').trim(),
+    };
+    const response = await axios.put(`/api/odoo/categories/${categoryId}`, payload, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
   },
 
   deleteCategory: async (orgId: string, id: string) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    const categoryId = Number(id);
+    if (!Number.isFinite(categoryId)) {
+      throw new Error('Odoo category id is required to delete a category.');
+    }
+    const response = await axios.delete(`/api/odoo/categories/${categoryId}`, {
+      ...BEST_EFFORT_AXIOS_CONFIG,
+      headers: orgId ? { 'X-Org-Id': orgId } : {},
+    });
+    return response.data?.data ?? response.data;
   },
 
   getCoupons: async (orgId?: string) => [],
 
   createCoupon: async (orgId: string, data: any) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    throw new Error('Coupon endpoints are not implemented for Odoo shop yet.');
   },
 
   updateCoupon: async (orgId: string, id: string, data: any) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    throw new Error('Coupon endpoints are not implemented for Odoo shop yet.');
   },
 
   deleteCoupon: async (orgId: string, id: string) => {
-    throw new Error('Magento now owns eCommerce. Manage catalog, checkout, payments, and inventory in Magento.');
+    throw new Error('Coupon endpoints are not implemented for Odoo shop yet.');
   },
 
   getProductImages: async () => {
     try {
-      const response = await axios.get('/api/image-library?category=commerce-product&limit=200', BEST_EFFORT_AXIOS_CONFIG);
+      const response = await axios.get('/api/image-library?category=commerce-product&limit=200', {
+        ...BEST_EFFORT_AXIOS_CONFIG,
+      } as any);
       const rows = response.data?.data ?? response.data ?? [];
       return Array.isArray(rows)
         ? rows
@@ -770,46 +808,6 @@ export const commerceService = {
 
   uploadProductImage: async (file: File, opts?: { sku?: string; orgId?: string }) => {
     const dataUrl = await fileToDataUrl(file);
-    const base64 = dataUrlToBase64(dataUrl);
-
-    if (opts?.sku) {
-      const payload = {
-        entry: {
-          media_type: 'image',
-          label: file.name,
-          position: 1,
-          disabled: false,
-          types: ['image', 'small_image', 'thumbnail'],
-          content: {
-            base64_encoded_data: base64,
-            type: file.type || 'image/jpeg',
-            name: file.name,
-          },
-        },
-      };
-
-      const response = await axios.post(
-        `/api/magento/rest/all/V1/products/${encodeURIComponent(opts.sku)}/media`,
-        { payload },
-        {
-          ...BEST_EFFORT_AXIOS_CONFIG,
-          headers: opts.orgId ? { 'X-Org-Id': opts.orgId } : {},
-        }
-      );
-
-      const mediaId = response.data?.data ?? response.data;
-      return normalizeImageAsset({
-        id: String(mediaId || `magento-media-${Date.now()}`),
-        name: file.name,
-        url: dataUrl,
-        thumbnail: dataUrl,
-        mimeType: file.type || 'image/*',
-        size: file.size,
-        category: 'commerce-product',
-        tags: ['shop-product', 'magento-media'],
-        createdAt: new Date().toISOString(),
-      });
-    }
 
     try {
       const response = await axios.post('/api/image-library', {

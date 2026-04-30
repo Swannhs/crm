@@ -76,12 +76,6 @@ export const navData: NavSection[] = [
       { title: 'White Label', path: paths.dashboard.whiteLabel, icon: ICONS.setting, roles: ['org_admin', 'org_owner', 'platform_admin'] },
       { title: 'Domain', path: paths.dashboard.domain, icon: ICONS.external, roles: ['org_admin', 'org_owner', 'platform_admin'] },
       { title: 'Settings', path: paths.dashboard.settings, icon: ICONS.setting, roles: ['org_admin', 'org_owner', 'platform_admin'] },
-      {
-        title: 'Integrations Magento',
-        path: paths.public.magentoIntegration,
-        icon: ICONS.external,
-        roles: ['org_admin', 'org_owner', 'platform_admin'],
-      },
       { title: 'Documents', path: paths.dashboard.documents, icon: ICONS.folder },
       { title: 'Employees', path: paths.dashboard.employees, icon: ICONS.job, roles: ['org_manager', 'org_admin', 'org_owner', 'platform_admin'] },
     ],

@@ -1,4 +1,4 @@
-import type { ICommerceCoupon, ICommerceProduct } from 'src/services/commerce-service';
+import type { ICommerceCoupon, ICommerceProduct, ICommerceInventoryItem } from 'src/services/commerce-service';
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -14,8 +14,11 @@ import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import Autocomplete from '@mui/material/Autocomplete';
+import Tooltip from '@mui/material/Tooltip';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
+import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
@@ -52,6 +55,7 @@ import {
   getStorefrontHomeHref,
 } from './commerce-workspace.utils';
 
+import { COMMERCE_DASHBOARD_MODULES } from './commerce-workspace.types';
 import type { CartLine, LocalOrder, ProductFormValues, CommerceDashboardModule } from './commerce-workspace.types';
 
 type SummaryCardsProps = {
@@ -138,7 +142,7 @@ export function CommerceSummaryCards({ products, orders, cartItems, topProducts 
             label: 'Average Order',
             value: fCurrency(avgOrderCents / 100),
             icon: 'solar:chart-2-bold-duotone',
-            helper: 'Magento order average',
+            helper: 'Average order value',
           },
           {
             label: 'Customers',
@@ -208,7 +212,7 @@ export function CommerceSummaryCards({ products, orders, cartItems, topProducts 
         <Grid item xs={12} md={6}>
           <Card sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              Recent Magento Orders
+              Recent Orders
             </Typography>
             <Stack spacing={1.5}>
               {recentOrders.length === 0 ? (
@@ -285,6 +289,7 @@ type ProductsTableProps = {
   onBulkActivate: () => void;
   onBulkArchive: () => void;
   onBulkDelete: () => void;
+  enableBulkStatusActions?: boolean;
   onQuickInventorySave: (sku: string, qty: number, sourceCode: string) => void;
   isBulkUpdating?: boolean;
   isBulkDeleting?: boolean;
@@ -315,6 +320,7 @@ export function CommerceProductsTable({
   onBulkActivate,
   onBulkArchive,
   onBulkDelete,
+  enableBulkStatusActions = true,
   onQuickInventorySave,
   isBulkUpdating = false,
   isBulkDeleting = false,
@@ -332,40 +338,63 @@ export function CommerceProductsTable({
     return product.variants?.length ? inventory > 0 && inventory <= threshold : false;
   }).length;
   const [inventoryDrafts, setInventoryDrafts] = useState<Record<string, { qty: string; sourceCode: string }>>({});
+  const hasActiveFilters = Boolean(search.trim()) || categoryFilter !== 'all' || statusFilter !== 'all';
+  const [actionsAnchorEl, setActionsAnchorEl] = useState<null | HTMLElement>(null);
+  const [activeActionProduct, setActiveActionProduct] = useState<ICommerceProduct | null>(null);
+  const actionsMenuOpen = Boolean(actionsAnchorEl && activeActionProduct);
+
+  const openActionsMenu = (event: React.MouseEvent<HTMLElement>, product: ICommerceProduct) => {
+    setActionsAnchorEl(event.currentTarget);
+    setActiveActionProduct(product);
+  };
+
+  const closeActionsMenu = () => {
+    setActionsAnchorEl(null);
+    setActiveActionProduct(null);
+  };
 
   return (
     <Card sx={{ overflow: 'hidden' }}>
       <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={2}
-        alignItems={{ xs: 'stretch', md: 'center' }}
-        justifyContent="space-between"
+        spacing={2.25}
         sx={{ p: 3 }}
       >
-        <Box>
-          <Typography variant="h5">Catalog</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Create and review the products sold through your shop.
-          </Typography>
-          <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap' }} useFlexGap>
-            <Chip size="small" label={`${filteredProducts.length} shown`} variant="soft" color="default" />
-            <Chip size="small" label={`${activeProducts} active`} variant="soft" color="success" />
-            <Chip size="small" label={`${lowStockProducts} low stock`} variant="soft" color={lowStockProducts ? 'warning' : 'default'} />
-          </Stack>
-        </Box>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
-          {selectedIds.length > 0 && (
-            <Stack direction="row" spacing={1}>
-              <Button size="small" color="success" variant="outlined" onClick={onBulkActivate} disabled={isBulkUpdating || isBulkDeleting}>Activate ({selectedIds.length})</Button>
-              <Button size="small" color="warning" variant="outlined" onClick={onBulkArchive} disabled={isBulkUpdating || isBulkDeleting}>Archive</Button>
-              <Button size="small" color="error" variant="outlined" onClick={onBulkDelete} disabled={isBulkDeleting || isBulkUpdating}>
-                {isBulkDeleting ? 'Deleting...' : 'Delete'}
-              </Button>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'stretch', md: 'flex-start' }}>
+          <Box>
+            <Typography variant="h5">Catalog</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Create and review the products sold through your shop.
+            </Typography>
+            <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap' }} useFlexGap>
+              <Chip size="small" label={`${filteredProducts.length} shown`} variant="soft" color="default" />
+              <Chip size="small" label={`${activeProducts} active`} variant="soft" color="success" />
+              <Chip size="small" label={`${lowStockProducts} low stock`} variant="soft" color={lowStockProducts ? 'warning' : 'default'} />
+              {selectedIds.length > 0 && (
+                <Chip size="small" label={`${selectedIds.length} selected`} variant="soft" color="info" />
+              )}
             </Stack>
-          )}
-          <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={onCreate}>
-            New product
-          </Button>
+          </Box>
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }} useFlexGap>
+            {selectedIds.length > 0 && (
+              <>
+                {enableBulkStatusActions && (
+                  <>
+                    <Button size="small" color="success" variant="outlined" onClick={onBulkActivate} disabled={isBulkUpdating || isBulkDeleting}>Activate ({selectedIds.length})</Button>
+                    <Button size="small" color="warning" variant="outlined" onClick={onBulkArchive} disabled={isBulkUpdating || isBulkDeleting}>Archive</Button>
+                  </>
+                )}
+                <Button size="small" color="error" variant="outlined" onClick={onBulkDelete} disabled={isBulkDeleting || isBulkUpdating}>
+                  {isBulkDeleting ? 'Deleting...' : 'Delete'}
+                </Button>
+              </>
+            )}
+            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={onCreate}>
+              New product
+            </Button>
+          </Stack>
+        </Stack>
+
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', md: 'center' }}>
           <TextField
             size="small"
             placeholder="Search products"
@@ -409,6 +438,21 @@ export function CommerceProductsTable({
             <MenuItem value="draft">Draft</MenuItem>
             <MenuItem value="archived">Archived</MenuItem>
           </TextField>
+          {hasActiveFilters && (
+            <Button
+              size="small"
+              color="inherit"
+              variant="text"
+              startIcon={<Iconify icon="solar:restart-bold" width={16} />}
+              onClick={() => {
+                onSearchChange('');
+                onCategoryFilterChange('all');
+                onStatusFilterChange('all');
+              }}
+            >
+              Reset
+            </Button>
+          )}
         </Stack>
       </Stack>
       <Divider />
@@ -440,8 +484,8 @@ export function CommerceProductsTable({
           ))}
         </Grid>
       </Box>
-      <TableContainer>
-        <Table>
+      <TableContainer sx={{ maxHeight: 760 }}>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
@@ -468,7 +512,13 @@ export function CommerceProductsTable({
                 : { label: 'Available', color: 'success' as const };
 
               return (
-                <TableRow key={product.id} hover>
+                <TableRow
+                  key={product.id}
+                  hover
+                  sx={{
+                    '&:last-of-type td': { borderBottom: 0 },
+                  }}
+                >
                   <TableCell padding="checkbox">
                     <Checkbox checked={selectedIds.includes(product.id)} onChange={() => onToggleSelect(product.id)} />
                   </TableCell>
@@ -487,7 +537,7 @@ export function CommerceProductsTable({
                         <Iconify icon="solar:box-bold-duotone" width={24} />
                       </Avatar>
                       <Stack spacing={0.5} sx={{ minWidth: 0 }}>
-                        <Typography variant="subtitle2" noWrap>
+                        <Typography variant="subtitle2" noWrap sx={{ maxWidth: 260 }}>
                           {product.name}
                         </Typography>
                         <Typography
@@ -512,10 +562,10 @@ export function CommerceProductsTable({
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <Stack spacing={0.75}>
-                      <Typography variant="body2">
-                        SKU: <strong>{product.sku || 'Not set'}</strong>
-                      </Typography>
+                      <Stack spacing={0.75}>
+                        <Typography variant="body2">
+                          SKU: <strong>{product.sku || 'Not set'}</strong>
+                        </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         Category: {product.categoryName || 'Uncategorized'}
                       </Typography>
@@ -538,9 +588,18 @@ export function CommerceProductsTable({
                   <TableCell>
                     <Chip
                       size="small"
-                      label={product.status || 'draft'}
-                      color={orderStatusColor(product.status || 'draft')}
+                      label={String(product.status || 'draft').toUpperCase()}
+                      color="primary"
                       variant="outlined"
+                      sx={{
+                        fontWeight: 700,
+                        letterSpacing: 0.4,
+                        px: 0.5,
+                        minWidth: 76,
+                        justifyContent: 'center',
+                        textTransform: 'uppercase',
+                        borderColor: 'primary.main',
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -590,6 +649,7 @@ export function CommerceProductsTable({
                           sx={{ maxWidth: 110 }}
                         />
                         <TextField
+                          select
                           size="small"
                           label="Source"
                           value={inventoryDrafts[product.id]?.sourceCode ?? 'default'}
@@ -603,10 +663,14 @@ export function CommerceProductsTable({
                             }))
                           }
                           sx={{ maxWidth: 130 }}
-                        />
+                        >
+                          <MenuItem value="default">default</MenuItem>
+                          <MenuItem value="warehouse">warehouse</MenuItem>
+                          <MenuItem value="storefront">storefront</MenuItem>
+                        </TextField>
                         <Button
                           size="small"
-                          variant="outlined"
+                          variant="contained"
                           disabled={isQuickInventorySaving}
                           onClick={() =>
                             onQuickInventorySave(
@@ -622,26 +686,15 @@ export function CommerceProductsTable({
                     </Stack>
                   </TableCell>
                   <TableCell align="right">
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Button
+                    <Tooltip title="Actions">
+                      <IconButton
                         size="small"
-                        color="inherit"
-                        component={Link}
-                        href={getProductHref(resolvedShopKey, product.id)}
+                        onClick={(event) => openActionsMenu(event, product)}
+                        aria-label={`Open actions for ${product.name}`}
                       >
-                        Preview
-                      </Button>
-                      <Button
-                        size="small"
-                        color="inherit"
-                        onClick={() => onEdit(product)}
-                      >
-                        Edit
-                      </Button>
-                      <IconButton size="small" color="error" onClick={() => onDelete(product.id)}>
-                         <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+                        <Iconify icon="solar:menu-dots-bold" width={20} />
                       </IconButton>
-                    </Stack>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               );
@@ -649,9 +702,24 @@ export function CommerceProductsTable({
             {filteredProducts.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} sx={{ py: 8, textAlign: 'center' }}>
+                  <Box
+                    sx={{
+                      width: 52,
+                      height: 52,
+                      mx: 'auto',
+                      mb: 1.5,
+                      borderRadius: 2,
+                      bgcolor: 'background.neutral',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Iconify icon="solar:box-minimalistic-bold-duotone" width={28} />
+                  </Box>
                   <Typography variant="subtitle1">No products found.</Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Create your first product or adjust the search query.
+                    {hasActiveFilters ? 'Try resetting filters or search terms.' : 'Create your first product to get started.'}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -668,6 +736,340 @@ export function CommerceProductsTable({
         onRowsPerPageChange={(event) => onRowsPerPageChange(Number(event.target.value))}
         rowsPerPageOptions={[10, 20, 50]}
       />
+      <Menu
+        anchorEl={actionsAnchorEl}
+        open={actionsMenuOpen}
+        onClose={closeActionsMenu}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem
+          component={Link}
+          href={getProductHref(resolvedShopKey, activeActionProduct?.id || '')}
+          onClick={closeActionsMenu}
+        >
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Iconify icon="solar:eye-bold-duotone" width={16} />
+            <span>Preview</span>
+          </Stack>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (activeActionProduct) onEdit(activeActionProduct);
+            closeActionsMenu();
+          }}
+        >
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Iconify icon="solar:pen-2-bold-duotone" width={16} />
+            <span>Edit</span>
+          </Stack>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (activeActionProduct) onDelete(activeActionProduct.id);
+            closeActionsMenu();
+          }}
+          sx={{ color: 'error.main' }}
+        >
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+            <span>Delete</span>
+          </Stack>
+        </MenuItem>
+      </Menu>
+    </Card>
+  );
+}
+
+type InventoryTableProps = {
+  items: ICommerceInventoryItem[];
+  products: Array<{ id: string; name: string; sku?: string }>;
+  locations: Array<{ id: string; fullName: string }>;
+  search: string;
+  onSearchChange: (value: string) => void;
+  onCreate: (input: { productId: number; locationId: number; quantity: number }) => void;
+  onSave: (id: string, qty: number) => void;
+  onDelete: (id: string) => void;
+  isCreating?: boolean;
+  isSaving?: boolean;
+  isDeleting?: boolean;
+  page: number;
+  rowsPerPage: number;
+  totalRows: number;
+  onPageChange: (page: number) => void;
+  onRowsPerPageChange: (pageSize: number) => void;
+};
+
+export function CommerceInventoryTable({
+  items,
+  products,
+  locations,
+  search,
+  onSearchChange,
+  onCreate,
+  onSave,
+  onDelete,
+  isCreating = false,
+  isSaving = false,
+  isDeleting = false,
+  page,
+  rowsPerPage,
+  totalRows,
+  onPageChange,
+  onRowsPerPageChange,
+}: InventoryTableProps) {
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [newInventory, setNewInventory] = useState({
+    productId: '',
+    locationId: '',
+    quantity: '0',
+  });
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [createTouched, setCreateTouched] = useState(false);
+  const lowStockCount = items.filter((item) => item.availableQuantity > 0 && item.availableQuantity <= 5).length;
+  const selectedCreateProduct = products.find((p) => p.id === newInventory.productId) || null;
+  const selectedCreateLocation = locations.find((l) => l.id === newInventory.locationId) || null;
+  const createQuantityNumber = Number(newInventory.quantity);
+  const createProductError = createTouched && !newInventory.productId;
+  const createLocationError = createTouched && !newInventory.locationId;
+  const createQuantityError =
+    createTouched &&
+    (!newInventory.quantity.trim() ||
+      !Number.isFinite(createQuantityNumber) ||
+      createQuantityNumber < 0);
+  const canCreateInventory =
+    Boolean(newInventory.productId) &&
+    Boolean(newInventory.locationId) &&
+    Number.isFinite(createQuantityNumber) &&
+    createQuantityNumber >= 0;
+
+  return (
+    <Card sx={{ overflow: 'hidden' }}>
+      <Stack spacing={2.25} sx={{ p: 3 }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'stretch', md: 'flex-start' }}>
+          <Box>
+            <Typography variant="h5">Inventory</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Track stock by Odoo quant and update quantities per location.
+            </Typography>
+            <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap' }} useFlexGap>
+              <Chip size="small" label={`${items.length} records`} variant="soft" color="default" />
+              <Chip size="small" label={`${lowStockCount} low stock`} variant="soft" color={lowStockCount ? 'warning' : 'default'} />
+            </Stack>
+          </Box>
+        </Stack>
+
+        <TextField
+          size="small"
+          placeholder="Search inventory by product"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Iconify icon="solar:magnifer-bold-duotone" width={18} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ maxWidth: 360 }}
+        />
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', md: 'center' }}>
+          <Autocomplete
+            size="small"
+            options={products}
+            value={selectedCreateProduct}
+            onChange={(_event, value) =>
+              setNewInventory((prev) => ({ ...prev, productId: value?.id || '' }))
+            }
+            getOptionLabel={(option) => `${option.name}${option.sku ? ` (${option.sku})` : ''}`}
+            sx={{ minWidth: 280 }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Product"
+                placeholder="Search product"
+                error={createProductError}
+                helperText={createProductError ? 'Select a product.' : ' '}
+              />
+            )}
+          />
+          <Autocomplete
+            size="small"
+            options={locations}
+            value={selectedCreateLocation}
+            onChange={(_event, value) =>
+              setNewInventory((prev) => ({ ...prev, locationId: value?.id || '' }))
+            }
+            getOptionLabel={(option) => option.fullName}
+            sx={{ minWidth: 280 }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Location"
+                placeholder="Search location"
+                error={createLocationError}
+                helperText={createLocationError ? 'Select a location.' : ' '}
+              />
+            )}
+          />
+          <TextField
+            size="small"
+            label="Quantity"
+            type="number"
+            value={newInventory.quantity}
+            onChange={(event) => setNewInventory((prev) => ({ ...prev, quantity: event.target.value }))}
+            sx={{ maxWidth: 130 }}
+            error={createQuantityError}
+            helperText={createQuantityError ? 'Enter a quantity >= 0.' : ' '}
+          />
+          <Button
+            size="small"
+            variant="contained"
+            disabled={isCreating || !canCreateInventory}
+            onClick={() => {
+              setCreateTouched(true);
+              if (!canCreateInventory) return;
+              onCreate({
+                productId: Number(newInventory.productId),
+                locationId: Number(newInventory.locationId),
+                quantity: createQuantityNumber,
+              });
+              setNewInventory({ productId: '', locationId: '', quantity: '0' });
+              setCreateTouched(false);
+            }}
+          >
+            {isCreating ? 'Creating...' : 'New inventory record'}
+          </Button>
+        </Stack>
+      </Stack>
+
+      <Divider />
+      <TableContainer sx={{ maxHeight: 760 }}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell>Product</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell>Source</TableCell>
+              <TableCell>Reserved</TableCell>
+              <TableCell>Available</TableCell>
+              <TableCell>Quantity</TableCell>
+              <TableCell>ID</TableCell>
+              <TableCell align="right">Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id} hover>
+                <TableCell>
+                  <Stack spacing={0.25}>
+                    <Typography variant="subtitle2">{item.productName}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      Quant ID: {item.id}
+                    </Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>{item.locationName || '-'}</TableCell>
+                <TableCell>
+                  <Chip size="small" label={item.sourceCode || 'default'} color="primary" variant="outlined" />
+                </TableCell>
+                <TableCell>{item.reservedQuantity}</TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: item.availableQuantity <= 5 ? 'warning.main' : 'success.main', fontWeight: 600 }}
+                  >
+                    {item.availableQuantity}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <TextField
+                    size="small"
+                    type="number"
+                    value={drafts[item.id] ?? String(item.quantity)}
+                    onChange={(event) =>
+                      setDrafts((prev) => ({
+                        ...prev,
+                        [item.id]: event.target.value,
+                      }))
+                    }
+                    sx={{ maxWidth: 120 }}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    {item.id}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button
+                      size="small"
+                      variant="contained"
+                      disabled={isSaving}
+                      onClick={() => onSave(item.id, Number(drafts[item.id] ?? item.quantity))}
+                    >
+                      {isSaving ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      size="small"
+                      color="error"
+                      variant="outlined"
+                      disabled={isDeleting}
+                      onClick={() => setPendingDeleteId(item.id)}
+                    >
+                      {isDeleting ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ))}
+            {items.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} sx={{ py: 8, textAlign: 'center' }}>
+                  <Typography variant="subtitle1">No inventory records found.</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    Try another search or verify stock quant data in Odoo.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        count={totalRows}
+        page={page}
+        onPageChange={(_event, nextPage) => onPageChange(nextPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(event) => onRowsPerPageChange(Number(event.target.value))}
+        rowsPerPageOptions={[10, 20, 50]}
+      />
+
+      <Dialog open={Boolean(pendingDeleteId)} onClose={() => setPendingDeleteId(null)}>
+        <DialogTitle>Delete inventory record?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            This will permanently delete quant ID {pendingDeleteId || '-'}.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingDeleteId(null)} disabled={isDeleting}>Cancel</Button>
+          <Button
+            color="error"
+            variant="contained"
+            disabled={isDeleting || !pendingDeleteId}
+            onClick={() => {
+              if (!pendingDeleteId) return;
+              onDelete(pendingDeleteId);
+              setPendingDeleteId(null);
+            }}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }
@@ -848,7 +1250,7 @@ export function CommerceProductFormCard({
               <RHFTextField
                 name="inventorySourceCode"
                 label="Inventory Source Code"
-                helperText="Magento MSI source code (default: default)"
+                helperText="Inventory source code (default: default)"
               />
               <RHFTextField name="tagsText" label="Tags" placeholder="summer, bestseller, new" />
               <Stack spacing={1.5}>
@@ -1603,7 +2005,7 @@ export function CommerceSettingsPanel({
           <Box sx={{ p: 3 }}>
             <Typography variant="h6">Store settings</Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Tax and payment configuration are managed by backend services and Magento.
+              Tax and payment configuration are managed by backend services and your current commerce integration.
             </Typography>
           </Box>
           <Divider />
@@ -1618,7 +2020,7 @@ export function CommerceSettingsPanel({
                 <RHFTextField name="currency" label="Currency" />
               </Stack>
               <Alert severity="info">
-                Tax rate and payment methods are read from Magento during checkout.
+                Tax rate and payment methods are read from the connected backend during checkout.
               </Alert>
               <Button type="submit" variant="contained">
                 Save settings
@@ -2221,7 +2623,7 @@ export function CommerceCheckoutPanel({
               <RHFTextField name="postalCode" label="Postal code" />
 
               <Button type="submit" variant="contained" disabled={isPending || cartItemsLength === 0}>
-                {isPending ? <CircularProgress size={20} color="inherit" /> : 'Create Magento order'}
+                {isPending ? <CircularProgress size={20} color="inherit" /> : 'Create order'}
               </Button>
             </Stack>
           </Form>
@@ -2343,6 +2745,7 @@ export function CommerceOrderCard({
 }
 
 type DashboardModulesProps = {
+  modules?: Array<{ label: string; value: CommerceDashboardModule; icon?: string }>;
   currentModule: CommerceDashboardModule;
   onModuleChange: (value: CommerceDashboardModule) => void;
   summaryCards: React.ReactNode;
@@ -2364,6 +2767,7 @@ type DashboardModulesProps = {
 };
 
 export function CommerceDashboardModules({
+  modules = COMMERCE_DASHBOARD_MODULES,
   currentModule,
   onModuleChange,
   summaryCards,
@@ -2386,21 +2790,9 @@ export function CommerceDashboardModules({
   return (
     <Stack spacing={4}>
       <Tabs value={currentModule} onChange={(_event, value) => onModuleChange(value)} variant="scrollable" scrollButtons="auto">
-        <Tab value="dashboard" label="Dashboard" />
-        <Tab value="pos" label="POS" />
-        <Tab value="products" label="Products" />
-        <Tab value="inventory" label="Inventory" />
-        <Tab value="orders" label="Orders" />
-        <Tab value="kds" label="KDS" />
-        <Tab value="cfd" label="CFD" />
-        <Tab value="kiosk" label="Kiosk" />
-        <Tab value="customers" label="Customers" />
-        <Tab value="memberships" label="Memberships" />
-        <Tab value="categories" label="Categories" />
-        <Tab value="coupons" label="Coupons" />
-        <Tab value="designer" label="Designer" />
-        <Tab value="tables" label="Tables" />
-        <Tab value="settings" label="Settings" />
+        {modules.map((moduleItem) => (
+          <Tab key={moduleItem.value} value={moduleItem.value} label={moduleItem.label} />
+        ))}
       </Tabs>
 
       {currentModule === 'dashboard' && summaryCards}

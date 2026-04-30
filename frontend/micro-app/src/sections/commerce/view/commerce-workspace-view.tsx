@@ -22,11 +22,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-import {
-  useMagentoCategories,
-  useMagentoCreateProduct,
-  useMagentoDeleteProduct,
-} from 'src/hooks/use-magento-shop';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { publicCommerceService } from 'src/services/public-commerce-service';
@@ -77,6 +72,7 @@ import {
 import {
   CommerceOrderCard,
   CommerceCartSummary,
+  CommerceInventoryTable,
   CommerceOrdersTable,
   CommerceTablesPanel,
   CommerceCouponDialog,
@@ -109,6 +105,13 @@ export function CommerceWorkspaceView({
   section,
   type,
 }: CommerceWorkspaceProps) {
+  const capabilities = {
+    bulkProductStatusUpdate: false,
+    coupons: false,
+    memberships: false,
+    designer: false,
+  } as const;
+
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, authenticated } = useAuthContext();
@@ -139,6 +142,17 @@ export function CommerceWorkspaceView({
     isKnownSection
       ? (section as CommerceDashboardModule)
       : resolveInitialModule(mode);
+  const enabledDashboardModules = useMemo(
+    () =>
+      COMMERCE_DASHBOARD_MODULES.filter((moduleItem) => {
+        if (moduleItem.value === 'coupons' && !capabilities.coupons) return false;
+        if (moduleItem.value === 'memberships' && !capabilities.memberships) return false;
+        if (moduleItem.value === 'designer' && !capabilities.designer) return false;
+        return true;
+      }),
+    [capabilities.coupons, capabilities.designer, capabilities.memberships]
+  );
+  const isCurrentModuleEnabled = enabledDashboardModules.some((moduleItem) => moduleItem.value === currentModule);
 
   const [activeTab, setActiveTab] = useState<'general' | 'variants' | 'modifiers'>('general');
   const [search, setSearch] = useState('');
@@ -152,6 +166,7 @@ export function CommerceWorkspaceView({
   const [categorySearch, setCategorySearch] = useState('');
   const [couponSearch, setCouponSearch] = useState('');
   const [orderSearch, setOrderSearch] = useState('');
+  const [inventorySearch, setInventorySearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [selectedVariantId, setSelectedVariantId] = useState('');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -247,6 +262,12 @@ export function CommerceWorkspaceView({
     }, 350);
     return () => window.clearTimeout(timer);
   }, [search]);
+  useEffect(() => {
+    if (!isStorefrontMode && !isCurrentModuleEnabled) {
+      const fallback = enabledDashboardModules[0]?.value || 'dashboard';
+      router.replace(paths.dashboard.shopSection(fallback));
+    }
+  }, [enabledDashboardModules, isCurrentModuleEnabled, isStorefrontMode, router]);
 
   const storefrontProductsQuery = useQuery({
     queryKey: ['commerce-products', mode, resolvedShopKey],
@@ -263,6 +284,21 @@ export function CommerceWorkspaceView({
         search: debouncedSearch,
       }),
   });
+  const inventoryQuery = useQuery({
+    queryKey: ['commerce-inventory', resolvedShopKey, productPage, productRowsPerPage, inventorySearch],
+    enabled: authenticated && !isStorefrontMode && currentModule === 'inventory',
+    queryFn: () =>
+      commerceService.getInventoryPage(resolvedShopKey, {
+        currentPage: productPage + 1,
+        pageSize: productRowsPerPage,
+        search: inventorySearch.trim(),
+      }),
+  });
+  const inventoryLocationsQuery = useQuery({
+    queryKey: ['commerce-inventory-locations', resolvedShopKey],
+    enabled: authenticated && !isStorefrontMode && currentModule === 'inventory',
+    queryFn: () => commerceService.getInventoryLocations(resolvedShopKey, { currentPage: 1, pageSize: 300 }),
+  });
 
   const ordersQuery = useQuery({
     queryKey: ['commerce-orders', resolvedOrgId],
@@ -270,10 +306,10 @@ export function CommerceWorkspaceView({
     queryFn: () => commerceService.getOrders(),
   });
 
-  const categoriesQuery = useMagentoCategories({
-    orgId: resolvedShopKey,
-    enabled: authenticated && !isStorefrontMode,
+  const categoriesQuery = useQuery({
     queryKey: categoryQueryKey,
+    enabled: authenticated && !isStorefrontMode,
+    queryFn: () => commerceService.getCategories(resolvedShopKey),
   });
 
   const couponsQuery = useQuery({
@@ -282,13 +318,10 @@ export function CommerceWorkspaceView({
     queryFn: () => commerceService.getCoupons(),
   });
 
-  const createProductMagentoMutation = useMagentoCreateProduct({
-    orgId: resolvedShopKey,
-    invalidateKeys: [productQueryKey as unknown[]],
-  });
   const createProductMutation = useMutation({
-    mutationFn: (values: ProductFormValues) => createProductMagentoMutation.mutateAsync(values),
+    mutationFn: (values: ProductFormValues) => commerceService.createProduct(resolvedShopKey, values),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
       productMethods.reset(DEFAULT_PRODUCT_FORM_VALUES);
       setEditingId(null);
       productDialog.onFalse();
@@ -298,7 +331,7 @@ export function CommerceWorkspaceView({
       const message = String(err?.message || '');
       const lower = message.toLowerCase();
       if ((lower.includes('sku') && lower.includes('exist')) || lower.includes('already exists')) {
-        productMethods.setError('sku', { type: 'manual', message: 'SKU already exists in Magento. Use a unique SKU.' });
+        productMethods.setError('sku', { type: 'manual', message: 'SKU already exists. Use a unique SKU.' });
       }
       showToast({ message: `Error: ${message}`, severity: 'error' });
     },
@@ -317,24 +350,21 @@ export function CommerceWorkspaceView({
       const message = String(err?.message || '');
       const lower = message.toLowerCase();
       if ((lower.includes('sku') && lower.includes('exist')) || lower.includes('already exists')) {
-        productMethods.setError('sku', { type: 'manual', message: 'SKU already exists in Magento. Use a unique SKU.' });
+        productMethods.setError('sku', { type: 'manual', message: 'SKU already exists. Use a unique SKU.' });
       }
       showToast({ message: `Error: ${message}`, severity: 'error' });
     },
   });
 
-  const deleteProductMagentoMutation = useMagentoDeleteProduct({
-    orgId: resolvedShopKey,
-    invalidateKeys: [productQueryKey as unknown[]],
-  });
   const deleteProductMutation = useMutation({
-    mutationFn: (id: string) => deleteProductMagentoMutation.mutateAsync(id),
+    mutationFn: (id: string) => commerceService.deleteProduct(resolvedShopKey, id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
       showToast({ message: 'Product deleted.', severity: 'success' });
     },
   });
   const bulkDeleteMutation = useMutation({
-    mutationFn: (ids: string[]) => Promise.all(ids.map((id) => deleteProductMagentoMutation.mutateAsync(id))),
+    mutationFn: (ids: string[]) => Promise.all(ids.map((id) => commerceService.deleteProduct(resolvedShopKey, id))),
     onSuccess: () => {
       setSelectedProductIds([]);
       setDeleteTargetIds([]);
@@ -361,6 +391,35 @@ export function CommerceWorkspaceView({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productQueryKey });
       showToast({ message: 'Inventory updated.', severity: 'success' });
+    },
+    onError: (err: Error) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
+  });
+  const updateInventoryMutation = useMutation({
+    mutationFn: ({ id, quantity }: { id: string; quantity: number }) =>
+      commerceService.updateInventory(resolvedShopKey, id, { quantity }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commerce-inventory', resolvedShopKey] });
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      showToast({ message: 'Inventory quant updated.', severity: 'success' });
+    },
+    onError: (err: Error) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
+  });
+  const createInventoryMutation = useMutation({
+    mutationFn: (payload: { productId: number; locationId: number; quantity: number }) =>
+      commerceService.createInventory(resolvedShopKey, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commerce-inventory', resolvedShopKey] });
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      showToast({ message: 'Inventory record created.', severity: 'success' });
+    },
+    onError: (err: Error) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
+  });
+  const deleteInventoryMutation = useMutation({
+    mutationFn: (id: string) => commerceService.deleteInventory(resolvedShopKey, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commerce-inventory', resolvedShopKey] });
+      queryClient.invalidateQueries({ queryKey: productQueryKey });
+      showToast({ message: 'Inventory record deleted.', severity: 'success' });
     },
     onError: (err: Error) => showToast({ message: `Error: ${err.message}`, severity: 'error' }),
   });
@@ -426,7 +485,7 @@ export function CommerceWorkspaceView({
     },
   });
 
-  const createMagentoOrderMutation = useMutation({
+  const createOrderMutation = useMutation({
     mutationFn: (payload: Parameters<typeof commerceService.createPosOrderFromCart>[1]) =>
       commerceService.createPosOrderFromCart(resolvedShopKey, payload),
   });
@@ -923,23 +982,35 @@ export function CommerceWorkspaceView({
     persistTables(tableLayouts.filter((item) => item.id !== tableId));
   };
 
-  const updateOrderState = (targetId: string) => {
+  const updateOrderState = async (
+    targetId: string,
+    changes?: { status?: string; paymentStatus?: string }
+  ) => {
     const existing = mergedOrders.find((item) => item.id === targetId);
     if (!existing) return;
-    showToast({
-      message: 'Order status updates must be performed in Magento.',
-      severity: 'info',
+    await commerceService.updateOrder(resolvedShopKey, targetId, {
+      status: changes?.status,
+      paymentStatus: changes?.paymentStatus,
     });
+    queryClient.invalidateQueries({ queryKey: ['commerce-orders', resolvedOrgId] });
   };
 
-  const markOrderProcessing = (targetId: string) => {
-    updateOrderState(targetId);
-    showToast({ message: 'Order moved to processing.', severity: 'success' });
+  const markOrderProcessing = async (targetId: string) => {
+    try {
+      await updateOrderState(targetId, { status: 'processing' });
+      showToast({ message: 'Order moved to processing.', severity: 'success' });
+    } catch (err: any) {
+      showToast({ message: `Error: ${err?.message || 'Unable to update order.'}`, severity: 'error' });
+    }
   };
 
-  const markOrderCompleted = (targetId: string) => {
-    updateOrderState(targetId);
-    showToast({ message: 'Order marked completed.', severity: 'success' });
+  const markOrderCompleted = async (targetId: string) => {
+    try {
+      await updateOrderState(targetId, { status: 'sale', paymentStatus: 'invoiced' });
+      showToast({ message: 'Order marked completed.', severity: 'success' });
+    } catch (err: any) {
+      showToast({ message: `Error: ${err?.message || 'Unable to update order.'}`, severity: 'error' });
+    }
   };
 
   const openOrderDetail = (id: string) => {
@@ -964,7 +1035,7 @@ export function CommerceWorkspaceView({
 
     const hasMissingSku = lineItems.some((line) => !line.sku);
     if (hasMissingSku) {
-      showToast({ message: 'One or more cart items do not have a Magento SKU.', severity: 'error' });
+      showToast({ message: 'One or more cart items do not have a SKU.', severity: 'error' });
       return;
     }
 
@@ -972,7 +1043,7 @@ export function CommerceWorkspaceView({
     const firstname = nameParts[0] || 'Guest';
     const lastname = nameParts.slice(1).join(' ') || 'Customer';
 
-    const createdOrder = await createMagentoOrderMutation.mutateAsync({
+    const createdOrder = await createOrderMutation.mutateAsync({
       email: values.email,
       firstname,
       lastname,
@@ -987,7 +1058,7 @@ export function CommerceWorkspaceView({
 
     clearCart();
     queryClient.invalidateQueries({ queryKey: ['commerce-orders'] });
-    showToast({ message: 'Magento order created successfully.', severity: 'success' });
+    showToast({ message: 'Order created successfully.', severity: 'success' });
     router.push(paths.public.orderPayment(String(createdOrder.orderId)));
   };
 
@@ -995,12 +1066,16 @@ export function CommerceWorkspaceView({
     if (!selectedOrder) return;
 
     updateOrderState(selectedOrder.id, {
-      paymentStatus: 'paid',
+      paymentStatus: 'invoiced',
       status: selectedOrder.status === 'pending' ? 'processing' : selectedOrder.status,
-    });
-
-    showToast({ message: 'Payment marked as completed.', severity: 'success' });
-    router.push(paths.public.onlineShopReceipt(selectedOrder.id, type || 'order'));
+    })
+      .then(() => {
+        showToast({ message: 'Payment marked as completed.', severity: 'success' });
+        router.push(paths.public.onlineShopReceipt(selectedOrder.id, type || 'order'));
+      })
+      .catch((err: any) => {
+        showToast({ message: `Error: ${err?.message || 'Unable to update order payment.'}`, severity: 'error' });
+      });
   };
 
   const pageTitle = useMemo(() => {
@@ -1090,7 +1165,7 @@ export function CommerceWorkspaceView({
         <CommerceCheckoutPanel
           checkoutMethods={checkoutMethods}
           onSubmit={checkoutMethods.handleSubmit(handleCheckout)}
-          isPending={createMagentoOrderMutation.isPending}
+          isPending={createOrderMutation.isPending}
           cartItemsLength={cartItems.length}
           cartSummary={cartSummary}
         />
@@ -1143,6 +1218,7 @@ export function CommerceWorkspaceView({
         />
       ) : (
         <CommerceDashboardModules
+          modules={enabledDashboardModules}
           currentModule={currentModule}
           onModuleChange={handleModuleChange}
           summaryCards={
@@ -1175,6 +1251,7 @@ export function CommerceWorkspaceView({
               onBulkActivate={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'active' })}
               onBulkArchive={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'archived' })}
               onBulkDelete={() => setDeleteTargetIds(selectedProductIds)}
+              enableBulkStatusActions={capabilities.bulkProductStatusUpdate}
               onQuickInventorySave={(sku, qty, sourceCode) =>
                 quickInventoryMutation.mutate({ sku, qty, sourceCode })
               }
@@ -1203,15 +1280,27 @@ export function CommerceWorkspaceView({
             />
           }
           couponsTable={
-            <CommerceCouponsTable
-              coupons={filteredCoupons}
-              search={couponSearch}
-              onCreate={handleCreateCoupon}
-              onSearchChange={setCouponSearch}
-              onEdit={handleCouponEdit}
-              onToggleActive={handleCouponToggle}
-              onDelete={(id) => deleteCouponMutation.mutate(id)}
-            />
+            capabilities.coupons ? (
+              <CommerceCouponsTable
+                coupons={filteredCoupons}
+                search={couponSearch}
+                onCreate={handleCreateCoupon}
+                onSearchChange={setCouponSearch}
+                onEdit={handleCouponEdit}
+                onToggleActive={handleCouponToggle}
+                onDelete={(id) => deleteCouponMutation.mutate(id)}
+              />
+            ) : (
+              <Card sx={{ p: 3 }}>
+                <Typography variant="h5">Coupons</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                  Coupon APIs are not available for the current Odoo shop integration.
+                </Typography>
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  This module is temporarily read-only/disabled until coupon endpoints are implemented.
+                </Alert>
+              </Card>
+            )
           }
           ordersTable={
             <CommerceOrdersTable
@@ -1232,7 +1321,7 @@ export function CommerceWorkspaceView({
             <Card sx={{ p: 3 }}>
               <Typography variant="h5">Memberships</Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                Membership analytics are being consolidated into Magento-backed customer segments.
+                Membership analytics are being consolidated into customer segments.
               </Typography>
               <Alert severity="info" sx={{ mt: 2 }}>
                 Use the Customers tab for active buyer insights while membership sync is finalized.
@@ -1292,36 +1381,28 @@ export function CommerceWorkspaceView({
             </Card>
           }
           inventoryPanel={
-            <CommerceProductsTable
-              filteredProducts={filteredProducts}
-              categories={catalogCategories}
-              resolvedShopKey={resolvedShopKey}
-              search={search}
-              categoryFilter={productCategoryFilter}
-              statusFilter={productStatusFilter}
-              onCreate={openCreateProductDialog}
-              onSearchChange={setSearch}
-              onCategoryFilterChange={setProductCategoryFilter}
-              onStatusFilterChange={setProductStatusFilter}
-              onEdit={handleProductEdit}
-              onDelete={(id) => deleteProductMutation.mutate(id)}
-              selectedIds={selectedProductIds}
-              onToggleSelect={(id) =>
-                setSelectedProductIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
-              }
-              onToggleSelectAll={(ids, checked) => setSelectedProductIds(checked ? ids : [])}
-              onBulkActivate={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'active' })}
-              onBulkArchive={() => bulkStatusMutation.mutate({ ids: selectedProductIds, status: 'archived' })}
-              onBulkDelete={() => setDeleteTargetIds(selectedProductIds)}
-              onQuickInventorySave={(sku, qty, sourceCode) =>
-                quickInventoryMutation.mutate({ sku, qty, sourceCode })
-              }
-              isBulkUpdating={bulkStatusMutation.isPending}
-              isBulkDeleting={bulkDeleteMutation.isPending}
-              isQuickInventorySaving={quickInventoryMutation.isPending}
+            <CommerceInventoryTable
+              items={Array.isArray(inventoryQuery.data?.items) ? inventoryQuery.data.items : []}
+              products={products.map((product) => ({
+                id: product.id,
+                name: product.name,
+                sku: product.sku,
+              }))}
+              locations={Array.isArray(inventoryLocationsQuery.data) ? inventoryLocationsQuery.data : []}
+              search={inventorySearch}
+              onSearchChange={(value) => {
+                setInventorySearch(value);
+                setProductPage(0);
+              }}
+              onCreate={(payload) => createInventoryMutation.mutate(payload)}
+              onSave={(id, qty) => updateInventoryMutation.mutate({ id, quantity: qty })}
+              onDelete={(id) => deleteInventoryMutation.mutate(id)}
+              isCreating={createInventoryMutation.isPending}
+              isSaving={updateInventoryMutation.isPending}
+              isDeleting={deleteInventoryMutation.isPending}
               page={productPage}
               rowsPerPage={productRowsPerPage}
-              totalRows={totalProductRows}
+              totalRows={Number(inventoryQuery.data?.total ?? 0)}
               onPageChange={setProductPage}
               onRowsPerPageChange={(size) => {
                 setProductRowsPerPage(size);
@@ -1451,8 +1532,14 @@ export function CommerceWorkspaceView({
         onClose={orderDialog.onFalse}
         order={mergedOrders.find((o) => o.id === selectedOrderId)}
         onStatusUpdate={(id, _status, _pStatus) => {
-          updateOrderState(id);
-          showToast({ message: 'Order status updated.', severity: 'success' });
+          updateOrderState(id, {
+            status: _status,
+            paymentStatus: _pStatus,
+          })
+            .then(() => showToast({ message: 'Order status updated.', severity: 'success' }))
+            .catch((err: any) =>
+              showToast({ message: `Error: ${err?.message || 'Unable to update order.'}`, severity: 'error' })
+            );
         }}
         onReceipt={(id) => router.push(paths.public.onlineShopReceipt(id, 'order'))}
       />
