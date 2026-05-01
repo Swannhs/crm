@@ -1,16 +1,16 @@
-import { Router } from 'express';
-import { requireIdentityContext } from '@mymanager/node-service-kit';
+import { Router } from "express";
+import { requireIdentityContext } from "@mymanager/node-service-kit";
 
-import { GoogleAuthService } from '../services/google-auth.service.js';
-<<<<<<< feature/implement-email-sending-14229016848080909968
-import { prisma } from '../lib/prisma.js';
-=======
-import { OutlookAuthService } from '../services/outlook-auth.service.js';
->>>>>>> main
+import { GoogleAuthService } from "../services/google-auth.service.js";
+
+import { prisma } from "../lib/prisma.js";
+
+import { OutlookAuthService } from "../services/outlook-auth.service.js";
 
 const router = Router();
 // @ts-ignore - temporary fix for missing type declarations
-const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
+const identityMiddleware = (req: any, res: any, next: any) =>
+  requireIdentityContext(req, res, next);
 const googleAuthService = new GoogleAuthService();
 const outlookAuthService = new OutlookAuthService();
 
@@ -18,14 +18,14 @@ const outlookAuthService = new OutlookAuthService();
 router.use(identityMiddleware);
 
 // GET /email/accounts - List connected email accounts
-router.get('/accounts', async (req: any, res, next) => {
+router.get("/accounts", async (req: any, res, next) => {
   try {
     const orgId = req.identity!.orgId;
     // TODO: Implement account listing from DB
     res.json({
       success: true,
       data: [],
-      message: 'Email accounts list'
+      message: "Email accounts list",
     });
   } catch (error) {
     next(error);
@@ -33,21 +33,21 @@ router.get('/accounts', async (req: any, res, next) => {
 });
 
 // POST /email/accounts/connect - Initiate OAuth connection
-router.post('/accounts/connect', async (req: any, res, next) => {
+router.post("/accounts/connect", async (req: any, res, next) => {
   try {
     const { provider } = req.body; // 'gmail' or 'outlook'
     const orgId = req.identity!.orgId;
     const userId = req.identity!.userId;
-    
-    if (!provider || !['gmail', 'outlook'].includes(provider)) {
+
+    if (!provider || !["gmail", "outlook"].includes(provider)) {
       return res.status(400).json({
         success: false,
-        error: 'Provider must be gmail or outlook'
+        error: "Provider must be gmail or outlook",
       });
     }
 
-    let authUrl = '';
-    if (provider === 'gmail') {
+    let authUrl = "";
+    if (provider === "gmail") {
       authUrl = googleAuthService.generateAuthUrl(orgId, userId);
     } else {
       authUrl = outlookAuthService.generateAuthUrl(orgId, userId);
@@ -57,9 +57,9 @@ router.post('/accounts/connect', async (req: any, res, next) => {
       success: true,
       data: {
         authUrl,
-        provider
+        provider,
       },
-      message: 'OAuth connection initiation successful'
+      message: "OAuth connection initiation successful",
     });
   } catch (error) {
     next(error);
@@ -67,7 +67,7 @@ router.post('/accounts/connect', async (req: any, res, next) => {
 });
 
 // GET /email/callback - Handle OAuth callback
-router.get('/callback', async (req, res, next) => {
+router.get("/callback", async (req, res, next) => {
   try {
     const { code, state, error } = req.query;
 
@@ -76,10 +76,14 @@ router.get('/callback', async (req, res, next) => {
     }
 
     if (!code || !state) {
-      return res.status(400).json({ success: false, error: 'Missing code or state' });
+      return res
+        .status(400)
+        .json({ success: false, error: "Missing code or state" });
     }
 
-    const { orgId, userId } = JSON.parse(Buffer.from(state as string, 'base64').toString());
+    const { orgId, userId } = JSON.parse(
+      Buffer.from(state as string, "base64").toString(),
+    );
 
     // Exchange code for tokens
     const tokens = await googleAuthService.getToken(code as string);
@@ -92,10 +96,10 @@ router.get('/callback', async (req, res, next) => {
       success: true,
       data: {
         email: userInfo.email,
-        provider: 'gmail',
-        isConnected: true
+        provider: "gmail",
+        isConnected: true,
       },
-      message: 'Email account connected successfully'
+      message: "Email account connected successfully",
     });
   } catch (error) {
     next(error);
@@ -103,7 +107,7 @@ router.get('/callback', async (req, res, next) => {
 });
 
 // GET /email/messages - List emails with filters
-router.get('/messages', async (req: any, res, next) => {
+router.get("/messages", async (req: any, res, next) => {
   try {
     const { accountId, search, limit, offset } = req.query;
     const orgId = req.identity!.orgId;
@@ -115,9 +119,9 @@ router.get('/messages', async (req: any, res, next) => {
       meta: {
         total: 0,
         limit: limit || 50,
-        offset: offset || 0
+        offset: offset || 0,
       },
-      message: 'Email messages endpoint - implementation in progress'
+      message: "Email messages endpoint - implementation in progress",
     });
   } catch (error) {
     next(error);
@@ -125,7 +129,7 @@ router.get('/messages', async (req: any, res, next) => {
 });
 
 // POST /email/send - Send an email
-router.post('/send', async (req: any, res, next) => {
+router.post("/send", async (req: any, res, next) => {
   try {
     const { to, subject, body, cc, bcc, dealId, isHtml, accountId } = req.body;
     const orgId = req.identity!.orgId;
@@ -134,32 +138,32 @@ router.post('/send', async (req: any, res, next) => {
     if (!to || !subject) {
       return res.status(400).json({
         success: false,
-        error: 'Recipient and subject are required'
+        error: "Recipient and subject are required",
       });
     }
 
     let account;
     if (accountId) {
       account = await prisma.emailAccount.findFirst({
-        where: { id: accountId, orgId, userId }
+        where: { id: accountId, orgId, userId },
       });
     } else {
       account = await prisma.emailAccount.findFirst({
-        where: { orgId, userId, provider: 'gmail', isConnected: true }
+        where: { orgId, userId, provider: "gmail", isConnected: true },
       });
     }
 
     if (!account) {
       return res.status(404).json({
         success: false,
-        error: 'No connected email account found'
+        error: "No connected email account found",
       });
     }
 
-    if (account.provider !== 'gmail') {
-       return res.status(400).json({
+    if (account.provider !== "gmail") {
+      return res.status(400).json({
         success: false,
-        error: `Sending via ${account.provider} is not currently supported`
+        error: `Sending via ${account.provider} is not currently supported`,
       });
     }
 
@@ -167,21 +171,24 @@ router.post('/send', async (req: any, res, next) => {
     if (!settings || !settings.refresh_token) {
       return res.status(400).json({
         success: false,
-        error: 'Email account is missing required authentication tokens'
+        error: "Email account is missing required authentication tokens",
       });
     }
 
-    const sendResult = await googleAuthService.sendEmail(settings.refresh_token, {
-      to,
-      subject,
-      body,
-      cc,
-      bcc,
-      isHtml
-    });
+    const sendResult = await googleAuthService.sendEmail(
+      settings.refresh_token,
+      {
+        to,
+        subject,
+        body,
+        cc,
+        bcc,
+        isHtml,
+      },
+    );
 
     if (!sendResult.id) {
-       throw new Error('Failed to send email via Google API');
+      throw new Error("Failed to send email via Google API");
     }
 
     // Persist to database
@@ -197,20 +204,20 @@ router.post('/send', async (req: any, res, next) => {
         bccEmails: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : [],
         textBody: isHtml ? undefined : body,
         htmlBody: isHtml ? body : undefined,
-        direction: 'outbound',
+        direction: "outbound",
         sentAt: new Date(),
         receivedAt: new Date(), // It's a sent email, so just use now
-        relatedDealId: dealId
-      }
+        relatedDealId: dealId,
+      },
     });
 
     res.json({
       success: true,
       data: {
         messageId: emailRecord.messageId,
-        id: emailRecord.id
+        id: emailRecord.id,
       },
-      message: 'Email sent successfully'
+      message: "Email sent successfully",
     });
   } catch (error) {
     next(error);
@@ -218,7 +225,7 @@ router.post('/send', async (req: any, res, next) => {
 });
 
 // GET /email/templates - List email templates
-router.get('/templates', async (req: any, res, next) => {
+router.get("/templates", async (req: any, res, next) => {
   try {
     const { category } = req.query;
     const orgId = req.identity!.orgId;
@@ -227,7 +234,7 @@ router.get('/templates', async (req: any, res, next) => {
     res.json({
       success: true,
       data: [],
-      message: 'Email templates endpoint - implementation in progress'
+      message: "Email templates endpoint - implementation in progress",
     });
   } catch (error) {
     next(error);
@@ -235,19 +242,53 @@ router.get('/templates', async (req: any, res, next) => {
 });
 
 // POST /email/templates - Create email template
-router.post('/templates', async (req: any, res, next) => {
+router.post("/templates", async (req: any, res, next) => {
   try {
     const { name, subject, body, category } = req.body;
     const orgId = req.identity!.orgId;
     const userId = req.identity!.userId;
 
-    // TODO: Implement template creation
+    if (!name || !subject || !body) {
+      return res.status(400).json({
+        success: false,
+        error: "Name, subject, and body are required",
+      });
+    }
+
+    // Extract variables from subject and body (e.g. {{firstName}})
+    const variableRegex = /{{([^}]+)}}/g;
+    const variables = new Set<string>();
+
+    let match;
+    while ((match = variableRegex.exec(subject)) !== null) {
+      variables.add(match[1]);
+    }
+    while ((match = variableRegex.exec(body)) !== null) {
+      variables.add(match[1]);
+    }
+
+    const template = await prisma.emailTemplate.create({
+      data: {
+        orgId,
+        createdBy: userId,
+        name,
+        subject,
+        body,
+        category,
+        variables: Array.from(variables),
+      },
+    });
+
     res.status(201).json({
       success: true,
       data: {
-        id: 'TODO: Generate template ID'
+        id: template.id,
+        name: template.name,
+        subject: template.subject,
+        category: template.category,
+        variables: template.variables,
       },
-      message: 'Template creation endpoint - implementation in progress'
+      message: "Email template created successfully",
     });
   } catch (error) {
     next(error);
@@ -255,7 +296,7 @@ router.post('/templates', async (req: any, res, next) => {
 });
 
 // GET /email/sequences - List email sequences
-router.get('/sequences', async (req: any, res, next) => {
+router.get("/sequences", async (req: any, res, next) => {
   try {
     const orgId = req.identity!.orgId;
 
@@ -263,7 +304,7 @@ router.get('/sequences', async (req: any, res, next) => {
     res.json({
       success: true,
       data: [],
-      message: 'Email sequences endpoint - implementation in progress'
+      message: "Email sequences endpoint - implementation in progress",
     });
   } catch (error) {
     next(error);
@@ -271,7 +312,7 @@ router.get('/sequences', async (req: any, res, next) => {
 });
 
 // POST /email/sequences - Create email sequence
-router.post('/sequences', async (req: any, res, next) => {
+router.post("/sequences", async (req: any, res, next) => {
   try {
     const { name, description, steps } = req.body;
     const orgId = req.identity!.orgId;
@@ -281,9 +322,9 @@ router.post('/sequences', async (req: any, res, next) => {
     res.status(201).json({
       success: true,
       data: {
-        id: 'TODO: Generate sequence ID'
+        id: "TODO: Generate sequence ID",
       },
-      message: 'Sequence creation endpoint - implementation in progress'
+      message: "Sequence creation endpoint - implementation in progress",
     });
   } catch (error) {
     next(error);
