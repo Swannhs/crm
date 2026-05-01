@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 import { GoogleAuthService } from '../services/google-auth.service.js';
+import { db } from '../db.js';
 
 const router = Router();
 const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
@@ -151,11 +152,20 @@ router.get('/templates', async (req, res, next) => {
     const { category } = req.query;
     const orgId = req.identity!.orgId;
 
-    // TODO: Implement template listing
+    const where: { orgId: string; category?: string } = { orgId };
+    if (category) {
+      where.category = String(category);
+    }
+
+    const templates = await db.emailTemplate.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
+
     res.json({
       success: true,
-      data: [],
-      message: 'Email templates endpoint - implementation in progress'
+      data: templates,
+      message: 'Email templates retrieved successfully'
     });
   } catch (error) {
     next(error);
