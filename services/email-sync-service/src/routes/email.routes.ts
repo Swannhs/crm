@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 import { GoogleAuthService } from '../services/google-auth.service.js';
+import { prisma } from '../lib/prisma.js';
 
 const router = Router();
 const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
@@ -97,21 +98,51 @@ router.get('/callback', async (req, res, next) => {
 });
 
 // GET /email/messages - List emails with filters
-router.get('/messages', async (req, res, next) => {
+router.get('/messages', async (req: any, res: any, next: any) => {
   try {
     const { accountId, search, limit, offset } = req.query;
     const orgId = req.identity!.orgId;
 
-    // TODO: Implement email listing
+    const parsedLimit = parseInt(limit as string, 10) || 50;
+    const parsedOffset = parseInt(offset as string, 10) || 0;
+
+    const where: any = {
+      orgId
+    };
+
+    if (accountId) {
+      where.accountId = accountId;
+    }
+
+    if (search) {
+      where.OR = [
+        { subject: { contains: search as string, mode: 'insensitive' } },
+        { fromEmail: { contains: search as string, mode: 'insensitive' } },
+        { snippet: { contains: search as string, mode: 'insensitive' } }
+      ];
+    }
+
+    const [emails, total] = await Promise.all([
+      prisma.email.findMany({
+        where,
+        take: parsedLimit,
+        skip: parsedOffset,
+        orderBy: {
+          receivedAt: 'desc'
+        }
+      }),
+      prisma.email.count({ where })
+    ]);
+
     res.json({
       success: true,
-      data: [],
+      data: emails,
       meta: {
-        total: 0,
-        limit: limit || 50,
-        offset: offset || 0
+        total,
+        limit: parsedLimit,
+        offset: parsedOffset
       },
-      message: 'Email messages endpoint - implementation in progress'
+      message: 'Email messages retrieved successfully'
     });
   } catch (error) {
     next(error);
