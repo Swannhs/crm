@@ -24,17 +24,72 @@ export class MarketingService {
   private readonly salesOrderModel = 'sale.order';
 
   // Fields
-  private readonly campaignFields = ['id', 'name', 'title', 'active', 'color', 'create_date', 'write_date'];
-  private readonly mailingFields = [
-    'id', 'subject', 'mailing_type', 'body_html', 'state', 'sent_date', 'schedule_date', 
-    'campaign_id', 'contact_list_ids', 'reply_to_mode', 'reply_to'
+  private readonly campaignFields = [
+    'id',
+    'name',
+    'title',
+    'active',
+    'color',
+    'create_date',
+    'write_date',
   ];
-  private readonly mailingListFields = ['id', 'name', 'active', 'contact_nbr', 'contact_count']; // Try multiple variations
-  private readonly templateFields = ['id', 'name', 'subject', 'body_html', 'model_id'];
-  private readonly mailingContactFields = ['id', 'name', 'email', 'phone', 'opt_out', 'create_date'];
-  private readonly mailingTraceFields = ['id', 'state', 'opened', 'clicked', 'trace_status', 'create_date'];
-  private readonly sourceFields = ['id', 'name', 'active', 'create_date', 'write_date'];
-  private readonly mediumFields = ['id', 'name', 'active', 'create_date', 'write_date'];
+  private readonly mailingFields = [
+    'id',
+    'subject',
+    'mailing_type',
+    'body_html',
+    'state',
+    'sent_date',
+    'schedule_date',
+    'campaign_id',
+    'contact_list_ids',
+    'reply_to_mode',
+    'reply_to',
+  ];
+  private readonly mailingListFields = [
+    'id',
+    'name',
+    'active',
+    'contact_nbr',
+    'contact_count',
+  ]; // Try multiple variations
+  private readonly templateFields = [
+    'id',
+    'name',
+    'subject',
+    'body_html',
+    'model_id',
+  ];
+  private readonly mailingContactFields = [
+    'id',
+    'name',
+    'email',
+    'phone',
+    'opt_out',
+    'create_date',
+  ];
+  private readonly mailingTraceFields = [
+    'id',
+    'state',
+    'opened',
+    'clicked',
+    'trace_status',
+    'create_date',
+  ];
+  private readonly sourceFields = [
+    'id',
+    'name',
+    'active',
+    'create_date',
+    'write_date',
+  ];
+  private readonly mediumFields = [
+    'id',
+    'name',
+    'active',
+    'create_date',
+    'write_date',
+  ];
 
   constructor(
     private readonly odooClient: OdooClientService,
@@ -42,7 +97,10 @@ export class MarketingService {
   ) {}
 
   private async getCampaignFieldFlags() {
-    if (this.campaignStatusField !== undefined && this.campaignColorFieldAvailable !== undefined) {
+    if (
+      this.campaignStatusField !== undefined &&
+      this.campaignColorFieldAvailable !== undefined
+    ) {
       return {
         statusField: this.campaignStatusField,
         hasColor: this.campaignColorFieldAvailable,
@@ -50,8 +108,14 @@ export class MarketingService {
     }
 
     try {
-      const fieldsInfo = await this.odooClient.execute(this.campaignModel, 'fields_get', [[], ['x_marketing_status', 'color']]);
-      const statusField = fieldsInfo?.x_marketing_status ? 'x_marketing_status' : null;
+      const fieldsInfo = await this.odooClient.execute(
+        this.campaignModel,
+        'fields_get',
+        [[], ['x_marketing_status', 'color']],
+      );
+      const statusField = fieldsInfo?.x_marketing_status
+        ? 'x_marketing_status'
+        : null;
       const hasColor = Boolean(fieldsInfo?.color);
       this.campaignStatusField = statusField;
       this.campaignColorFieldAvailable = hasColor;
@@ -72,11 +136,16 @@ export class MarketingService {
     const domain: any[] = search ? [['name', 'ilike', search]] : [];
 
     const [data, total] = await Promise.all([
-      this.odooClient.searchRead(this.campaignModel, domain, this.campaignFields, {
-        offset: (page - 1) * pageSize,
-        limit: pageSize,
-        order: 'write_date desc',
-      }),
+      this.odooClient.searchRead(
+        this.campaignModel,
+        domain,
+        this.campaignFields,
+        {
+          offset: (page - 1) * pageSize,
+          limit: pageSize,
+          order: 'write_date desc',
+        },
+      ),
       this.odooClient.execute(this.campaignModel, 'search_count', [domain]),
     ]);
 
@@ -84,7 +153,11 @@ export class MarketingService {
   }
 
   async getCampaign(id: number) {
-    const [campaign] = await this.odooClient.searchRead(this.campaignModel, [['id', '=', id]], this.campaignFields);
+    const [campaign] = await this.odooClient.searchRead(
+      this.campaignModel,
+      [['id', '=', id]],
+      this.campaignFields,
+    );
     return campaign;
   }
 
@@ -106,8 +179,12 @@ export class MarketingService {
     if (data?.name !== undefined) payload.name = String(data.name).trim();
     if (data?.title !== undefined) payload.title = String(data.title).trim();
     if (data?.active !== undefined) payload.active = data.active;
-    if (statusField && data?.status !== undefined) payload[statusField] = String(data.status);
-    return this.odooClient.execute(this.campaignModel, 'write', [[id], payload]);
+    if (statusField && data?.status !== undefined)
+      payload[statusField] = String(data.status);
+    return this.odooClient.execute(this.campaignModel, 'write', [
+      [id],
+      payload,
+    ]);
   }
 
   removeCampaign(id: number) {
@@ -134,14 +211,21 @@ export class MarketingService {
       if (hasColor) payload.color = 8;
     }
 
-    return this.odooClient.execute(this.campaignModel, 'write', [[id], payload]);
+    return this.odooClient.execute(this.campaignModel, 'write', [
+      [id],
+      payload,
+    ]);
   }
 
   // --- Mass Mailings (The actual "Campaign" logic for sending) ---
 
   async listMailings(campaignId?: number) {
     const domain: any[] = campaignId ? [['campaign_id', '=', campaignId]] : [];
-    return this.odooClient.searchRead(this.mailingModel, domain, this.mailingFields);
+    return this.odooClient.searchRead(
+      this.mailingModel,
+      domain,
+      this.mailingFields,
+    );
   }
 
   async createMailing(data: any) {
@@ -150,7 +234,9 @@ export class MarketingService {
       body_html: data.content || data.body_html,
       mailing_type: data.type || 'mail',
       campaign_id: data.campaignId,
-      contact_list_ids: data.segmentId ? [[6, 0, [Number(data.segmentId)]]] : [],
+      contact_list_ids: data.segmentId
+        ? [[6, 0, [Number(data.segmentId)]]]
+        : [],
       reply_to_mode: 'update',
     };
     return this.odooClient.execute(this.mailingModel, 'create', [payload]);
@@ -158,7 +244,9 @@ export class MarketingService {
 
   async sendMailing(id: number) {
     // In Odoo mass_mailing, action_put_in_queue puts it in the outgoing queue
-    return this.odooClient.execute(this.mailingModel, 'action_put_in_queue', [[id]]);
+    return this.odooClient.execute(this.mailingModel, 'action_put_in_queue', [
+      [id],
+    ]);
   }
 
   async sendTestMail(campaignId: number, to: string) {
@@ -166,32 +254,46 @@ export class MarketingService {
     const subject = String(mailing?.subject || '').trim();
     const bodyHtml = String(mailing?.body_html || '').trim();
     if (!subject || !bodyHtml) {
-      throw new Error('Campaign content is incomplete. Subject and content are required.');
+      throw new Error(
+        'Campaign content is incomplete. Subject and content are required.',
+      );
     }
 
     const senderConfigured = await this.isSenderConfigured();
     if (!senderConfigured.configured) {
-      throw new Error(senderConfigured.message || 'Marketing sender is not configured.');
+      throw new Error(
+        senderConfigured.message || 'Marketing sender is not configured.',
+      );
     }
 
-    const createdId = await this.odooClient.execute(this.mailModel, 'create', [{
-      subject,
-      body_html: bodyHtml,
-      email_to: String(to).trim(),
-      reply_to: mailing?.reply_to || undefined,
-      auto_delete: true,
-    }]);
+    const createdId = await this.odooClient.execute(this.mailModel, 'create', [
+      {
+        subject,
+        body_html: bodyHtml,
+        email_to: String(to).trim(),
+        reply_to: mailing?.reply_to || undefined,
+        auto_delete: true,
+      },
+    ]);
 
-    await this.odooClient.execute(this.mailModel, 'send', [[Number(createdId)]]);
+    await this.odooClient.execute(this.mailModel, 'send', [
+      [Number(createdId)],
+    ]);
     return { success: true };
   }
 
   async scheduleMailing(id: number, date: string) {
-    return this.odooClient.execute(this.mailingModel, 'write', [[id], { schedule_date: date }]);
+    return this.odooClient.execute(this.mailingModel, 'write', [
+      [id],
+      { schedule_date: date },
+    ]);
   }
 
   async cancelScheduledMailing(id: number) {
-    return this.odooClient.execute(this.mailingModel, 'write', [[id], { schedule_date: false }]);
+    return this.odooClient.execute(this.mailingModel, 'write', [
+      [id],
+      { schedule_date: false },
+    ]);
   }
 
   async getOrCreateCampaignMailing(campaignId: number) {
@@ -199,24 +301,30 @@ export class MarketingService {
       this.mailingModel,
       [['campaign_id', '=', campaignId]],
       this.mailingFields,
-      { limit: 1, order: 'id desc' }
+      { limit: 1, order: 'id desc' },
     );
 
     if (existing.length > 0) return existing[0];
 
-    const createdId = await this.odooClient.execute(this.mailingModel, 'create', [{
-      subject: 'Untitled campaign',
-      body_html: '',
-      mailing_type: 'mail',
-      campaign_id: campaignId,
-      reply_to_mode: 'update',
-    }]);
+    const createdId = await this.odooClient.execute(
+      this.mailingModel,
+      'create',
+      [
+        {
+          subject: 'Untitled campaign',
+          body_html: '',
+          mailing_type: 'mail',
+          campaign_id: campaignId,
+          reply_to_mode: 'update',
+        },
+      ],
+    );
 
     const created = await this.odooClient.searchRead(
       this.mailingModel,
       [['id', '=', Number(createdId)]],
       this.mailingFields,
-      { limit: 1 }
+      { limit: 1 },
     );
 
     return created[0];
@@ -227,18 +335,28 @@ export class MarketingService {
       this.mailingModel,
       [['campaign_id', '=', campaignId]],
       this.mailingFields,
-      { limit: 1, order: 'id desc' }
+      { limit: 1, order: 'id desc' },
     );
     return rows[0] ?? null;
   }
 
   async isSenderConfigured() {
     try {
-      const count = await this.odooClient.execute(this.mailServerModel, 'search_count', [[]]);
+      const count = await this.odooClient.execute(
+        this.mailServerModel,
+        'search_count',
+        [[]],
+      );
       if (Number(count || 0) > 0) return { configured: true };
-      return { configured: false, message: 'Marketing sender is not configured.' };
+      return {
+        configured: false,
+        message: 'Marketing sender is not configured.',
+      };
     } catch (error) {
-      return { configured: false, message: 'Marketing sender is not configured.' };
+      return {
+        configured: false,
+        message: 'Marketing sender is not configured.',
+      };
     }
   }
 
@@ -255,7 +373,9 @@ export class MarketingService {
     }
 
     const listIds = Array.isArray(mailing?.contact_list_ids)
-      ? mailing.contact_list_ids.map((x: any) => Number(Array.isArray(x) ? x[0] : x)).filter((n: number) => Number.isFinite(n) && n > 0)
+      ? mailing.contact_list_ids
+          .map((x: any) => Number(Array.isArray(x) ? x[0] : x))
+          .filter((n: number) => Number.isFinite(n) && n > 0)
       : [];
 
     if (listIds.length === 0) {
@@ -273,21 +393,30 @@ export class MarketingService {
         this.mailingContactModel,
         [['list_ids', 'in', listIds]],
         this.mailingContactFields,
-        { limit: 5000, order: 'id desc' }
+        { limit: 5000, order: 'id desc' },
       );
 
       const totalRecipients = Array.isArray(contacts) ? contacts.length : 0;
 
       let compliantRecipients = Array.isArray(contacts)
-        ? contacts.filter((c: any) => !Boolean(c?.opt_out) && Boolean(String(c?.email || '').trim())).length
+        ? contacts.filter(
+            (c: any) => !c?.opt_out && Boolean(String(c?.email || '').trim()),
+          ).length
         : 0;
-      let blockedRecipients = Math.max(0, totalRecipients - compliantRecipients);
+      let blockedRecipients = Math.max(
+        0,
+        totalRecipients - compliantRecipients,
+      );
 
       if (orgId) {
         for (const c of Array.isArray(contacts) ? contacts : []) {
-          const email = String(c?.email || '').trim().toLowerCase();
+          const email = String(c?.email || '')
+            .trim()
+            .toLowerCase();
           if (!email) continue;
-          const suppression = await (this.prisma as any).marketingSuppressionEntry.findFirst({
+          const suppression = await (
+            this.prisma as any
+          ).marketingSuppressionEntry.findFirst({
             where: { orgId, channel: 'email', value: email },
           });
           if (suppression) {
@@ -302,7 +431,10 @@ export class MarketingService {
         compliantRecipients,
         totalRecipients,
         blockedRecipients,
-        message: blockedRecipients > 0 ? 'Some recipients are blocked by consent/unsubscribe rules.' : 'All recipients are compliant.',
+        message:
+          blockedRecipients > 0
+            ? 'Some recipients are blocked by consent/unsubscribe rules.'
+            : 'All recipients are compliant.',
       };
     } catch (error) {
       return {
@@ -321,23 +453,28 @@ export class MarketingService {
         this.mailingContactModel,
         [['list_ids', 'in', [segmentId]]],
         this.mailingContactFields,
-        { limit: 25, order: 'id desc' }
+        { limit: 25, order: 'id desc' },
       );
 
-      const sampleContacts = (Array.isArray(contacts) ? contacts : []).slice(0, 10).map((c: any) => ({
-        id: String(c?.id || ''),
-        name: c?.name ? String(c.name) : undefined,
-        email: c?.email ? String(c.email) : undefined,
-        phone: c?.phone ? String(c.phone) : undefined,
-        consentStatus: c?.opt_out ? 'opted_out' : 'subscribed',
-      }));
+      const sampleContacts = (Array.isArray(contacts) ? contacts : [])
+        .slice(0, 10)
+        .map((c: any) => ({
+          id: String(c?.id || ''),
+          name: c?.name ? String(c.name) : undefined,
+          email: c?.email ? String(c.email) : undefined,
+          phone: c?.phone ? String(c.phone) : undefined,
+          consentStatus: c?.opt_out ? 'opted_out' : 'subscribed',
+        }));
 
       return {
         count: Array.isArray(contacts) ? contacts.length : 0,
         sampleContacts,
       };
     } catch (error) {
-      return { message: 'Segment preview is not available yet.', available: false };
+      return {
+        message: 'Segment preview is not available yet.',
+        available: false,
+      };
     }
   }
 
@@ -350,19 +487,25 @@ export class MarketingService {
         this.mailingTraceModel,
         [['mailing_id', '=', Number(mailing.id)]],
         this.mailingTraceFields,
-        { limit: 10000, order: 'id desc' }
+        { limit: 10000, order: 'id desc' },
       );
 
       const rows = Array.isArray(traces) ? traces : [];
       const recipients = rows.length;
-      const delivered = rows.filter((r: any) => String(r?.state || '').toLowerCase() === 'sent').length;
+      const delivered = rows.filter(
+        (r: any) => String(r?.state || '').toLowerCase() === 'sent',
+      ).length;
       const opened = rows.filter((r: any) => Boolean(r?.opened)).length;
       const clicked = rows.filter((r: any) => Boolean(r?.clicked)).length;
       const bounced = rows.filter((r: any) => {
         const status = String(r?.trace_status || r?.state || '').toLowerCase();
         return status.includes('bounce') || status.includes('exception');
       }).length;
-      const unsubscribed = rows.filter((r: any) => String(r?.trace_status || '').toLowerCase().includes('unsubscribe')).length;
+      const unsubscribed = rows.filter((r: any) =>
+        String(r?.trace_status || '')
+          .toLowerCase()
+          .includes('unsubscribe'),
+      ).length;
 
       return {
         recipients,
@@ -377,7 +520,9 @@ export class MarketingService {
     }
   }
 
-  private async mapFiltersToDomain(filters: Array<{ field: string; operator: string; value: any }>) {
+  private async mapFiltersToDomain(
+    filters: Array<{ field: string; operator: string; value: any }>,
+  ) {
     const allowedFields = new Set([
       'lifecycleStage',
       'tag',
@@ -403,7 +548,11 @@ export class MarketingService {
     ]);
 
     const domain: any[] = [];
-    const fieldsInfo = await this.odooClient.execute(this.mailingContactModel, 'fields_get', [[]]);
+    const fieldsInfo = await this.odooClient.execute(
+      this.mailingContactModel,
+      'fields_get',
+      [[]],
+    );
     const hasField = (field: string) => Boolean(fieldsInfo?.[field]);
     for (const raw of filters) {
       const field = String(raw?.field || '');
@@ -416,51 +565,90 @@ export class MarketingService {
       }
 
       if (field === 'lifecycleStage') {
-        if (!hasField('lifecycle_stage')) throw new Error('Unsupported filter field: lifecycleStage');
-        if (operator === 'equals') domain.push(['lifecycle_stage', '=', String(raw?.value || '')]);
-        else if (operator === 'not_equals') domain.push(['lifecycle_stage', '!=', String(raw?.value || '')]);
-        else throw new Error(`Unsupported operator for lifecycleStage: ${operator}`);
+        if (!hasField('lifecycle_stage'))
+          throw new Error('Unsupported filter field: lifecycleStage');
+        if (operator === 'equals')
+          domain.push(['lifecycle_stage', '=', String(raw?.value || '')]);
+        else if (operator === 'not_equals')
+          domain.push(['lifecycle_stage', '!=', String(raw?.value || '')]);
+        else
+          throw new Error(
+            `Unsupported operator for lifecycleStage: ${operator}`,
+          );
       }
       if (field === 'tag') {
-        if (!hasField('tag_ids')) throw new Error('Unsupported filter field: tag');
-        const values = Array.isArray(raw?.value) ? raw.value.map((x: any) => Number(x)).filter((n: number) => Number.isFinite(n)) : [Number(raw?.value)];
+        if (!hasField('tag_ids'))
+          throw new Error('Unsupported filter field: tag');
+        const values = Array.isArray(raw?.value)
+          ? raw.value
+              .map((x: any) => Number(x))
+              .filter((n: number) => Number.isFinite(n))
+          : [Number(raw?.value)];
         if (!values.length) throw new Error('Invalid tag filter value.');
-        if (operator === 'in' || operator === 'equals') domain.push(['tag_ids', 'in', values]);
-        else if (operator === 'not_in' || operator === 'not_equals') domain.push(['tag_ids', 'not in', values]);
+        if (operator === 'in' || operator === 'equals')
+          domain.push(['tag_ids', 'in', values]);
+        else if (operator === 'not_in' || operator === 'not_equals')
+          domain.push(['tag_ids', 'not in', values]);
         else throw new Error(`Unsupported operator for tag: ${operator}`);
       }
       if (field === 'source') {
-        if (!hasField('source_id')) throw new Error('Unsupported filter field: source');
-        if (operator === 'equals') domain.push(['source_id', '=', Number(raw?.value)]);
-        else if (operator === 'not_equals') domain.push(['source_id', '!=', Number(raw?.value)]);
+        if (!hasField('source_id'))
+          throw new Error('Unsupported filter field: source');
+        if (operator === 'equals')
+          domain.push(['source_id', '=', Number(raw?.value)]);
+        else if (operator === 'not_equals')
+          domain.push(['source_id', '!=', Number(raw?.value)]);
         else throw new Error(`Unsupported operator for source: ${operator}`);
       }
       if (field === 'email') {
-        if (operator === 'contains') domain.push(['email', 'ilike', `%${String(raw?.value || '')}%`]);
-        else if (operator === 'starts_with') domain.push(['email', 'ilike', `${String(raw?.value || '')}%`]);
-        else if (operator === 'ends_with') domain.push(['email', 'ilike', `%${String(raw?.value || '')}`]);
-        else if (operator === 'equals') domain.push(['email', '=', String(raw?.value || '')]);
-        else if (operator === 'not_equals') domain.push(['email', '!=', String(raw?.value || '')]);
+        if (operator === 'contains')
+          domain.push(['email', 'ilike', `%${String(raw?.value || '')}%`]);
+        else if (operator === 'starts_with')
+          domain.push(['email', 'ilike', `${String(raw?.value || '')}%`]);
+        else if (operator === 'ends_with')
+          domain.push(['email', 'ilike', `%${String(raw?.value || '')}`]);
+        else if (operator === 'equals')
+          domain.push(['email', '=', String(raw?.value || '')]);
+        else if (operator === 'not_equals')
+          domain.push(['email', '!=', String(raw?.value || '')]);
         else throw new Error(`Unsupported operator for email: ${operator}`);
       }
       if (field === 'createdAt') {
-        if (operator === 'greater_than') domain.push(['create_date', '>', String(raw?.value || '')]);
-        else if (operator === 'less_than') domain.push(['create_date', '<', String(raw?.value || '')]);
-        else if (operator === 'between' && Array.isArray(raw?.value) && raw.value.length === 2) {
+        if (operator === 'greater_than')
+          domain.push(['create_date', '>', String(raw?.value || '')]);
+        else if (operator === 'less_than')
+          domain.push(['create_date', '<', String(raw?.value || '')]);
+        else if (
+          operator === 'between' &&
+          Array.isArray(raw?.value) &&
+          raw.value.length === 2
+        ) {
           domain.push(['create_date', '>=', String(raw.value[0])]);
           domain.push(['create_date', '<=', String(raw.value[1])]);
-        } else if (operator === 'equals') domain.push(['create_date', '=', String(raw?.value || '')]);
+        } else if (operator === 'equals')
+          domain.push(['create_date', '=', String(raw?.value || '')]);
         else throw new Error(`Unsupported operator for createdAt: ${operator}`);
       }
       if (field === 'lastActivityAt') {
-        if (!hasField('write_date')) throw new Error('Unsupported filter field: lastActivityAt');
-        if (operator === 'greater_than') domain.push(['write_date', '>', String(raw?.value || '')]);
-        else if (operator === 'less_than') domain.push(['write_date', '<', String(raw?.value || '')]);
-        else if (operator === 'between' && Array.isArray(raw?.value) && raw.value.length === 2) {
+        if (!hasField('write_date'))
+          throw new Error('Unsupported filter field: lastActivityAt');
+        if (operator === 'greater_than')
+          domain.push(['write_date', '>', String(raw?.value || '')]);
+        else if (operator === 'less_than')
+          domain.push(['write_date', '<', String(raw?.value || '')]);
+        else if (
+          operator === 'between' &&
+          Array.isArray(raw?.value) &&
+          raw.value.length === 2
+        ) {
           domain.push(['write_date', '>=', String(raw.value[0])]);
           domain.push(['write_date', '<=', String(raw.value[1])]);
-        } else if (operator === 'equals') domain.push(['write_date', '=', String(raw?.value || '')]);
-        else throw new Error(`Unsupported operator for lastActivityAt: ${operator}`);
+        } else if (operator === 'equals')
+          domain.push(['write_date', '=', String(raw?.value || '')]);
+        else
+          throw new Error(
+            `Unsupported operator for lastActivityAt: ${operator}`,
+          );
       }
       if (field === 'marketingConsent') {
         // Odoo mailing.contact keeps suppression via opt_out.
@@ -471,26 +659,48 @@ export class MarketingService {
     return domain;
   }
 
-  private async filterContactsByPartnerActivity(baseRows: any[], filters: Array<{ field: string; operator: string; value: any }>) {
+  private async filterContactsByPartnerActivity(
+    baseRows: any[],
+    filters: Array<{ field: string; operator: string; value: any }>,
+  ) {
     const wantsOrders = filters.find((f) => f.field === 'hasOrders');
     const wantsBookings = filters.find((f) => f.field === 'hasBookings');
     if (!wantsOrders && !wantsBookings) return baseRows;
 
-    const fieldsInfo = await this.odooClient.execute(this.mailingContactModel, 'fields_get', [[]]);
+    const fieldsInfo = await this.odooClient.execute(
+      this.mailingContactModel,
+      'fields_get',
+      [[]],
+    );
     if (!fieldsInfo?.partner_id) {
       throw new Error('Unsupported filter field: hasOrders');
     }
     const contacts = await this.odooClient.searchRead(
       this.mailingContactModel,
-      [['id', 'in', baseRows.map((r: any) => Number(r.id)).filter((n: number) => Number.isFinite(n))]],
-      ['id', 'partner_id']
+      [
+        [
+          'id',
+          'in',
+          baseRows
+            .map((r: any) => Number(r.id))
+            .filter((n: number) => Number.isFinite(n)),
+        ],
+      ],
+      ['id', 'partner_id'],
     );
 
     const partnerMap = new Map<number, number>();
     for (const row of Array.isArray(contacts) ? contacts : []) {
       const contactId = Number(row?.id);
-      const partnerId = Number(Array.isArray(row?.partner_id) ? row.partner_id[0] : row?.partner_id);
-      if (Number.isFinite(contactId) && Number.isFinite(partnerId) && partnerId > 0) partnerMap.set(contactId, partnerId);
+      const partnerId = Number(
+        Array.isArray(row?.partner_id) ? row.partner_id[0] : row?.partner_id,
+      );
+      if (
+        Number.isFinite(contactId) &&
+        Number.isFinite(partnerId) &&
+        partnerId > 0
+      )
+        partnerMap.set(contactId, partnerId);
     }
     const partnerIds = Array.from(new Set(Array.from(partnerMap.values())));
 
@@ -500,12 +710,16 @@ export class MarketingService {
         this.salesOrderModel,
         [['partner_id', 'in', partnerIds]],
         ['id', 'partner_id'],
-        { limit: 10000, order: 'id desc' }
+        { limit: 10000, order: 'id desc' },
       );
       orderPartnerIds = new Set(
         (Array.isArray(orders) ? orders : [])
-          .map((o: any) => Number(Array.isArray(o?.partner_id) ? o.partner_id[0] : o?.partner_id))
-          .filter((n: number) => Number.isFinite(n))
+          .map((o: any) =>
+            Number(
+              Array.isArray(o?.partner_id) ? o.partner_id[0] : o?.partner_id,
+            ),
+          )
+          .filter((n: number) => Number.isFinite(n)),
       );
     }
 
@@ -515,12 +729,15 @@ export class MarketingService {
         'calendar.event',
         [['partner_ids', 'in', partnerIds]],
         ['id', 'partner_ids'],
-        { limit: 10000, order: 'id desc' }
+        { limit: 10000, order: 'id desc' },
       );
       const acc = new Set<number>();
       for (const evt of Array.isArray(events) ? events : []) {
         const ids = Array.isArray(evt?.partner_ids) ? evt.partner_ids : [];
-        ids.map((id: any) => Number(id)).filter((n: number) => Number.isFinite(n)).forEach((n: number) => acc.add(n));
+        ids
+          .map((id: any) => Number(id))
+          .filter((n: number) => Number.isFinite(n))
+          .forEach((n: number) => acc.add(n));
       }
       bookingPartnerIds = acc;
     }
@@ -544,14 +761,21 @@ export class MarketingService {
 
   async previewSegment(filters: any) {
     const list = Array.isArray(filters) ? filters : [];
-    const domain = await this.mapFiltersToDomain(list.filter((f: any) => f?.field !== 'hasOrders' && f?.field !== 'hasBookings'));
+    const domain = await this.mapFiltersToDomain(
+      list.filter(
+        (f: any) => f?.field !== 'hasOrders' && f?.field !== 'hasBookings',
+      ),
+    );
     const contacts = await this.odooClient.searchRead(
       this.mailingContactModel,
       domain,
       this.mailingContactFields,
-      { limit: 5000, order: 'id desc' }
+      { limit: 5000, order: 'id desc' },
     );
-    const filtered = await this.filterContactsByPartnerActivity(Array.isArray(contacts) ? contacts : [], list);
+    const filtered = await this.filterContactsByPartnerActivity(
+      Array.isArray(contacts) ? contacts : [],
+      list,
+    );
     const total = filtered.length;
 
     const sampleContacts = filtered.slice(0, 10).map((c: any) => ({
@@ -578,7 +802,8 @@ export class MarketingService {
 
   async addSuppressionEntry(orgId: string, payload: any) {
     const channel = String(payload?.channel || '').toLowerCase();
-    if (!['email', 'sms'].includes(channel)) throw new Error('Invalid suppression channel.');
+    if (!['email', 'sms'].includes(channel))
+      throw new Error('Invalid suppression channel.');
     const value = String(payload?.value || '').trim();
     if (!value) throw new Error('Suppression value is required.');
     return (this.prisma as any).marketingSuppressionEntry.create({
@@ -593,12 +818,21 @@ export class MarketingService {
   }
 
   async removeSuppressionEntry(orgId: string, id: string) {
-    const existing = await (this.prisma as any).marketingSuppressionEntry.findFirst({ where: { id, orgId } });
+    const existing = await (
+      this.prisma as any
+    ).marketingSuppressionEntry.findFirst({ where: { id, orgId } });
     if (!existing) return null;
-    return (this.prisma as any).marketingSuppressionEntry.delete({ where: { id } });
+    return (this.prisma as any).marketingSuppressionEntry.delete({
+      where: { id },
+    });
   }
 
-  async upsertContactConsent(orgId: string, contactId: string, payload: any, userId?: string) {
+  async upsertContactConsent(
+    orgId: string,
+    contactId: string,
+    payload: any,
+    userId?: string,
+  ) {
     return (this.prisma as any).marketingContactConsent.upsert({
       where: { orgId_contactId: { orgId, contactId } },
       update: {
@@ -618,15 +852,35 @@ export class MarketingService {
     });
   }
 
-  async evaluateRecipientEligibility(orgId: string, input: { channel: 'email' | 'sms'; email?: string; phone?: string; contactId?: string }) {
+  async evaluateRecipientEligibility(
+    orgId: string,
+    input: {
+      channel: 'email' | 'sms';
+      email?: string;
+      phone?: string;
+      contactId?: string;
+    },
+  ) {
     const channel = input.channel;
     const email = input.email ? String(input.email).trim().toLowerCase() : '';
     const phone = input.phone ? String(input.phone).trim() : '';
 
-    if (channel === 'email' && !email) return { eligible: false, code: 'missing_email', reason: 'Recipient email is missing.' };
-    if (channel === 'sms' && !phone) return { eligible: false, code: 'missing_phone', reason: 'Recipient phone is missing.' };
+    if (channel === 'email' && !email)
+      return {
+        eligible: false,
+        code: 'missing_email',
+        reason: 'Recipient email is missing.',
+      };
+    if (channel === 'sms' && !phone)
+      return {
+        eligible: false,
+        code: 'missing_phone',
+        reason: 'Recipient phone is missing.',
+      };
 
-    const suppressions = await (this.prisma as any).marketingSuppressionEntry.findMany({
+    const suppressions = await (
+      this.prisma as any
+    ).marketingSuppressionEntry.findMany({
       where: {
         orgId,
         channel,
@@ -636,19 +890,57 @@ export class MarketingService {
     });
     if (suppressions.length > 0) {
       const reason = String(suppressions[0]?.reason || 'suppressed');
-      if (reason === 'bounce') return { eligible: false, code: 'bounced', reason: 'Recipient suppressed due to bounce.' };
-      if (reason === 'complaint') return { eligible: false, code: 'complained', reason: 'Recipient suppressed due to complaint.' };
-      if (reason === 'unsubscribed') return { eligible: false, code: 'unsubscribed', reason: 'Recipient has unsubscribed.' };
-      return { eligible: false, code: 'suppressed', reason: 'Recipient is suppressed.' };
+      if (reason === 'bounce')
+        return {
+          eligible: false,
+          code: 'bounced',
+          reason: 'Recipient suppressed due to bounce.',
+        };
+      if (reason === 'complaint')
+        return {
+          eligible: false,
+          code: 'complained',
+          reason: 'Recipient suppressed due to complaint.',
+        };
+      if (reason === 'unsubscribed')
+        return {
+          eligible: false,
+          code: 'unsubscribed',
+          reason: 'Recipient has unsubscribed.',
+        };
+      return {
+        eligible: false,
+        code: 'suppressed',
+        reason: 'Recipient is suppressed.',
+      };
     }
 
     if (input.contactId) {
-      const consent = await (this.prisma as any).marketingContactConsent.findUnique({
-        where: { orgId_contactId: { orgId, contactId: String(input.contactId) } },
+      const consent = await (
+        this.prisma as any
+      ).marketingContactConsent.findUnique({
+        where: {
+          orgId_contactId: { orgId, contactId: String(input.contactId) },
+        },
       });
-      if (consent?.unsubscribed) return { eligible: false, code: 'unsubscribed', reason: 'Recipient has unsubscribed.' };
-      if (channel === 'email' && consent?.emailOptIn === false) return { eligible: false, code: 'missing_consent', reason: 'Email consent missing.' };
-      if (channel === 'sms' && consent?.smsOptIn === false) return { eligible: false, code: 'missing_consent', reason: 'SMS consent missing.' };
+      if (consent?.unsubscribed)
+        return {
+          eligible: false,
+          code: 'unsubscribed',
+          reason: 'Recipient has unsubscribed.',
+        };
+      if (channel === 'email' && consent?.emailOptIn === false)
+        return {
+          eligible: false,
+          code: 'missing_consent',
+          reason: 'Email consent missing.',
+        };
+      if (channel === 'sms' && consent?.smsOptIn === false)
+        return {
+          eligible: false,
+          code: 'missing_consent',
+          reason: 'SMS consent missing.',
+        };
     }
 
     return { eligible: true };
@@ -660,12 +952,22 @@ export class MarketingService {
         orgId,
         campaignId: String(payload.campaignId),
         templateId: String(payload.templateId),
-        templateVersionId: payload?.templateVersionId ? String(payload.templateVersionId) : undefined,
+        templateVersionId: payload?.templateVersionId
+          ? String(payload.templateVersionId)
+          : undefined,
         templateNameSnapshot: String(payload.templateNameSnapshot || ''),
-        subjectSnapshot: payload?.subjectSnapshot ? String(payload.subjectSnapshot) : undefined,
-        previewTextSnapshot: payload?.previewTextSnapshot ? String(payload.previewTextSnapshot) : undefined,
-        contentSnapshot: payload?.contentSnapshot ? String(payload.contentSnapshot) : undefined,
-        appliedByUserId: payload?.appliedByUserId ? String(payload.appliedByUserId) : undefined,
+        subjectSnapshot: payload?.subjectSnapshot
+          ? String(payload.subjectSnapshot)
+          : undefined,
+        previewTextSnapshot: payload?.previewTextSnapshot
+          ? String(payload.previewTextSnapshot)
+          : undefined,
+        contentSnapshot: payload?.contentSnapshot
+          ? String(payload.contentSnapshot)
+          : undefined,
+        appliedByUserId: payload?.appliedByUserId
+          ? String(payload.appliedByUserId)
+          : undefined,
       },
     });
   }
@@ -687,16 +989,24 @@ export class MarketingService {
   }
 
   async ingestDeliveryEvent(orgId: string, provider: string, event: any) {
-    const providerEventId = event?.providerEventId ? String(event.providerEventId) : undefined;
-    const providerMessageId = event?.providerMessageId ? String(event.providerMessageId) : undefined;
+    const providerEventId = event?.providerEventId
+      ? String(event.providerEventId)
+      : undefined;
+    const providerMessageId = event?.providerMessageId
+      ? String(event.providerMessageId)
+      : undefined;
     if (providerEventId) {
-      const existing = await (this.prisma as any).marketingDeliveryEvent.findFirst({
+      const existing = await (
+        this.prisma as any
+      ).marketingDeliveryEvent.findFirst({
         where: { orgId, provider, providerEventId },
       });
       if (existing) return existing;
     }
     if (providerMessageId) {
-      const existingByMessage = await (this.prisma as any).marketingDeliveryEvent.findFirst({
+      const existingByMessage = await (
+        this.prisma as any
+      ).marketingDeliveryEvent.findFirst({
         where: {
           orgId,
           provider,
@@ -712,8 +1022,12 @@ export class MarketingService {
         orgId,
         campaignId: String(event.campaignId),
         recipientId: event?.recipientId ? String(event.recipientId) : undefined,
-        recipientEmail: event?.recipientEmail ? String(event.recipientEmail).toLowerCase() : undefined,
-        recipientPhone: event?.recipientPhone ? String(event.recipientPhone) : undefined,
+        recipientEmail: event?.recipientEmail
+          ? String(event.recipientEmail).toLowerCase()
+          : undefined,
+        recipientPhone: event?.recipientPhone
+          ? String(event.recipientPhone)
+          : undefined,
         provider,
         providerEventId,
         providerMessageId,
@@ -728,12 +1042,20 @@ export class MarketingService {
     const type = String(event?.eventType || '').toLowerCase();
     if (['bounced', 'complained', 'unsubscribed'].includes(type)) {
       const channel = event?.recipientPhone ? 'sms' : 'email';
-      const value = channel === 'sms' ? String(event?.recipientPhone || '') : String(event?.recipientEmail || '').toLowerCase();
+      const value =
+        channel === 'sms'
+          ? String(event?.recipientPhone || '')
+          : String(event?.recipientEmail || '').toLowerCase();
       if (value) {
         await this.addSuppressionEntry(orgId, {
           channel,
           value,
-          reason: type === 'bounced' ? 'bounce' : type === 'complained' ? 'complaint' : 'unsubscribed',
+          reason:
+            type === 'bounced'
+              ? 'bounce'
+              : type === 'complained'
+                ? 'complaint'
+                : 'unsubscribed',
           source: `webhook:${provider}`,
         });
       }
@@ -753,55 +1075,95 @@ export class MarketingService {
   async campaignEventAnalytics(orgId: string, campaignId: string) {
     const events = await this.getDeliveryEvents(orgId, campaignId);
     const campaignIdNum = Number(campaignId);
-    const eventMetrics = events.length ? (() => {
-      const count = (type: string) => events.filter((e: any) => String(e?.eventType || '').toLowerCase() === type).length;
-      const recipients = new Set(events.map((e: any) => String(e?.recipientEmail || e?.recipientPhone || e?.recipientId || '')).filter(Boolean)).size;
-      const sent = count('sent');
-      const delivered = count('delivered');
-      const opened = count('opened');
-      const clicked = count('clicked');
-      const bounced = count('bounced');
-      const complained = count('complained');
-      const unsubscribed = count('unsubscribed');
-      const failed = count('failed');
+    const eventMetrics = events.length
+      ? (() => {
+          const count = (type: string) =>
+            events.filter(
+              (e: any) => String(e?.eventType || '').toLowerCase() === type,
+            ).length;
+          const recipients = new Set(
+            events
+              .map((e: any) =>
+                String(
+                  e?.recipientEmail ||
+                    e?.recipientPhone ||
+                    e?.recipientId ||
+                    '',
+                ),
+              )
+              .filter(Boolean),
+          ).size;
+          const sent = count('sent');
+          const delivered = count('delivered');
+          const opened = count('opened');
+          const clicked = count('clicked');
+          const bounced = count('bounced');
+          const complained = count('complained');
+          const unsubscribed = count('unsubscribed');
+          const failed = count('failed');
 
-      return {
-        recipients,
-        sent,
-        delivered,
-        opened,
-        clicked,
-        bounced,
-        complained,
-        unsubscribed,
-        failed,
-        openRate: delivered > 0 ? Number(((opened / delivered) * 100).toFixed(1)) : undefined,
-        clickRate: delivered > 0 ? Number(((clicked / delivered) * 100).toFixed(1)) : undefined,
-        bounceRate: sent > 0 ? Number(((bounced / sent) * 100).toFixed(1)) : undefined,
-        unsubscribeRate: delivered > 0 ? Number(((unsubscribed / delivered) * 100).toFixed(1)) : undefined,
-      };
-    })() : {};
+          return {
+            recipients,
+            sent,
+            delivered,
+            opened,
+            clicked,
+            bounced,
+            complained,
+            unsubscribed,
+            failed,
+            openRate:
+              delivered > 0
+                ? Number(((opened / delivered) * 100).toFixed(1))
+                : undefined,
+            clickRate:
+              delivered > 0
+                ? Number(((clicked / delivered) * 100).toFixed(1))
+                : undefined,
+            bounceRate:
+              sent > 0
+                ? Number(((bounced / sent) * 100).toFixed(1))
+                : undefined,
+            unsubscribeRate:
+              delivered > 0
+                ? Number(((unsubscribed / delivered) * 100).toFixed(1))
+                : undefined,
+          };
+        })()
+      : {};
 
-    if (!Number.isFinite(campaignIdNum) || campaignIdNum <= 0) return eventMetrics;
+    if (!Number.isFinite(campaignIdNum) || campaignIdNum <= 0)
+      return eventMetrics;
 
     const [opportunities, orders] = await Promise.all([
       this.odooClient.searchRead(
         this.leadModel,
-        [['campaign_id', '=', campaignIdNum], ['type', '=', 'opportunity']],
+        [
+          ['campaign_id', '=', campaignIdNum],
+          ['type', '=', 'opportunity'],
+        ],
         ['id'],
-        { limit: 10000, order: 'id desc' }
+        { limit: 10000, order: 'id desc' },
       ),
       this.odooClient.searchRead(
         this.salesOrderModel,
-        [['campaign_id', '=', campaignIdNum], ['state', 'in', ['sale', 'done']]],
+        [
+          ['campaign_id', '=', campaignIdNum],
+          ['state', 'in', ['sale', 'done']],
+        ],
         ['id', 'amount_total'],
-        { limit: 10000, order: 'id desc' }
+        { limit: 10000, order: 'id desc' },
       ),
     ]);
 
-    const conversions = Array.isArray(opportunities) ? opportunities.length : undefined;
+    const conversions = Array.isArray(opportunities)
+      ? opportunities.length
+      : undefined;
     const revenue = Array.isArray(orders)
-      ? orders.reduce((sum: number, row: any) => sum + Number(row?.amount_total || 0), 0)
+      ? orders.reduce(
+          (sum: number, row: any) => sum + Number(row?.amount_total || 0),
+          0,
+        )
       : undefined;
 
     return {
@@ -811,20 +1173,33 @@ export class MarketingService {
     };
   }
 
-  async updateCampaignContent(id: number, data: any, context?: { orgId?: string; userId?: string }) {
+  async updateCampaignContent(
+    id: number,
+    data: any,
+    context?: { orgId?: string; userId?: string },
+  ) {
     const mailing = await this.getOrCreateCampaignMailing(id);
     const payload: Record<string, any> = {};
 
-    if (data?.subject !== undefined) payload.subject = String(data.subject || '').trim();
-    if (data?.content !== undefined) payload.body_html = String(data.content || '');
+    if (data?.subject !== undefined)
+      payload.subject = String(data.subject || '').trim();
+    if (data?.content !== undefined)
+      payload.body_html = String(data.content || '');
     if (data?.segmentId !== undefined) {
       const segmentId = Number(data.segmentId);
-      payload.contact_list_ids = Number.isFinite(segmentId) && segmentId > 0 ? [[6, 0, [segmentId]]] : [[5, 0, 0]];
+      payload.contact_list_ids =
+        Number.isFinite(segmentId) && segmentId > 0
+          ? [[6, 0, [segmentId]]]
+          : [[5, 0, 0]];
     }
-    if (data?.senderEmail !== undefined) payload.reply_to = String(data.senderEmail || '').trim();
+    if (data?.senderEmail !== undefined)
+      payload.reply_to = String(data.senderEmail || '').trim();
 
     if (Object.keys(payload).length > 0) {
-      await this.odooClient.execute(this.mailingModel, 'write', [[mailing.id], payload]);
+      await this.odooClient.execute(this.mailingModel, 'write', [
+        [mailing.id],
+        payload,
+      ]);
     }
 
     if (data?.templateId !== undefined && context?.orgId) {
@@ -860,31 +1235,50 @@ export class MarketingService {
   async listSegments() {
     try {
       this.logger.log(`Fetching segments from model: ${this.mailingListModel}`);
-      
+
       // Step 1: Detect available fields to avoid Odoo errors
-      const fieldsInfo = await this.odooClient.execute(this.mailingListModel, 'fields_get', [[], ['name', 'contact_nbr', 'contact_count', 'is_public', 'active']]);
+      const fieldsInfo = await this.odooClient.execute(
+        this.mailingListModel,
+        'fields_get',
+        [[], ['name', 'contact_nbr', 'contact_count', 'is_public', 'active']],
+      );
       const availableFields = Object.keys(fieldsInfo);
-      
-      this.logger.log(`Available fields for ${this.mailingListModel}: ${availableFields.join(', ')}`);
-      
+
+      this.logger.log(
+        `Available fields for ${this.mailingListModel}: ${availableFields.join(', ')}`,
+      );
+
       const requestedFields = ['id', 'name'];
       if (availableFields.includes('active')) requestedFields.push('active');
-      if (availableFields.includes('contact_count')) requestedFields.push('contact_count');
-      else if (availableFields.includes('contact_nbr')) requestedFields.push('contact_nbr');
-      
+      if (availableFields.includes('contact_count'))
+        requestedFields.push('contact_count');
+      else if (availableFields.includes('contact_nbr'))
+        requestedFields.push('contact_nbr');
+
       // Step 2: Fetch data with discovered fields
-      const lists = await this.odooClient.searchRead(this.mailingListModel, [], requestedFields);
-      
+      const lists = await this.odooClient.searchRead(
+        this.mailingListModel,
+        [],
+        requestedFields,
+      );
+
       this.logger.log(`Found ${lists.length} segments in Odoo.`);
       return lists;
     } catch (error) {
-      this.logger.error(`Failed to fetch segments: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to fetch segments: ${error.message}`,
+        error.stack,
+      );
       return [];
     }
   }
 
   async getSegment(id: number) {
-    const [segment] = await this.odooClient.searchRead(this.mailingListModel, [['id', '=', id]], this.mailingListFields);
+    const [segment] = await this.odooClient.searchRead(
+      this.mailingListModel,
+      [['id', '=', id]],
+      this.mailingListFields,
+    );
     return segment;
   }
 
@@ -893,10 +1287,14 @@ export class MarketingService {
     const payload: any = {
       name: data.name,
     };
-    
+
     // Check fields before setting to avoid Odoo error
     try {
-      const fieldsInfo = await this.odooClient.execute(this.mailingListModel, 'fields_get', [[], ['active', 'is_public']]);
+      const fieldsInfo = await this.odooClient.execute(
+        this.mailingListModel,
+        'fields_get',
+        [[], ['active', 'is_public']],
+      );
       if (fieldsInfo.active) payload.active = true;
       if (fieldsInfo.is_public) payload.is_public = data.isPublic !== false;
     } catch (e) {
@@ -909,15 +1307,22 @@ export class MarketingService {
   async updateSegment(id: number, data: any) {
     const payload: Record<string, any> = {};
     if (data.name) payload.name = data.name;
-    
+
     try {
-      const fieldsInfo = await this.odooClient.execute(this.mailingListModel, 'fields_get', [[], ['is_public']]);
+      const fieldsInfo = await this.odooClient.execute(
+        this.mailingListModel,
+        'fields_get',
+        [[], ['is_public']],
+      );
       if (fieldsInfo.is_public && data.isPublic !== undefined) {
         payload.is_public = data.isPublic;
       }
     } catch (e) {}
 
-    return this.odooClient.execute(this.mailingListModel, 'write', [[id], payload]);
+    return this.odooClient.execute(this.mailingListModel, 'write', [
+      [id],
+      payload,
+    ]);
   }
 
   async deleteSegment(id: number) {
@@ -928,11 +1333,20 @@ export class MarketingService {
 
   async listTemplates() {
     // Filter by model if possible, usually 'mailing.mailing' or 'res.partner'
-    return this.odooClient.searchRead(this.templateModel, [], this.templateFields, { limit: 50 });
+    return this.odooClient.searchRead(
+      this.templateModel,
+      [],
+      this.templateFields,
+      { limit: 50 },
+    );
   }
 
   async getTemplate(id: number) {
-    const [template] = await this.odooClient.searchRead(this.templateModel, [['id', '=', id]], this.templateFields);
+    const [template] = await this.odooClient.searchRead(
+      this.templateModel,
+      [['id', '=', id]],
+      this.templateFields,
+    );
     return template;
   }
 
@@ -948,10 +1362,15 @@ export class MarketingService {
   async updateTemplate(id: number, data: any) {
     const payload: Record<string, any> = {};
     if (data?.name !== undefined) payload.name = String(data.name || '').trim();
-    if (data?.subject !== undefined) payload.subject = String(data.subject || '').trim();
-    if (data?.content !== undefined) payload.body_html = String(data.content || '');
+    if (data?.subject !== undefined)
+      payload.subject = String(data.subject || '').trim();
+    if (data?.content !== undefined)
+      payload.body_html = String(data.content || '');
     if (Object.keys(payload).length === 0) return true;
-    return this.odooClient.execute(this.templateModel, 'write', [[id], payload]);
+    return this.odooClient.execute(this.templateModel, 'write', [
+      [id],
+      payload,
+    ]);
   }
 
   async deleteTemplate(id: number) {
@@ -985,19 +1404,38 @@ export class MarketingService {
       salesRows,
     ] = await Promise.all([
       this.odooClient.execute(this.campaignModel, 'search_count', [[]]),
-      this.odooClient.execute(this.campaignModel, 'search_count', [[['active', '=', true]]]),
+      this.odooClient.execute(this.campaignModel, 'search_count', [
+        [['active', '=', true]],
+      ]),
       this.odooClient.execute(this.sourceModel, 'search_count', [[]]),
       this.odooClient.execute(this.mediumModel, 'search_count', [[]]),
-      this.odooClient.execute(this.leadModel, 'search_count', [[['type', '=', 'lead'], ...leadDateDomain]]),
-      this.odooClient.execute(this.leadModel, 'search_count', [[['type', '=', 'opportunity'], ...leadDateDomain]]),
-      this.odooClient.searchRead(this.salesOrderModel, orderDateDomain, ['amount_total', 'state', 'date_order'], { limit: 300, order: 'id desc' }),
+      this.odooClient.execute(this.leadModel, 'search_count', [
+        [['type', '=', 'lead'], ...leadDateDomain],
+      ]),
+      this.odooClient.execute(this.leadModel, 'search_count', [
+        [['type', '=', 'opportunity'], ...leadDateDomain],
+      ]),
+      this.odooClient.searchRead(
+        this.salesOrderModel,
+        orderDateDomain,
+        ['amount_total', 'state', 'date_order'],
+        { limit: 300, order: 'id desc' },
+      ),
     ]);
 
     const wonSales = Array.isArray(salesRows)
-      ? salesRows.filter((row: any) => ['sale', 'done'].includes(String(row?.state || '').toLowerCase()))
+      ? salesRows.filter((row: any) =>
+          ['sale', 'done'].includes(String(row?.state || '').toLowerCase()),
+        )
       : [];
-    const revenue = wonSales.reduce((sum: number, row: any) => sum + Number(row?.amount_total || 0), 0);
-    const conversionRate = totalLeads > 0 ? Number(((totalOpportunities / totalLeads) * 100).toFixed(2)) : 0;
+    const revenue = wonSales.reduce(
+      (sum: number, row: any) => sum + Number(row?.amount_total || 0),
+      0,
+    );
+    const conversionRate =
+      totalLeads > 0
+        ? Number(((totalOpportunities / totalLeads) * 100).toFixed(2))
+        : 0;
 
     return {
       totalCampaigns: Number(totalCampaigns || 0),
@@ -1009,15 +1447,33 @@ export class MarketingService {
       conversionRate,
       wonOrders: wonSales.length,
       revenue,
-      avgRevenuePerWonOrder: wonSales.length ? Number((revenue / wonSales.length).toFixed(2)) : 0,
+      avgRevenuePerWonOrder: wonSales.length
+        ? Number((revenue / wonSales.length).toFixed(2))
+        : 0,
     };
   }
 
   async campaignInsights(id: number, paginationDto: PaginationDto) {
     const page = paginationDto.page ?? 1;
     const pageSize = paginationDto.pageSize ?? 20;
-    const leadFields = ['id', 'name', 'email_from', 'phone', 'type', 'stage_id', 'expected_revenue', 'create_date'];
-    const orderFields = ['id', 'name', 'partner_id', 'state', 'amount_total', 'date_order'];
+    const leadFields = [
+      'id',
+      'name',
+      'email_from',
+      'phone',
+      'type',
+      'stage_id',
+      'expected_revenue',
+      'create_date',
+    ];
+    const orderFields = [
+      'id',
+      'name',
+      'partner_id',
+      'state',
+      'amount_total',
+      'date_order',
+    ];
 
     const leadDomain: any[] = [['campaign_id', '=', id]];
     const orderDomain: any[] = [['campaign_id', '=', id]];
@@ -1029,12 +1485,19 @@ export class MarketingService {
         order: 'create_date desc',
       }),
       this.odooClient.execute(this.leadModel, 'search_count', [leadDomain]),
-      this.odooClient.searchRead(this.salesOrderModel, orderDomain, orderFields, {
-        offset: (page - 1) * pageSize,
-        limit: pageSize,
-        order: 'date_order desc',
-      }),
-      this.odooClient.execute(this.salesOrderModel, 'search_count', [orderDomain]),
+      this.odooClient.searchRead(
+        this.salesOrderModel,
+        orderDomain,
+        orderFields,
+        {
+          offset: (page - 1) * pageSize,
+          limit: pageSize,
+          order: 'date_order desc',
+        },
+      ),
+      this.odooClient.execute(this.salesOrderModel, 'search_count', [
+        orderDomain,
+      ]),
     ]);
 
     return {

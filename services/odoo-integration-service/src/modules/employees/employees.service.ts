@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { OdooClientService } from '../odoo-base/odoo-client.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
@@ -76,7 +80,7 @@ export class EmployeesService {
     fields: string[],
     page: number,
     pageSize: number,
-    order = 'write_date desc'
+    order = 'write_date desc',
   ) {
     const [data, total] = await Promise.all([
       this.odooClient.searchRead(model, domain, fields, {
@@ -111,7 +115,8 @@ export class EmployeesService {
     return {
       id: String(record?.id ?? ''),
       name: String(record?.name ?? 'Unnamed role'),
-      description: typeof record?.comment === 'string' ? record.comment : undefined,
+      description:
+        typeof record?.comment === 'string' ? record.comment : undefined,
       system: true,
     };
   }
@@ -122,9 +127,11 @@ export class EmployeesService {
         this.hrEmployeeModel,
         [['id', '=', employeeId]],
         ['id', 'user_id'],
-        { limit: 1 }
+        { limit: 1 },
       );
-      const userId = Array.isArray(employee?.user_id) ? Number(employee.user_id[0]) : Number(employee?.user_id);
+      const userId = Array.isArray(employee?.user_id)
+        ? Number(employee.user_id[0])
+        : Number(employee?.user_id);
       if (Number.isFinite(userId) && userId > 0) return userId;
     } catch {
       // Continue to explicit failure.
@@ -134,7 +141,11 @@ export class EmployeesService {
 
   private async getConfigParam(key: string): Promise<string | null> {
     try {
-      const value = await this.odooClient.execute(this.configParamModel, 'get_param', [key]);
+      const value = await this.odooClient.execute(
+        this.configParamModel,
+        'get_param',
+        [key],
+      );
       if (typeof value === 'string') return value;
       if (value === false || value == null) return null;
       return EmployeesService.mockSettingsStore.get(key) ?? null;
@@ -145,7 +156,10 @@ export class EmployeesService {
 
   private async setConfigParam(key: string, value: string): Promise<void> {
     try {
-      await this.odooClient.execute(this.configParamModel, 'set_param', [key, value]);
+      await this.odooClient.execute(this.configParamModel, 'set_param', [
+        key,
+        value,
+      ]);
     } catch {
       // In mock mode we still persist in-process for deterministic API behavior.
     }
@@ -163,7 +177,13 @@ export class EmployeesService {
     if (activeFilter !== undefined) domain.push(['active', '=', activeFilter]);
 
     try {
-      const result = await this.listModel(this.hrEmployeeModel, domain, this.employeeFields, page, pageSize);
+      const result = await this.listModel(
+        this.hrEmployeeModel,
+        domain,
+        this.employeeFields,
+        page,
+        pageSize,
+      );
       return {
         ...result,
         data: result.data.map((item: any) => this.normalizeEmployee(item)),
@@ -171,16 +191,21 @@ export class EmployeesService {
     } catch {
       const fallbackDomain: any[] = [['employee', '=', true]];
       if (search) {
-        fallbackDomain.push('|', ['name', 'ilike', `%${search}%`], ['email', 'ilike', `%${search}%`]);
+        fallbackDomain.push(
+          '|',
+          ['name', 'ilike', `%${search}%`],
+          ['email', 'ilike', `%${search}%`],
+        );
       }
-      if (activeFilter !== undefined) fallbackDomain.push(['active', '=', activeFilter]);
+      if (activeFilter !== undefined)
+        fallbackDomain.push(['active', '=', activeFilter]);
 
       const result = await this.listModel(
         this.fallbackEmployeeModel,
         fallbackDomain,
         this.fallbackEmployeeFields,
         page,
-        pageSize
+        pageSize,
       );
       return {
         ...result,
@@ -195,7 +220,7 @@ export class EmployeesService {
         this.hrEmployeeModel,
         [['id', '=', id]],
         this.employeeFields,
-        { limit: 1 }
+        { limit: 1 },
       );
       if (employee) return this.normalizeEmployee(employee);
     } catch {
@@ -206,7 +231,7 @@ export class EmployeesService {
       this.fallbackEmployeeModel,
       [['id', '=', id]],
       this.fallbackEmployeeFields,
-      { limit: 1 }
+      { limit: 1 },
     );
     return fallbackEmployee ? this.normalizeEmployee(fallbackEmployee) : null;
   }
@@ -251,11 +276,14 @@ export class EmployeesService {
     };
 
     const cleanedPayload = Object.fromEntries(
-      Object.entries(payload).filter(([, value]) => value !== undefined)
+      Object.entries(payload).filter(([, value]) => value !== undefined),
     );
 
     try {
-      return this.odooClient.execute(this.hrEmployeeModel, 'write', [[id], cleanedPayload]);
+      return this.odooClient.execute(this.hrEmployeeModel, 'write', [
+        [id],
+        cleanedPayload,
+      ]);
     } catch {
       const fallbackPayload = {
         name: cleanedPayload.name,
@@ -267,18 +295,29 @@ export class EmployeesService {
       };
 
       const cleanedFallback = Object.fromEntries(
-        Object.entries(fallbackPayload).filter(([, value]) => value !== undefined)
+        Object.entries(fallbackPayload).filter(
+          ([, value]) => value !== undefined,
+        ),
       );
-      return this.odooClient.execute(this.fallbackEmployeeModel, 'write', [[id], cleanedFallback]);
+      return this.odooClient.execute(this.fallbackEmployeeModel, 'write', [
+        [id],
+        cleanedFallback,
+      ]);
     }
   }
 
   async updateStatus(id: number, status: 'active' | 'inactive') {
     const active = status === 'active';
     try {
-      return this.odooClient.execute(this.hrEmployeeModel, 'write', [[id], { active }]);
+      return this.odooClient.execute(this.hrEmployeeModel, 'write', [
+        [id],
+        { active },
+      ]);
     } catch {
-      return this.odooClient.execute(this.fallbackEmployeeModel, 'write', [[id], { active }]);
+      return this.odooClient.execute(this.fallbackEmployeeModel, 'write', [
+        [id],
+        { active },
+      ]);
     }
   }
 
@@ -286,7 +325,9 @@ export class EmployeesService {
     try {
       return this.odooClient.execute(this.hrEmployeeModel, 'unlink', [[id]]);
     } catch {
-      return this.odooClient.execute(this.fallbackEmployeeModel, 'unlink', [[id]]);
+      return this.odooClient.execute(this.fallbackEmployeeModel, 'unlink', [
+        [id],
+      ]);
     }
   }
 
@@ -302,7 +343,7 @@ export class EmployeesService {
       ['id', 'name', 'manager_id', 'parent_id', 'company_id', 'active'],
       page,
       pageSize,
-      'name asc'
+      'name asc',
     );
   }
 
@@ -329,7 +370,7 @@ export class EmployeesService {
       ['id', 'name', 'department_id', 'no_of_recruitment', 'active'],
       page,
       pageSize,
-      'name asc'
+      'name asc',
     );
   }
 
@@ -338,7 +379,8 @@ export class EmployeesService {
       {
         name: data?.name,
         department_id: data?.department_id ?? data?.departmentId ?? false,
-        no_of_recruitment: data?.no_of_recruitment ?? data?.noOfRecruitment ?? 1,
+        no_of_recruitment:
+          data?.no_of_recruitment ?? data?.noOfRecruitment ?? 1,
       },
     ]);
   }
@@ -356,10 +398,17 @@ export class EmployeesService {
     return this.listModel(
       this.attendanceModel,
       domain,
-      ['id', 'employee_id', 'check_in', 'check_out', 'worked_hours', 'create_date'],
+      [
+        'id',
+        'employee_id',
+        'check_in',
+        'check_out',
+        'worked_hours',
+        'create_date',
+      ],
       page,
       pageSize,
-      'check_in desc'
+      'check_in desc',
     );
   }
 
@@ -370,17 +419,25 @@ export class EmployeesService {
     const endDate = query?.endDate;
     const domain: any[] = [];
 
-    if (query?.employeeId) domain.push(['employee_id', '=', Number(query.employeeId)]);
+    if (query?.employeeId)
+      domain.push(['employee_id', '=', Number(query.employeeId)]);
     if (startDate) domain.push(['check_in', '>=', startDate]);
     if (endDate) domain.push(['check_in', '<=', endDate]);
 
     return this.listModel(
       this.attendanceModel,
       domain,
-      ['id', 'employee_id', 'check_in', 'check_out', 'worked_hours', 'create_date'],
+      [
+        'id',
+        'employee_id',
+        'check_in',
+        'check_out',
+        'worked_hours',
+        'create_date',
+      ],
       page,
       pageSize,
-      'check_in desc'
+      'check_in desc',
     );
   }
 
@@ -393,19 +450,25 @@ export class EmployeesService {
       ['id', 'employee_id', 'check_in', 'check_out', 'worked_hours'],
       1,
       cappedPageSize,
-      'check_in desc'
+      'check_in desc',
     );
 
     const rows = result.data || [];
-    const checkedIn = rows.filter((row: any) => row.check_in && !row.check_out).length;
+    const checkedIn = rows.filter(
+      (row: any) => row.check_in && !row.check_out,
+    ).length;
     const completed = rows.filter((row: any) => !!row.check_out).length;
-    const totalHours = rows.reduce((acc: number, row: any) => acc + Number(row.worked_hours || 0), 0);
+    const totalHours = rows.reduce(
+      (acc: number, row: any) => acc + Number(row.worked_hours || 0),
+      0,
+    );
 
     return {
       totalRecords: result.total,
       activeCheckIns: checkedIn,
       completedSessions: completed,
-      averageWorkedHours: rows.length > 0 ? Number((totalHours / rows.length).toFixed(2)) : 0,
+      averageWorkedHours:
+        rows.length > 0 ? Number((totalHours / rows.length).toFixed(2)) : 0,
     };
   }
 
@@ -430,12 +493,18 @@ export class EmployeesService {
   async clockOutLatestForEmployee(employeeId: number, data?: any) {
     const records = await this.odooClient.searchRead(
       this.attendanceModel,
-      [['employee_id', '=', employeeId], ['check_out', '=', false]],
+      [
+        ['employee_id', '=', employeeId],
+        ['check_out', '=', false],
+      ],
       ['id', 'check_in', 'check_out'],
-      { limit: 1, order: 'check_in desc' }
+      { limit: 1, order: 'check_in desc' },
     );
     const latest = Array.isArray(records) ? records[0] : null;
-    if (!latest?.id) throw new NotFoundException('No open attendance record found for this employee.');
+    if (!latest?.id)
+      throw new NotFoundException(
+        'No open attendance record found for this employee.',
+      );
     return this.clockOut(Number(latest.id), data);
   }
 
@@ -445,18 +514,26 @@ export class EmployeesService {
       check_in: data?.check_in ?? data?.clockIn ?? new Date().toISOString(),
       check_out: data?.check_out ?? data?.clockOut ?? undefined,
     };
-    if (!payload.employee_id) throw new BadRequestException('employeeId is required.');
+    if (!payload.employee_id)
+      throw new BadRequestException('employeeId is required.');
     return this.odooClient.execute(this.attendanceModel, 'create', [payload]);
   }
 
   async updateAttendanceRecord(id: number, data: any) {
     const payload: Record<string, any> = {};
-    if (data?.check_in || data?.clockIn) payload.check_in = data.check_in ?? data.clockIn;
-    if (data?.check_out || data?.clockOut) payload.check_out = data.check_out ?? data.clockOut;
+    if (data?.check_in || data?.clockIn)
+      payload.check_in = data.check_in ?? data.clockIn;
+    if (data?.check_out || data?.clockOut)
+      payload.check_out = data.check_out ?? data.clockOut;
     if (Object.keys(payload).length === 0) {
-      throw new BadRequestException('No attendance fields provided for update.');
+      throw new BadRequestException(
+        'No attendance fields provided for update.',
+      );
     }
-    return this.odooClient.execute(this.attendanceModel, 'write', [[id], payload]);
+    return this.odooClient.execute(this.attendanceModel, 'write', [
+      [id],
+      payload,
+    ]);
   }
 
   async deleteAttendanceRecord(id: number) {
@@ -468,7 +545,7 @@ export class EmployeesService {
       this.leaveTypeModel,
       [],
       ['id', 'name', 'requires_allocation', 'active'],
-      { order: 'name asc' }
+      { order: 'name asc' },
     );
   }
 
@@ -477,9 +554,11 @@ export class EmployeesService {
     const pageSize = Math.min(Number(query?.pageSize ?? 50), 200);
     const domain: any[] = [];
 
-    if (query?.employeeId) domain.push(['employee_id', '=', Number(query.employeeId)]);
+    if (query?.employeeId)
+      domain.push(['employee_id', '=', Number(query.employeeId)]);
     if (query?.status) domain.push(['state', '=', String(query.status)]);
-    if (query?.startDate) domain.push(['request_date_from', '>=', query.startDate]);
+    if (query?.startDate)
+      domain.push(['request_date_from', '>=', query.startDate]);
     if (query?.endDate) domain.push(['request_date_to', '<=', query.endDate]);
 
     return this.listModel(
@@ -497,7 +576,7 @@ export class EmployeesService {
       ],
       page,
       pageSize,
-      'request_date_from desc'
+      'request_date_from desc',
     );
   }
 
@@ -515,29 +594,48 @@ export class EmployeesService {
 
   async approveLeaveRequest(id: number) {
     try {
-      return await this.odooClient.execute(this.leaveModel, 'action_approve', [[id]]);
+      return await this.odooClient.execute(this.leaveModel, 'action_approve', [
+        [id],
+      ]);
     } catch {
       try {
-        return await this.odooClient.execute(this.leaveModel, 'action_validate', [[id]]);
+        return await this.odooClient.execute(
+          this.leaveModel,
+          'action_validate',
+          [[id]],
+        );
       } catch {
-        return this.odooClient.execute(this.leaveModel, 'write', [[id], { state: 'validate' }]);
+        return this.odooClient.execute(this.leaveModel, 'write', [
+          [id],
+          { state: 'validate' },
+        ]);
       }
     }
   }
 
   async refuseLeaveRequest(id: number) {
     try {
-      return await this.odooClient.execute(this.leaveModel, 'action_refuse', [[id]]);
+      return await this.odooClient.execute(this.leaveModel, 'action_refuse', [
+        [id],
+      ]);
     } catch {
-      return this.odooClient.execute(this.leaveModel, 'write', [[id], { state: 'refuse' }]);
+      return this.odooClient.execute(this.leaveModel, 'write', [
+        [id],
+        { state: 'refuse' },
+      ]);
     }
   }
 
   async cancelLeaveRequest(id: number) {
     try {
-      return await this.odooClient.execute(this.leaveModel, 'action_cancel', [[id]]);
+      return await this.odooClient.execute(this.leaveModel, 'action_cancel', [
+        [id],
+      ]);
     } catch {
-      return this.odooClient.execute(this.leaveModel, 'write', [[id], { state: 'cancel' }]);
+      return this.odooClient.execute(this.leaveModel, 'write', [
+        [id],
+        { state: 'cancel' },
+      ]);
     }
   }
 
@@ -546,8 +644,10 @@ export class EmployeesService {
     const pageSize = Math.min(Number(query?.pageSize ?? 50), 200);
     const domain: any[] = [];
 
-    if (query?.employeeId) domain.push(['employee_id', '=', Number(query.employeeId)]);
-    if (query?.startDate) domain.push(['start_datetime', '>=', query.startDate]);
+    if (query?.employeeId)
+      domain.push(['employee_id', '=', Number(query.employeeId)]);
+    if (query?.startDate)
+      domain.push(['start_datetime', '>=', query.startDate]);
     if (query?.endDate) domain.push(['end_datetime', '<=', query.endDate]);
 
     return this.listModel(
@@ -565,7 +665,7 @@ export class EmployeesService {
       ],
       page,
       pageSize,
-      'start_datetime asc'
+      'start_datetime asc',
     );
   }
 
@@ -595,10 +695,13 @@ export class EmployeesService {
       state: data?.state,
     };
     const cleanedPayload = Object.fromEntries(
-      Object.entries(payload).filter(([, value]) => value !== undefined)
+      Object.entries(payload).filter(([, value]) => value !== undefined),
     );
 
-    return this.odooClient.execute(this.planningModel, 'write', [[id], cleanedPayload]);
+    return this.odooClient.execute(this.planningModel, 'write', [
+      [id],
+      cleanedPayload,
+    ]);
   }
 
   async deleteShift(id: number) {
@@ -663,9 +766,11 @@ export class EmployeesService {
       this.groupsModel,
       [],
       ['id', 'name', 'comment'],
-      { order: 'name asc', limit: 500 }
+      { order: 'name asc', limit: 500 },
     );
-    return (Array.isArray(rows) ? rows : []).map((row: any) => this.normalizeRole(row));
+    return (Array.isArray(rows) ? rows : []).map((row: any) =>
+      this.normalizeRole(row),
+    );
   }
 
   async assignRole(employeeId: number, roleId: number) {
@@ -673,7 +778,10 @@ export class EmployeesService {
       throw new BadRequestException('Valid roleId is required.');
     }
     const userId = await this.resolveEmployeeUserId(employeeId);
-    await this.odooClient.execute(this.usersModel, 'write', [[userId], { groups_id: [[4, roleId]] }]);
+    await this.odooClient.execute(this.usersModel, 'write', [
+      [userId],
+      { groups_id: [[4, roleId]] },
+    ]);
     return { success: true };
   }
 
@@ -682,17 +790,29 @@ export class EmployeesService {
       throw new BadRequestException('Valid roleId is required.');
     }
     const userId = await this.resolveEmployeeUserId(employeeId);
-    await this.odooClient.execute(this.usersModel, 'write', [[userId], { groups_id: [[3, roleId]] }]);
+    await this.odooClient.execute(this.usersModel, 'write', [
+      [userId],
+      { groups_id: [[3, roleId]] },
+    ]);
     return { success: true };
   }
 
   async updateEmployeePermissions(employeeId: number, data: any) {
-    const roleIds = Array.isArray(data?.roleIds) ? data.roleIds.map((id: any) => Number(id)).filter((id: number) => Number.isFinite(id) && id > 0) : null;
+    const roleIds = Array.isArray(data?.roleIds)
+      ? data.roleIds
+          .map((id: any) => Number(id))
+          .filter((id: number) => Number.isFinite(id) && id > 0)
+      : null;
     if (!roleIds || roleIds.length === 0) {
-      throw new BadRequestException('roleIds[] is required to update employee permissions.');
+      throw new BadRequestException(
+        'roleIds[] is required to update employee permissions.',
+      );
     }
     const userId = await this.resolveEmployeeUserId(employeeId);
-    await this.odooClient.execute(this.usersModel, 'write', [[userId], { groups_id: [[6, 0, roleIds]] }]);
+    await this.odooClient.execute(this.usersModel, 'write', [
+      [userId],
+      { groups_id: [[6, 0, roleIds]] },
+    ]);
     return { success: true };
   }
 
@@ -705,7 +825,13 @@ export class EmployeesService {
       workWeek: this.getSettingsKey(orgId, 'workWeek'),
       documentTypes: this.getSettingsKey(orgId, 'documentTypes'),
     };
-    const [employmentTypesRaw, attendanceRulesRaw, timeOffTypesRaw, workWeekRaw, documentTypesRaw] = await Promise.all([
+    const [
+      employmentTypesRaw,
+      attendanceRulesRaw,
+      timeOffTypesRaw,
+      workWeekRaw,
+      documentTypesRaw,
+    ] = await Promise.all([
       this.getConfigParam(keys.employmentTypes),
       this.getConfigParam(keys.attendanceRules),
       this.getConfigParam(keys.timeOffTypes),
@@ -733,12 +859,23 @@ export class EmployeesService {
 
   async updateSettings(orgId: string, data: any) {
     if (!orgId) throw new BadRequestException('x-org-id is required.');
-    const updatableKeys = ['employmentTypes', 'attendanceRules', 'timeOffTypes', 'workWeek', 'documentTypes'] as const;
+    const updatableKeys = [
+      'employmentTypes',
+      'attendanceRules',
+      'timeOffTypes',
+      'workWeek',
+      'documentTypes',
+    ] as const;
     const updates: Array<Promise<void>> = [];
 
     for (const key of updatableKeys) {
       if (data?.[key] === undefined) continue;
-      updates.push(this.setConfigParam(this.getSettingsKey(orgId, key), JSON.stringify(data[key])));
+      updates.push(
+        this.setConfigParam(
+          this.getSettingsKey(orgId, key),
+          JSON.stringify(data[key]),
+        ),
+      );
     }
 
     if (updates.length === 0) {

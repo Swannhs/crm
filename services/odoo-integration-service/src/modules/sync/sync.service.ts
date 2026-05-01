@@ -19,36 +19,68 @@ export class SyncService {
     }
     this.logger.log(`Starting Magento customer sync for org: ${orgId}`);
     try {
-      const response = await axios.get(`${this.magentoUrl}/v1/magento/customers`, {
-        headers: { 'x-org-id': orgId, 'x-user-id': 'system-sync' }
-      });
-      
+      const response = await axios.get(
+        `${this.magentoUrl}/v1/magento/customers`,
+        {
+          headers: { 'x-org-id': orgId, 'x-user-id': 'system-sync' },
+        },
+      );
+
       const customers = response.data?.data?.items || [];
       let created = 0;
       let updated = 0;
 
+      if (customers.length === 0) {
+        return { total: 0, created, updated };
+      }
+
+      // Batch fetch existing partners from Odoo
+      const emails = customers.map((c: any) => c.email).filter(Boolean);
+      const refs = customers.map((c: any) => `MAG-${c.id}`);
+
+      // We need to fetch ID and the fields we match against to populate our Map
+      const existingPartners = await this.odooClient.searchRead(
+        'res.partner',
+        ['|', ['email', 'in', emails], ['ref', 'in', refs]],
+        ['id', 'email', 'ref'],
+      );
+
+      // Build a lookup map by ref and email
+      const partnerByRef = new Map<string, number>();
+      const partnerByEmail = new Map<string, number>();
+
+      for (const p of existingPartners) {
+        if (p.ref) partnerByRef.set(p.ref, p.id);
+        if (p.email) partnerByEmail.set(p.email, p.id);
+      }
+
       for (const customer of customers) {
-        // Check if partner exists in Odoo
-        const existing = await this.odooClient.searchRead('res.partner', 
-          ['|', ['email', '=', customer.email], ['ref', '=', `MAG-${customer.id}`]],
-          ['id']
-        );
+        const ref = `MAG-${customer.id}`;
+
+        // Match logic: ref matches first, then email
+        const existingId =
+          partnerByRef.get(ref) || partnerByEmail.get(customer.email);
 
         const partnerData = {
           name: `${customer.firstname} ${customer.lastname}`,
           email: customer.email,
-          ref: `MAG-${customer.id}`,
+          ref,
           customer_rank: 1,
           comment: `Synced from Magento ID: ${customer.id}`,
         };
 
         let odooId: number;
-        if (existing && existing.length > 0) {
-          odooId = existing[0].id;
-          await this.odooClient.execute('res.partner', 'write', [[odooId], partnerData]);
+        if (existingId !== undefined) {
+          odooId = existingId;
+          await this.odooClient.execute('res.partner', 'write', [
+            [odooId],
+            partnerData,
+          ]);
           updated++;
         } else {
-          odooId = await this.odooClient.execute('res.partner', 'create', [partnerData]);
+          odooId = await this.odooClient.execute('res.partner', 'create', [
+            partnerData,
+          ]);
           created++;
         }
 
@@ -76,18 +108,19 @@ export class SyncService {
     this.logger.log(`Starting Magento order sync for org: ${orgId}`);
     try {
       const response = await axios.get(`${this.magentoUrl}/v1/magento/orders`, {
-        headers: { 'x-org-id': orgId, 'x-user-id': 'system-sync' }
+        headers: { 'x-org-id': orgId, 'x-user-id': 'system-sync' },
       });
-      
+
       const orders = response.data?.data?.items || [];
       let synced = 0;
       let skipped = 0;
 
       for (const order of orders) {
         // Check if order already exists in Odoo (by origin/ref)
-        const existing = await this.odooClient.searchRead('sale.order', 
+        const existing = await this.odooClient.searchRead(
+          'sale.order',
           [['name', '=', `MAG-${order.increment_id || order.entity_id}`]],
-          ['id']
+          ['id'],
         );
 
         if (existing && existing.length > 0) {
@@ -96,20 +129,25 @@ export class SyncService {
         }
 
         // 1. Find or create partner
-        const partners = await this.odooClient.searchRead('res.partner', 
-          [['email', '=', order.customer_email]], 
-          ['id']
+        const partners = await this.odooClient.searchRead(
+          'res.partner',
+          [['email', '=', order.customer_email]],
+          ['id'],
         );
-        
+
         let partnerId;
         if (partners && partners.length > 0) {
           partnerId = partners[0].id;
         } else {
-          partnerId = await this.odooClient.execute('res.partner', 'create', [{
-            name: `${order.customer_firstname} ${order.customer_lastname}`.trim() || order.customer_email,
-            email: order.customer_email,
-            customer_rank: 1,
-          }]);
+          partnerId = await this.odooClient.execute('res.partner', 'create', [
+            {
+              name:
+                `${order.customer_firstname} ${order.customer_lastname}`.trim() ||
+                order.customer_email,
+              email: order.customer_email,
+              customer_rank: 1,
+            },
+          ]);
         }
 
         // Ensure Prisma map exists for the partner
@@ -122,20 +160,26 @@ export class SyncService {
         }
 
         // 2. Map items to order lines
-        const orderLines = (order.items || []).map((item: any) => [0, 0, {
-          name: item.name || `Product SKU: ${item.sku}`,
-          product_uom_qty: item.qty_ordered || 1,
-          price_unit: item.price || 0,
-        }]);
+        const orderLines = (order.items || []).map((item: any) => [
+          0,
+          0,
+          {
+            name: item.name || `Product SKU: ${item.sku}`,
+            product_uom_qty: item.qty_ordered || 1,
+            price_unit: item.price || 0,
+          },
+        ]);
 
         // 3. Create Sale Order
-        await this.odooClient.execute('sale.order', 'create', [{
-          partner_id: partnerId,
-          name: `MAG-${order.increment_id || order.entity_id}`,
-          date_order: order.created_at,
-          order_line: orderLines,
-          note: `Magento Order ID: ${order.entity_id}. Status: ${order.status}`,
-        }]);
+        await this.odooClient.execute('sale.order', 'create', [
+          {
+            partner_id: partnerId,
+            name: `MAG-${order.increment_id || order.entity_id}`,
+            date_order: order.created_at,
+            order_line: orderLines,
+            note: `Magento Order ID: ${order.entity_id}. Status: ${order.status}`,
+          },
+        ]);
 
         synced++;
       }

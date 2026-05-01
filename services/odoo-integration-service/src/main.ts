@@ -7,14 +7,16 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
-  app.useGlobalPipes(new ValidationPipe({ 
-    whitelist: true, 
-    transform: true,
-    forbidNonWhitelisted: false,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: false,
+    }),
+  );
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.setGlobalPrefix('v1/odoo');
-  
+
   const config = new DocumentBuilder()
     .setTitle('Odoo Integration Service')
     .setDescription('Industrial Odoo API for MyManager')

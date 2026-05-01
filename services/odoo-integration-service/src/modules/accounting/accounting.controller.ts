@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Query,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { AccountingService } from './accounting.service.js';
@@ -27,7 +39,9 @@ export class AccountingController {
   ) {
     let odooId: number | undefined;
     if (contactId) {
-      odooId = /^\d+$/.test(contactId) ? Number(contactId) : (await this.contactsService.resolveUuid(contactId)) || undefined;
+      odooId = /^\d+$/.test(contactId)
+        ? Number(contactId)
+        : (await this.contactsService.resolveUuid(contactId)) || undefined;
     }
     return this.accountingService.findAllInvoices(paginationDto, odooId);
   }
@@ -65,10 +79,7 @@ export class AccountingController {
 
   @Get('invoices/:id/download')
   @ApiOperation({ summary: 'Download invoice PDF' })
-  async download(
-    @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response,
-  ) {
+  async download(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     const base64 = await this.accountingService.downloadInvoice(id);
     const buffer = Buffer.from(base64, 'base64');
 

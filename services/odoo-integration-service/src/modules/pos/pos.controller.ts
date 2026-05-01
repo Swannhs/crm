@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IdentityGuard } from '../../common/guards/identity.guard.js';
 import { PosService } from './pos.service.js';
@@ -68,7 +79,12 @@ export class PosController {
   createCart(@Body() body: { shopId?: string } = {}) {
     const resolvedShopId = this.resolveShopId(body?.shopId);
     const tables = this.posService.getTables(resolvedShopId);
-    const table = tables[0] ?? this.posService.createTable({ shopId: resolvedShopId, tableName: 'Takeout' });
+    const table =
+      tables[0] ??
+      this.posService.createTable({
+        shopId: resolvedShopId,
+        tableName: 'Takeout',
+      });
 
     return this.posService.createTableOrder({
       shopId: resolvedShopId,
@@ -90,7 +106,11 @@ export class PosController {
   ) {
     const order = this.posService.getTableOrder(cartId);
     const product = body?.productId
-      ? this.posService.getCatalog(order.shopId).find((item) => item.id === body.productId || item.sku === body.productId)
+      ? this.posService
+          .getCatalog(order.shopId)
+          .find(
+            (item) => item.id === body.productId || item.sku === body.productId,
+          )
       : undefined;
 
     const result = this.posService.addOrderItem(cartId, {
@@ -115,13 +135,18 @@ export class PosController {
   ) {
     const order = this.posService.getTableOrder(cartId);
     const qty = Math.max(1, Number(body?.qty || 1));
-    const lines = order.lines.map((line) => (line.id === lineId ? { ...line, quantity: qty } : line));
+    const lines = order.lines.map((line) =>
+      line.id === lineId ? { ...line, quantity: qty } : line,
+    );
     return this.posService.updateTableOrder({ id: cartId, lines });
   }
 
   @Delete('cart/:cartId/items/:lineId')
   @ApiOperation({ summary: 'Compatibility: Remove POS cart item' })
-  removeCartItem(@Param('cartId') cartId: string, @Param('lineId') lineId: string) {
+  removeCartItem(
+    @Param('cartId') cartId: string,
+    @Param('lineId') lineId: string,
+  ) {
     return this.posService.removeOrderItem(cartId, lineId);
   }
 
@@ -139,7 +164,10 @@ export class PosController {
 
   @Get('kds/queue')
   @ApiOperation({ summary: 'Get KDS queue' })
-  getKdsQueue(@Query('shopId') shopId: string, @Query('station') station?: string) {
+  getKdsQueue(
+    @Query('shopId') shopId: string,
+    @Query('station') station?: string,
+  ) {
     return this.posService.getKdsQueue(shopId, station);
   }
 
@@ -147,9 +175,17 @@ export class PosController {
   @ApiOperation({ summary: 'Update KDS line status' })
   updateKdsLineStatus(
     @Param('lineId') lineId: string,
-    @Body() body: { shopId: string; status: 'queued' | 'preparing' | 'ready' | 'served' },
+    @Body()
+    body: {
+      shopId: string;
+      status: 'queued' | 'preparing' | 'ready' | 'served';
+    },
   ) {
-    return this.posService.updateKdsLineStatus(body?.shopId, lineId, body?.status || 'queued');
+    return this.posService.updateKdsLineStatus(
+      body?.shopId,
+      lineId,
+      body?.status || 'queued',
+    );
   }
 
   @Get('cfd/snapshot')
@@ -224,7 +260,11 @@ export class PosController {
     @Param('tableNo') tableNo: string,
     @Body() body: { shopId: string; orderState: string },
   ) {
-    return this.posService.updateTableState(body?.shopId, tableNo, body?.orderState || '');
+    return this.posService.updateTableState(
+      body?.shopId,
+      tableNo,
+      body?.orderState || '',
+    );
   }
 
   @Patch('table-mode/update-guest-seats/:tableNo')
@@ -233,7 +273,12 @@ export class PosController {
     @Param('tableNo') tableNo: string,
     @Body() body: { shopId: string; guestCount: number; seats: any[] },
   ) {
-    return this.posService.updateGuestSeats(body?.shopId, tableNo, body?.guestCount ?? 0, body?.seats || []);
+    return this.posService.updateGuestSeats(
+      body?.shopId,
+      tableNo,
+      body?.guestCount ?? 0,
+      body?.seats || [],
+    );
   }
 
   @Get('table-orders')
@@ -358,7 +403,10 @@ export class PosController {
 
   @Get('maintenance/incidents')
   @ApiOperation({ summary: 'Get maintenance incidents' })
-  getMaintenanceIncidents(@Query('shopId') shopId: string, @Query('status') status?: string) {
+  getMaintenanceIncidents(
+    @Query('shopId') shopId: string,
+    @Query('status') status?: string,
+  ) {
     return this.posService.getMaintenanceIncidents(shopId, status);
   }
 
@@ -388,7 +436,10 @@ export class PosController {
 
   @Get('analytics/orders')
   @ApiOperation({ summary: 'Get POS order analytics' })
-  getOrderAnalytics(@Query('shopId') shopId: string, @Query('days') days?: string) {
+  getOrderAnalytics(
+    @Query('shopId') shopId: string,
+    @Query('days') days?: string,
+  ) {
     return this.posService.getOrderAnalytics(shopId, Number(days || 7));
   }
 

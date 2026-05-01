@@ -38,5 +38,4 @@ import { OdooAdapterModule } from './modules/odoo-adapter/odoo-adapter.module.js
     MagentoCompatibilityModule,
   ],
 })
-
 export class AppModule {}

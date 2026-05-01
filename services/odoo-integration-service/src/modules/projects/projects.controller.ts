@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, ParseIntPipe, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  ParseIntPipe,
+  BadRequestException,
+} from '@nestjs/common';
 import { ProjectsService } from './projects.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
@@ -9,7 +21,9 @@ export class ProjectsController {
   private parseBoardProjectId(boardId: string): number {
     const parsed = Number(String(boardId).replace(/^board-/, ''));
     if (!Number.isInteger(parsed) || parsed <= 0) {
-      throw new BadRequestException('Invalid boardId. Expected format: board-<projectId>.');
+      throw new BadRequestException(
+        'Invalid boardId. Expected format: board-<projectId>.',
+      );
     }
     return parsed;
   }
@@ -31,7 +45,10 @@ export class ProjectsController {
   }
 
   @Put('v1/projects/:id')
-  async updateProject(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async updateProject(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
     return this.projectsService.updateProject(id, data);
   }
 
@@ -59,7 +76,10 @@ export class ProjectsController {
   }
 
   @Post('v1/projects/:projectId/boards')
-  async createProjectBoard(@Param('projectId', ParseIntPipe) projectId: number, @Body() data: any) {
+  async createProjectBoard(
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Body() data: any,
+  ) {
     return this.projectsService.createBoard(projectId, data);
   }
 
@@ -78,14 +98,24 @@ export class ProjectsController {
   @Post('v1/boards/:boardId/columns')
   async createColumn(@Param('boardId') boardId: string, @Body() data: any) {
     const projectId = this.parseBoardProjectId(boardId);
-    const column = await this.projectsService.createColumnForProject(projectId, data);
+    const column = await this.projectsService.createColumnForProject(
+      projectId,
+      data,
+    );
     return { ...column, boardId, projectId };
   }
 
   @Patch('v1/columns/:id')
   async updateColumn(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
     const updated = await this.projectsService.updateColumn(id, data);
-    return updated ? { id: String(updated.id), name: updated.name, sequence: updated.sequence, fold: updated.fold } : null;
+    return updated
+      ? {
+          id: String(updated.id),
+          name: updated.name,
+          sequence: updated.sequence,
+          fold: updated.fold,
+        }
+      : null;
   }
 
   @Delete('v1/columns/:id')
@@ -95,9 +125,14 @@ export class ProjectsController {
   }
 
   @Post('v1/boards/:boardId/columns/reorder')
-  async reorderColumns(@Param('boardId') boardId: string, @Body() data: { orderedColumnIds?: Array<string | number> }) {
+  async reorderColumns(
+    @Param('boardId') boardId: string,
+    @Body() data: { orderedColumnIds?: Array<string | number> },
+  ) {
     const projectId = this.parseBoardProjectId(boardId);
-    const orderedColumnIds = Array.isArray(data?.orderedColumnIds) ? data.orderedColumnIds : [];
+    const orderedColumnIds = Array.isArray(data?.orderedColumnIds)
+      ? data.orderedColumnIds
+      : [];
     return this.projectsService.reorderColumns(projectId, orderedColumnIds);
   }
 
@@ -141,7 +176,10 @@ export class ProjectsController {
   }
 
   @Post('v1/tasks/:id/subtasks')
-  async createSubtask(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async createSubtask(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
     return this.projectsService.createSubtask(id, data);
   }
 
@@ -157,7 +195,10 @@ export class ProjectsController {
   }
 
   @Post('v1/comments/:commentId/replies')
-  async addReply(@Param('commentId', ParseIntPipe) commentId: number, @Body() data: any) {
+  async addReply(
+    @Param('commentId', ParseIntPipe) commentId: number,
+    @Body() data: any,
+  ) {
     return this.projectsService.addCommentReply(commentId, data);
   }
 }

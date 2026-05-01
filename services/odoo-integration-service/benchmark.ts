@@ -1,41 +1,60 @@
-import { ContactsService } from './src/modules/contacts/contacts.service.js';
-import { PrismaService } from './src/common/prisma/prisma.service.js';
+import { SyncService } from './src/modules/sync/sync.service.js';
 import { OdooClientService } from './src/modules/odoo-base/odoo-client.service.js';
+import { PrismaService } from './src/common/prisma/prisma.service.js';
+import { ConfigService } from '@nestjs/config';
+
+// Patch axios for the get request
+import axios from 'axios';
+const originalGet = axios.get;
+axios.get = async (url, config) => {
+  if (url.includes('magento/customers')) {
+    return {
+      data: {
+        data: {
+          items: Array.from({ length: 1000 }).map((_, i) => ({
+            id: i,
+            firstname: `Test${i}`,
+            lastname: `User${i}`,
+            email: `test${i}@example.com`,
+          })),
+        },
+      },
+    } as any;
+  }
+  return originalGet(url, config);
+};
+
+// Simulate network delay for JSON-RPC
+const originalPost = axios.post;
+axios.post = async (url, data, config) => {
+  if (url.includes('jsonrpc')) {
+    await new Promise(resolve => setTimeout(resolve, 5)); // 5ms delay per request
+  }
+  return originalPost(url, data, config);
+};
+
 
 async function run() {
-  const odooClient = {
-    execute: async (model: string, method: string, args: any[]) => {
-      await new Promise(r => setTimeout(r, 50)); // simulate latency
-      return Math.floor(Math.random() * 100000);
-    }
-  } as any;
+  process.env.MAGENTO_INTEGRATION_URL = 'http://magento.local';
+  const config = new ConfigService();
+  const odooClient = new OdooClientService(config);
 
   const prisma = {
     contactMap: {
-      upsert: async () => {
-        await new Promise(r => setTimeout(r, 10)); // simulate latency
-        return {};
-      }
+      upsert: async () => ({}),
     }
-  } as any;
+  } as unknown as PrismaService;
 
-  const service = new ContactsService(odooClient, prisma);
+  const syncService = new SyncService(odooClient, prisma);
 
-  // Create a large CSV
-  let csv = "Name,Email,Phone,Mobile,IsCompany,Street,City,VAT\n";
-  for (let i = 0; i < 200; i++) {
-    csv += `Test ${i},test${i}@example.com,123456789,123456789,false,Test Street,Test City,123456\n`;
-  }
+  // Warmup
+  await syncService.syncMagentoCustomers('org1');
 
-  const file = {
-    buffer: Buffer.from(csv)
-  } as any;
-
+  // Actual test
   const start = Date.now();
-  await service.import(file);
+  await syncService.syncMagentoCustomers('org1');
   const end = Date.now();
-
-  console.log(`Import took ${end - start}ms`);
+  console.log(`Sync 1000 items took ${end - start}ms`);
 }
 
-run().catch(console.error);
+run();

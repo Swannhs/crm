@@ -7,8 +7,16 @@ import { CreateOrderDto } from './dto/order.dto.js';
 export class SalesService {
   private readonly model = 'sale.order';
   private readonly defaultFields = [
-    'id', 'name', 'partner_id', 'date_order', 'amount_total', 
-    'amount_untaxed', 'amount_tax', 'state', 'invoice_status', 'order_line'
+    'id',
+    'name',
+    'partner_id',
+    'date_order',
+    'amount_total',
+    'amount_untaxed',
+    'amount_tax',
+    'state',
+    'invoice_status',
+    'order_line',
   ];
 
   constructor(private readonly odooClient: OdooClientService) {}
@@ -20,13 +28,12 @@ export class SalesService {
     const domain: any[] = search ? [['name', 'ilike', search]] : [];
 
     const [data, total] = await Promise.all([
-      this.odooClient.searchRead(
-        this.model,
-        domain,
-        this.defaultFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'date_order desc' }
-      ),
-      this.odooClient.execute(this.model, 'search_count', [domain])
+      this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: 'date_order desc',
+      }),
+      this.odooClient.execute(this.model, 'search_count', [domain]),
     ]);
 
     return { data, total };
@@ -36,7 +43,7 @@ export class SalesService {
     const [order] = await this.odooClient.searchRead(
       this.model,
       [['id', '=', id]],
-      [...this.defaultFields, 'order_line']
+      [...this.defaultFields, 'order_line'],
     );
     return order;
   }
@@ -45,7 +52,7 @@ export class SalesService {
     // Format lines for Odoo (0, 0, { values })
     const formattedData = {
       ...data,
-      order_line: data.order_line.map(line => [0, 0, line])
+      order_line: data.order_line.map((line) => [0, 0, line]),
     };
     return this.odooClient.execute(this.model, 'create', [formattedData]);
   }
@@ -55,7 +62,9 @@ export class SalesService {
   }
 
   async createInvoice(id: number) {
-    return this.odooClient.execute(this.model, 'action_create_invoices', [[id]]);
+    return this.odooClient.execute(this.model, 'action_create_invoices', [
+      [id],
+    ]);
   }
 
   async update(id: number, data: any) {
