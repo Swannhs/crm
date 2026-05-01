@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
 type PosSeat = { seatNo: number };
@@ -98,7 +102,12 @@ type PosTableOrder = {
   tableName: string;
   channel: 'dine_in' | 'takeaway' | 'delivery' | 'ecommerce';
   source: 'odoo_pos' | 'magento' | 'manual';
-  fulfillmentStatus: 'draft' | 'sent_to_kitchen' | 'ready_for_pickup' | 'out_for_delivery' | 'completed';
+  fulfillmentStatus:
+    | 'draft'
+    | 'sent_to_kitchen'
+    | 'ready_for_pickup'
+    | 'out_for_delivery'
+    | 'completed';
   customerId: string | null;
   customerName: string | null;
   customerPhone: string | null;
@@ -174,7 +183,13 @@ type PosDevice = {
   id: string;
   shopId: string;
   name: string;
-  kind: 'pos-terminal' | 'kds-screen' | 'cfd-screen' | 'printer' | 'scanner' | 'network';
+  kind:
+    | 'pos-terminal'
+    | 'kds-screen'
+    | 'cfd-screen'
+    | 'printer'
+    | 'scanner'
+    | 'network';
   location: string | null;
   status: 'online' | 'offline' | 'maintenance';
   lastHeartbeatAt: string;
@@ -203,10 +218,16 @@ export class PosService {
   private readonly catalogByShop = new Map<string, PosMenuItem[]>();
   private readonly ticketCounterByShop = new Map<string, number>();
   private readonly devicesByShop = new Map<string, PosDevice[]>();
-  private readonly incidentsByShop = new Map<string, PosMaintenanceIncident[]>();
+  private readonly incidentsByShop = new Map<
+    string,
+    PosMaintenanceIncident[]
+  >();
   private readonly customersByShop = new Map<string, PosCustomer[]>();
   private readonly inventoryByShop = new Map<string, PosInventoryItem[]>();
-  private readonly inventoryMovementsByShop = new Map<string, PosInventoryMovement[]>();
+  private readonly inventoryMovementsByShop = new Map<
+    string,
+    PosInventoryMovement[]
+  >();
   private readonly refundsByShop = new Map<string, PosRefund[]>();
 
   getSettings(shopId: string) {
@@ -235,7 +256,9 @@ export class PosService {
     return this.customersByShop.get(shopId)!;
   }
 
-  upsertCustomer(input: Partial<PosCustomer> & { shopId?: string; name?: string }) {
+  upsertCustomer(
+    input: Partial<PosCustomer> & { shopId?: string; name?: string },
+  ) {
     const shopId = this.resolveShopId(input.shopId);
     this.ensureShop(shopId);
 
@@ -243,9 +266,12 @@ export class PosService {
     if (input.id) {
       const existing = customers.find((customer) => customer.id === input.id);
       if (!existing) throw new NotFoundException('Customer not found');
-      if (typeof input.name === 'string' && input.name.trim()) existing.name = input.name.trim();
-      if (typeof input.email === 'string' || input.email === null) existing.email = input.email ?? null;
-      if (typeof input.phone === 'string' || input.phone === null) existing.phone = input.phone ?? null;
+      if (typeof input.name === 'string' && input.name.trim())
+        existing.name = input.name.trim();
+      if (typeof input.email === 'string' || input.email === null)
+        existing.email = input.email ?? null;
+      if (typeof input.phone === 'string' || input.phone === null)
+        existing.phone = input.phone ?? null;
       existing.updatedAt = new Date().toISOString();
       return existing;
     }
@@ -268,12 +294,21 @@ export class PosService {
     return customer;
   }
 
-  assignOrderCustomer(orderId: string, input: { customerId?: string; customerName?: string; customerPhone?: string }) {
+  assignOrderCustomer(
+    orderId: string,
+    input: {
+      customerId?: string;
+      customerName?: string;
+      customerPhone?: string;
+    },
+  ) {
     const { order, shopId } = this.findOrderById(orderId);
     this.ensureShop(shopId);
 
     if (input.customerId) {
-      const customer = this.customersByShop.get(shopId)!.find((item) => item.id === input.customerId);
+      const customer = this.customersByShop
+        .get(shopId)!
+        .find((item) => item.id === input.customerId);
       if (!customer) throw new NotFoundException('Customer not found');
       order.customerId = customer.id;
       order.customerName = customer.name;
@@ -299,10 +334,17 @@ export class PosService {
   ) {
     const { order } = this.findOrderById(orderId);
 
-    if (input.fulfillmentStatus) order.fulfillmentStatus = this.normalizeFulfillmentStatus(input.fulfillmentStatus);
-    if (input.orderStatus) order.orderStatus = this.normalizeOrderStatus(input.orderStatus);
+    if (input.fulfillmentStatus)
+      order.fulfillmentStatus = this.normalizeFulfillmentStatus(
+        input.fulfillmentStatus,
+      );
+    if (input.orderStatus)
+      order.orderStatus = this.normalizeOrderStatus(input.orderStatus);
     if (input.channel) order.channel = this.normalizeChannel(input.channel);
-    if (typeof input.deliveryAddress === 'string' || input.deliveryAddress === null) {
+    if (
+      typeof input.deliveryAddress === 'string' ||
+      input.deliveryAddress === null
+    ) {
       order.deliveryAddress = input.deliveryAddress ?? null;
     }
     order.updatedAt = new Date().toISOString();
@@ -315,11 +357,14 @@ export class PosService {
   ) {
     const { order, shopId } = this.findOrderById(orderId);
     const maxRefundable = this.roundMoney(order.paidAmount);
-    if (maxRefundable <= 0) throw new BadRequestException('Order has no captured payment to refund');
+    if (maxRefundable <= 0)
+      throw new BadRequestException('Order has no captured payment to refund');
 
     const amount = this.roundMoney(Number(input.amount ?? maxRefundable));
-    if (!Number.isFinite(amount) || amount <= 0) throw new BadRequestException('Refund amount must be greater than zero');
-    if (amount > maxRefundable) throw new BadRequestException('Refund amount exceeds paid amount');
+    if (!Number.isFinite(amount) || amount <= 0)
+      throw new BadRequestException('Refund amount must be greater than zero');
+    if (amount > maxRefundable)
+      throw new BadRequestException('Refund amount exceeds paid amount');
 
     const refund: PosRefund = {
       id: randomUUID(),
@@ -353,7 +398,9 @@ export class PosService {
     this.ensureShop(shopId);
     const inventory = this.inventoryByShop.get(shopId)!;
     const movements = this.inventoryMovementsByShop.get(shopId)!;
-    const lowStock = inventory.filter((item) => item.onHand <= item.reorderPoint);
+    const lowStock = inventory.filter(
+      (item) => item.onHand <= item.reorderPoint,
+    );
     return { inventory, lowStock, movements: movements.slice(0, 50) };
   }
 
@@ -367,13 +414,16 @@ export class PosService {
   }) {
     const shopId = this.resolveShopId(input.shopId);
     this.ensureShop(shopId);
-    if (!input.inventoryItemId) throw new BadRequestException('inventoryItemId is required');
+    if (!input.inventoryItemId)
+      throw new BadRequestException('inventoryItemId is required');
     const quantityDelta = Number(input.quantityDelta ?? 0);
     if (!Number.isFinite(quantityDelta) || quantityDelta === 0) {
       throw new BadRequestException('quantityDelta must be non-zero');
     }
 
-    const item = this.inventoryByShop.get(shopId)!.find((inv) => inv.id === input.inventoryItemId);
+    const item = this.inventoryByShop
+      .get(shopId)!
+      .find((inv) => inv.id === input.inventoryItemId);
     if (!item) throw new NotFoundException('Inventory item not found');
 
     item.onHand = Math.max(0, this.roundMoney(item.onHand + quantityDelta));
@@ -398,25 +448,43 @@ export class PosService {
     const orders = this.tableOrdersByShop.get(shopId)!;
     const lookbackDays = Math.max(1, Math.min(90, Number(days) || 7));
     const fromTs = Date.now() - lookbackDays * 24 * 60 * 60 * 1000;
-    const scoped = orders.filter((order) => new Date(order.createdAt).getTime() >= fromTs);
-    const revenue = this.roundMoney(scoped.reduce((sum, order) => sum + order.totalAmount, 0));
-    const avgTicket = this.roundMoney(scoped.length ? revenue / scoped.length : 0);
+    const scoped = orders.filter(
+      (order) => new Date(order.createdAt).getTime() >= fromTs,
+    );
+    const revenue = this.roundMoney(
+      scoped.reduce((sum, order) => sum + order.totalAmount, 0),
+    );
+    const avgTicket = this.roundMoney(
+      scoped.length ? revenue / scoped.length : 0,
+    );
     const refunds = (this.refundsByShop.get(shopId) || []).filter(
       (refund) => new Date(refund.createdAt).getTime() >= fromTs,
     );
 
     const byChannel = scoped.reduce(
       (acc, order) => {
-        acc[order.channel] = this.roundMoney((acc[order.channel] || 0) + order.totalAmount);
+        acc[order.channel] = this.roundMoney(
+          (acc[order.channel] || 0) + order.totalAmount,
+        );
         return acc;
       },
-      { dine_in: 0, takeaway: 0, delivery: 0, ecommerce: 0 } as Record<PosTableOrder['channel'], number>,
+      { dine_in: 0, takeaway: 0, delivery: 0, ecommerce: 0 } as Record<
+        PosTableOrder['channel'],
+        number
+      >,
     );
 
-    const topItems = new Map<string, { name: string; quantity: number; revenue: number }>();
+    const topItems = new Map<
+      string,
+      { name: string; quantity: number; revenue: number }
+    >();
     scoped.forEach((order) => {
       order.lines.forEach((line) => {
-        const existing = topItems.get(line.name) || { name: line.name, quantity: 0, revenue: 0 };
+        const existing = topItems.get(line.name) || {
+          name: line.name,
+          quantity: 0,
+          revenue: 0,
+        };
         existing.quantity += line.quantity;
         existing.revenue = this.roundMoney(existing.revenue + line.lineTotal);
         topItems.set(line.name, existing);
@@ -428,7 +496,9 @@ export class PosService {
       orderCount: scoped.length,
       revenue,
       avgTicket,
-      refundAmount: this.roundMoney(refunds.reduce((sum, refund) => sum + refund.amount, 0)),
+      refundAmount: this.roundMoney(
+        refunds.reduce((sum, refund) => sum + refund.amount, 0),
+      ),
       refundCount: refunds.length,
       byChannel,
       topItems: Array.from(topItems.values())
@@ -463,12 +533,23 @@ export class PosService {
         deliveryAddress: isDelivery ? `${100 + i} Commerce Ave` : null,
         seats: [{ seatNo: 1 }],
         lines: [
-          { name: itemA?.name || 'Chef Special', quantity: 1 + (i % 2), unitPrice: itemA?.unitPrice || 12.5 },
-          { name: itemB?.name || 'House Drink', quantity: 1, unitPrice: itemB?.unitPrice || 5.5 },
+          {
+            name: itemA?.name || 'Chef Special',
+            quantity: 1 + (i % 2),
+            unitPrice: itemA?.unitPrice || 12.5,
+          },
+          {
+            name: itemB?.name || 'House Drink',
+            quantity: 1,
+            unitPrice: itemB?.unitPrice || 5.5,
+          },
         ],
       });
       if (i % 4 === 0) {
-        this.addPayment(order.id, { method: 'card', amount: order.totalAmount });
+        this.addPayment(order.id, {
+          method: 'card',
+          amount: order.totalAmount,
+        });
       }
       created.push(order);
     }
@@ -499,20 +580,27 @@ export class PosService {
           note: line.note,
         })),
       )
-      .filter((ticket) => (normalizedStation ? ticket.station === normalizedStation : true))
+      .filter((ticket) =>
+        normalizedStation ? ticket.station === normalizedStation : true,
+      )
       .sort((a, b) => String(a.queuedAt).localeCompare(String(b.queuedAt)));
 
     return {
       queue,
       totals: {
         queued: queue.filter((item) => item.prepStatus === 'queued').length,
-        preparing: queue.filter((item) => item.prepStatus === 'preparing').length,
+        preparing: queue.filter((item) => item.prepStatus === 'preparing')
+          .length,
         ready: queue.filter((item) => item.prepStatus === 'ready').length,
       },
     };
   }
 
-  updateKdsLineStatus(shopId: string, lineId: string, status: 'queued' | 'preparing' | 'ready' | 'served') {
+  updateKdsLineStatus(
+    shopId: string,
+    lineId: string,
+    status: 'queued' | 'preparing' | 'ready' | 'served',
+  ) {
     this.ensureShop(shopId);
     const { order, line } = this.findLineById(shopId, lineId);
     const nextStatus = status || 'queued';
@@ -520,7 +608,11 @@ export class PosService {
 
     line.prepStatus = nextStatus;
     if (nextStatus === 'preparing' && !line.startedAt) line.startedAt = now;
-    if ((nextStatus === 'ready' || nextStatus === 'served') && !line.completedAt) line.completedAt = now;
+    if (
+      (nextStatus === 'ready' || nextStatus === 'served') &&
+      !line.completedAt
+    )
+      line.completedAt = now;
     if (nextStatus === 'queued') {
       line.startedAt = null;
       line.completedAt = null;
@@ -528,7 +620,9 @@ export class PosService {
 
     order.updatedAt = now;
     if (nextStatus === 'ready' || nextStatus === 'served') {
-      const allReady = order.lines.every((item) => item.prepStatus === 'ready' || item.prepStatus === 'served');
+      const allReady = order.lines.every(
+        (item) => item.prepStatus === 'ready' || item.prepStatus === 'served',
+      );
       if (allReady && order.orderStatus === 'open') {
         order.orderStatus = 'sent';
       }
@@ -541,7 +635,9 @@ export class PosService {
     this.ensureShop(shopId);
     const activeOrders = this.tableOrdersByShop
       .get(shopId)!
-      .filter((order) => !['cancelled', 'paid', 'closed'].includes(order.orderStatus))
+      .filter(
+        (order) => !['cancelled', 'paid', 'closed'].includes(order.orderStatus),
+      )
       .map((order) => ({
         orderId: order.id,
         ticketNo: order.ticketNo,
@@ -555,7 +651,10 @@ export class PosService {
           order.lines.length === 0
             ? 0
             : Math.round(
-                (order.lines.filter((line) => line.prepStatus === 'ready' || line.prepStatus === 'served').length /
+                (order.lines.filter(
+                  (line) =>
+                    line.prepStatus === 'ready' || line.prepStatus === 'served',
+                ).length /
                   order.lines.length) *
                   100,
               ),
@@ -584,7 +683,13 @@ export class PosService {
     return this.devicesByShop.get(shopId)!;
   }
 
-  upsertMaintenanceDevice(input: Partial<PosDevice> & { shopId?: string; name?: string; kind?: PosDevice['kind'] }) {
+  upsertMaintenanceDevice(
+    input: Partial<PosDevice> & {
+      shopId?: string;
+      name?: string;
+      kind?: PosDevice['kind'];
+    },
+  ) {
     const shopId = this.resolveShopId(input.shopId);
     this.ensureShop(shopId);
 
@@ -594,9 +699,11 @@ export class PosService {
       if (!existing) throw new NotFoundException('Device not found');
       if (input.name) existing.name = input.name;
       if (input.kind) existing.kind = input.kind;
-      if (typeof input.location === 'string' || input.location === null) existing.location = input.location ?? null;
+      if (typeof input.location === 'string' || input.location === null)
+        existing.location = input.location ?? null;
       if (input.status) existing.status = input.status;
-      if (typeof input.notes === 'string' || input.notes === null) existing.notes = input.notes ?? null;
+      if (typeof input.notes === 'string' || input.notes === null)
+        existing.notes = input.notes ?? null;
       existing.lastHeartbeatAt = new Date().toISOString();
       return existing;
     }
@@ -621,7 +728,9 @@ export class PosService {
     const incidents = this.incidentsByShop.get(shopId)!;
     if (!status) return incidents;
     const normalized = status.toLowerCase();
-    return incidents.filter((incident) => incident.status.toLowerCase() === normalized);
+    return incidents.filter(
+      (incident) => incident.status.toLowerCase() === normalized,
+    );
   }
 
   createMaintenanceIncident(input: {
@@ -633,7 +742,8 @@ export class PosService {
   }) {
     const shopId = this.resolveShopId(input.shopId);
     this.ensureShop(shopId);
-    if (!input.title?.trim()) throw new BadRequestException('title is required');
+    if (!input.title?.trim())
+      throw new BadRequestException('title is required');
 
     const incident: PosMaintenanceIncident = {
       id: randomUUID(),
@@ -650,7 +760,10 @@ export class PosService {
     return incident;
   }
 
-  updateMaintenanceIncident(id: string, input: Partial<PosMaintenanceIncident>) {
+  updateMaintenanceIncident(
+    id: string,
+    input: Partial<PosMaintenanceIncident>,
+  ) {
     for (const incidents of this.incidentsByShop.values()) {
       const incident = incidents.find((item) => item.id === id);
       if (!incident) continue;
@@ -680,11 +793,25 @@ export class PosService {
     this.ensureShop(shopId);
     const settings = this.settingsByShop.get(shopId)!;
 
-    if (typeof input.numberPadFirstValue === 'number') settings.numberPadFirstValue = Math.max(0, Math.round(input.numberPadFirstValue));
-    if (typeof input.numberPadSecondValue === 'number') settings.numberPadSecondValue = Math.max(0, Math.round(input.numberPadSecondValue));
-    if (typeof input.numberPadThirdValue === 'number') settings.numberPadThirdValue = Math.max(0, Math.round(input.numberPadThirdValue));
-    if (typeof input.taxRate === 'number') settings.taxRate = this.normalizeRate(input.taxRate);
-    if (typeof input.serviceChargeRate === 'number') settings.serviceChargeRate = this.normalizeRate(input.serviceChargeRate);
+    if (typeof input.numberPadFirstValue === 'number')
+      settings.numberPadFirstValue = Math.max(
+        0,
+        Math.round(input.numberPadFirstValue),
+      );
+    if (typeof input.numberPadSecondValue === 'number')
+      settings.numberPadSecondValue = Math.max(
+        0,
+        Math.round(input.numberPadSecondValue),
+      );
+    if (typeof input.numberPadThirdValue === 'number')
+      settings.numberPadThirdValue = Math.max(
+        0,
+        Math.round(input.numberPadThirdValue),
+      );
+    if (typeof input.taxRate === 'number')
+      settings.taxRate = this.normalizeRate(input.taxRate);
+    if (typeof input.serviceChargeRate === 'number')
+      settings.serviceChargeRate = this.normalizeRate(input.serviceChargeRate);
     settings.updatedAt = new Date().toISOString();
 
     this.repriceOrders(shopId);
@@ -700,7 +827,8 @@ export class PosService {
     this.ensureShop(shopId);
     const settings = this.settingsByShop.get(shopId)!;
 
-    if (typeof input.tipEnabled === 'boolean') settings.tipEnabled = input.tipEnabled;
+    if (typeof input.tipEnabled === 'boolean')
+      settings.tipEnabled = input.tipEnabled;
     if (Array.isArray(input.tipPercentages) && input.tipPercentages.length) {
       settings.tipPercentages = input.tipPercentages
         .map((value) => Number(value))
@@ -716,7 +844,9 @@ export class PosService {
     return this.tablesByShop.get(shopId)!;
   }
 
-  createTable(input: Partial<PosTable> & { shopId?: string; tableName?: string }) {
+  createTable(
+    input: Partial<PosTable> & { shopId?: string; tableName?: string },
+  ) {
     const shopId = this.resolveShopId(input.shopId);
     if (!input.tableName?.trim()) {
       throw new BadRequestException('tableName is required');
@@ -732,7 +862,11 @@ export class PosService {
       tableName: input.tableName.trim(),
       tableShape: input.tableShape || 'square',
       tableColor: input.tableColor ?? null,
-      tableDimension: input.tableDimension ?? { width: 1, length: 1, scale: 'm' },
+      tableDimension: input.tableDimension ?? {
+        width: 1,
+        length: 1,
+        scale: 'm',
+      },
       seats: this.normalizeSeats(input.seats, 4),
       createdAt: now,
       updatedAt: now,
@@ -758,11 +892,16 @@ export class PosService {
     const { table, shopId } = this.findTableById(input.id);
     const previousTableName = table.tableName;
 
-    if (typeof input.tableName === 'string' && input.tableName.trim()) table.tableName = input.tableName.trim();
-    if (typeof input.tableShape === 'string' && input.tableShape.trim()) table.tableShape = input.tableShape.trim();
-    if (typeof input.tableColor === 'string') table.tableColor = input.tableColor;
-    if (typeof input.roomId === 'string' || input.roomId === null) table.roomId = input.roomId ?? null;
-    if (Array.isArray(input.seats)) table.seats = this.normalizeSeats(input.seats, table.seats.length || 4);
+    if (typeof input.tableName === 'string' && input.tableName.trim())
+      table.tableName = input.tableName.trim();
+    if (typeof input.tableShape === 'string' && input.tableShape.trim())
+      table.tableShape = input.tableShape.trim();
+    if (typeof input.tableColor === 'string')
+      table.tableColor = input.tableColor;
+    if (typeof input.roomId === 'string' || input.roomId === null)
+      table.roomId = input.roomId ?? null;
+    if (Array.isArray(input.seats))
+      table.seats = this.normalizeSeats(input.seats, table.seats.length || 4);
     table.updatedAt = new Date().toISOString();
 
     const mode = this.findModeByTableNo(shopId, previousTableName);
@@ -788,12 +927,16 @@ export class PosService {
     this.tablesByShop.set(shopId, nextTables);
 
     const nextModes = this.tableModesByShop.get(shopId)!.filter((item) => {
-      const table = nextTables.find((t) => t.tableName.toLowerCase() === item.tableNo.toLowerCase());
+      const table = nextTables.find(
+        (t) => t.tableName.toLowerCase() === item.tableNo.toLowerCase(),
+      );
       return Boolean(table);
     });
     this.tableModesByShop.set(shopId, nextModes);
 
-    const nextOrders = this.tableOrdersByShop.get(shopId)!.filter((item) => item.tableId !== id);
+    const nextOrders = this.tableOrdersByShop
+      .get(shopId)!
+      .filter((item) => item.tableId !== id);
     this.tableOrdersByShop.set(shopId, nextOrders);
 
     return { deleted: true, id };
@@ -810,7 +953,8 @@ export class PosService {
 
   decreaseSeat(id: string) {
     const { table } = this.findTableById(id);
-    if (table.seats.length > 1) table.seats = table.seats.slice(0, table.seats.length - 1);
+    if (table.seats.length > 1)
+      table.seats = table.seats.slice(0, table.seats.length - 1);
     table.updatedAt = new Date().toISOString();
     this.syncModeSeats(table.shopId, table.tableName, table.seats);
     return table;
@@ -829,17 +973,27 @@ export class PosService {
     return mode;
   }
 
-  updateGuestSeats(shopId: string, tableNo: string, guestCount: number, seats: PosSeat[]) {
+  updateGuestSeats(
+    shopId: string,
+    tableNo: string,
+    guestCount: number,
+    seats: PosSeat[],
+  ) {
     this.ensureShop(shopId);
     const mode = this.findModeByTableNo(shopId, tableNo);
     mode.guestCount = Math.max(0, Number(guestCount) || 0);
-    mode.seats = this.normalizeSeats(seats, mode.guestCount || mode.seats.length || 1);
+    mode.seats = this.normalizeSeats(
+      seats,
+      mode.guestCount || mode.seats.length || 1,
+    );
     return mode;
   }
 
   getTableOrders(shopId: string) {
     this.ensureShop(shopId);
-    return this.tableOrdersByShop.get(shopId)!.map((order) => this.withReceipt(order));
+    return this.tableOrdersByShop
+      .get(shopId)!
+      .map((order) => this.withReceipt(order));
   }
 
   getTableOrder(orderId: string) {
@@ -861,7 +1015,9 @@ export class PosService {
     if (!input.tableId) throw new BadRequestException('tableId is required');
     this.ensureShop(shopId);
 
-    const table = this.tablesByShop.get(shopId)!.find((item) => item.id === input.tableId);
+    const table = this.tablesByShop
+      .get(shopId)!
+      .find((item) => item.id === input.tableId);
     if (!table) throw new NotFoundException('Table not found');
 
     const now = new Date().toISOString();
@@ -876,7 +1032,9 @@ export class PosService {
       tableName: input.tableName || table.tableName,
       channel: this.normalizeChannel(input.channel),
       source: this.normalizeSource(input.source),
-      fulfillmentStatus: this.normalizeFulfillmentStatus(input.fulfillmentStatus),
+      fulfillmentStatus: this.normalizeFulfillmentStatus(
+        input.fulfillmentStatus,
+      ),
       customerId: input.customerId || null,
       customerName: input.customerName?.trim() || null,
       customerPhone: input.customerPhone?.trim() || null,
@@ -903,62 +1061,88 @@ export class PosService {
     return this.withReceipt(order);
   }
 
-  updateTableOrder(input: Partial<PosTableOrder> & { id?: string; lines?: any[] }) {
+  updateTableOrder(
+    input: Partial<PosTableOrder> & { id?: string; lines?: any[] },
+  ) {
     if (!input.id) throw new BadRequestException('id is required');
     const { order, shopId } = this.findOrderById(input.id);
 
-    if (typeof input.tableName === 'string' && input.tableName.trim()) order.tableName = input.tableName.trim();
-    if (typeof input.orderStatus === 'string') order.orderStatus = this.normalizeOrderStatus(input.orderStatus);
-    if (typeof input.channel === 'string') order.channel = this.normalizeChannel(input.channel);
-    if (typeof input.source === 'string') order.source = this.normalizeSource(input.source);
+    if (typeof input.tableName === 'string' && input.tableName.trim())
+      order.tableName = input.tableName.trim();
+    if (typeof input.orderStatus === 'string')
+      order.orderStatus = this.normalizeOrderStatus(input.orderStatus);
+    if (typeof input.channel === 'string')
+      order.channel = this.normalizeChannel(input.channel);
+    if (typeof input.source === 'string')
+      order.source = this.normalizeSource(input.source);
     if (typeof input.fulfillmentStatus === 'string') {
-      order.fulfillmentStatus = this.normalizeFulfillmentStatus(input.fulfillmentStatus);
+      order.fulfillmentStatus = this.normalizeFulfillmentStatus(
+        input.fulfillmentStatus,
+      );
     }
     if (typeof input.customerName === 'string' || input.customerName === null) {
       order.customerName = input.customerName?.trim() || null;
     }
-    if (typeof input.customerPhone === 'string' || input.customerPhone === null) {
+    if (
+      typeof input.customerPhone === 'string' ||
+      input.customerPhone === null
+    ) {
       order.customerPhone = input.customerPhone?.trim() || null;
     }
-    if (typeof input.deliveryAddress === 'string' || input.deliveryAddress === null) {
+    if (
+      typeof input.deliveryAddress === 'string' ||
+      input.deliveryAddress === null
+    ) {
       order.deliveryAddress = input.deliveryAddress?.trim() || null;
     }
-    if (Array.isArray(input.seats)) order.seats = this.normalizeSeats(input.seats, order.seats.length || 1);
-    if (Array.isArray(input.lines)) order.lines = this.normalizeIncomingLines(shopId, input.lines);
-    if (typeof input.discountAmount === 'number') order.discountAmount = Math.max(0, Number(input.discountAmount) || 0);
-    if (typeof input.tipAmount === 'number') order.tipAmount = Math.max(0, Number(input.tipAmount) || 0);
+    if (Array.isArray(input.seats))
+      order.seats = this.normalizeSeats(input.seats, order.seats.length || 1);
+    if (Array.isArray(input.lines))
+      order.lines = this.normalizeIncomingLines(shopId, input.lines);
+    if (typeof input.discountAmount === 'number')
+      order.discountAmount = Math.max(0, Number(input.discountAmount) || 0);
+    if (typeof input.tipAmount === 'number')
+      order.tipAmount = Math.max(0, Number(input.tipAmount) || 0);
     order.updatedAt = new Date().toISOString();
 
     this.recalculateOrder(shopId, order);
     return this.withReceipt(order);
   }
 
-  addOrderItem(orderId: string, payload: {
-    menuItemId?: string;
-    name?: string;
-    quantity?: number;
-    unitPrice?: number;
-    taxRate?: number;
-    note?: string;
-    discountAmount?: number;
-  }) {
+  addOrderItem(
+    orderId: string,
+    payload: {
+      menuItemId?: string;
+      name?: string;
+      quantity?: number;
+      unitPrice?: number;
+      taxRate?: number;
+      note?: string;
+      discountAmount?: number;
+    },
+  ) {
     const { order, shopId } = this.findOrderById(orderId);
     const settings = this.settingsByShop.get(shopId)!;
     const quantity = Math.max(1, Number(payload.quantity) || 1);
     const discountAmount = Math.max(0, Number(payload.discountAmount) || 0);
     const menuItem = payload.menuItemId
-      ? this.catalogByShop.get(shopId)!.find((item) => item.id === payload.menuItemId)
+      ? this.catalogByShop
+          .get(shopId)!
+          .find((item) => item.id === payload.menuItemId)
       : undefined;
 
     const itemName = payload.name || menuItem?.name;
-    if (!itemName) throw new BadRequestException('name or menuItemId is required');
+    if (!itemName)
+      throw new BadRequestException('name or menuItemId is required');
 
     const unitPrice = Number(payload.unitPrice ?? menuItem?.unitPrice ?? 0);
     if (!Number.isFinite(unitPrice) || unitPrice < 0) {
       throw new BadRequestException('unitPrice must be a non-negative number');
     }
 
-    const taxRate = this.normalizeRate(payload.taxRate ?? menuItem?.taxRate ?? settings.taxRate);
+    const taxRate = this.normalizeRate(
+      payload.taxRate ?? menuItem?.taxRate ?? settings.taxRate,
+    );
     const lineSubtotal = this.roundMoney(unitPrice * quantity);
     const lineTax = this.roundMoney((lineSubtotal - discountAmount) * taxRate);
     const lineTotal = this.roundMoney(lineSubtotal - discountAmount + lineTax);
@@ -1000,12 +1184,15 @@ export class PosService {
     return this.withReceipt(order);
   }
 
-  addPayment(orderId: string, payload: {
-    method?: 'cash' | 'card' | 'wallet' | 'other';
-    amount?: number;
-    tipAmount?: number;
-    reference?: string;
-  }) {
+  addPayment(
+    orderId: string,
+    payload: {
+      method?: 'cash' | 'card' | 'wallet' | 'other';
+      amount?: number;
+      tipAmount?: number;
+      reference?: string;
+    },
+  ) {
     const { order, shopId } = this.findOrderById(orderId);
     const amount = Number(payload.amount ?? 0);
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -1047,7 +1234,9 @@ export class PosService {
 
   deleteTableOrder(id: string) {
     const { shopId } = this.findOrderById(id);
-    const nextOrders = this.tableOrdersByShop.get(shopId)!.filter((item) => item.id !== id);
+    const nextOrders = this.tableOrdersByShop
+      .get(shopId)!
+      .filter((item) => item.id !== id);
     this.tableOrdersByShop.set(shopId, nextOrders);
     return { deleted: true, id };
   }
@@ -1073,7 +1262,11 @@ export class PosService {
     return shift;
   }
 
-  closeShift(input: { shopId?: string; shiftId?: string; closingCash?: number }) {
+  closeShift(input: {
+    shopId?: string;
+    shiftId?: string;
+    closingCash?: number;
+  }) {
     const shopId = this.resolveShopId(input.shopId);
     this.ensureShop(shopId);
 
@@ -1095,7 +1288,9 @@ export class PosService {
       .reduce((sum, payment) => sum + payment.amount, 0);
 
     shift.expectedCash = this.roundMoney(shift.openingCash + cashPayments);
-    shift.closingCash = this.roundMoney(Number(input.closingCash ?? shift.expectedCash));
+    shift.closingCash = this.roundMoney(
+      Number(input.closingCash ?? shift.expectedCash),
+    );
     shift.closedAt = new Date().toISOString();
     shift.state = 'closed';
 
@@ -1161,11 +1356,51 @@ export class PosService {
     );
 
     this.catalogByShop.set(shopId, [
-      { id: randomUUID(), sku: 'APP-BRUS-001', name: 'Bruschetta', category: 'Appetizer', unitPrice: 9.5, taxRate: 0.0825, active: true },
-      { id: randomUUID(), sku: 'MAIN-SALM-010', name: 'Grilled Salmon', category: 'Main', unitPrice: 24.0, taxRate: 0.0825, active: true },
-      { id: randomUUID(), sku: 'MAIN-PAST-011', name: 'Truffle Pasta', category: 'Main', unitPrice: 21.0, taxRate: 0.0825, active: true },
-      { id: randomUUID(), sku: 'BVG-LATT-021', name: 'Iced Latte', category: 'Beverage', unitPrice: 6.0, taxRate: 0.0825, active: true },
-      { id: randomUUID(), sku: 'DSRT-CAKE-031', name: 'Cheesecake Slice', category: 'Dessert', unitPrice: 8.0, taxRate: 0.0825, active: true },
+      {
+        id: randomUUID(),
+        sku: 'APP-BRUS-001',
+        name: 'Bruschetta',
+        category: 'Appetizer',
+        unitPrice: 9.5,
+        taxRate: 0.0825,
+        active: true,
+      },
+      {
+        id: randomUUID(),
+        sku: 'MAIN-SALM-010',
+        name: 'Grilled Salmon',
+        category: 'Main',
+        unitPrice: 24.0,
+        taxRate: 0.0825,
+        active: true,
+      },
+      {
+        id: randomUUID(),
+        sku: 'MAIN-PAST-011',
+        name: 'Truffle Pasta',
+        category: 'Main',
+        unitPrice: 21.0,
+        taxRate: 0.0825,
+        active: true,
+      },
+      {
+        id: randomUUID(),
+        sku: 'BVG-LATT-021',
+        name: 'Iced Latte',
+        category: 'Beverage',
+        unitPrice: 6.0,
+        taxRate: 0.0825,
+        active: true,
+      },
+      {
+        id: randomUUID(),
+        sku: 'DSRT-CAKE-031',
+        name: 'Cheesecake Slice',
+        category: 'Dessert',
+        unitPrice: 8.0,
+        taxRate: 0.0825,
+        active: true,
+      },
     ]);
 
     this.ticketCounterByShop.set(shopId, 1000);
@@ -1197,8 +1432,14 @@ export class PosService {
         lineTotal,
         prepStatus,
         queuedAt,
-        startedAt: prepStatus === 'preparing' || prepStatus === 'ready' || prepStatus === 'served' ? queuedAt : null,
-        completedAt: prepStatus === 'ready' || prepStatus === 'served' ? queuedAt : null,
+        startedAt:
+          prepStatus === 'preparing' ||
+          prepStatus === 'ready' ||
+          prepStatus === 'served'
+            ? queuedAt
+            : null,
+        completedAt:
+          prepStatus === 'ready' || prepStatus === 'served' ? queuedAt : null,
         note: null,
       };
     };
@@ -1402,13 +1643,21 @@ export class PosService {
     this.refundsByShop.set(shopId, []);
 
     const modes = this.tableModesByShop.get(shopId)!;
-    const table1Mode = modes.find((item) => item.tableNo.toLowerCase() === (tables[0]?.tableName || '').toLowerCase());
+    const table1Mode = modes.find(
+      (item) =>
+        item.tableNo.toLowerCase() ===
+        (tables[0]?.tableName || '').toLowerCase(),
+    );
     if (table1Mode) {
       table1Mode.guestCount = 2;
       table1Mode.orderState = 'stay';
       table1Mode.sendTime = nowIso;
     }
-    const table2Mode = modes.find((item) => item.tableNo.toLowerCase() === (tables[1]?.tableName || '').toLowerCase());
+    const table2Mode = modes.find(
+      (item) =>
+        item.tableNo.toLowerCase() ===
+        (tables[1]?.tableName || '').toLowerCase(),
+    );
     if (table2Mode) {
       table2Mode.guestCount = 1;
       table2Mode.orderState = 'send';
@@ -1439,7 +1688,12 @@ export class PosService {
     this.incidentsByShop.set(shopId, []);
   }
 
-  private makeSeedTable(shopId: string, tableName: string, roomId: string, color: string): PosTable {
+  private makeSeedTable(
+    shopId: string,
+    tableName: string,
+    roomId: string,
+    color: string,
+  ): PosTable {
     const now = new Date().toISOString();
     return {
       id: randomUUID(),
@@ -1465,9 +1719,14 @@ export class PosService {
 
   private normalizeSeats(input: any, fallbackSize = 1): PosSeat[] {
     if (Array.isArray(input) && input.length) {
-      return input.map((seat, index) => ({ seatNo: Number(seat?.seatNo) || index + 1 }));
+      return input.map((seat, index) => ({
+        seatNo: Number(seat?.seatNo) || index + 1,
+      }));
     }
-    return Array.from({ length: Math.max(1, fallbackSize) }, (_value, index) => ({ seatNo: index + 1 }));
+    return Array.from(
+      { length: Math.max(1, fallbackSize) },
+      (_value, index) => ({ seatNo: index + 1 }),
+    );
   }
 
   private normalizeRate(value: number) {
@@ -1485,14 +1744,20 @@ export class PosService {
       const settings = this.settingsByShop.get(shopId)!;
       const taxRate = this.normalizeRate(line?.taxRate ?? settings.taxRate);
       const lineSubtotal = this.roundMoney(unitPrice * quantity);
-      const lineTax = this.roundMoney((lineSubtotal - discountAmount) * taxRate);
-      const lineTotal = this.roundMoney(lineSubtotal - discountAmount + lineTax);
+      const lineTax = this.roundMoney(
+        (lineSubtotal - discountAmount) * taxRate,
+      );
+      const lineTotal = this.roundMoney(
+        lineSubtotal - discountAmount + lineTax,
+      );
 
       return {
         id: line?.id || randomUUID(),
         menuItemId: line?.menuItemId || null,
         name: String(line?.name || 'Custom Item'),
-        station: line?.station || this.deriveStation(String(line?.name || 'Custom Item')),
+        station:
+          line?.station ||
+          this.deriveStation(String(line?.name || 'Custom Item')),
         quantity,
         unitPrice: this.roundMoney(unitPrice),
         taxRate,
@@ -1511,10 +1776,19 @@ export class PosService {
 
   private deriveStation(itemName: string): PosOrderLine['station'] {
     const normalized = itemName.toLowerCase();
-    if (normalized.includes('latte') || normalized.includes('coffee') || normalized.includes('tea') || normalized.includes('cocktail')) {
+    if (
+      normalized.includes('latte') ||
+      normalized.includes('coffee') ||
+      normalized.includes('tea') ||
+      normalized.includes('cocktail')
+    ) {
       return 'bar';
     }
-    if (normalized.includes('cake') || normalized.includes('dessert') || normalized.includes('ice cream')) {
+    if (
+      normalized.includes('cake') ||
+      normalized.includes('dessert') ||
+      normalized.includes('ice cream')
+    ) {
       return 'dessert';
     }
     return 'kitchen';
@@ -1533,16 +1807,30 @@ export class PosService {
 
   private recalculateOrder(shopId: string, order: PosTableOrder) {
     const settings = this.settingsByShop.get(shopId)!;
-    const subtotalAmount = this.roundMoney(order.lines.reduce((sum, line) => sum + line.lineSubtotal, 0));
-    const linesDiscount = this.roundMoney(order.lines.reduce((sum, line) => sum + line.discountAmount, 0));
+    const subtotalAmount = this.roundMoney(
+      order.lines.reduce((sum, line) => sum + line.lineSubtotal, 0),
+    );
+    const linesDiscount = this.roundMoney(
+      order.lines.reduce((sum, line) => sum + line.discountAmount, 0),
+    );
     const orderDiscount = this.roundMoney(order.discountAmount || 0);
     const discountAmount = this.roundMoney(linesDiscount + orderDiscount);
-    const taxableBase = this.roundMoney(Math.max(0, subtotalAmount - discountAmount));
-    const taxAmount = this.roundMoney(order.lines.reduce((sum, line) => sum + line.lineTax, 0));
-    const serviceChargeAmount = this.roundMoney(taxableBase * settings.serviceChargeRate);
+    const taxableBase = this.roundMoney(
+      Math.max(0, subtotalAmount - discountAmount),
+    );
+    const taxAmount = this.roundMoney(
+      order.lines.reduce((sum, line) => sum + line.lineTax, 0),
+    );
+    const serviceChargeAmount = this.roundMoney(
+      taxableBase * settings.serviceChargeRate,
+    );
     const tipAmount = this.roundMoney(order.tipAmount || 0);
-    const totalAmount = this.roundMoney(taxableBase + taxAmount + serviceChargeAmount + tipAmount);
-    const paidAmount = this.roundMoney(order.payments.reduce((sum, payment) => sum + payment.amount, 0));
+    const totalAmount = this.roundMoney(
+      taxableBase + taxAmount + serviceChargeAmount + tipAmount,
+    );
+    const paidAmount = this.roundMoney(
+      order.payments.reduce((sum, payment) => sum + payment.amount, 0),
+    );
     const balanceDue = this.roundMoney(Math.max(0, totalAmount - paidAmount));
 
     order.subtotalAmount = subtotalAmount;
@@ -1562,7 +1850,10 @@ export class PosService {
       tableName: order.tableName,
       currency: settings.currency,
       createdAt: order.createdAt,
-      closedAt: order.orderStatus === 'paid' || order.orderStatus === 'closed' ? order.updatedAt : null,
+      closedAt:
+        order.orderStatus === 'paid' || order.orderStatus === 'closed'
+          ? order.updatedAt
+          : null,
       lines: order.lines.map((line) => ({
         name: line.name,
         quantity: line.quantity,
@@ -1594,25 +1885,38 @@ export class PosService {
   }
 
   private normalizeChannel(channel: unknown): PosTableOrder['channel'] {
-    const normalized = String(channel || 'dine_in').toLowerCase().trim();
-    if (normalized === 'takeaway' || normalized === 'take_away') return 'takeaway';
+    const normalized = String(channel || 'dine_in')
+      .toLowerCase()
+      .trim();
+    if (normalized === 'takeaway' || normalized === 'take_away')
+      return 'takeaway';
     if (normalized === 'delivery') return 'delivery';
-    if (normalized === 'ecommerce' || normalized === 'online') return 'ecommerce';
+    if (normalized === 'ecommerce' || normalized === 'online')
+      return 'ecommerce';
     return 'dine_in';
   }
 
   private normalizeSource(source: unknown): PosTableOrder['source'] {
-    const normalized = String(source || 'odoo_pos').toLowerCase().trim();
+    const normalized = String(source || 'odoo_pos')
+      .toLowerCase()
+      .trim();
     if (normalized === 'magento') return 'magento';
     if (normalized === 'manual') return 'manual';
     return 'odoo_pos';
   }
 
-  private normalizeFulfillmentStatus(status: unknown): PosTableOrder['fulfillmentStatus'] {
-    const normalized = String(status || 'draft').toLowerCase().trim();
-    if (normalized === 'sent_to_kitchen' || normalized === 'in_kitchen') return 'sent_to_kitchen';
-    if (normalized === 'ready_for_pickup' || normalized === 'ready') return 'ready_for_pickup';
-    if (normalized === 'out_for_delivery' || normalized === 'delivery') return 'out_for_delivery';
+  private normalizeFulfillmentStatus(
+    status: unknown,
+  ): PosTableOrder['fulfillmentStatus'] {
+    const normalized = String(status || 'draft')
+      .toLowerCase()
+      .trim();
+    if (normalized === 'sent_to_kitchen' || normalized === 'in_kitchen')
+      return 'sent_to_kitchen';
+    if (normalized === 'ready_for_pickup' || normalized === 'ready')
+      return 'ready_for_pickup';
+    if (normalized === 'out_for_delivery' || normalized === 'delivery')
+      return 'out_for_delivery';
     if (normalized === 'completed' || normalized === 'done') return 'completed';
     return 'draft';
   }
@@ -1620,25 +1924,38 @@ export class PosService {
   private updateCustomerStatsFromOrder(order: PosTableOrder) {
     const customers = this.customersByShop.get(order.shopId) || [];
     const customer =
-      (order.customerId ? customers.find((item) => item.id === order.customerId) : null) ||
-      (order.customerPhone ? customers.find((item) => item.phone === order.customerPhone) : null) ||
+      (order.customerId
+        ? customers.find((item) => item.id === order.customerId)
+        : null) ||
+      (order.customerPhone
+        ? customers.find((item) => item.phone === order.customerPhone)
+        : null) ||
       null;
     if (!customer) return;
     customer.totalOrders += 1;
-    customer.totalSpend = this.roundMoney(customer.totalSpend + order.totalAmount);
+    customer.totalSpend = this.roundMoney(
+      customer.totalSpend + order.totalAmount,
+    );
     customer.loyaltyPoints += Math.max(1, Math.floor(order.totalAmount / 5));
     customer.lastOrderAt = new Date().toISOString();
     customer.updatedAt = customer.lastOrderAt;
   }
 
-  private consumeInventoryFromOrder(shopId: string, order: PosTableOrder, reason: PosInventoryMovement['reason']) {
+  private consumeInventoryFromOrder(
+    shopId: string,
+    order: PosTableOrder,
+    reason: PosInventoryMovement['reason'],
+  ) {
     const inventory = this.inventoryByShop.get(shopId) || [];
     const movementLog = this.inventoryMovementsByShop.get(shopId) || [];
 
     order.lines.forEach((line) => {
       const matchedItem = this.findInventoryItemForLine(inventory, line.name);
       if (!matchedItem) return;
-      matchedItem.onHand = Math.max(0, this.roundMoney(matchedItem.onHand - line.quantity));
+      matchedItem.onHand = Math.max(
+        0,
+        this.roundMoney(matchedItem.onHand - line.quantity),
+      );
       matchedItem.updatedAt = new Date().toISOString();
       movementLog.unshift({
         id: randomUUID(),
@@ -1677,11 +1994,18 @@ export class PosService {
     });
   }
 
-  private findInventoryItemForLine(inventory: PosInventoryItem[], lineName: string) {
+  private findInventoryItemForLine(
+    inventory: PosInventoryItem[],
+    lineName: string,
+  ) {
     const normalizedLine = lineName.toLowerCase();
     return (
-      inventory.find((item) => normalizedLine.includes(item.name.toLowerCase().split(' ')[0])) ||
-      inventory.find((item) => normalizedLine.includes(item.category.toLowerCase()))
+      inventory.find((item) =>
+        normalizedLine.includes(item.name.toLowerCase().split(' ')[0]),
+      ) ||
+      inventory.find((item) =>
+        normalizedLine.includes(item.category.toLowerCase()),
+      )
     );
   }
 
@@ -1690,7 +2014,8 @@ export class PosService {
     if (normalized === 'hold') return 'hold';
     if (normalized === 'sent') return 'sent';
     if (normalized === 'closed') return 'closed';
-    if (normalized === 'cancelled' || normalized === 'canceled') return 'cancelled';
+    if (normalized === 'cancelled' || normalized === 'canceled')
+      return 'cancelled';
     if (normalized === 'paid') return 'paid';
     return 'open';
   }
@@ -1733,11 +2058,16 @@ export class PosService {
 
   private syncModeSeats(shopId: string, tableNo: string, seats: PosSeat[]) {
     const modes = this.tableModesByShop.get(shopId) || [];
-    const mode = modes.find((item) => item.tableNo.toLowerCase() === tableNo.toLowerCase());
+    const mode = modes.find(
+      (item) => item.tableNo.toLowerCase() === tableNo.toLowerCase(),
+    );
     if (mode) mode.seats = seats;
   }
 
-  private findLineById(shopId: string, lineId: string): { order: PosTableOrder; line: PosOrderLine } {
+  private findLineById(
+    shopId: string,
+    lineId: string,
+  ): { order: PosTableOrder; line: PosOrderLine } {
     const orders = this.tableOrdersByShop.get(shopId) || [];
     for (const order of orders) {
       const line = order.lines.find((item) => item.id === lineId);

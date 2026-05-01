@@ -1,5 +1,25 @@
-import { Controller, Get, Post, Put, Delete, Body, Query, Param, ParseIntPipe, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Query,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiHeader,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ContactsService } from './contacts.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
@@ -82,7 +102,9 @@ export class ContactsController {
   @Get(':id/orders')
   @ApiOperation({ summary: 'Get contact sales orders' })
   async getOrders(@Param('id') id: string) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) return [];
     return this.contactsService.getOrders(odooId);
   }
@@ -90,7 +112,9 @@ export class ContactsController {
   @Get(':id/projects')
   @ApiOperation({ summary: 'Get contact projects' })
   async getProjects(@Param('id') id: string) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) return [];
     return this.contactsService.getProjects(odooId);
   }
@@ -98,14 +122,18 @@ export class ContactsController {
   // --- Pets ---
   @Get(':id/pets')
   async getPets(@Param('id') id: string) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) return [];
     return this.contactsService.getPets(odooId);
   }
 
   @Post(':id/pets')
   async createPet(@Param('id') id: string, @Body() data: any) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) throw new Error('Contact not found');
     return this.contactsService.createPet(odooId, data);
   }
@@ -123,14 +151,18 @@ export class ContactsController {
   // --- Files ---
   @Get(':id/files')
   async getFiles(@Param('id') id: string) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) return [];
     return this.contactsService.getFiles(odooId);
   }
 
   @Post(':id/files')
   async createFile(@Param('id') id: string, @Body() data: any) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) throw new Error('Contact not found');
     return this.contactsService.createFile(odooId, data);
   }
@@ -143,14 +175,18 @@ export class ContactsController {
   // --- Tasks ---
   @Get(':id/tasks')
   async getTasks(@Param('id') id: string) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) return [];
     return this.contactsService.getTasks(odooId);
   }
 
   @Post(':id/tasks')
   async createTask(@Param('id') id: string, @Body() data: any) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) throw new Error('Contact not found');
     return this.contactsService.createTask(odooId, data);
   }
@@ -168,20 +204,27 @@ export class ContactsController {
   // --- Activities ---
   @Get(':id/activities')
   async getActivities(@Param('id') id: string) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) return [];
     return this.contactsService.getActivities(odooId);
   }
 
   @Post(':id/activities')
   async createActivity(@Param('id') id: string, @Body() data: any) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) throw new Error('Contact not found');
     return this.contactsService.createActivity(odooId, data);
   }
 
   @Put('activities/:activityId')
-  async updateActivity(@Param('activityId') activityId: string, @Body() data: any) {
+  async updateActivity(
+    @Param('activityId') activityId: string,
+    @Body() data: any,
+  ) {
     return this.contactsService.updateActivity(activityId, data);
   }
 
@@ -192,15 +235,22 @@ export class ContactsController {
 
   // --- Shifts ---
   @Get(':id/shifts')
-  async getShifts(@Param('id') id: string, @Query() paginationDto: PaginationDto) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+  async getShifts(
+    @Param('id') id: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) return { data: [], total: 0 };
     return this.contactsService.getShifts(odooId, paginationDto);
   }
 
   @Post(':id/clock-in')
   async clockIn(@Param('id') id: string) {
-    const odooId = /^\d+$/.test(id) ? Number(id) : await this.contactsService.resolveUuid(id);
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
     if (!odooId) throw new Error('Contact not found');
     return this.contactsService.clockIn(odooId);
   }

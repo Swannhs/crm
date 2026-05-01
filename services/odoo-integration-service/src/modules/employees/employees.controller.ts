@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, Headers, Param, ParseIntPipe, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Headers,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { IdentityGuard } from '../../common/guards/identity.guard.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
@@ -62,19 +75,28 @@ export class EmployeesController {
 
   @Post(':id/clock-in')
   @ApiOperation({ summary: 'Clock in employee (contract alias)' })
-  async clockInByEmployee(@Param('id', ParseIntPipe) id: number, @Body() data?: any) {
+  async clockInByEmployee(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data?: any,
+  ) {
     return this.employeesService.clockIn({ ...(data || {}), employeeId: id });
   }
 
   @Post('attendance/:attendanceId/clock-out')
   @ApiOperation({ summary: 'Clock out attendance record' })
-  async clockOut(@Param('attendanceId', ParseIntPipe) attendanceId: number, @Body() data: any) {
+  async clockOut(
+    @Param('attendanceId', ParseIntPipe) attendanceId: number,
+    @Body() data: any,
+  ) {
     return this.employeesService.clockOut(attendanceId, data);
   }
 
   @Post(':id/clock-out')
   @ApiOperation({ summary: 'Clock out employee (contract alias)' })
-  async clockOutByEmployee(@Param('id', ParseIntPipe) id: number, @Body() data?: any) {
+  async clockOutByEmployee(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data?: any,
+  ) {
     return this.employeesService.clockOutLatestForEmployee(id, data);
   }
 
@@ -86,7 +108,10 @@ export class EmployeesController {
 
   @Patch('attendance/:id')
   @ApiOperation({ summary: 'Update attendance record (contract alias)' })
-  async updateAttendanceRecord(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async updateAttendanceRecord(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
     return this.employeesService.updateAttendanceRecord(id, data);
   }
 
@@ -194,13 +219,19 @@ export class EmployeesController {
 
   @Delete(':id/roles/:roleId')
   @ApiOperation({ summary: 'Remove role from employee' })
-  async removeRole(@Param('id', ParseIntPipe) id: number, @Param('roleId', ParseIntPipe) roleId: number) {
+  async removeRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('roleId', ParseIntPipe) roleId: number,
+  ) {
     return this.employeesService.removeRole(id, roleId);
   }
 
   @Patch(':id/permissions')
   @ApiOperation({ summary: 'Update employee permission overrides' })
-  async updatePermissions(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async updatePermissions(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
     return this.employeesService.updateEmployeePermissions(id, data);
   }
 
@@ -212,7 +243,10 @@ export class EmployeesController {
 
   @Patch('settings')
   @ApiOperation({ summary: 'Update HR settings' })
-  async updateSettings(@Headers('x-org-id') orgId?: string, @Body() data?: any) {
+  async updateSettings(
+    @Headers('x-org-id') orgId?: string,
+    @Body() data?: any,
+  ) {
     return this.employeesService.updateSettings(orgId || '', data || {});
   }
 
@@ -238,7 +272,7 @@ export class EmployeesController {
   @ApiOperation({ summary: 'Activate/deactivate employee' })
   async updateStatus(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { status: 'active' | 'inactive' }
+    @Body() body: { status: 'active' | 'inactive' },
   ) {
     return this.employeesService.updateStatus(id, body.status);
   }
@@ -257,13 +291,19 @@ export class EmployeesController {
 
   @Get(':id/attendance')
   @ApiOperation({ summary: 'List employee attendance' })
-  async getAttendanceByEmployee(@Param('id', ParseIntPipe) id: number, @Query() query: any) {
+  async getAttendanceByEmployee(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: any,
+  ) {
     return this.employeesService.getAttendanceByEmployee(id, query);
   }
 
   @Get(':id/shifts')
   @ApiOperation({ summary: 'List employee shifts' })
-  async getShiftsByEmployee(@Param('id', ParseIntPipe) id: number, @Query() query: any) {
+  async getShiftsByEmployee(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: any,
+  ) {
     return this.employeesService.getShiftsByEmployee(id, query);
   }
 
@@ -275,7 +315,10 @@ export class EmployeesController {
 
   @Post(':id/documents')
   @ApiOperation({ summary: 'Create employee document metadata' })
-  async uploadEmployeeDocument(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async uploadEmployeeDocument(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
     return this.employeesService.uploadEmployeeDocument(id, data);
   }
 

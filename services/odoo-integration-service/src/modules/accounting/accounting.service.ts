@@ -6,8 +6,17 @@ import { PaginationDto } from '../../common/dto/pagination.dto.js';
 export class AccountingService {
   private readonly model = 'account.move';
   private readonly defaultFields = [
-    'id', 'name', 'partner_id', 'invoice_date', 'invoice_date_due', 
-    'amount_total', 'amount_untaxed', 'amount_residual', 'state', 'payment_state', 'move_type'
+    'id',
+    'name',
+    'partner_id',
+    'invoice_date',
+    'invoice_date_due',
+    'amount_total',
+    'amount_untaxed',
+    'amount_residual',
+    'state',
+    'payment_state',
+    'move_type',
   ];
 
   constructor(private readonly odooClient: OdooClientService) {}
@@ -16,10 +25,8 @@ export class AccountingService {
     const page = paginationDto.page ?? 1;
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
-    
-    const domain: any[] = [
-      ['move_type', 'in', ['out_invoice', 'out_refund']]
-    ];
+
+    const domain: any[] = [['move_type', 'in', ['out_invoice', 'out_refund']]];
 
     if (contactId) {
       domain.push(['partner_id', '=', contactId]);
@@ -30,13 +37,12 @@ export class AccountingService {
     }
 
     const [data, total] = await Promise.all([
-      this.odooClient.searchRead(
-        this.model,
-        domain,
-        this.defaultFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'invoice_date desc' }
-      ),
-      this.odooClient.execute(this.model, 'search_count', [domain])
+      this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: 'invoice_date desc',
+      }),
+      this.odooClient.execute(this.model, 'search_count', [domain]),
     ]);
 
     return { data, total };
@@ -46,7 +52,7 @@ export class AccountingService {
     const [invoice] = await this.odooClient.searchRead(
       this.model,
       [['id', '=', id]],
-      [...this.defaultFields, 'invoice_line_ids']
+      [...this.defaultFields, 'invoice_line_ids'],
     );
     return invoice;
   }
@@ -73,7 +79,7 @@ export class AccountingService {
     const result = await this.odooClient.execute(
       'ir.actions.report',
       '_render_qweb_pdf',
-      ['account.report_invoice', [id]]
+      ['account.report_invoice', [id]],
     );
     return result[0];
   }
