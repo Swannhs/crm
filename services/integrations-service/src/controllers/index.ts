@@ -682,7 +682,21 @@ export class OdooController {
 
   async connect(req: AuthenticatedRequest, res: Response) {
     try {
-      const connection = await this.svc.connect(req.identity, req.body);
+      const { baseUrl, db, username, password, apiKey, isActive } = req.body;
+      if (!baseUrl || !db || !username) {
+        return res.status(400).json({ success: false, message: 'baseUrl, db, and username are required' });
+      }
+
+      const input = {
+        baseUrl: String(baseUrl),
+        db: String(db),
+        username: String(username),
+        ...(password !== undefined && { password: String(password) }),
+        ...(apiKey !== undefined && { apiKey: String(apiKey) }),
+        ...(isActive !== undefined && { isActive: Boolean(isActive) }),
+      };
+
+      const connection = await this.svc.connect(req.identity, input);
       return res.status(201).json({ success: true, data: connection });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
@@ -732,7 +746,13 @@ export class OdooController {
 
   async syncMagento(req: AuthenticatedRequest, res: Response) {
     try {
-      const data = await this.svc.syncMagento(req.identity, req.body);
+      const { dryRun, limit, push } = req.body;
+      const options = {
+        ...(dryRun !== undefined && { dryRun: Boolean(dryRun) }),
+        ...(limit !== undefined && { limit: Number(limit) }),
+        ...(push !== undefined && { push: Boolean(push) }),
+      };
+      const data = await this.svc.syncMagento(req.identity, options);
       return res.json({ success: true, data });
     } catch (err: any) {
       return res.status(500).json({ success: false, message: err.message });
