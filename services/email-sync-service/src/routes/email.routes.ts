@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 import { GoogleAuthService } from '../services/google-auth.service.js';
+import { prisma } from '../config/prisma.js';
 
 const router = Router();
 const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
@@ -11,13 +12,16 @@ const googleAuthService = new GoogleAuthService();
 router.use(identityMiddleware);
 
 // GET /email/accounts - List connected email accounts
-router.get('/accounts', async (req, res, next) => {
+router.get('/accounts', async (req: any, res, next) => {
   try {
     const orgId = req.identity!.orgId;
-    // TODO: Implement account listing from DB
+    const accounts = await prisma.emailAccount.findMany({
+      where: { orgId }
+    });
+
     res.json({
       success: true,
-      data: [],
+      data: accounts,
       message: 'Email accounts list'
     });
   } catch (error) {
