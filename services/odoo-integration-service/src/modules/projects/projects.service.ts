@@ -11,14 +11,43 @@ export class ProjectsService {
   private readonly taskCommentModel = 'project.task.comment';
 
   private readonly projectFields = [
-    'id', 'name', 'user_id', 'partner_id', 'date_start', 'date', 'label_tasks', 'color'
+    'id',
+    'name',
+    'user_id',
+    'partner_id',
+    'date_start',
+    'date',
+    'label_tasks',
+    'color',
   ];
 
   private readonly taskFields = [
-    'id', 'name', 'project_id', 'user_ids', 'stage_id', 'date_deadline', 'priority', 'sequence', 'kanban_state', 'description'
+    'id',
+    'name',
+    'project_id',
+    'user_ids',
+    'stage_id',
+    'date_deadline',
+    'priority',
+    'sequence',
+    'kanban_state',
+    'description',
   ];
-  private readonly taskStageFields = ['id', 'name', 'sequence', 'fold', 'project_ids'];
-  private readonly taskCommentFields = ['id', 'task_id', 'parent_id', 'author', 'content', 'create_date'];
+  private readonly taskStageFields = [
+    'id',
+    'name',
+    'sequence',
+    'fold',
+    'project_ids',
+  ];
+  private readonly taskCommentFields = [
+    'id',
+    'task_id',
+    'parent_id',
+    'author',
+    'content',
+    'create_date',
+  ];
 
   constructor(private readonly odooClient: OdooClientService) {}
 
@@ -27,7 +56,7 @@ export class ProjectsService {
     const page = paginationDto.page ?? 1;
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
-    
+
     const domain: any[] = search ? [['name', 'ilike', search]] : [];
 
     const [data, total] = await Promise.all([
@@ -35,9 +64,9 @@ export class ProjectsService {
         this.projectModel,
         domain,
         this.projectFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'name asc' }
+        { offset: (page - 1) * pageSize, limit: pageSize, order: 'name asc' },
       ),
-      this.odooClient.execute(this.projectModel, 'search_count', [domain])
+      this.odooClient.execute(this.projectModel, 'search_count', [domain]),
     ]);
 
     return { data, total };
@@ -47,7 +76,7 @@ export class ProjectsService {
     const [project] = await this.odooClient.searchRead(
       this.projectModel,
       [['id', '=', id]],
-      this.projectFields
+      this.projectFields,
     );
     return project;
   }
@@ -56,7 +85,7 @@ export class ProjectsService {
     const [task] = await this.odooClient.searchRead(
       this.taskModel,
       [['id', '=', id]],
-      this.taskFields
+      this.taskFields,
     );
     return task;
   }
@@ -78,17 +107,16 @@ export class ProjectsService {
     const page = paginationDto.page ?? 1;
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
-    
+
     const domain: any[] = search ? [['name', 'ilike', search]] : [];
 
     const [data, total] = await Promise.all([
-      this.odooClient.searchRead(
-        this.taskModel,
-        domain,
-        this.taskFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'sequence asc' }
-      ),
-      this.odooClient.execute(this.taskModel, 'search_count', [domain])
+      this.odooClient.searchRead(this.taskModel, domain, this.taskFields, {
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: 'sequence asc',
+      }),
+      this.odooClient.execute(this.taskModel, 'search_count', [domain]),
     ]);
 
     return { data, total };
@@ -99,12 +127,16 @@ export class ProjectsService {
       this.taskModel,
       [['project_id', '=', projectId]],
       this.taskFields,
-      { order: 'sequence asc' }
+      { order: 'sequence asc' },
     );
     return rows.map((task: any) => ({
       ...task,
       title: task?.name,
-      columnId: String(Array.isArray(task?.stage_id) ? task.stage_id[0] : task?.stage_id ?? ''),
+      columnId: String(
+        Array.isArray(task?.stage_id)
+          ? task.stage_id[0]
+          : (task?.stage_id ?? ''),
+      ),
       createdAt: task?.create_date ?? task?.createdAt ?? null,
       updatedAt: task?.write_date ?? task?.updatedAt ?? null,
     }));
@@ -113,10 +145,13 @@ export class ProjectsService {
   async createTask(data: any) {
     const payload = { ...data };
     if (payload.title && !payload.name) payload.name = payload.title;
-    if (payload.columnId && !payload.stage_id) payload.stage_id = Number(payload.columnId);
+    if (payload.columnId && !payload.stage_id)
+      payload.stage_id = Number(payload.columnId);
     delete payload.title;
     delete payload.columnId;
-    const id = await this.odooClient.execute(this.taskModel, 'create', [payload]);
+    const id = await this.odooClient.execute(this.taskModel, 'create', [
+      payload,
+    ]);
     return this.findOneTask(Number(id));
   }
 
@@ -125,13 +160,14 @@ export class ProjectsService {
       this.taskStageModel,
       [],
       this.taskStageFields,
-      { order: 'sequence asc, id asc' }
+      { order: 'sequence asc, id asc' },
     );
 
     return stages
       .filter((stage: any) => {
         const projectIdsRaw = stage?.project_ids;
-        if (!Array.isArray(projectIdsRaw) || projectIdsRaw.length === 0) return true;
+        if (!Array.isArray(projectIdsRaw) || projectIdsRaw.length === 0)
+          return true;
         const projectIds = projectIdsRaw
           .flatMap((value: any) => {
             if (Array.isArray(value)) {
@@ -160,21 +196,32 @@ export class ProjectsService {
     }
 
     const existing = await this.findColumnsByProject(projectId);
-    const maxSequence = existing.reduce((max, col) => Math.max(max, Number(col.sequence ?? 0)), 0);
-    const sequence = Number.isFinite(Number(data?.sequence)) ? Number(data.sequence) : maxSequence + 1;
+    const maxSequence = existing.reduce(
+      (max, col) => Math.max(max, Number(col.sequence ?? 0)),
+      0,
+    );
+    const sequence = Number.isFinite(Number(data?.sequence))
+      ? Number(data.sequence)
+      : maxSequence + 1;
 
-    const stageId = await this.odooClient.execute(this.taskStageModel, 'create', [{
-      name,
-      sequence,
-      // Odoo many2many command: replace project_ids with one project link.
-      project_ids: [[6, 0, [projectId]]],
-      fold: Boolean(data?.fold ?? false),
-    }]);
+    const stageId = await this.odooClient.execute(
+      this.taskStageModel,
+      'create',
+      [
+        {
+          name,
+          sequence,
+          // Odoo many2many command: replace project_ids with one project link.
+          project_ids: [[6, 0, [projectId]]],
+          fold: Boolean(data?.fold ?? false),
+        },
+      ],
+    );
 
     const [created] = await this.odooClient.searchRead(
       this.taskStageModel,
       [['id', '=', Number(stageId)]],
-      this.taskStageFields
+      this.taskStageFields,
     );
 
     return {
@@ -190,7 +237,10 @@ export class ProjectsService {
     if (typeof data?.name === 'string' && data.name.trim()) {
       updateData.name = data.name.trim();
     }
-    if (data?.sequence !== undefined && Number.isFinite(Number(data.sequence))) {
+    if (
+      data?.sequence !== undefined &&
+      Number.isFinite(Number(data.sequence))
+    ) {
       updateData.sequence = Number(data.sequence);
     }
     if (data?.fold !== undefined) {
@@ -198,32 +248,57 @@ export class ProjectsService {
     }
 
     if (Object.keys(updateData).length === 0) {
-      const [noop] = await this.odooClient.searchRead(this.taskStageModel, [['id', '=', id]], this.taskStageFields);
+      const [noop] = await this.odooClient.searchRead(
+        this.taskStageModel,
+        [['id', '=', id]],
+        this.taskStageFields,
+      );
       return noop;
     }
 
-    await this.odooClient.execute(this.taskStageModel, 'write', [[id], updateData]);
-    const [updated] = await this.odooClient.searchRead(this.taskStageModel, [['id', '=', id]], this.taskStageFields);
+    await this.odooClient.execute(this.taskStageModel, 'write', [
+      [id],
+      updateData,
+    ]);
+    const [updated] = await this.odooClient.searchRead(
+      this.taskStageModel,
+      [['id', '=', id]],
+      this.taskStageFields,
+    );
     return updated;
   }
 
   async removeColumn(id: number) {
-    const tasks = await this.odooClient.searchRead(this.taskModel, [['stage_id', '=', id]], ['id']);
-    const taskIds = (tasks || []).map((t: any) => Number(t.id)).filter((v: number) => Number.isFinite(v));
+    const tasks = await this.odooClient.searchRead(
+      this.taskModel,
+      [['stage_id', '=', id]],
+      ['id'],
+    );
+    const taskIds = (tasks || [])
+      .map((t: any) => Number(t.id))
+      .filter((v: number) => Number.isFinite(v));
     if (taskIds.length > 0) {
       await this.odooClient.execute(this.taskModel, 'unlink', [taskIds]);
     }
     return this.odooClient.execute(this.taskStageModel, 'unlink', [[id]]);
   }
 
-  async reorderColumns(projectId: number, orderedColumnIds: Array<string | number>) {
+  async reorderColumns(
+    projectId: number,
+    orderedColumnIds: Array<string | number>,
+  ) {
     const existing = await this.findColumnsByProject(projectId);
     const existingIds = new Set(existing.map((col: any) => String(col.id)));
-    const normalized = orderedColumnIds.map((id) => String(id)).filter((id) => existingIds.has(id));
+    const normalized = orderedColumnIds
+      .map((id) => String(id))
+      .filter((id) => existingIds.has(id));
 
     for (let index = 0; index < normalized.length; index += 1) {
       const columnId = Number(normalized[index]);
-      await this.odooClient.execute(this.taskStageModel, 'write', [[columnId], { sequence: index + 1 }]);
+      await this.odooClient.execute(this.taskStageModel, 'write', [
+        [columnId],
+        { sequence: index + 1 },
+      ]);
     }
     return this.findColumnsByProject(projectId);
   }
@@ -251,7 +326,8 @@ export class ProjectsService {
   async updateTask(id: number, data: any) {
     // Map frontend fields if necessary
     const updateData = { ...data };
-    if (updateData.title && !updateData.name) updateData.name = updateData.title;
+    if (updateData.title && !updateData.name)
+      updateData.name = updateData.title;
     if (data.columnId) {
       updateData.stage_id = parseInt(data.columnId);
       delete updateData.columnId;
@@ -271,19 +347,27 @@ export class ProjectsService {
       this.timesheetModel,
       [['task_id', '=', taskId]],
       ['id', 'name', 'date', 'unit_amount', 'user_id'],
-      { order: 'date desc' }
+      { order: 'date desc' },
     );
   }
 
-  async logWork(data: { taskId: number; projectId: number; name: string; hours: number; date: string }) {
-    return this.odooClient.execute(this.timesheetModel, 'create', [{
-      name: data.name,
-      task_id: data.taskId,
-      project_id: data.projectId,
-      unit_amount: data.hours,
-      date: data.date,
-      user_id: 1, // Defaulting to Admin for mock/simplified flow
-    }]);
+  async logWork(data: {
+    taskId: number;
+    projectId: number;
+    name: string;
+    hours: number;
+    date: string;
+  }) {
+    return this.odooClient.execute(this.timesheetModel, 'create', [
+      {
+        name: data.name,
+        task_id: data.taskId,
+        project_id: data.projectId,
+        unit_amount: data.hours,
+        date: data.date,
+        user_id: 1, // Defaulting to Admin for mock/simplified flow
+      },
+    ]);
   }
 
   // Sub-tasks
@@ -291,18 +375,20 @@ export class ProjectsService {
     return this.odooClient.searchRead(
       this.taskModel,
       [['parent_id', '=', parentTaskId]],
-      this.taskFields
+      this.taskFields,
     );
   }
 
   async createSubtask(parentTaskId: number, data: any) {
     const parentTask = await this.findOneTask(parentTaskId);
-    return this.odooClient.execute(this.taskModel, 'create', [{
-      ...data,
-      name: data?.name ?? data?.title ?? 'Subtask',
-      parent_id: parentTaskId,
-      project_id: parentTask.project_id?.[0],
-    }]);
+    return this.odooClient.execute(this.taskModel, 'create', [
+      {
+        ...data,
+        name: data?.name ?? data?.title ?? 'Subtask',
+        parent_id: parentTaskId,
+        project_id: parentTask.project_id?.[0],
+      },
+    ]);
   }
 
   async getTaskComments(taskId: number) {
@@ -310,7 +396,7 @@ export class ProjectsService {
       this.taskCommentModel,
       [['task_id', '=', taskId]],
       this.taskCommentFields,
-      { order: 'create_date asc, id asc' }
+      { order: 'create_date asc, id asc' },
     );
 
     const comments = rows
@@ -328,7 +414,9 @@ export class ProjectsService {
     rows
       .filter((row: any) => !!row.parent_id)
       .forEach((row: any) => {
-        const parentId = String(Array.isArray(row.parent_id) ? row.parent_id[0] : row.parent_id);
+        const parentId = String(
+          Array.isArray(row.parent_id) ? row.parent_id[0] : row.parent_id,
+        );
         const parent = byId.get(parentId);
         if (!parent) return;
         parent.replies.push({
@@ -347,14 +435,17 @@ export class ProjectsService {
   async addTaskComment(taskId: number, data: any) {
     const content = String(data?.content ?? '').trim();
     if (!content) throw new Error('Comment content is required.');
-    const author = String(data?.author ?? data?.userName ?? 'User').trim() || 'User';
-    const id = await this.odooClient.execute(this.taskCommentModel, 'create', [{
-      task_id: taskId,
-      author,
-      content,
-      parent_id: false,
-      create_date: new Date().toISOString(),
-    }]);
+    const author =
+      String(data?.author ?? data?.userName ?? 'User').trim() || 'User';
+    const id = await this.odooClient.execute(this.taskCommentModel, 'create', [
+      {
+        task_id: taskId,
+        author,
+        content,
+        parent_id: false,
+        create_date: new Date().toISOString(),
+      },
+    ]);
     return {
       id: String(id),
       taskId,
@@ -368,23 +459,28 @@ export class ProjectsService {
   async addCommentReply(commentId: number, data: any) {
     const content = String(data?.content ?? '').trim();
     if (!content) throw new Error('Reply content is required.');
-    const author = String(data?.author ?? data?.userName ?? 'User').trim() || 'User';
+    const author =
+      String(data?.author ?? data?.userName ?? 'User').trim() || 'User';
 
     const [parent] = await this.odooClient.searchRead(
       this.taskCommentModel,
       [['id', '=', commentId]],
-      this.taskCommentFields
+      this.taskCommentFields,
     );
     if (!parent) throw new Error('Parent comment not found.');
-    const taskId = Number(Array.isArray(parent.task_id) ? parent.task_id[0] : parent.task_id);
+    const taskId = Number(
+      Array.isArray(parent.task_id) ? parent.task_id[0] : parent.task_id,
+    );
 
-    const id = await this.odooClient.execute(this.taskCommentModel, 'create', [{
-      task_id: taskId,
-      parent_id: commentId,
-      author,
-      content,
-      create_date: new Date().toISOString(),
-    }]);
+    const id = await this.odooClient.execute(this.taskCommentModel, 'create', [
+      {
+        task_id: taskId,
+        parent_id: commentId,
+        author,
+        content,
+        create_date: new Date().toISOString(),
+      },
+    ]);
 
     return {
       id: String(id),
