@@ -547,16 +547,26 @@ export class WebhookService {
   async handleMetaWebhook(body: any, logger: any) {
     // Basic WhatsApp message extraction logic based on WACRM parity
     if (body.object === 'whatsapp_business_account') {
+      const orgCache = new Map<string, string | null | undefined>();
+
       for (const entry of body.entry) {
         for (const change of entry.changes) {
           if (change.value.messages) {
             for (const message of change.value.messages) {
               const contact = change.value.contacts?.[0];
               const businessPhoneNumberId = change.value.metadata?.phone_number_id;
-              const integration = businessPhoneNumberId
-                ? await this.metaIntegrationService.findByBusinessPhoneNumberId(businessPhoneNumberId)
-                : null;
-              const organizationId = integration?.organizationId;
+
+              let organizationId: string | null | undefined;
+
+              if (businessPhoneNumberId) {
+                if (orgCache.has(businessPhoneNumberId)) {
+                  organizationId = orgCache.get(businessPhoneNumberId);
+                } else {
+                  const integration = await this.metaIntegrationService.findByBusinessPhoneNumberId(businessPhoneNumberId);
+                  organizationId = integration?.organizationId;
+                  orgCache.set(businessPhoneNumberId, organizationId);
+                }
+              }
 
               if (!organizationId) {
                 logger.warn?.(

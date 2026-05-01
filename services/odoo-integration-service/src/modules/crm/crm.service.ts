@@ -36,19 +36,18 @@ export class CrmService {
     const page = paginationDto.page ?? 1;
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
-    
+
     const domain: any[] = search
       ? ['|', ['name', 'ilike', search], ['email_from', 'ilike', search]]
       : [];
 
     const [data, total] = await Promise.all([
-      this.odooClient.searchRead(
-        this.model,
-        domain,
-        this.defaultFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'create_date desc' }
-      ),
-      this.odooClient.execute(this.model, 'search_count', [domain])
+      this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: 'create_date desc',
+      }),
+      this.odooClient.execute(this.model, 'search_count', [domain]),
     ]);
 
     return { data, total };
@@ -58,7 +57,7 @@ export class CrmService {
     const [lead] = await this.odooClient.searchRead(
       this.model,
       [['id', '=', id]],
-      this.defaultFields
+      this.defaultFields,
     );
     return lead;
   }

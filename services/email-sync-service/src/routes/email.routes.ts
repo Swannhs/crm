@@ -2,12 +2,17 @@ import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 import { GoogleAuthService } from '../services/google-auth.service.js';
+<<<<<<< feature/implement-email-sending-14229016848080909968
 import { prisma } from '../lib/prisma.js';
+=======
+import { OutlookAuthService } from '../services/outlook-auth.service.js';
+>>>>>>> main
 
 const router = Router();
 // @ts-ignore - temporary fix for missing type declarations
 const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
 const googleAuthService = new GoogleAuthService();
+const outlookAuthService = new OutlookAuthService();
 
 // All routes require identity context
 router.use(identityMiddleware);
@@ -45,8 +50,7 @@ router.post('/accounts/connect', async (req: any, res, next) => {
     if (provider === 'gmail') {
       authUrl = googleAuthService.generateAuthUrl(orgId, userId);
     } else {
-      // TODO: Implement Outlook OAuth URL generation
-      return res.status(501).json({ success: false, error: 'Outlook not yet implemented' });
+      authUrl = outlookAuthService.generateAuthUrl(orgId, userId);
     }
 
     res.json({

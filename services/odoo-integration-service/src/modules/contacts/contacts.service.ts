@@ -297,7 +297,7 @@ export class ContactsService {
       this.getOrders(id),
       this.getTasks(id),
       this.getActivities(id),
-      this.getShifts(id, { page: 1, pageSize: 1 } as PaginationDto),
+      this.getShifts(id, { page: 1, pageSize: 1 }),
     ]);
 
     const totalSpent = orders

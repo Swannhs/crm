@@ -1,16 +1,63 @@
 export const INITIAL_MOCK_DATA: Record<string, any[]> = {
   'res.partner': [
-    { id: 1, name: 'John Doe', email: 'john@acme.corp', phone: '+1 555-0101', city: 'San Francisco', is_company: false },
-    { id: 2, name: 'Acme Corp', email: 'info@acme.corp', phone: '+1 555-0202', city: 'San Francisco', is_company: true },
-    { id: 3, name: 'Jane Smith', email: 'jane@globex.it', phone: '+1 555-0303', city: 'Milan', is_company: false },
+    {
+      id: 1,
+      name: 'John Doe',
+      email: 'john@acme.corp',
+      phone: '+1 555-0101',
+      city: 'San Francisco',
+      is_company: false,
+    },
+    {
+      id: 2,
+      name: 'Acme Corp',
+      email: 'info@acme.corp',
+      phone: '+1 555-0202',
+      city: 'San Francisco',
+      is_company: true,
+    },
+    {
+      id: 3,
+      name: 'Jane Smith',
+      email: 'jane@globex.it',
+      phone: '+1 555-0303',
+      city: 'Milan',
+      is_company: false,
+    },
   ],
   'crm.lead': [
-    { id: 1, name: 'Enterprise Cloud Migration', planned_revenue: 150000, probability: 40, stage_id: [1, 'New'] },
-    { id: 2, name: 'Mobile App Development', planned_revenue: 45000, probability: 80, stage_id: [3, 'Proposition'] },
+    {
+      id: 1,
+      name: 'Enterprise Cloud Migration',
+      planned_revenue: 150000,
+      probability: 40,
+      stage_id: [1, 'New'],
+    },
+    {
+      id: 2,
+      name: 'Mobile App Development',
+      planned_revenue: 45000,
+      probability: 80,
+      stage_id: [3, 'Proposition'],
+    },
   ],
   'account.move': [
-    { id: 1, name: 'INV/2024/001', amount_total: 1200, state: 'posted', payment_state: 'paid', invoice_date: '2024-03-01' },
-    { id: 2, name: 'INV/2024/002', amount_total: 3500, state: 'posted', payment_state: 'not_paid', invoice_date: '2024-03-15' },
+    {
+      id: 1,
+      name: 'INV/2024/001',
+      amount_total: 1200,
+      state: 'posted',
+      payment_state: 'paid',
+      invoice_date: '2024-03-01',
+    },
+    {
+      id: 2,
+      name: 'INV/2024/002',
+      amount_total: 3500,
+      state: 'posted',
+      payment_state: 'not_paid',
+      invoice_date: '2024-03-15',
+    },
   ],
   'product.template': [
     {
@@ -43,7 +90,8 @@ export const INITIAL_MOCK_DATA: Record<string, any[]> = {
       type: 'consu',
       qty_available: 120,
       barcode: '194253702333',
-      description: 'High-fidelity audio meets industry-leading active noise cancellation.',
+      description:
+        'High-fidelity audio meets industry-leading active noise cancellation.',
       photos: ['https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3'],
     },
     {
@@ -54,9 +102,10 @@ export const INITIAL_MOCK_DATA: Record<string, any[]> = {
       type: 'consu',
       qty_available: 8,
       barcode: '194253702444',
-      description: 'Full-frame mirrorless camera for enthusiasts and pros alike.',
+      description:
+        'Full-frame mirrorless camera for enthusiasts and pros alike.',
       photos: ['https://images.unsplash.com/photo-1516035069371-29a1b244cc32'],
-    }
+    },
   ],
   'product.category': [
     { id: 1, name: 'Electronics', is_active: true },
@@ -73,18 +122,42 @@ export const INITIAL_MOCK_DATA: Record<string, any[]> = {
       date_order: '2024-04-20 10:00:00',
       partner_id: [1, 'Azure Interior'],
       order_line: [
-        { id: 1, name: 'iPhone 15 Pro Max', qty_ordered: 1, price: 1199.0 }
+        { id: 1, name: 'iPhone 15 Pro Max', qty_ordered: 1, price: 1199.0 },
       ],
-    }
+    },
   ],
   'blog.post': [],
   'project.project': [
-    { id: 1, name: 'Website Redesign', user_id: [1, 'Admin'], date_start: '2024-01-01', label_tasks: 'Tasks' },
-    { id: 2, name: 'Mobile App Launch', user_id: [1, 'Admin'], date_start: '2024-02-15', label_tasks: 'Milestones' },
+    {
+      id: 1,
+      name: 'Website Redesign',
+      user_id: [1, 'Admin'],
+      date_start: '2024-01-01',
+      label_tasks: 'Tasks',
+    },
+    {
+      id: 2,
+      name: 'Mobile App Launch',
+      user_id: [1, 'Admin'],
+      date_start: '2024-02-15',
+      label_tasks: 'Milestones',
+    },
   ],
   'project.task': [
-    { id: 1, name: 'Design Homepage', project_id: [1, 'Website Redesign'], stage_id: [1, 'New'], priority: '0' },
-    { id: 2, name: 'Setup Database', project_id: [2, 'Mobile App Launch'], stage_id: [2, 'In Progress'], priority: '1' },
+    {
+      id: 1,
+      name: 'Design Homepage',
+      project_id: [1, 'Website Redesign'],
+      stage_id: [1, 'New'],
+      priority: '0',
+    },
+    {
+      id: 2,
+      name: 'Setup Database',
+      project_id: [2, 'Mobile App Launch'],
+      stage_id: [2, 'In Progress'],
+      priority: '1',
+    },
   ],
   'account.analytic.line': [],
 };

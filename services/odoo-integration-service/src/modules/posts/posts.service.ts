@@ -6,8 +6,14 @@ import { PaginationDto } from '../../common/dto/pagination.dto.js';
 export class PostsService {
   private readonly model = 'blog.post';
   private readonly defaultFields = [
-    'id', 'name', 'subtitle', 'author_id', 'post_date', 
-    'website_published', 'blog_id', 'visits'
+    'id',
+    'name',
+    'subtitle',
+    'author_id',
+    'post_date',
+    'website_published',
+    'blog_id',
+    'visits',
   ];
 
   constructor(private readonly odooClient: OdooClientService) {}
@@ -16,19 +22,16 @@ export class PostsService {
     const page = paginationDto.page ?? 1;
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
-    
-    const domain: any[] = search
-      ? [['name', 'ilike', search]]
-      : [];
+
+    const domain: any[] = search ? [['name', 'ilike', search]] : [];
 
     const [data, total] = await Promise.all([
-      this.odooClient.searchRead(
-        this.model,
-        domain,
-        this.defaultFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'post_date desc' }
-      ),
-      this.odooClient.execute(this.model, 'search_count', [domain])
+      this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: 'post_date desc',
+      }),
+      this.odooClient.execute(this.model, 'search_count', [domain]),
     ]);
 
     return { data, total };
@@ -38,7 +41,7 @@ export class PostsService {
     const [post] = await this.odooClient.searchRead(
       this.model,
       [['id', '=', id]],
-      [...this.defaultFields, 'content']
+      [...this.defaultFields, 'content'],
     );
     return post;
   }
@@ -56,10 +59,16 @@ export class PostsService {
   }
 
   async publish(id: number) {
-    return this.odooClient.execute(this.model, 'write', [[id], { website_published: true }]);
+    return this.odooClient.execute(this.model, 'write', [
+      [id],
+      { website_published: true },
+    ]);
   }
 
   async unpublish(id: number) {
-    return this.odooClient.execute(this.model, 'write', [[id], { website_published: false }]);
+    return this.odooClient.execute(this.model, 'write', [
+      [id],
+      { website_published: false },
+    ]);
   }
 }
