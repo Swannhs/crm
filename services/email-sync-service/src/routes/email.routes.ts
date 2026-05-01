@@ -2,10 +2,12 @@ import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 import { GoogleAuthService } from '../services/google-auth.service.js';
+import { OutlookAuthService } from '../services/outlook-auth.service.js';
 
 const router = Router();
 const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
 const googleAuthService = new GoogleAuthService();
+const outlookAuthService = new OutlookAuthService();
 
 // All routes require identity context
 router.use(identityMiddleware);
@@ -43,8 +45,7 @@ router.post('/accounts/connect', async (req, res, next) => {
     if (provider === 'gmail') {
       authUrl = googleAuthService.generateAuthUrl(orgId, userId);
     } else {
-      // TODO: Implement Outlook OAuth URL generation
-      return res.status(501).json({ success: false, error: 'Outlook not yet implemented' });
+      authUrl = outlookAuthService.generateAuthUrl(orgId, userId);
     }
 
     res.json({
