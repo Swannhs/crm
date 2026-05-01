@@ -1,4 +1,24 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Query, Param, ParseIntPipe, UseGuards, BadRequestException, NotImplementedException, Headers, Req, UnauthorizedException, HttpCode, HttpStatus, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Query,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  BadRequestException,
+  NotImplementedException,
+  Headers,
+  Req,
+  UnauthorizedException,
+  HttpCode,
+  HttpStatus,
+  HttpException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiHeader } from '@nestjs/swagger';
 import { MarketingService } from './marketing.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
@@ -47,7 +67,11 @@ export class MarketingController {
         id: String(c.id),
         name: c.name,
         type: 'email',
-        status: c.active ? 'active' : Number(c?.color ?? -1) === 8 ? 'archived' : 'paused',
+        status: c.active
+          ? 'active'
+          : Number(c?.color ?? -1) === 8
+            ? 'archived'
+            : 'paused',
         active: c.active !== false,
         color: c?.color,
         title: c?.title,
@@ -72,7 +96,11 @@ export class MarketingController {
       id: String(c.id),
       name: c.name,
       type: 'email',
-      status: c.active ? 'active' : Number(c?.color ?? -1) === 8 ? 'archived' : 'paused',
+      status: c.active
+        ? 'active'
+        : Number(c?.color ?? -1) === 8
+          ? 'archived'
+          : 'paused',
       active: c.active !== false,
       color: c?.color,
       title: c?.title,
@@ -127,76 +155,130 @@ export class MarketingController {
 
   @Post('campaigns/:id/send')
   @ApiOperation({ summary: 'Send campaign mailing' })
-  async sendCampaign(@Param('id', ParseIntPipe) id: number, @Headers('x-org-id') orgId?: string) {
+  async sendCampaign(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('x-org-id') orgId?: string,
+  ) {
     const mailings = await this.marketingService.listMailings(id);
-    if (mailings.length === 0) throw new BadRequestException('Campaign content is missing. Save builder content first.');
+    if (mailings.length === 0)
+      throw new BadRequestException(
+        'Campaign content is missing. Save builder content first.',
+      );
     const mailing = mailings[0];
     if (!mailing?.subject || !mailing?.body_html) {
-      throw new BadRequestException('Campaign content is incomplete. Subject and content are required.');
+      throw new BadRequestException(
+        'Campaign content is incomplete. Subject and content are required.',
+      );
     }
     if (!mailing?.contact_list_ids || mailing.contact_list_ids.length === 0) {
       throw new BadRequestException('Audience is required before sending.');
     }
     const senderConfigured = await this.marketingService.isSenderConfigured();
-    if (!senderConfigured.configured) throw new NotImplementedException(senderConfigured.message || 'Marketing sender is not configured.');
-    const compliance = await this.marketingService.getComplianceStatus(id, orgId);
-    if (!compliance.available) throw new NotImplementedException(compliance.message || 'Compliance checks are not available yet.');
+    if (!senderConfigured.configured)
+      throw new NotImplementedException(
+        senderConfigured.message || 'Marketing sender is not configured.',
+      );
+    const compliance = await this.marketingService.getComplianceStatus(
+      id,
+      orgId,
+    );
+    if (!compliance.available)
+      throw new NotImplementedException(
+        compliance.message || 'Compliance checks are not available yet.',
+      );
     if ((compliance.compliantRecipients || 0) <= 0) {
-      throw new BadRequestException('No compliant recipients available for delivery.');
+      throw new BadRequestException(
+        'No compliant recipients available for delivery.',
+      );
     }
     return this.marketingService.sendMailing(mailing.id);
   }
 
   @Post('campaigns/:id/schedule')
   @ApiOperation({ summary: 'Schedule campaign mailing' })
-  async scheduleCampaign(@Param('id', ParseIntPipe) id: number, @Body() body: { time?: string; scheduledAt?: string }, @Headers('x-org-id') orgId?: string) {
+  async scheduleCampaign(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { time?: string; scheduledAt?: string },
+    @Headers('x-org-id') orgId?: string,
+  ) {
     const scheduleAt = body?.scheduledAt || body?.time;
     if (!scheduleAt) throw new BadRequestException('scheduledAt is required.');
     const scheduled = new Date(scheduleAt);
-    if (Number.isNaN(scheduled.getTime()) || scheduled.getTime() <= Date.now()) {
-      throw new BadRequestException('scheduledAt must be a valid future datetime.');
+    if (
+      Number.isNaN(scheduled.getTime()) ||
+      scheduled.getTime() <= Date.now()
+    ) {
+      throw new BadRequestException(
+        'scheduledAt must be a valid future datetime.',
+      );
     }
     const mailings = await this.marketingService.listMailings(id);
-    if (mailings.length === 0) throw new BadRequestException('Campaign content is missing. Save builder content first.');
+    if (mailings.length === 0)
+      throw new BadRequestException(
+        'Campaign content is missing. Save builder content first.',
+      );
     const mailing = mailings[0];
     if (!mailing?.subject || !mailing?.body_html) {
-      throw new BadRequestException('Campaign content is incomplete. Subject and content are required.');
+      throw new BadRequestException(
+        'Campaign content is incomplete. Subject and content are required.',
+      );
     }
     if (!mailing?.contact_list_ids || mailing.contact_list_ids.length === 0) {
       throw new BadRequestException('Audience is required before scheduling.');
     }
     const senderConfigured = await this.marketingService.isSenderConfigured();
-    if (!senderConfigured.configured) throw new NotImplementedException(senderConfigured.message || 'Marketing sender is not configured.');
-    const compliance = await this.marketingService.getComplianceStatus(id, orgId);
-    if (!compliance.available) throw new NotImplementedException(compliance.message || 'Compliance checks are not available yet.');
+    if (!senderConfigured.configured)
+      throw new NotImplementedException(
+        senderConfigured.message || 'Marketing sender is not configured.',
+      );
+    const compliance = await this.marketingService.getComplianceStatus(
+      id,
+      orgId,
+    );
+    if (!compliance.available)
+      throw new NotImplementedException(
+        compliance.message || 'Compliance checks are not available yet.',
+      );
     if ((compliance.compliantRecipients || 0) <= 0) {
-      throw new BadRequestException('No compliant recipients available for delivery.');
+      throw new BadRequestException(
+        'No compliant recipients available for delivery.',
+      );
     }
     await this.marketingService.scheduleMailing(mailing.id, scheduleAt);
     return this.getCampaign(id);
   }
 
   @Post('campaigns/:id/send-test')
-  async sendTest(@Param('id', ParseIntPipe) id: number, @Body() body: { email?: string; to?: string }) {
+  async sendTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { email?: string; to?: string },
+  ) {
     const recipient = String(body?.to || body?.email || '').trim();
     if (!recipient) throw new BadRequestException('Recipient is required.');
     const campaign = await this.marketingService.getCampaign(id);
     if (!campaign) throw new BadRequestException('Campaign not found.');
     const senderConfigured = await this.marketingService.isSenderConfigured();
     if (!senderConfigured.configured) {
-      throw new NotImplementedException(senderConfigured.message || 'Marketing sender is not configured.');
+      throw new NotImplementedException(
+        senderConfigured.message || 'Marketing sender is not configured.',
+      );
     }
     try {
       return await this.marketingService.sendTestMail(id, recipient);
     } catch (error: any) {
-      throw new BadRequestException(error?.message || 'Unable to send test campaign.');
+      throw new BadRequestException(
+        error?.message || 'Unable to send test campaign.',
+      );
     }
   }
 
   @Post('campaigns/:id/cancel-schedule')
   async cancelSchedule(@Param('id', ParseIntPipe) id: number) {
     const mailings = await this.marketingService.listMailings(id);
-    if (mailings.length === 0) throw new BadRequestException('No scheduled mailing found for this campaign.');
+    if (mailings.length === 0)
+      throw new BadRequestException(
+        'No scheduled mailing found for this campaign.',
+      );
     await this.marketingService.cancelScheduledMailing(mailings[0].id);
     return this.getCampaign(id);
   }
@@ -208,7 +290,11 @@ export class MarketingController {
     @Headers('x-org-id') orgId?: string,
     @Headers('x-user-id') userId?: string,
   ) {
-    const campaign = await this.marketingService.updateCampaignContent(id, data, { orgId, userId });
+    const campaign = await this.marketingService.updateCampaignContent(
+      id,
+      data,
+      { orgId, userId },
+    );
     return campaign;
   }
 
@@ -248,7 +334,10 @@ export class MarketingController {
   }
 
   @Patch('segments/:id')
-  async updateSegment(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async updateSegment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
     return this.marketingService.updateSegment(id, data);
   }
 
@@ -262,7 +351,10 @@ export class MarketingController {
     const segmentId = Number(payload?.segmentId);
     if (Number.isFinite(segmentId) && segmentId > 0) {
       const result = await this.marketingService.previewSegmentById(segmentId);
-      if (result?.available === false) throw new NotImplementedException('Segment preview is not available yet.');
+      if (result?.available === false)
+        throw new NotImplementedException(
+          'Segment preview is not available yet.',
+        );
       return result;
     }
     if (!Array.isArray(payload?.filters)) {
@@ -271,7 +363,9 @@ export class MarketingController {
     try {
       return await this.marketingService.previewSegment(payload?.filters);
     } catch (error: any) {
-      throw new BadRequestException(error?.message || 'Invalid segment filters.');
+      throw new BadRequestException(
+        error?.message || 'Invalid segment filters.',
+      );
     }
   }
 
@@ -311,7 +405,10 @@ export class MarketingController {
   }
 
   @Patch('templates/:id')
-  async updateTemplate(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+  async updateTemplate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
     return this.marketingService.updateTemplate(id, data);
   }
 
@@ -326,12 +423,18 @@ export class MarketingController {
   }
 
   @Get('templates/:id/usage')
-  async templateUsage(@Param('id', ParseIntPipe) id: number, @Headers('x-org-id') orgId?: string) {
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+  async templateUsage(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('x-org-id') orgId?: string,
+  ) {
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     try {
       return await this.marketingService.getTemplateUsage(orgId, String(id));
     } catch (error) {
-      throw new NotImplementedException('Template usage tracking is not available yet.');
+      throw new NotImplementedException(
+        'Template usage tracking is not available yet.',
+      );
     }
   }
 
@@ -388,7 +491,8 @@ export class MarketingController {
     @Query() _paginationDto: PaginationDto,
     @Headers('x-org-id') orgId?: string,
   ) {
-    if (orgId) return this.marketingService.campaignEventAnalytics(orgId, String(id));
+    if (orgId)
+      return this.marketingService.campaignEventAnalytics(orgId, String(id));
     return this.marketingService.campaignDeliveryAnalytics(id);
   }
 
@@ -401,72 +505,117 @@ export class MarketingController {
   }
 
   @Get('campaigns/:id/compliance-status')
-  async getCampaignComplianceStatus(@Param('id', ParseIntPipe) id: number, @Headers('x-org-id') orgId?: string) {
+  async getCampaignComplianceStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('x-org-id') orgId?: string,
+  ) {
     const result = await this.marketingService.getComplianceStatus(id, orgId);
-    if (!result.available) throw new NotImplementedException(result.message || 'Compliance checks are not available yet.');
+    if (!result.available)
+      throw new NotImplementedException(
+        result.message || 'Compliance checks are not available yet.',
+      );
     return result;
   }
 
   @Get('sender-status')
   async getSenderStatus() {
     const result = await this.marketingService.isSenderConfigured();
-    if (!result.configured) throw new NotImplementedException(result.message || 'Sender configuration is required.');
+    if (!result.configured)
+      throw new NotImplementedException(
+        result.message || 'Sender configuration is required.',
+      );
     return result;
   }
 
   @Get('campaigns/:id/template-usage')
-  async campaignTemplateUsage(@Param('id', ParseIntPipe) id: number, @Headers('x-org-id') orgId?: string) {
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+  async campaignTemplateUsage(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('x-org-id') orgId?: string,
+  ) {
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     try {
-      return await this.marketingService.getCampaignTemplateUsage(orgId, String(id));
+      return await this.marketingService.getCampaignTemplateUsage(
+        orgId,
+        String(id),
+      );
     } catch (error) {
-      throw new NotImplementedException('Template usage tracking is not available yet.');
+      throw new NotImplementedException(
+        'Template usage tracking is not available yet.',
+      );
     }
   }
 
   @Get('campaigns/:id/delivery-events')
-  async campaignDeliveryEvents(@Param('id', ParseIntPipe) id: number, @Headers('x-org-id') orgId?: string) {
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+  async campaignDeliveryEvents(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('x-org-id') orgId?: string,
+  ) {
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     try {
       return await this.marketingService.getDeliveryEvents(orgId, String(id));
     } catch (error) {
-      throw new NotImplementedException('Delivery event tracking is not available yet.');
+      throw new NotImplementedException(
+        'Delivery event tracking is not available yet.',
+      );
     }
   }
 
   @Get('suppression-list')
   async suppressionList(@Headers('x-org-id') orgId?: string) {
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     try {
       return await this.marketingService.getSuppressionList(orgId);
     } catch (error: any) {
       if (error instanceof HttpException) throw error;
-      throw new NotImplementedException('Suppression list storage is not available yet.');
+      throw new NotImplementedException(
+        'Suppression list storage is not available yet.',
+      );
     }
   }
 
   @Post('suppression-list')
-  async addSuppression(@Headers('x-org-id') orgId?: string, @Body() payload?: any) {
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+  async addSuppression(
+    @Headers('x-org-id') orgId?: string,
+    @Body() payload?: any,
+  ) {
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     try {
       return await this.marketingService.addSuppressionEntry(orgId, payload);
     } catch (error: any) {
       if (error instanceof HttpException) throw error;
-      if (error?.message?.startsWith?.('Invalid') || error?.message?.includes?.('required')) {
+      if (
+        error?.message?.startsWith?.('Invalid') ||
+        error?.message?.includes?.('required')
+      ) {
         throw new BadRequestException(error.message);
       }
-      throw new NotImplementedException('Suppression list storage is not available yet.');
+      throw new NotImplementedException(
+        'Suppression list storage is not available yet.',
+      );
     }
   }
 
   @Delete('suppression-list/:id')
-  async removeSuppression(@Headers('x-org-id') orgId?: string, @Param('id') id?: string) {
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+  async removeSuppression(
+    @Headers('x-org-id') orgId?: string,
+    @Param('id') id?: string,
+  ) {
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     try {
-      return await this.marketingService.removeSuppressionEntry(orgId, String(id));
+      return await this.marketingService.removeSuppressionEntry(
+        orgId,
+        String(id),
+      );
     } catch (error: any) {
       if (error instanceof HttpException) throw error;
-      throw new NotImplementedException('Suppression list storage is not available yet.');
+      throw new NotImplementedException(
+        'Suppression list storage is not available yet.',
+      );
     }
   }
 
@@ -477,12 +626,20 @@ export class MarketingController {
     @Param('id') contactId?: string,
     @Body() payload?: any,
   ) {
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     try {
-      return await this.marketingService.upsertContactConsent(orgId, String(contactId), payload, userId);
+      return await this.marketingService.upsertContactConsent(
+        orgId,
+        String(contactId),
+        payload,
+        userId,
+      );
     } catch (error: any) {
       if (error instanceof HttpException) throw error;
-      throw new NotImplementedException('Consent policy storage is not available yet.');
+      throw new NotImplementedException(
+        'Consent policy storage is not available yet.',
+      );
     }
   }
 
@@ -494,15 +651,23 @@ export class MarketingController {
     @Headers('x-webhook-signature') signature?: string,
     @Req() req?: any,
   ) {
-    const configuredProviders = String(process.env.MARKETING_WEBHOOK_PROVIDERS || '').split(',').map((x) => x.trim()).filter(Boolean);
+    const configuredProviders = String(
+      process.env.MARKETING_WEBHOOK_PROVIDERS || '',
+    )
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean);
     if (!configuredProviders.includes(provider)) {
       throw new NotImplementedException('Webhook provider is not configured.');
     }
     const secret = process.env.MARKETING_WEBHOOK_SECRET;
     if (!secret) {
-      throw new NotImplementedException('Webhook signature configuration is missing.');
+      throw new NotImplementedException(
+        'Webhook signature configuration is missing.',
+      );
     }
-    if (!signature) throw new UnauthorizedException('Missing webhook signature.');
+    if (!signature)
+      throw new UnauthorizedException('Missing webhook signature.');
 
     // NOTE: raw body middleware is not enabled in this service yet; we verify against JSON payload text.
     const rawBody = req?.rawBody
@@ -511,13 +676,16 @@ export class MarketingController {
         : Buffer.from(String(req.rawBody))
       : Buffer.from(JSON.stringify(req?.body || {}));
     const expected = createHmac('sha256', secret).update(rawBody).digest('hex');
-    if (signature !== expected) throw new UnauthorizedException('Invalid webhook signature.');
+    if (signature !== expected)
+      throw new UnauthorizedException('Invalid webhook signature.');
 
-    if (!orgId) throw new UnauthorizedException('Missing organization context.');
+    if (!orgId)
+      throw new UnauthorizedException('Missing organization context.');
     const payload = req?.body || {};
     const eventType = String(payload?.eventType || '').toLowerCase();
     const campaignId = String(payload?.campaignId || '');
-    if (!campaignId || !eventType) throw new BadRequestException('campaignId and eventType are required.');
+    if (!campaignId || !eventType)
+      throw new BadRequestException('campaignId and eventType are required.');
 
     try {
       await this.marketingService.ingestDeliveryEvent(orgId, provider, {
@@ -534,7 +702,9 @@ export class MarketingController {
         rawPayload: payload,
       });
     } catch (error) {
-      throw new NotImplementedException('Delivery event storage is not available yet.');
+      throw new NotImplementedException(
+        'Delivery event storage is not available yet.',
+      );
     }
 
     return { accepted: true };

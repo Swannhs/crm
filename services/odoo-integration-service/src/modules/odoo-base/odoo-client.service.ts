@@ -15,7 +15,9 @@ export class OdooClientService {
   private static mockStore: Record<string, any[]> = { ...INITIAL_MOCK_DATA };
 
   constructor(private configService: ConfigService) {
-    this.url = this.configService.get<string>('ODOO_BASE_URL') || 'http://odoo-demo:8069';
+    this.url =
+      this.configService.get<string>('ODOO_BASE_URL') ||
+      'http://odoo-demo:8069';
     this.db = this.configService.get<string>('ODOO_DB') || 'demo';
     this.password = this.configService.get<string>('ODOO_PASSWORD') || 'admin';
   }
@@ -23,7 +25,11 @@ export class OdooClientService {
   /**
    * Internal JSON-RPC caller
    */
-  private async jsonRpcCall(service: 'common' | 'object', method: string, args: any[]) {
+  private async jsonRpcCall(
+    service: 'common' | 'object',
+    method: string,
+    args: any[],
+  ) {
     const payload = {
       jsonrpc: '2.0',
       method: 'call',
@@ -47,8 +53,11 @@ export class OdooClientService {
 
       return response.data?.result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`JSON-RPC error at ${service}.${method}: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `JSON-RPC error at ${service}.${method}: ${errorMessage}`,
+      );
       throw error;
     }
   }
@@ -58,29 +67,40 @@ export class OdooClientService {
       if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
         const uid = await this.jsonRpcCall('common', 'authenticate', [
           this.db,
-          username || this.configService.get<string>('ODOO_USERNAME') || 'admin',
+          username ||
+            this.configService.get<string>('ODOO_USERNAME') ||
+            'admin',
           password || this.password,
           {},
         ]);
-        
+
         if (!uid || typeof uid !== 'number') {
-          throw new Error('Authentication failed: Invalid credentials or database');
+          throw new Error(
+            'Authentication failed: Invalid credentials or database',
+          );
         }
 
         this.uid = uid;
         return uid;
       }
-      
+
       this.uid = 1;
       return 1;
     } catch (error) {
-      this.logger.warn(`Odoo JSON-RPC authentication failed, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `Odoo JSON-RPC authentication failed, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`,
+      );
       this.uid = 1;
       return 1;
     }
   }
 
-  async execute(model: string, method: string, args: any[], kwargs: any = {}): Promise<any> {
+  async execute(
+    model: string,
+    method: string,
+    args: any[],
+    kwargs: any = {},
+  ): Promise<any> {
     if (!this.uid) await this.authenticate();
 
     try {
@@ -97,12 +117,19 @@ export class OdooClientService {
       }
       return this.handleMockExecute(model, method, args, kwargs);
     } catch (error) {
-      this.logger.warn(`Odoo JSON-RPC execution failed for ${model}.${method}, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `Odoo JSON-RPC execution failed for ${model}.${method}, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return this.handleMockExecute(model, method, args, kwargs);
     }
   }
 
-  async searchRead(model: string, domain: any[] = [], fields: string[] = [], options: any = {}): Promise<any[]> {
+  async searchRead(
+    model: string,
+    domain: any[] = [],
+    fields: string[] = [],
+    options: any = {},
+  ): Promise<any[]> {
     return this.execute(model, 'search_read', [domain], {
       fields,
       ...options,
@@ -119,7 +146,8 @@ export class OdooClientService {
   private evaluateCondition(record: any, condition: any[]): boolean {
     const [field, operator, rawValue] = condition;
     const left = this.normalizeComparable(record?.[field]);
-    const right = operator === 'in' ? rawValue : this.normalizeComparable(rawValue);
+    const right =
+      operator === 'in' ? rawValue : this.normalizeComparable(rawValue);
 
     switch (operator) {
       case '=':
@@ -138,7 +166,9 @@ export class OdooClientService {
         return Array.isArray(rawValue) ? rawValue.includes(left) : false;
       case 'ilike': {
         const leftText = String(left ?? '').toLowerCase();
-        const pattern = String(right ?? '').toLowerCase().replaceAll('%', '');
+        const pattern = String(right ?? '')
+          .toLowerCase()
+          .replaceAll('%', '');
         return leftText.includes(pattern);
       }
       default:
@@ -190,7 +220,12 @@ export class OdooClientService {
     });
   }
 
-  private handleMockExecute(model: string, method: string, args: any[], kwargs: any): any {
+  private handleMockExecute(
+    model: string,
+    method: string,
+    args: any[],
+    kwargs: any,
+  ): any {
     if (!OdooClientService.mockStore[model]) {
       OdooClientService.mockStore[model] = [];
     }
@@ -210,13 +245,13 @@ export class OdooClientService {
 
       case 'create':
         const newId = store.length + 1001;
-        const newRecord = { 
-          id: newId, 
-          ...args[0], 
+        const newRecord = {
+          id: newId,
+          ...args[0],
           create_date: new Date().toISOString(),
           createdAt: new Date().toISOString(),
           priority: args[0].priority || '0',
-          kanban_state: args[0].kanban_state || 'normal'
+          kanban_state: args[0].kanban_state || 'normal',
         };
         store.unshift(newRecord);
         return newId;
@@ -225,16 +260,22 @@ export class OdooClientService {
         const idsToUpdate = args[0];
         const updateData = args[1];
         idsToUpdate.forEach((id: number) => {
-          const index = store.findIndex(item => item.id === id);
+          const index = store.findIndex((item) => item.id === id);
           if (index !== -1) {
-            store[index] = { ...store[index], ...updateData, write_date: new Date().toISOString() };
+            store[index] = {
+              ...store[index],
+              ...updateData,
+              write_date: new Date().toISOString(),
+            };
           }
         });
         return true;
 
       case 'unlink':
         const idsToDelete = args[0];
-        OdooClientService.mockStore[model] = store.filter(item => !idsToDelete.includes(item.id));
+        OdooClientService.mockStore[model] = store.filter(
+          (item) => !idsToDelete.includes(item.id),
+        );
         return true;
 
       case 'action_post':
@@ -242,7 +283,10 @@ export class OdooClientService {
 
       case '_render_qweb_pdf':
         // Return a dummy PDF base64
-        return ['JVBERi0xLjEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDAKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPj4KZW5kb2JqCjMgMCBvYmoKPDAKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovUmVzb3VyY2VzIDw8Pj4KL0NvbnRlbnRzIDQgMCBSCj4+CmVuZG9iago0IDAgb2JqCjw8Ci9MZW5ndGggMAo+PgpzdHJlYW0KZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTggMDAwMDAgbiAKMDAwMDAwMDA2NiAwMDAwMCBuIAowMDAwMDAwMTIxIDAwMDAwIG4gCjAwMDAwMDAyMzEgMDAwMDAgbiAKdHJhaWxlcgo8PAovU2l6ZSA1Ci9Sb290IDEgMCBSCj4+CnN0YXJ0eHJlZgoyNzIKJSVFT0Y=', 'pdf'];
+        return [
+          'JVBERi0xLjEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDAKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPj4KZW5kb2JqCjMgMCBvYmoKPDAKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQovUmVzb3VyY2VzIDw8Pj4KL0NvbnRlbnRzIDQgMCBSCj4+CmVuZG9iago0IDAgb2JqCjw8Ci9MZW5ndGggMAo+PgpzdHJlYW0KZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTggMDAwMDAgbiAKMDAwMDAwMDA2NiAwMDAwMCBuIAowMDAwMDAwMTIxIDAwMDAwIG4gCjAwMDAwMDAyMzEgMDAwMDAgbiAKdHJhaWxlcgo8PAovU2l6ZSA1Ci9Sb290IDEgMCBSCj4+CnN0YXJ0eHJlZgoyNzIKJSVFT0Y=',
+          'pdf',
+        ];
 
       default:
         return Array.isArray(store) ? store : [];

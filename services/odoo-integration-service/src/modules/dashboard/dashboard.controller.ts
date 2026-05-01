@@ -8,7 +8,6 @@ import { IdentityGuard } from '../../common/guards/identity.guard.js';
 @ApiHeader({ name: 'x-org-id', required: true })
 @Controller()
 export class DashboardController {
-
   @Get('marketing/v1/campaigns')
   @ApiOperation({ summary: 'Get mock campaigns' })
   async getCampaigns() {
