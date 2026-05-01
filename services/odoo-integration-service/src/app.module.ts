@@ -16,6 +16,7 @@ import { PrismaModule } from './common/prisma/prisma.module.js';
 import { EmployeesModule } from './modules/employees/employees.module.js';
 import { BookingModule } from './modules/booking/booking.module.js';
 import { OdooAdapterModule } from './modules/odoo-adapter/odoo-adapter.module.js';
+import { CalendarModule } from './modules/calendar/calendar.module.js';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { OdooAdapterModule } from './modules/odoo-adapter/odoo-adapter.module.js
     PosModule,
     EmployeesModule,
     BookingModule,
+    CalendarModule,
     OdooAdapterModule,
     MagentoCompatibilityModule,
   ],

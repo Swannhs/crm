@@ -713,6 +713,118 @@ async function handleApiCompat(req: Request, res: Response) {
       return notImplemented(res, { module, method: req.method, path: rest, hint: "booking-types & appointments" });
     }
 
+    if (module === "calendar") {
+      const odooCalendarBase = API_ROUTER_CONFIG.odooIntegrationBaseUrl;
+      const bookingBase = API_ROUTER_CONFIG.bookingServiceBaseUrl;
+      const query = new URLSearchParams(req.query as Record<string, string>).toString();
+      const withQuery = (path: string) => (query ? `${path}?${query}` : path);
+
+      if (req.method === "GET" && rest === "/summary") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: withQuery("/v1/odoo/calendar/summary") });
+      }
+
+      if (req.method === "GET" && rest === "/events") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: withQuery("/v1/odoo/calendar/events") });
+      }
+      if (req.method === "POST" && rest === "/events") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: "/v1/odoo/calendar/events" });
+      }
+      if (req.method === "GET" && /^\/events\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/events/${id}` });
+      }
+      if (req.method === "PATCH" && /^\/events\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/events/${id}` });
+      }
+      if (req.method === "DELETE" && /^\/events\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/events/${id}` });
+      }
+      if (req.method === "POST" && /^\/events\/[^/]+\/cancel$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/events/${id}/cancel` });
+      }
+      if (req.method === "POST" && /^\/events\/[^/]+\/complete$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/events/${id}/complete` });
+      }
+      if (req.method === "POST" && /^\/events\/[^/]+\/respond$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/events/${id}/respond` });
+      }
+
+      if (req.method === "GET" && rest === "/availability") {
+        return proxyTo(req, res, { baseUrl: bookingBase, targetPath: withQuery("/v1/availability") });
+      }
+      if (req.method === "POST" && rest === "/availability") {
+        return proxyTo(req, res, { baseUrl: bookingBase, targetPath: "/v1/availability" });
+      }
+      if (req.method === "PATCH" && /^\/availability\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: bookingBase, targetPath: `/v1/availability/${id}` });
+      }
+      if (req.method === "DELETE" && /^\/availability\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: bookingBase, targetPath: `/v1/availability/${id}` });
+      }
+      if (req.method === "GET" && rest === "/available-slots") {
+        if (req.query?.bookingTypeId && req.query?.date) {
+          return proxyTo(req, res, { baseUrl: bookingBase, targetPath: withQuery("/v1/appointments/available-slots") });
+        }
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: withQuery("/v1/odoo/calendar/available-slots") });
+      }
+
+      if (req.method === "GET" && rest === "/booking-links") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: withQuery("/v1/odoo/calendar/booking-links") });
+      }
+      if (req.method === "POST" && rest === "/booking-links") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: "/v1/odoo/calendar/booking-links" });
+      }
+      if (req.method === "GET" && /^\/booking-links\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/booking-links/${id}` });
+      }
+      if (req.method === "PATCH" && /^\/booking-links\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/booking-links/${id}` });
+      }
+      if (req.method === "DELETE" && /^\/booking-links\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/booking-links/${id}` });
+      }
+      if (req.method === "GET" && /^\/booking-links\/[^/]+\/slots$/.test(rest)) {
+        const id = rest.split("/")[2];
+        const bookingTypeId = String(req.query?.bookingTypeId || id);
+        const qs = new URLSearchParams({ ...(req.query as Record<string, string>), bookingTypeId }).toString();
+        return proxyTo(req, res, { baseUrl: bookingBase, targetPath: `/v1/appointments/available-slots?${qs}` });
+      }
+
+      if (req.method === "GET" && rest === "/reminders") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: withQuery("/v1/odoo/calendar/reminders") });
+      }
+      if (req.method === "POST" && rest === "/reminders") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: "/v1/odoo/calendar/reminders" });
+      }
+      if (req.method === "PATCH" && /^\/reminders\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/reminders/${id}` });
+      }
+      if (req.method === "DELETE" && /^\/reminders\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: `/v1/odoo/calendar/reminders/${id}` });
+      }
+
+      if (req.method === "GET" && rest === "/settings") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: "/v1/odoo/calendar/settings" });
+      }
+      if (req.method === "PATCH" && rest === "/settings") {
+        return proxyTo(req, res, { baseUrl: odooCalendarBase, targetPath: "/v1/odoo/calendar/settings" });
+      }
+
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "calendar events implemented; advanced features return unavailable if not supported" });
+    }
+
 
     if (module === "scoring") {
       if (req.method === "GET" && (rest === "/models" || rest === "/hot-leads")) {
