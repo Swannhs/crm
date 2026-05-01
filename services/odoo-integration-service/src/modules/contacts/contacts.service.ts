@@ -8,7 +8,19 @@ import { parse } from 'csv-parse/sync';
 @Injectable()
 export class ContactsService {
   private readonly model = 'res.partner';
-  private readonly defaultFields = ['id', 'name', 'email', 'phone', 'mobile', 'is_company', 'street', 'city', 'country_id', 'supplier_rank', 'employee'];
+  private readonly defaultFields = [
+    'id',
+    'name',
+    'email',
+    'phone',
+    'mobile',
+    'is_company',
+    'street',
+    'city',
+    'country_id',
+    'supplier_rank',
+    'employee',
+  ];
 
   async import(file: Express.Multer.File) {
     const content = file.buffer.toString();
@@ -18,27 +30,47 @@ export class ContactsService {
       trim: true,
     });
 
-    const results = [];
-    for (const record of records as any[]) {
-      try {
-        const createDto: CreateContactDto = {
-          name: record.Name || record.name || record.fullName || record.FullName,
-          email: record.Email || record.email,
-          phone: record.Phone || record.phone,
-          mobile: record.Mobile || record.mobile,
-          isCompany: record.IsCompany === 'true' || record.isCompany === 'true' || record.IsCompany === true || false,
-          street: record.Street || record.street,
-          city: record.City || record.city,
-          vat: record.VAT || record.vat,
-        } as any;
+    const results: any[] = [];
+    const chunkSize = 20;
+    const recordsArray = records as any[];
 
-        if (createDto.name) {
-          const res = await this.create(createDto);
-          results.push({ success: true, name: createDto.name, id: res });
+    for (let i = 0; i < recordsArray.length; i += chunkSize) {
+      const chunk = recordsArray.slice(i, i + chunkSize);
+
+      const chunkPromises = chunk.map(async (record) => {
+        try {
+          const createDto: CreateContactDto = {
+            name:
+              record.Name || record.name || record.fullName || record.FullName,
+            email: record.Email || record.email,
+            phone: record.Phone || record.phone,
+            mobile: record.Mobile || record.mobile,
+            isCompany:
+              record.IsCompany === 'true' ||
+              record.isCompany === 'true' ||
+              record.IsCompany === true ||
+              false,
+            street: record.Street || record.street,
+            city: record.City || record.city,
+            vat: record.VAT || record.vat,
+          } as any;
+
+          if (createDto.name) {
+            const res = await this.create(createDto);
+            return { success: true, name: createDto.name, id: res };
+          }
+          return null;
+        } catch (error: any) {
+          return {
+            success: false,
+            name: record.name || record.Name || 'Unknown',
+            error: error.message,
+          };
         }
-      } catch (error: any) {
-        results.push({ success: false, name: (record as any).name || 'Unknown', error: error.message });
-      }
+      });
+
+      const chunkResults = await Promise.all(chunkPromises);
+      results.push(...chunkResults.filter((r) => r !== null));
     }
     return results;
   }
@@ -53,7 +85,11 @@ export class ContactsService {
     const normalizedType = String(type || '').toLowerCase();
 
     if (search) {
-      domain.push('|', ['name', 'ilike', `%${search}%`], ['email', 'ilike', `%${search}%`]);
+      domain.push(
+        '|',
+        ['name', 'ilike', `%${search}%`],
+        ['email', 'ilike', `%${search}%`],
+      );
     }
 
     if (normalizedType) {
@@ -79,7 +115,9 @@ export class ContactsService {
           select: { odooId: true },
         });
 
-        const odooIds = statusMaps.map((item: { odooId: number }) => item.odooId);
+        const odooIds = statusMaps.map(
+          (item: { odooId: number }) => item.odooId,
+        );
         if (odooIds.length === 0) {
           return [['id', '=', 0]];
         }
@@ -100,29 +138,28 @@ export class ContactsService {
     const domain = await this.buildDomain(search, type);
 
     const [data, total] = await Promise.all([
-      this.odooClient.searchRead(
-        this.model,
-        domain,
-        this.defaultFields,
-        { offset: (page - 1) * pageSize, limit: pageSize, order: 'write_date desc' }
-      ),
-      this.odooClient.execute(this.model, 'search_count', [domain])
+      this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: 'write_date desc',
+      }),
+      this.odooClient.execute(this.model, 'search_count', [domain]),
     ]);
 
     const dataWithUuids = await Promise.all(
       data.map(async (c: any) => {
-        const map = await this.prisma.contactMap.findUnique({
-          where: { odooId: c.id }
-        }) as any;
+        const map = (await this.prisma.contactMap.findUnique({
+          where: { odooId: c.id },
+        })) as any;
 
         // If no map exists, create one (lazy initialization)
         let uuid = map?.uuid;
         let status = map?.status || 'new';
 
         if (!map) {
-          const newMap = await this.prisma.contactMap.create({
-            data: { odooId: c.id }
-          }) as any;
+          const newMap = (await this.prisma.contactMap.create({
+            data: { odooId: c.id },
+          })) as any;
           uuid = newMap.uuid;
           status = newMap.status || 'new';
         }
@@ -130,9 +167,9 @@ export class ContactsService {
         return {
           ...c,
           uuid,
-          status
+          status,
         };
-      })
+      }),
     );
 
     const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
@@ -155,7 +192,7 @@ export class ContactsService {
       this.model,
       domain,
       ['id', 'is_company', 'create_date'],
-      { limit: 2000, order: 'create_date asc' }
+      { limit: 2000, order: 'create_date asc' },
     );
 
     const contactIds = contacts.map((contact: any) => contact.id);
@@ -180,7 +217,9 @@ export class ContactsService {
     const typeCounts: Record<string, number> = {};
 
     contacts.forEach((contact: any) => {
-      const status = String(statusByOdooId.get(contact.id) || 'new').toLowerCase();
+      const status = String(
+        statusByOdooId.get(contact.id) || 'new',
+      ).toLowerCase();
       statusCounts[status] = (statusCounts[status] || 0) + 1;
 
       const contactType = contact.is_company ? 'Company' : 'Client';
@@ -191,7 +230,9 @@ export class ContactsService {
     const monthKeys: string[] = [];
     for (let i = 5; i >= 0; i -= 1) {
       const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      monthKeys.push(`${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`);
+      monthKeys.push(
+        `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`,
+      );
     }
 
     const monthlyCounts: Record<string, number> = {};
@@ -210,10 +251,12 @@ export class ContactsService {
 
     return {
       totalContacts: contacts.length,
-      statusDistribution: Object.entries(statusCounts).map(([label, value]) => ({
-        label,
-        value,
-      })),
+      statusDistribution: Object.entries(statusCounts).map(
+        ([label, value]) => ({
+          label,
+          value,
+        }),
+      ),
       typeDistribution: Object.entries(typeCounts).map(([label, value]) => ({
         label,
         value,
@@ -229,22 +272,24 @@ export class ContactsService {
     const [contact] = await this.odooClient.searchRead(
       this.model,
       [['id', '=', id]],
-      this.defaultFields
+      this.defaultFields,
     );
     if (!contact) return null;
 
-    const map = await this.prisma.contactMap.findUnique({
-      where: { odooId: id }
-    }) as any;
+    const map = (await this.prisma.contactMap.findUnique({
+      where: { odooId: id },
+    })) as any;
 
     // Lazy create map if missing
     let uuid = map?.uuid;
     let status = map?.status || 'new';
 
     if (!map) {
-       const newMap = await this.prisma.contactMap.create({ data: { odooId: id } }) as any;
-       uuid = newMap.uuid;
-       status = newMap.status || 'new';
+      const newMap = (await this.prisma.contactMap.create({
+        data: { odooId: id },
+      })) as any;
+      uuid = newMap.uuid;
+      status = newMap.status || 'new';
     }
 
     // Calculate insights
@@ -252,7 +297,7 @@ export class ContactsService {
       this.getOrders(id),
       this.getTasks(id),
       this.getActivities(id),
-      this.getShifts(id, { page: 1, pageSize: 1 } as PaginationDto)
+      this.getShifts(id, { page: 1, pageSize: 1 } as PaginationDto),
     ]);
 
     const totalSpent = orders
@@ -260,9 +305,14 @@ export class ContactsService {
       .reduce((acc: number, curr: any) => acc + curr.amount_total, 0);
 
     const completedTasks = tasks.filter((t: any) => t.status === 'done').length;
-    const engagement = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
+    const engagement =
+      tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
 
-    const lastActivity = activities[0]?.createdAt || shifts.data?.[0]?.clockIn || contact.write_date || contact.create_date;
+    const lastActivity =
+      activities[0]?.createdAt ||
+      shifts.data?.[0]?.clockIn ||
+      contact.write_date ||
+      contact.create_date;
 
     return {
       ...contact,
@@ -274,23 +324,23 @@ export class ContactsService {
         lastActive: lastActivity,
         totalTasks: tasks.length,
         completedTasks,
-        totalOrders: orders.length
-      }
+        totalOrders: orders.length,
+      },
     };
   }
 
   async findByUuid(uuid: string) {
-    const map = await this.prisma.contactMap.findUnique({
-      where: { uuid }
-    }) as any;
+    const map = (await this.prisma.contactMap.findUnique({
+      where: { uuid },
+    })) as any;
     if (!map) return null;
     return this.findOne(map.odooId);
   }
 
   async resolveUuid(uuid: string): Promise<number | null> {
-    const map = await this.prisma.contactMap.findUnique({
-      where: { uuid }
-    }) as any;
+    const map = (await this.prisma.contactMap.findUnique({
+      where: { uuid },
+    })) as any;
     return map?.odooId ?? null;
   }
 
@@ -345,7 +395,9 @@ export class ContactsService {
     delete normalized.fullName;
     delete normalized.isCompany;
 
-    const createdId = await this.odooClient.execute(this.model, 'create', [normalized]);
+    const createdId = await this.odooClient.execute(this.model, 'create', [
+      normalized,
+    ]);
 
     if (typeof createdId === 'number') {
       await this.prisma.contactMap.upsert({
@@ -390,7 +442,7 @@ export class ContactsService {
       'sale.order',
       [['partner_id', '=', id]],
       ['id', 'name', 'date_order', 'amount_total', 'state', 'invoice_status'],
-      { order: 'date_order desc' }
+      { order: 'date_order desc' },
     );
   }
 
@@ -399,7 +451,7 @@ export class ContactsService {
       'project.project',
       [['partner_id', '=', id]],
       ['id', 'name', 'label_tasks', 'allow_timesheets', 'create_date'],
-      { order: 'create_date desc' }
+      { order: 'create_date desc' },
     );
   }
 
@@ -407,7 +459,7 @@ export class ContactsService {
   async getActivities(id: number) {
     return this.prisma.contactActivity.findMany({
       where: { contactId: id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -443,25 +495,25 @@ export class ContactsService {
         where: { contactId: id },
         orderBy: { clockIn: 'desc' },
         skip: (page - 1) * pageSize,
-        take: pageSize
+        take: pageSize,
       }),
       this.prisma.contactShift.count({
-        where: { contactId: id }
-      })
+        where: { contactId: id },
+      }),
     ]);
     return { data, total };
   }
 
   async clockIn(id: number) {
     return this.prisma.contactShift.create({
-      data: { contactId: id, clockIn: new Date(), status: 'Approved' }
+      data: { contactId: id, clockIn: new Date(), status: 'Approved' },
     });
   }
 
   async clockOut(shiftId: string) {
     return this.prisma.contactShift.update({
       where: { id: shiftId },
-      data: { clockOut: new Date() }
+      data: { clockOut: new Date() },
     });
   }
 }
