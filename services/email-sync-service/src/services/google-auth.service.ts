@@ -40,4 +40,67 @@ export class GoogleAuthService {
     const { data } = await oauth2.userinfo.get();
     return data;
   }
+
+  async sendEmail(
+    refreshToken: string,
+    params: {
+      to: string | string[];
+      subject: string;
+      body: string;
+      cc?: string | string[];
+      bcc?: string | string[];
+      isHtml?: boolean;
+    }
+  ) {
+    const client = new google.auth.OAuth2(
+      config.gmail.clientId,
+      config.gmail.clientSecret
+    );
+    client.setCredentials({ refresh_token: refreshToken });
+
+    const gmail = google.gmail({ version: 'v1', auth: client });
+
+    const to = Array.isArray(params.to) ? params.to.join(', ') : params.to;
+
+    let messageParts = [
+      `To: ${to}`,
+      `Subject: ${params.subject}`,
+      'MIME-Version: 1.0',
+    ];
+
+    if (params.cc) {
+      const cc = Array.isArray(params.cc) ? params.cc.join(', ') : params.cc;
+      messageParts.push(`Cc: ${cc}`);
+    }
+
+    if (params.bcc) {
+      const bcc = Array.isArray(params.bcc) ? params.bcc.join(', ') : params.bcc;
+      messageParts.push(`Bcc: ${bcc}`);
+    }
+
+    const contentType = params.isHtml ? 'text/html; charset="UTF-8"' : 'text/plain; charset="UTF-8"';
+    messageParts.push(`Content-Type: ${contentType}`);
+
+    // Empty line separates headers from body
+    messageParts.push('');
+    messageParts.push(params.body);
+
+    const message = messageParts.join('\r\n');
+
+    // Base64url encode the message
+    const encodedMessage = Buffer.from(message)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const res = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedMessage
+      }
+    });
+
+    return res.data;
+  }
 }

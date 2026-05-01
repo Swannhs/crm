@@ -2,9 +2,14 @@ import { Router } from 'express';
 import { requireIdentityContext } from '@mymanager/node-service-kit';
 
 import { GoogleAuthService } from '../services/google-auth.service.js';
+<<<<<<< feature/implement-email-sending-14229016848080909968
+import { prisma } from '../lib/prisma.js';
+=======
 import { OutlookAuthService } from '../services/outlook-auth.service.js';
+>>>>>>> main
 
 const router = Router();
+// @ts-ignore - temporary fix for missing type declarations
 const identityMiddleware = (req: any, res: any, next: any) => requireIdentityContext(req, res, next);
 const googleAuthService = new GoogleAuthService();
 const outlookAuthService = new OutlookAuthService();
@@ -13,7 +18,7 @@ const outlookAuthService = new OutlookAuthService();
 router.use(identityMiddleware);
 
 // GET /email/accounts - List connected email accounts
-router.get('/accounts', async (req, res, next) => {
+router.get('/accounts', async (req: any, res, next) => {
   try {
     const orgId = req.identity!.orgId;
     // TODO: Implement account listing from DB
@@ -28,7 +33,7 @@ router.get('/accounts', async (req, res, next) => {
 });
 
 // POST /email/accounts/connect - Initiate OAuth connection
-router.post('/accounts/connect', async (req, res, next) => {
+router.post('/accounts/connect', async (req: any, res, next) => {
   try {
     const { provider } = req.body; // 'gmail' or 'outlook'
     const orgId = req.identity!.orgId;
@@ -98,7 +103,7 @@ router.get('/callback', async (req, res, next) => {
 });
 
 // GET /email/messages - List emails with filters
-router.get('/messages', async (req, res, next) => {
+router.get('/messages', async (req: any, res, next) => {
   try {
     const { accountId, search, limit, offset } = req.query;
     const orgId = req.identity!.orgId;
@@ -120,9 +125,9 @@ router.get('/messages', async (req, res, next) => {
 });
 
 // POST /email/send - Send an email
-router.post('/send', async (req, res, next) => {
+router.post('/send', async (req: any, res, next) => {
   try {
-    const { to, subject, body, cc, bcc, dealId } = req.body;
+    const { to, subject, body, cc, bcc, dealId, isHtml, accountId } = req.body;
     const orgId = req.identity!.orgId;
     const userId = req.identity!.userId;
 
@@ -133,13 +138,79 @@ router.post('/send', async (req, res, next) => {
       });
     }
 
-    // TODO: Implement email sending
+    let account;
+    if (accountId) {
+      account = await prisma.emailAccount.findFirst({
+        where: { id: accountId, orgId, userId }
+      });
+    } else {
+      account = await prisma.emailAccount.findFirst({
+        where: { orgId, userId, provider: 'gmail', isConnected: true }
+      });
+    }
+
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        error: 'No connected email account found'
+      });
+    }
+
+    if (account.provider !== 'gmail') {
+       return res.status(400).json({
+        success: false,
+        error: `Sending via ${account.provider} is not currently supported`
+      });
+    }
+
+    const settings = account.settings as { refresh_token?: string } | null;
+    if (!settings || !settings.refresh_token) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email account is missing required authentication tokens'
+      });
+    }
+
+    const sendResult = await googleAuthService.sendEmail(settings.refresh_token, {
+      to,
+      subject,
+      body,
+      cc,
+      bcc,
+      isHtml
+    });
+
+    if (!sendResult.id) {
+       throw new Error('Failed to send email via Google API');
+    }
+
+    // Persist to database
+    const emailRecord = await prisma.email.create({
+      data: {
+        orgId,
+        accountId: account.id,
+        messageId: sendResult.id,
+        subject,
+        fromEmail: account.email,
+        toEmails: Array.isArray(to) ? to : [to],
+        ccEmails: cc ? (Array.isArray(cc) ? cc : [cc]) : [],
+        bccEmails: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : [],
+        textBody: isHtml ? undefined : body,
+        htmlBody: isHtml ? body : undefined,
+        direction: 'outbound',
+        sentAt: new Date(),
+        receivedAt: new Date(), // It's a sent email, so just use now
+        relatedDealId: dealId
+      }
+    });
+
     res.json({
       success: true,
       data: {
-        messageId: 'TODO: Generate message ID'
+        messageId: emailRecord.messageId,
+        id: emailRecord.id
       },
-      message: 'Email send endpoint - implementation in progress'
+      message: 'Email sent successfully'
     });
   } catch (error) {
     next(error);
@@ -147,7 +218,7 @@ router.post('/send', async (req, res, next) => {
 });
 
 // GET /email/templates - List email templates
-router.get('/templates', async (req, res, next) => {
+router.get('/templates', async (req: any, res, next) => {
   try {
     const { category } = req.query;
     const orgId = req.identity!.orgId;
@@ -164,7 +235,7 @@ router.get('/templates', async (req, res, next) => {
 });
 
 // POST /email/templates - Create email template
-router.post('/templates', async (req, res, next) => {
+router.post('/templates', async (req: any, res, next) => {
   try {
     const { name, subject, body, category } = req.body;
     const orgId = req.identity!.orgId;
@@ -184,7 +255,7 @@ router.post('/templates', async (req, res, next) => {
 });
 
 // GET /email/sequences - List email sequences
-router.get('/sequences', async (req, res, next) => {
+router.get('/sequences', async (req: any, res, next) => {
   try {
     const orgId = req.identity!.orgId;
 
@@ -200,7 +271,7 @@ router.get('/sequences', async (req, res, next) => {
 });
 
 // POST /email/sequences - Create email sequence
-router.post('/sequences', async (req, res, next) => {
+router.post('/sequences', async (req: any, res, next) => {
   try {
     const { name, description, steps } = req.body;
     const orgId = req.identity!.orgId;
