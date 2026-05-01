@@ -10,8 +10,10 @@ const { app, logger } = createServiceApp({
 // Register routes
 app.use('/api/v1/email', emailRoutes);
 
+import { Request, Response } from 'express';
+
 // Health check endpoint
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'healthy',
     service: 'email-sync-service',
