@@ -46,4 +46,3 @@ export class InvoiceEntity {
   @ApiProperty({ required: false, type: 'array', items: { type: 'object' } })
   lines?: any[];
 }
-}

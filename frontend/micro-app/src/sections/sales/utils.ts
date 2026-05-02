@@ -29,11 +29,16 @@ export function formatOptionalPercent(value: unknown) {
   return hasNumber(value) ? `${value.toFixed(1)}%` : 'Unavailable';
 }
 
-export function normalizeStage(stage: string | undefined): SalesStage {
-  const s = String(stage || '').toLowerCase();
+export function normalizeStage(stage: unknown): SalesStage {
+  const raw =
+    typeof stage === 'object' && stage !== null
+      ? (stage as any).status ?? (stage as any).name ?? ''
+      : stage;
+
+  const s = String(raw || '').toLowerCase();
   if (s === 'new' || s === 'qualified' || s === 'proposal' || s === 'negotiation' || s === 'won' || s === 'lost') return s;
   if (s.includes('qual')) return 'qualified';
-  if (s.includes('prop')) return 'proposal';
+  if (s.includes('prop') || s.includes('quote')) return 'proposal';
   if (s.includes('nego')) return 'negotiation';
   if (s.includes('won')) return 'won';
   if (s.includes('lost')) return 'lost';

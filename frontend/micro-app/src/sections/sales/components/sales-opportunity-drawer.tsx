@@ -17,6 +17,24 @@ import { SalesOpportunityTimeline } from './sales-opportunity-timeline';
 
 import type { SalesStage, SalesOrderRow, SalesOpportunity } from '../types';
 
+type OdooStage = { id: number; name: string; sequence: number; is_won: boolean };
+
+function findOdooStage(stages: OdooStage[] | undefined, stage: SalesStage) {
+  if (stage === 'won') {
+    return stages?.find((s) => s.is_won) ?? stages?.find((s) => s.name.toLowerCase().includes('won'));
+  }
+
+  return stages?.find((s) => {
+    const label = s.name.toLowerCase();
+    if (stage === 'new' && label.includes('new')) return true;
+    if (stage === 'qualified' && label.includes('qual')) return true;
+    if (stage === 'proposal' && (label.includes('prop') || label.includes('quote'))) return true;
+    if (stage === 'negotiation' && label.includes('nego')) return true;
+    if (stage === 'lost' && label.includes('lost')) return true;
+    return false;
+  });
+}
+
 export function SalesOpportunityDrawer({
   open,
   item,
@@ -28,6 +46,7 @@ export function SalesOpportunityDrawer({
   onLinkOrder,
   onMoveStage,
   onDelete,
+  stages,
 }: {
   open: boolean;
   item: SalesOpportunity | null;
@@ -39,7 +58,7 @@ export function SalesOpportunityDrawer({
   onLinkOrder: (orderId: string, opportunityId: string) => void;
   onMoveStage: (id: string, stage: SalesStage, stageId?: number) => void;
   onDelete?: (id: string) => void;
-  stages?: Array<{ id: number; name: string; sequence: number; is_won: boolean }>;
+  stages?: OdooStage[];
 }) {
   const [currentTab, setCurrentTab] = useState('overview');
 
@@ -107,16 +126,7 @@ export function SalesOpportunityDrawer({
                   value={item.stage}
                   onChange={(e) => {
                     const next = e.target.value as SalesStage;
-                    const stageInfo = stages?.find(s => {
-                      const label = s.name.toLowerCase();
-                      if (next === 'new' && label.includes('new')) return true;
-                      if (next === 'qualified' && label.includes('qual')) return true;
-                      if (next === 'proposal' && (label.includes('prop') || label.includes('quote'))) return true;
-                      if (next === 'negotiation' && label.includes('nego')) return true;
-                      if (next === 'won' && label.includes('won')) return true;
-                      if (next === 'lost' && label.includes('lost')) return true;
-                      return false;
-                    });
+                    const stageInfo = findOdooStage(stages, next);
                     onMoveStage(item.id, next, stageInfo?.id);
                   }}
                   disabled={stageLoading}
@@ -142,7 +152,7 @@ export function SalesOpportunityDrawer({
                         size="small" 
                         color="success" 
                         onClick={() => {
-                          const stageInfo = stages?.find(s => s.name.toLowerCase().includes('won'));
+                          const stageInfo = findOdooStage(stages, 'won');
                           onMoveStage(item.id, 'won', stageInfo?.id);
                         }}
                       >
@@ -153,7 +163,7 @@ export function SalesOpportunityDrawer({
                         size="small" 
                         color="error" 
                         onClick={() => {
-                          const stageInfo = stages?.find(s => s.name.toLowerCase().includes('lost'));
+                          const stageInfo = findOdooStage(stages, 'lost');
                           onMoveStage(item.id, 'lost', stageInfo?.id);
                         }}
                       >

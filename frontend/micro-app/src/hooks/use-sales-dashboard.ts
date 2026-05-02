@@ -91,7 +91,7 @@ export function useUpdateSalesOpportunity() {
 export function useUpdateOpportunityStage() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, stage }: { id: string; stage: SalesStage }) => updateOpportunityStage(id, stage),
+    mutationFn: ({ id, stage, stageId }: { id: string; stage: SalesStage; stageId?: number }) => updateOpportunityStage(id, stage, stageId),
     onSuccess: async () => invalidateSales(queryClient),
   });
 }

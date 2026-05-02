@@ -846,9 +846,16 @@ async function handleApiCompat(req: Request, res: Response) {
 
     if (module === "sales-dashboard") {
       const odooOrdersUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/sales/orders?pageSize=100&page=1");
-      const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm?pageSize=100&page=1");
+      const crmQuery = new URLSearchParams(req.query as Record<string, string>);
+      if (!crmQuery.has("pageSize")) crmQuery.set("pageSize", "100");
+      if (!crmQuery.has("page")) crmQuery.set("page", "1");
+      const odooCrmUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/crm?${crmQuery.toString()}`);
       const normalizeSalesStage = (rawStage: unknown): string => {
-        const s = String(rawStage ?? "").toLowerCase();
+        const raw =
+          typeof rawStage === "object" && rawStage !== null
+            ? (rawStage as any).status ?? (rawStage as any).name ?? ""
+            : rawStage;
+        const s = String(raw ?? "").toLowerCase();
         if (!s) return "new";
         if (s.includes("qual")) return "qualified";
         if (s.includes("prop") || s.includes("quote")) return "proposal";
@@ -857,6 +864,48 @@ async function handleApiCompat(req: Request, res: Response) {
         if (s.includes("lost")) return "lost";
         if (s.includes("new")) return "new";
         return "new";
+      };
+      const stageIdOf = (lead: any) => Number(lead?.stageId ?? lead?.stage?.id ?? (Array.isArray(lead?.stage_id) ? lead.stage_id[0] : 0)) || undefined;
+      const stageLabelOf = (lead: any) => lead?.stageName ?? lead?.stage?.name ?? (Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "");
+      const partnerNameOf = (lead: any) => lead?.customerName ?? lead?.companyName ?? lead?.partner?.name ?? (Array.isArray(lead?.partner_id) ? lead.partner_id[1] : "");
+      const normalizeOpportunityRow = (lead: any) => {
+        const expectedRevenue = Number(lead?.expectedRevenue ?? lead?.expected_revenue ?? lead?.planned_revenue ?? 0);
+        const probability = Number(lead?.probability ?? 0);
+        const stage = normalizeSalesStage(lead?.stageStatus ?? lead?.status ?? lead?.stage ?? stageLabelOf(lead));
+        const nextActivityTitle = String(lead?.nextActivity?.title ?? lead?.nextActivity?.summary ?? lead?.activity_summary ?? "").trim();
+        const nextActivityDueDate = String(lead?.nextActivity?.dueDate ?? lead?.nextActivity?.deadline ?? lead?.activity_date_deadline ?? "").trim();
+
+        return {
+          id: String(lead?.id ?? lead?.odooId ?? ""),
+          odooId: Number(lead?.odooId ?? lead?.id ?? 0) || undefined,
+          name: String(lead?.name ?? "Untitled opportunity"),
+          customerName: String(partnerNameOf(lead)),
+          companyName: String(lead?.companyName ?? partnerNameOf(lead)),
+          email: String(lead?.email ?? lead?.email_from ?? ""),
+          phone: String(lead?.phone ?? ""),
+          stage,
+          stageId: stageIdOf(lead),
+          probability,
+          expectedRevenue,
+          weightedValue: Number(lead?.weightedValue ?? (expectedRevenue * probability) / 100),
+          recurringRevenue: Number(lead?.recurringRevenue ?? lead?.recurring_revenue_monthly ?? 0) || undefined,
+          assignedTo: String(lead?.assignedTo ?? lead?.user?.name ?? (Array.isArray(lead?.user_id) ? lead.user_id[1] : "")),
+          priority: String(lead?.priority ?? "medium"),
+          source: String(lead?.source ?? (String(lead?.type ?? "").toLowerCase() === "lead" ? "manual" : "odoo")),
+          status: stage,
+          expectedCloseDate: String(lead?.expectedCloseDate ?? lead?.expectedClose ?? lead?.date_deadline ?? ""),
+          createdAt: String(lead?.createdAt ?? lead?.create_date ?? ""),
+          updatedAt: String(lead?.updatedAt ?? lead?.write_date ?? ""),
+          nextActivity: nextActivityTitle || nextActivityDueDate ? {
+            id: String(lead?.nextActivity?.id ?? lead?.nextActivity?.odooId ?? `lead-${String(lead?.id ?? "")}-next-activity`),
+            type: String(lead?.nextActivity?.type ?? (Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo")).toLowerCase(),
+            title: nextActivityTitle || "Follow-up",
+            dueDate: nextActivityDueDate || undefined,
+            state: lead?.nextActivity?.state ?? lead?.activity_state ?? "planned",
+            overdue: (lead?.nextActivity?.overdue ?? lead?.activity_state === "overdue") === true,
+          } : undefined,
+          linkedMagentoOrderIds: Array.isArray(lead?.linkedMagentoOrderIds) ? lead.linkedMagentoOrderIds : [],
+        };
       };
 
       if (req.method === "GET" && rest === "/summary") {
@@ -950,11 +999,11 @@ async function handleApiCompat(req: Request, res: Response) {
         const rows = crmItems.map((lead: any) => ({
           id: String(lead?.id ?? ""),
           name: String(lead?.name ?? "Unnamed lead"),
-          stage: String(Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "Unstaged"),
+          stage: String(stageLabelOf(lead) || "Unstaged"),
           priority: Number(lead?.probability ?? 0) >= 70 ? "high" : "normal",
-          expectedRevenue: Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0),
+          expectedRevenue: Number(lead?.expectedRevenue ?? lead?.expected_revenue ?? lead?.planned_revenue ?? 0),
           type: String(lead?.type ?? "opportunity"),
-          email: String(lead?.email_from ?? ""),
+          email: String(lead?.email ?? lead?.email_from ?? ""),
           phone: String(lead?.phone ?? ""),
         }));
         return res.json({
@@ -976,40 +1025,7 @@ async function handleApiCompat(req: Request, res: Response) {
       if (req.method === "GET" && rest === "/opportunities") {
         const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
         const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
-
-        const rows = crmItems.map((lead: any) => {
-          const stageLabel = Array.isArray(lead?.stage_id) ? lead.stage_id[1] : "";
-          const stage = normalizeSalesStage(stageLabel);
-          const source = String(lead?.type ?? "").toLowerCase() === "lead" ? "manual" : "odoo";
-          const nextActivityTitle = String(lead?.activity_summary ?? "").trim();
-          const nextActivityDueDate = String(lead?.activity_date_deadline ?? "").trim();
-
-          return {
-            id: String(lead?.id ?? ""),
-            name: String(lead?.name ?? "Untitled opportunity"),
-            customerName: String(Array.isArray(lead?.partner_id) ? lead.partner_id[1] : ""),
-            email: String(lead?.email_from ?? ""),
-            phone: String(lead?.phone ?? ""),
-            stage,
-            probability: Number(lead?.probability ?? 0),
-            expectedRevenue: Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0),
-            recurringRevenue: Number(lead?.recurring_revenue_monthly ?? 0) || undefined,
-            assignedTo: String(Array.isArray(lead?.user_id) ? lead.user_id[1] : ""),
-            priority: Number(lead?.priority ?? 0) >= 2 ? "high" : Number(lead?.priority ?? 0) >= 1 ? "medium" : "low",
-            source,
-            expectedCloseDate: String(lead?.date_deadline ?? ""),
-            createdAt: String(lead?.create_date ?? ""),
-            updatedAt: String(lead?.write_date ?? ""),
-            nextActivity: nextActivityTitle || nextActivityDueDate ? {
-              id: `lead-${String(lead?.id ?? "")}-next-activity`,
-              type: String(Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo").toLowerCase(),
-              title: nextActivityTitle || "Follow-up",
-              dueDate: nextActivityDueDate || null,
-              state: lead?.activity_state || "planned",
-              overdue: lead?.activity_state === "overdue",
-            } : null,
-          };
-        });
+        const rows = crmItems.map(normalizeOpportunityRow);
 
         return res.json({
           data: rows,
@@ -1022,18 +1038,19 @@ async function handleApiCompat(req: Request, res: Response) {
       }
 
       if (req.method === "GET" && rest === "/activities") {
-        const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
-        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
+        const activityUrl = toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, withQuery(req, "/v1/odoo/crm/activities"));
+        const crmRes = await fetchUpstreamJsonSafe(req, activityUrl);
+        const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : Array.isArray(crmRes.data) ? crmRes.data : [];
 
         const rows = crmItems
-          .filter((lead: any) => String(lead?.activity_summary ?? "").trim() || String(lead?.activity_date_deadline ?? "").trim())
-          .map((lead: any) => {
-            const activityType = String(Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo").toLowerCase();
-            const dueDate = String(lead?.activity_date_deadline ?? "").trim();
-            const isDone = String(lead?.activity_state ?? "").toLowerCase() === "done";
+          .filter((activity: any) => String(activity?.summary ?? "").trim() || String(activity?.date_deadline ?? "").trim())
+          .map((activity: any) => {
+            const activityType = String(Array.isArray(activity?.activity_type_id) ? activity.activity_type_id[1] : "todo").toLowerCase();
+            const dueDate = String(activity?.date_deadline ?? "").trim();
+            const isDone = String(activity?.state ?? "").toLowerCase() === "done";
             return {
-              id: `lead-${String(lead?.id ?? "")}-activity`,
-              opportunityId: String(lead?.id ?? ""),
+              id: String(activity?.id ?? ""),
+              opportunityId: String(activity?.res_id ?? ""),
               type: activityType.includes("mail")
                 ? "email"
                 : activityType.includes("call")
@@ -1041,10 +1058,10 @@ async function handleApiCompat(req: Request, res: Response) {
                   : activityType.includes("meet")
                     ? "meeting"
                     : "todo",
-              title: String(lead?.activity_summary ?? "Follow-up"),
+              title: String(activity?.summary ?? "Follow-up"),
               dueDate: dueDate || undefined,
               completed: isDone,
-              createdAt: String(lead?.create_date ?? ""),
+              createdAt: String(activity?.create_date ?? ""),
             };
           });
 
@@ -1094,9 +1111,8 @@ async function handleApiCompat(req: Request, res: Response) {
 
         const stageBuckets = new Map<string, { value: number; count: number }>();
         crmItems.forEach((lead: any) => {
-          const stageLabel = Array.isArray(lead?.stage_id) ? String(lead.stage_id[1] ?? "") : "";
-          const stage = normalizeSalesStage(stageLabel);
-          const value = Number(lead?.expected_revenue ?? lead?.planned_revenue ?? 0);
+          const stage = normalizeSalesStage(lead?.stageStatus ?? lead?.status ?? lead?.stage ?? stageLabelOf(lead));
+          const value = Number(lead?.expectedRevenue ?? lead?.expected_revenue ?? lead?.planned_revenue ?? 0);
           const current = stageBuckets.get(stage) ?? { value: 0, count: 0 };
           current.value += Number.isFinite(value) ? value : 0;
           current.count += 1;
@@ -1190,18 +1206,27 @@ async function handleApiCompat(req: Request, res: Response) {
         const stagesRes = await fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm/stages"));
         const stages = Array.isArray(stagesRes.data) ? stagesRes.data : [];
 
-        const targetStage = stages.find((s: any) => {
+        const targetStage = nextStage === "won"
+          ? stages.find((s: any) => s?.is_won === true) ?? stages.find((s: any) => String(s.name).toLowerCase().includes("won"))
+          : stages.find((s: any) => {
           const label = String(s.name).toLowerCase();
           if (nextStage === "new" && label.includes("new")) return true;
           if (nextStage === "qualified" && label.includes("qual")) return true;
           if (nextStage === "proposal" && (label.includes("prop") || label.includes("quote"))) return true;
           if (nextStage === "negotiation" && label.includes("nego")) return true;
-          if (nextStage === "won" && label.includes("won")) return true;
           if (nextStage === "lost" && label.includes("lost")) return true;
           return false;
         });
 
         if (!targetStage) {
+          if (nextStage === "lost") {
+            return proxyTo(req, res, {
+              baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+              targetPath: `/v1/odoo/crm/${id}`,
+              method: "PUT",
+              body: { active: false },
+            });
+          }
           return res.status(400).json({ message: `Could not find Odoo stage for label: ${nextStage}` });
         }
 

@@ -302,14 +302,14 @@ export class OdooClientService {
             
             if (!groups[key]) {
               groups[key] = { [groupField]: key, [`${groupField}_count`]: 0 };
-              rgFields.forEach(f => {
+              rgFields.forEach((f: string) => {
                 if (f.endsWith(':sum')) groups[key][f.split(':')[0]] = 0;
                 if (f.endsWith(':count')) groups[key][f.split(':')[0]] = 0;
               });
             }
             
             groups[key][`${groupField}_count`]++;
-            rgFields.forEach(f => {
+            rgFields.forEach((f: string) => {
               if (f.endsWith(':sum')) {
                 const fn = f.split(':')[0];
                 groups[key][fn] += Number(rec[fn] || 0);

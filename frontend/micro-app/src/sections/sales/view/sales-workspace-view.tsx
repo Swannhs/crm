@@ -27,6 +27,7 @@ import {
   useUpdateSalesOpportunity,
   useCreateSalesOpportunity,
   useUpdateOpportunityStage,
+  useDeleteSalesActivity,
   useDeleteSalesOpportunity,
   usePreviewMagentoToOdooSync,
   useSalesStages,
@@ -116,7 +117,7 @@ export function SalesWorkspaceView() {
       await stageMutation.mutateAsync({ id, stage, stageId });
       toast.success('Stage updated');
       if (selectedOpportunity?.id === id) {
-        setSelectedOpportunity({ ...selectedOpportunity, stage });
+        setSelectedOpportunity({ ...selectedOpportunity, stage, stageId });
       }
     } catch (error: any) {
       toast.error(error?.message || 'Stage update unavailable');

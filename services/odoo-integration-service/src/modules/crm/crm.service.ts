@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { OdooClientService } from '../odoo-base/odoo-client.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
@@ -88,40 +88,53 @@ export class CrmService {
 
   private normalizeOpportunity(lead: any) {
     const stageLabel = Array.isArray(lead.stage_id) ? lead.stage_id[1] : '';
+    const stageId = Array.isArray(lead.stage_id) ? lead.stage_id[0] : null;
+    const partnerId = Array.isArray(lead.partner_id) ? lead.partner_id[0] : null;
+    const partnerName = Array.isArray(lead.partner_id) ? lead.partner_id[1] : '';
     const probability = Number(lead.probability ?? 0);
+    const expectedRevenue = Number(lead.expected_revenue || lead.planned_revenue || 0);
+    const weightedValue = (expectedRevenue * probability) / 100;
 
-    let status: 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' = 'new';
+    let stageStatus: 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' = 'new';
     const label = stageLabel.toLowerCase();
 
-    if (lead.is_won || label.includes('won') || probability === 100) status = 'won';
-    else if (lead.active === false || label.includes('lost') || (probability === 0 && label.includes('lost'))) status = 'lost';
-    else if (label.includes('nego')) status = 'negotiation';
-    else if (label.includes('prop') || label.includes('quote')) status = 'proposal';
-    else if (label.includes('qual')) status = 'qualified';
-    else if (label.includes('new')) status = 'new';
+    if (lead.is_won || label.includes('won') || probability === 100) stageStatus = 'won';
+    else if (lead.active === false || label.includes('lost') || (probability === 0 && label.includes('lost'))) stageStatus = 'lost';
+    else if (label.includes('nego')) stageStatus = 'negotiation';
+    else if (label.includes('prop') || label.includes('quote')) stageStatus = 'proposal';
+    else if (label.includes('qual')) stageStatus = 'qualified';
+    else if (label.includes('new')) stageStatus = 'new';
 
     return {
       id: lead.id,
+      odooId: lead.id,
       name: lead.name,
-      partner: Array.isArray(lead.partner_id)
-        ? { id: lead.partner_id[0], name: lead.partner_id[1] }
-        : null,
+      partner: partnerId ? { id: partnerId, name: partnerName } : null,
+      customerName: partnerName,
+      customerId: partnerId ?? undefined,
+      companyName: partnerName,
       email: lead.email_from,
       phone: lead.phone,
       probability,
-      expectedRevenue: lead.expected_revenue || lead.planned_revenue || 0,
+      expectedRevenue,
+      weightedValue,
       recurringRevenue: lead.recurring_revenue_monthly || 0,
       stage: {
-        id: Array.isArray(lead.stage_id) ? lead.stage_id[0] : null,
+        id: stageId,
         name: stageLabel,
-        status,
+        status: stageStatus,
       },
+      stageId: stageId ?? undefined,
+      stageName: stageLabel,
+      stageStatus,
+      status: stageStatus,
       user: Array.isArray(lead.user_id)
         ? { id: lead.user_id[0], name: lead.user_id[1] }
         : null,
       priority: lead.priority,
       tags: Array.isArray(lead.tag_ids) ? lead.tag_ids : [],
       expectedClose: lead.date_deadline,
+      expectedCloseDate: lead.date_deadline,
       createdAt: lead.create_date,
       updatedAt: lead.write_date,
       type: lead.type,
@@ -139,12 +152,37 @@ export class CrmService {
     };
   }
 
+  private mapOpportunityWritePayload(data: any) {
+    const priorityMap: Record<string, string> = { low: '0', medium: '1', high: '2' };
+    const payload: Record<string, any> = {
+      name: data?.name,
+      email_from: data?.email ?? data?.email_from,
+      phone: data?.phone,
+      planned_revenue: data?.expectedRevenue ?? data?.planned_revenue,
+      probability: data?.probability,
+      recurring_revenue_monthly: data?.recurringRevenue ?? data?.recurring_revenue_monthly,
+      stage_id: data?.stageId ?? data?.stage_id,
+      priority: priorityMap[data?.priority] ?? data?.priority,
+      date_deadline: data?.expectedCloseDate ?? data?.expectedClose ?? data?.date_deadline,
+      description: data?.notes ?? data?.description,
+      type: data?.type ?? 'opportunity',
+    };
+
+    if (data?.partnerId || data?.customerId) {
+      payload.partner_id = Number(data.partnerId ?? data.customerId);
+    }
+
+    return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined && value !== ''));
+  }
+
   async create(data: any) {
-    return this.odooClient.execute(this.model, 'create', [data]);
+    const id = await this.odooClient.execute(this.model, 'create', [this.mapOpportunityWritePayload(data)]);
+    return this.findOne(Number(id));
   }
 
   async update(id: number, data: any) {
-    return this.odooClient.execute(this.model, 'write', [[id], data]);
+    await this.odooClient.execute(this.model, 'write', [[id], this.mapOpportunityWritePayload(data)]);
+    return this.findOne(id);
   }
 
   async remove(id: number) {
@@ -184,31 +222,54 @@ export class CrmService {
   }
 
   private async resolveActivityTypeId(type?: string): Promise<number | undefined> {
-    if (!type) return undefined;
     const types = await this.odooClient.searchRead('mail.activity.type', [], ['id', 'name']);
-    const foundType = types.find((t: any) => 
-      t.name.toLowerCase().includes(type.toLowerCase()) || 
-      type.toLowerCase().includes(t.name.toLowerCase())
-    );
-    return foundType?.id;
+    if (!types.length) return undefined;
+
+    const requested = String(type ?? '').toLowerCase().trim();
+    const findBy = (needle: string) =>
+      types.find((t: any) => {
+        const label = String(t.name ?? '').toLowerCase();
+        return label === needle || label.includes(needle) || needle.includes(label);
+      });
+
+    if (requested) {
+      const foundType = findBy(requested);
+      if (foundType) return foundType.id;
+    }
+
+    for (const alias of ['todo', 'to-do', 'to do', 'call', 'email', 'meeting']) {
+      const foundType = findBy(alias);
+      if (foundType) return foundType.id;
+    }
+
+    return types[0]?.id;
   }
 
   async createActivity(data: any) {
     const { type, title, dueDate, opportunityId, res_id, ...rest } = data;
-    
+    const resId = Number(res_id || opportunityId);
+    const summary = String(title || data.summary || '').trim();
+
+    if (!Number.isFinite(resId) || resId <= 0) {
+      throw new BadRequestException('A valid opportunity ID is required to create an activity.');
+    }
+    if (!summary) {
+      throw new BadRequestException('Activity title is required.');
+    }
+
     const activity_type_id = data.activity_type_id || await this.resolveActivityTypeId(type);
+    if (!activity_type_id) {
+      throw new BadRequestException('No Odoo activity type is configured.');
+    }
 
     const payload = {
       ...rest,
       res_model: this.model,
-      res_id: Number(res_id || opportunityId),
-      summary: title || data.summary,
+      res_id: resId,
+      summary,
       date_deadline: dueDate || data.date_deadline,
+      activity_type_id,
     };
-
-    if (activity_type_id) {
-      payload['activity_type_id'] = activity_type_id;
-    }
 
     return this.odooClient.execute('mail.activity', 'create', [payload]);
   }

@@ -21,8 +21,12 @@ export type SalesSummary = {
   avgOrderValue?: number;
   hotLeads?: number;
   opportunities?: number;
+  opportunityCount?: number;
   pipelineValue?: number;
   weightedForecast?: number;
+  weightedValue?: number;
+  wonValue?: number;
+  lostValue?: number;
   winRate?: number;
   sources?: {
     magentoOrders?: number;
@@ -42,10 +46,12 @@ export type SalesOpportunity = {
   odooId?: number;
   probability?: number;
   expectedRevenue?: number;
+  weightedValue?: number;
   recurringRevenue?: number;
   assignedTo?: string;
   priority?: SalesPriority;
   source: SalesSource;
+  status?: SalesStage;
   expectedCloseDate?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -55,6 +61,7 @@ export type SalesOpportunity = {
     title: string;
     dueDate?: string;
     overdue?: boolean;
+    state?: string;
   };
   linkedMagentoCustomerId?: string;
   linkedMagentoOrderIds?: string[];

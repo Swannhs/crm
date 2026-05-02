@@ -49,4 +49,3 @@ export class LeadEntity {
   @ApiProperty()
   updatedAt: string;
 }
-}

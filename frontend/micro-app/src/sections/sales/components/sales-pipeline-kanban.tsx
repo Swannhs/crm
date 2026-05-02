@@ -10,6 +10,24 @@ import { normalizeStage, SALES_STAGE_ORDER, SALES_STAGE_LABEL } from '../utils';
 
 import type { SalesStage, SalesOpportunity } from '../types';
 
+type OdooStage = { id: number; name: string; sequence: number; is_won: boolean };
+
+function findOdooStage(stages: OdooStage[] | undefined, stage: SalesStage) {
+  if (stage === 'won') {
+    return stages?.find((s) => s.is_won) ?? stages?.find((s) => s.name.toLowerCase().includes('won'));
+  }
+
+  return stages?.find((s) => {
+    const label = s.name.toLowerCase();
+    if (stage === 'new' && label.includes('new')) return true;
+    if (stage === 'qualified' && label.includes('qual')) return true;
+    if (stage === 'proposal' && (label.includes('prop') || label.includes('quote'))) return true;
+    if (stage === 'negotiation' && label.includes('nego')) return true;
+    if (stage === 'lost' && label.includes('lost')) return true;
+    return false;
+  });
+}
+
 export function SalesPipelineKanban({
   opportunities,
   stages,
@@ -18,14 +36,11 @@ export function SalesPipelineKanban({
   onMove,
 }: {
   opportunities: SalesOpportunity[];
-  stages?: Array<{ id: number; name: string; sequence: number; is_won: boolean }>;
+  stages?: OdooStage[];
   moving?: boolean;
   onOpen: (item: SalesOpportunity) => void;
   onMove: (id: string, stage: SalesStage, stageId?: number) => void;
 }) {
-  // If we have real Odoo stages, we could map them, but for now we keep the 6 canonical columns
-  // and use the stages data to potentially enrich the labels or handle custom ordering.
-  
   if (!opportunities.length) {
     return <SalesEmptyState title="No opportunities yet" description="Create your first opportunity to start building pipeline momentum." />;
   }
@@ -34,16 +49,7 @@ export function SalesPipelineKanban({
     <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2 }}>
       {SALES_STAGE_ORDER.map((stage) => {
         const rows = opportunities.filter((item) => normalizeStage(item.stage) === stage);
-        const stageInfo = stages?.find(s => {
-           const label = s.name.toLowerCase();
-           if (stage === 'new' && label.includes('new')) return true;
-           if (stage === 'qualified' && label.includes('qual')) return true;
-           if (stage === 'proposal' && (label.includes('prop') || label.includes('quote'))) return true;
-           if (stage === 'negotiation' && label.includes('nego')) return true;
-           if (stage === 'won' && label.includes('won')) return true;
-           if (stage === 'lost' && label.includes('lost')) return true;
-           return false;
-        });
+        const stageInfo = findOdooStage(stages, stage);
 
         return (
           <Card
@@ -93,16 +99,7 @@ export function SalesPipelineKanban({
                   moving={moving} 
                   onOpen={() => onOpen(item)} 
                   onMove={(next) => {
-                    const nextStageInfo = stages?.find(s => {
-                      const label = s.name.toLowerCase();
-                      if (next === 'new' && label.includes('new')) return true;
-                      if (next === 'qualified' && label.includes('qual')) return true;
-                      if (next === 'proposal' && (label.includes('prop') || label.includes('quote'))) return true;
-                      if (next === 'negotiation' && label.includes('nego')) return true;
-                      if (next === 'won' && label.includes('won')) return true;
-                      if (next === 'lost' && label.includes('lost')) return true;
-                      return false;
-                    });
+                    const nextStageInfo = findOdooStage(stages, next);
                     onMove(item.id, next, nextStageInfo?.id);
                   }} 
                 />

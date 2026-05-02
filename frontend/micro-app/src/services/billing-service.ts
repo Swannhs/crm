@@ -8,6 +8,7 @@ export type IInvoiceLine = {
   quantity: number;
   priceUnit: number;
   priceSubtotal: number;
+  priceTotal: number;
   productName?: string;
 };
 
@@ -61,6 +62,7 @@ function normalizeOdooInvoice(invoice: any, index: number = 0): IInvoice {
         quantity: toNumber(l.quantity),
         priceUnit: toNumber(l.priceUnit || l.price_unit),
         priceSubtotal: toNumber(l.priceSubtotal || l.price_subtotal),
+        priceTotal: toNumber(l.priceTotal || l.price_total),
         productName: l.productName,
       }))
     : undefined;

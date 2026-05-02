@@ -15,6 +15,7 @@ import { CrmService } from './crm.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 import { LeadEntity } from './entities/lead.entity.js';
 import { IdentityGuard } from '../../common/guards/identity.guard.js';
+import { parseOdooNumericId } from '../../common/parse-odoo-numeric-id.js';
 
 @ApiTags('CRM')
 @UseGuards(IdentityGuard)
@@ -59,22 +60,19 @@ export class CrmController {
   @ApiOperation({ summary: 'Get details of a lead/opportunity' })
   @ApiResponse({ status: 200, type: LeadEntity })
   async findOne(@Param('id') id: string) {
-    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
-    return this.crmService.findOne(numericId);
+    return this.crmService.findOne(parseOdooNumericId(id));
   }
 
   @Get(':id/timeline')
   @ApiOperation({ summary: 'Get timeline of a lead/opportunity' })
   async getTimeline(@Param('id') id: string) {
-    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
-    return this.crmService.getTimeline(numericId);
+    return this.crmService.getTimeline(parseOdooNumericId(id));
   }
 
   @Post(':id/notes')
   @ApiOperation({ summary: 'Create a note for an opportunity' })
   async createNote(@Param('id') id: string, @Body('body') body: string) {
-    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
-    return this.crmService.createNote(numericId, body);
+    return this.crmService.createNote(parseOdooNumericId(id), body);
   }
 
   @Post()
@@ -86,15 +84,13 @@ export class CrmController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a lead' })
   async update(@Param('id') id: string, @Body() data: any) {
-    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
-    return this.crmService.update(numericId, data);
+    return this.crmService.update(parseOdooNumericId(id), data);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a lead' })
   async remove(@Param('id') id: string) {
-    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
-    return this.crmService.remove(numericId);
+    return this.crmService.remove(parseOdooNumericId(id));
   }
 
   @Post('activities')
@@ -118,7 +114,6 @@ export class CrmController {
   @Delete('activities/:id')
   @ApiOperation({ summary: 'Delete a CRM activity' })
   async removeActivity(@Param('id') id: string) {
-    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
-    return this.crmService.removeActivity(numericId);
+    return this.crmService.removeActivity(parseOdooNumericId(id));
   }
 }

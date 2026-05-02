@@ -12,6 +12,16 @@ import type {
 } from 'src/sections/sales/types';
 
 import axios from 'src/utils/axios';
+import { normalizeStage } from 'src/sections/sales/utils';
+
+export type {
+  SalesLeadRow,
+  SalesSummary,
+  SalesOrderRow,
+  SalesAnalytics,
+  SalesOpportunity,
+  SalesActivity,
+} from 'src/sections/sales/types';
 
 type OpportunityPayload = Partial<Omit<SalesOpportunity, 'id' | 'nextActivity' | 'linkedMagentoOrderIds'>> & {
   notes?: string;
@@ -33,6 +43,55 @@ function paramsFromFilters(filters?: SalesFilters) {
   return Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ''));
 }
 
+export function normalizeSalesOpportunity(raw: any): SalesOpportunity {
+  const stageObject = raw?.stage && typeof raw.stage === 'object' ? raw.stage : null;
+  const stageName = stageObject?.name ?? raw?.stage ?? raw?.stageName ?? 'new';
+  const normalizedStage = normalizeStage(stageObject?.status ?? raw?.stageStatus ?? raw?.status ?? stageName);
+  const expectedRevenue = Number(raw?.expectedRevenue ?? raw?.plannedRevenue ?? raw?.expected_revenue ?? raw?.planned_revenue ?? 0);
+  const probability = Number(raw?.probability ?? 0);
+  const source = raw?.source === 'magento' || raw?.source === 'manual' ? raw.source : 'odoo';
+  const priority = raw?.priority === 'low' || raw?.priority === 'high' ? raw.priority : 'medium';
+
+  return {
+    id: String(raw?.id ?? raw?.odooId ?? ''),
+    odooId: Number(raw?.odooId ?? raw?.id ?? 0) || undefined,
+    name: raw?.name ?? 'Untitled opportunity',
+    customerName: raw?.customerName ?? raw?.partner?.name ?? raw?.companyName ?? '',
+    companyName: raw?.companyName ?? raw?.partner?.name ?? '',
+    email: raw?.email ?? raw?.email_from ?? '',
+    phone: raw?.phone ?? '',
+    stage: normalizedStage,
+    stageId: Number(raw?.stageId ?? stageObject?.id ?? 0) || undefined,
+    probability,
+    expectedRevenue,
+    weightedValue: Number(raw?.weightedValue ?? (expectedRevenue * probability) / 100),
+    recurringRevenue: Number(raw?.recurringRevenue ?? raw?.recurring_revenue_monthly ?? 0),
+    assignedTo: raw?.assignedTo ?? raw?.user?.name ?? '',
+    priority,
+    source,
+    status: normalizeStage(raw?.status ?? raw?.stageStatus ?? normalizedStage),
+    expectedCloseDate: raw?.expectedCloseDate ?? raw?.expectedClose ?? raw?.date_deadline ?? '',
+    createdAt: raw?.createdAt ?? raw?.create_date,
+    updatedAt: raw?.updatedAt ?? raw?.write_date,
+    nextActivity: raw?.nextActivity
+      ? {
+          id: String(raw.nextActivity.id ?? raw.nextActivity.odooId ?? ''),
+          type: raw.nextActivity.type ?? 'todo',
+          title: raw.nextActivity.title ?? raw.nextActivity.summary ?? 'Activity',
+          dueDate: raw.nextActivity.dueDate ?? raw.nextActivity.deadline,
+          overdue: raw.nextActivity.overdue ?? raw.nextActivity.state === 'overdue',
+          state: raw.nextActivity.state,
+        }
+      : undefined,
+    linkedMagentoOrderIds: raw?.linkedMagentoOrderIds ?? [],
+  };
+}
+
+function normalizeSalesOpportunityRows(payload: any): SalesOpportunity[] {
+  const rows = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
+  return rows.map(normalizeSalesOpportunity);
+}
+
 export async function getSalesSummary(filters?: SalesFilters): Promise<SalesSummary> {
   const response = await axios.get('/api/sales-dashboard/summary', { params: paramsFromFilters(filters) });
   return unwrap<SalesSummary>(response.data);
@@ -50,7 +109,7 @@ export async function getSalesLeads(filters?: SalesFilters): Promise<SalesLeadRo
 
 export async function getSalesOpportunities(filters?: SalesFilters): Promise<SalesOpportunity[]> {
   const response = await axios.get('/api/sales-dashboard/opportunities', { params: paramsFromFilters(filters) });
-  return unwrap<SalesOpportunity[]>(response.data);
+  return normalizeSalesOpportunityRows(unwrap<any>(response.data));
 }
 
 export async function getSalesActivities(filters?: SalesFilters): Promise<SalesActivity[]> {
@@ -65,17 +124,17 @@ export async function getSalesAnalytics(filters?: SalesFilters): Promise<SalesAn
 
 export async function createSalesOpportunity(payload: OpportunityPayload): Promise<SalesOpportunity> {
   const response = await axios.post('/api/sales-dashboard/opportunities', payload);
-  return unwrap<SalesOpportunity>(response.data);
+  return normalizeSalesOpportunity(unwrap<any>(response.data));
 }
 
 export async function updateSalesOpportunity(id: string, payload: OpportunityPayload): Promise<SalesOpportunity> {
   const response = await axios.patch(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}`, payload);
-  return unwrap<SalesOpportunity>(response.data);
+  return normalizeSalesOpportunity(unwrap<any>(response.data));
 }
 
 export async function updateOpportunityStage(id: string, stage: SalesStage, stageId?: number): Promise<SalesOpportunity> {
   const response = await axios.patch(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}/stage`, { stage, stageId });
-  return unwrap<SalesOpportunity>(response.data);
+  return normalizeSalesOpportunity(unwrap<any>(response.data));
 }
 
 export async function createSalesActivity(opportunityId: string, payload: ActivityPayload): Promise<SalesActivity> {

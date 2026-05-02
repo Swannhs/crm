@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -225,6 +225,7 @@ export function ContactOverviewTab({ contact }: any) {
           <Button onClick={companyDialog.onFalse}>Cancel</Button>
         </DialogActions>
       </Dialog>
+    </Stack>
   );
 }
 

@@ -188,7 +188,7 @@ export class ContactsService {
       total,
       page,
       pageSize,
-      totalPages,
+      totalPages: Math.ceil(total / pageSize),
     };
   }
 

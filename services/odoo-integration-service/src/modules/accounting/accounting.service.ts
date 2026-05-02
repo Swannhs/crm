@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { OdooClientService } from '../odoo-base/odoo-client.service.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
 
@@ -125,8 +125,15 @@ export class AccountingService {
   }
 
   async remove(id: number) {
+    const invoice = await this.findOne(id);
+    if (!invoice) throw new NotFoundException('Invoice not found');
+
+    if (invoice.state === 'posted') {
+      throw new BadRequestException('Posted invoices cannot be deleted. Cancel or credit note flow is required.');
+    }
+
     await this.odooClient.execute(this.model, 'unlink', [[id]]);
-    return { id, archived: true };
+    return { id, deleted: true };
   }
 
   async post(id: number) {
