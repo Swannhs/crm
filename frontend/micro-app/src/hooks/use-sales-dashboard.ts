@@ -19,6 +19,7 @@ import {
   previewMagentoToOdooSync,
   getSalesStages,
   deleteSalesActivity,
+  deleteSalesOpportunity,
   createOpportunityNote,
 } from 'src/services/sales-dashboard-service';
 
@@ -112,6 +113,11 @@ export function useCompleteSalesActivity() {
 export function useDeleteSalesActivity() {
   const queryClient = useQueryClient();
   return useMutation({ mutationFn: deleteSalesActivity, onSuccess: async () => invalidateSales(queryClient) });
+}
+
+export function useDeleteSalesOpportunity() {
+  const queryClient = useQueryClient();
+  return useMutation({ mutationFn: deleteSalesOpportunity, onSuccess: async () => invalidateSales(queryClient) });
 }
 
 export function useCreateOpportunityNote() {

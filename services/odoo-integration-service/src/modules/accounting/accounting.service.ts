@@ -107,8 +107,8 @@ export class AccountingService {
         name: line.name,
         quantity: line.quantity,
         priceUnit: line.price_unit,
-        subtotal: line.price_subtotal,
-        total: line.price_total,
+        priceSubtotal: line.price_subtotal,
+        priceTotal: line.price_total,
         productName: line.product_id ? line.product_id[1] : undefined,
       })) || [],
     };

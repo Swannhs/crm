@@ -27,6 +27,7 @@ export class ContactsService {
     'create_date',
     'write_date',
     'child_ids',
+    'active',
   ];
 
   async import(file: Express.Multer.File) {
@@ -87,8 +88,11 @@ export class ContactsService {
     private readonly prisma: PrismaService,
   ) {}
 
-  private async buildDomain(search?: string, type?: string): Promise<any[]> {
+  private async buildDomain(search?: string, type?: string, includeArchived = false): Promise<any[]> {
     const domain: any[] = [];
+    if (!includeArchived) {
+      domain.push(['active', '=', true]);
+    }
     const normalizedType = String(type || '').toLowerCase();
 
     if (search) {
@@ -193,7 +197,7 @@ export class ContactsService {
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
 
-    const domain: any[] = [['is_company', '=', true]];
+    const domain: any[] = [['is_company', '=', true], ['active', '=', true]];
     if (search) {
       domain.push(['name', 'ilike', `%${search}%`]);
     }
@@ -221,7 +225,7 @@ export class ContactsService {
   async findCompany(id: number) {
     const [company] = await this.odooClient.searchRead(
       this.model,
-      [['id', '=', id], ['is_company', '=', true]],
+      [['id', '=', id], ['is_company', '=', true], ['active', '=', true]],
       this.defaultFields,
     );
     if (!company) return null;
@@ -240,7 +244,7 @@ export class ContactsService {
   }
 
   async removeCompany(id: number) {
-    return this.remove(id);
+    return this.update(id, { active: false } as any);
   }
 
   async getCompanyContacts(id: number) {
@@ -280,6 +284,7 @@ export class ContactsService {
         country: partner.country_id ? partner.country_id[1] : undefined,
       },
       contactCount: Array.isArray(partner.child_ids) ? partner.child_ids.length : 0,
+      active: partner.active,
       createdAt: partner.create_date,
       updatedAt: partner.write_date,
     };
@@ -536,7 +541,7 @@ export class ContactsService {
   }
 
   async remove(id: number) {
-    return this.odooClient.execute(this.model, 'unlink', [[id]]);
+    return this.odooClient.execute(this.model, 'write', [[id], { active: false }]);
   }
 
   async getOrders(id: number) {

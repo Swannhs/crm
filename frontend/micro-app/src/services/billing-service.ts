@@ -101,6 +101,10 @@ export const billingService = {
         pageSize: params?.pageSize,
         search: params?.search,
         contactId: params?.contactId,
+        state: params?.state,
+        paymentState: params?.paymentState,
+        dateFrom: params?.dateFrom,
+        dateTo: params?.dateTo,
       },
     });
     const invoices = normalizeInvoicesResponse(response.data);

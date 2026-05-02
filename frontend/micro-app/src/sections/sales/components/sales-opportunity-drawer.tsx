@@ -27,6 +27,7 @@ export function SalesOpportunityDrawer({
   onAddActivity,
   onLinkOrder,
   onMoveStage,
+  onDelete,
 }: {
   open: boolean;
   item: SalesOpportunity | null;
@@ -37,6 +38,7 @@ export function SalesOpportunityDrawer({
   onAddActivity: () => void;
   onLinkOrder: (orderId: string, opportunityId: string) => void;
   onMoveStage: (id: string, stage: SalesStage) => void;
+  onDelete?: (id: string) => void;
 }) {
   const [currentTab, setCurrentTab] = useState('overview');
 
@@ -123,6 +125,20 @@ export function SalesOpportunityDrawer({
                       <Button variant="soft" size="small" onClick={onAddActivity}>Add activity</Button>
                       <Button variant="soft" size="small" color="success" onClick={() => onMoveStage(item.id, 'won')}>Mark won</Button>
                       <Button variant="soft" size="small" color="error" onClick={() => onMoveStage(item.id, 'lost')}>Mark lost</Button>
+                      {onDelete && (
+                        <Button 
+                          variant="soft" 
+                          size="small" 
+                          color="error" 
+                          onClick={() => {
+                            if (confirm('Archive this opportunity?')) {
+                              onDelete(item.id);
+                            }
+                          }}
+                        >
+                          Archive
+                        </Button>
+                      )}
                    </Stack>
                 </Box>
 

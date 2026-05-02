@@ -1,7 +1,7 @@
 'use client';
 
 import { z as zod } from 'zod';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -54,6 +54,13 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
   const searchParams = useSearchParams();
   const preFilledCustomerId = searchParams.get('customer');
 
+  const [filters, setFilters] = useState({
+    state: '',
+    paymentState: '',
+    dateFrom: '',
+    dateTo: '',
+  });
+
   const methods = useForm({
     resolver: zodResolver(InvoiceSchema),
     defaultValues: {
@@ -88,8 +95,8 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
   });
 
   const invoicesQuery = useQuery({
-    queryKey: ['invoice-list', section],
-    queryFn: () => billingService.getInvoices(section ? { section } : undefined),
+    queryKey: ['invoice-list', section, filters],
+    queryFn: () => billingService.getInvoices({ ...filters, contactId: section === 'customer' ? preFilledCustomerId : undefined }),
     enabled: !invoiceId,
   });
 
@@ -364,9 +371,61 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
       <Grid container spacing={3}>
         <Grid item xs={12} md={section === 'payouts' ? 12 : 8}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              {section === 'payouts' ? 'Payout History' : 'Invoices'}
-            </Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+              <Typography variant="h6">
+                {section === 'payouts' ? 'Payout History' : 'Invoices'}
+              </Typography>
+              {section !== 'payouts' && (
+                <Stack direction="row" spacing={1}>
+                  <TextField
+                    select
+                    size="small"
+                    label="Status"
+                    value={filters.state}
+                    onChange={(e) => setFilters({ ...filters, state: e.target.value })}
+                    sx={{ width: 120 }}
+                    SelectProps={{ native: true }}
+                  >
+                    <option value="">All</option>
+                    <option value="draft">Draft</option>
+                    <option value="posted">Posted</option>
+                    <option value="cancel">Cancelled</option>
+                  </TextField>
+                  <TextField
+                    select
+                    size="small"
+                    label="Payment"
+                    value={filters.paymentState}
+                    onChange={(e) => setFilters({ ...filters, paymentState: e.target.value })}
+                    sx={{ width: 140 }}
+                    SelectProps={{ native: true }}
+                  >
+                    <option value="">All</option>
+                    <option value="not_paid">Not Paid</option>
+                    <option value="in_payment">In Payment</option>
+                    <option value="paid">Paid</option>
+                    <option value="partial">Partial</option>
+                    <option value="reversed">Reversed</option>
+                  </TextField>
+                  <TextField
+                    type="date"
+                    size="small"
+                    label="From"
+                    value={filters.dateFrom}
+                    onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                  <TextField
+                    type="date"
+                    size="small"
+                    label="To"
+                    value={filters.dateTo}
+                    onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Stack>
+              )}
+            </Stack>
             <Stack spacing={2}>
               {(() => {
                 const data = section === 'payouts' ? paymentsQuery.data : (invoicesQuery.data as any)?.data;
@@ -381,13 +440,42 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
                 }
 
                 return list.map((item: any) => (
-                  <Box key={item._id || item.id} sx={{ p: 2, borderRadius: 2, bgcolor: 'background.neutral' }}>
-                    <Typography variant="subtitle2">
-                      {item.customerName || item.metadata?.customerName || item.description || item.no || item.id}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      {fCurrency(item.totalDue || item.amount || (item.amountCents || item.amount_cents || 0) / 100)}
-                    </Typography>
+                  <Box
+                    key={item._id || item.id}
+                    onClick={() => router.push(paths.dashboard.invoiceDetails(item.id))}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: 'background.neutral',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'background.neutral', opacity: 0.8 },
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="subtitle2">
+                          {item.no || item.id}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {item.customerName || item.metadata?.customerName || 'Unknown Customer'}
+                        </Typography>
+                      </Box>
+                      <Stack alignItems="flex-end">
+                        <Typography variant="subtitle2">
+                          {fCurrency(item.totalDue || item.amountTotal || item.amount || 0)}
+                        </Typography>
+                        <Label
+                          variant="soft"
+                          color={
+                            (item.status === 'posted' ? 'success' :
+                             item.status === 'draft' ? 'info' : 'default') as any
+                          }
+                          sx={{ mt: 0.5 }}
+                        >
+                          {item.status || 'Draft'}
+                        </Label>
+                      </Stack>
+                    </Stack>
                   </Box>
                 ));
               })()}

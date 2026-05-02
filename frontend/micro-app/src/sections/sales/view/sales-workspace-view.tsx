@@ -27,6 +27,7 @@ import {
   useUpdateSalesOpportunity,
   useCreateSalesOpportunity,
   useUpdateOpportunityStage,
+  useDeleteSalesOpportunity,
   usePreviewMagentoToOdooSync,
   useSalesStages,
 } from 'src/hooks/use-sales-dashboard';
@@ -78,6 +79,7 @@ export function SalesWorkspaceView() {
   const createActivityMutation = useCreateSalesActivity();
   const completeActivityMutation = useCompleteSalesActivity();
   const deleteActivityMutation = useDeleteSalesActivity();
+  const deleteOpportunityMutation = useDeleteSalesOpportunity();
   const linkOrderMutation = useLinkOrderToOpportunity();
   const previewSyncMutation = usePreviewMagentoToOdooSync();
   const runSyncMutation = useRunMagentoToOdooSync();
@@ -271,6 +273,15 @@ export function SalesWorkspaceView() {
           }
         }}
         onMoveStage={handleMoveStage}
+        onDelete={async (id) => {
+          try {
+            await deleteOpportunityMutation.mutateAsync(id);
+            toast.success('Opportunity archived');
+            setSelectedOpportunity(null);
+          } catch (error: any) {
+            toast.error(error?.message || 'Delete unavailable');
+          }
+        }}
       />
 
       <SalesOpportunityDialog

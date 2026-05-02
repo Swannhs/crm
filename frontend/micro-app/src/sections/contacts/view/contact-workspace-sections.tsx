@@ -55,6 +55,7 @@ import { Scrollbar } from 'src/components/scrollbar';
 // ----------------------------------------------------------------------
 
 export function ContactOverviewTab({ contact }: any) {
+  const queryClient = useQueryClient();
   const companyDialog = useBoolean();
   const insights = contact?.insights || {
     totalSpent: 0,
@@ -96,18 +97,18 @@ export function ContactOverviewTab({ contact }: any) {
                     color="error" 
                     variant="soft" 
                     onClick={async () => {
-                      if (confirm('Unlink this contact from their company?')) {
+                      if (confirm('Archive this contact relationship? (Unlinks from company)')) {
                         try {
                           await contactService.unlinkCompany(contact.id);
-                          showToast({ message: 'Company unlinked' });
-                          window.location.reload();
+                          showToast({ message: 'Relationship archived' });
+                          queryClient.invalidateQueries({ queryKey: ['contact', contact.id] });
                         } catch (e: any) {
                           showToast({ message: e.message, severity: 'error' });
                         }
                       }
                     }}
                   >
-                    Unlink
+                    Archive Link
                   </Button>
                 ) : (
                   <Button size="small" variant="soft" color="primary" onClick={() => companyDialog.onTrue()}>
@@ -212,7 +213,8 @@ export function ContactOverviewTab({ contact }: any) {
               try {
                 await contactService.linkCompany(contact.id, companyId);
                 showToast({ message: 'Company linked' });
-                window.location.reload();
+                queryClient.invalidateQueries({ queryKey: ['contact', contact.id] });
+                companyDialog.onFalse();
               } catch (e: any) {
                 showToast({ message: e.message, severity: 'error' });
               }
@@ -1577,7 +1579,7 @@ export function TasksTab({ tasks, loading, refetch, contactId }: any) {
         <DialogContent>Are you sure you want to permanently delete this task?</DialogContent>
         <DialogActions>
           <Button onClick={deleteDialog.onFalse}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleDelete}>Delete</Button>
+          <Button color="error" variant="contained" onClick={handleDelete}>Archive</Button>
         </DialogActions>
       </Dialog>
     </Stack>
@@ -1588,17 +1590,19 @@ export function TasksTab({ tasks, loading, refetch, contactId }: any) {
 
 function CompanySelector({ onSelect }: { onSelect: (id: number) => void }) {
   const [search, setSearch] = useState('');
-  const { data: companies, isLoading } = useQuery({
+  const { data: result, isLoading } = useQuery({
     queryKey: ['companies-search', search],
-    queryFn: () => contactService.getContactsByType('company', search),
+    queryFn: () => contactService.getCompanies({ search, pageSize: 20 }),
     enabled: search.length > 2,
   });
+
+  const companies = result?.data || [];
 
   return (
     <Stack spacing={2}>
       <TextField
         fullWidth
-        placeholder="Type company name..."
+        placeholder="Search Odoo companies..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         InputProps={{
@@ -1606,32 +1610,49 @@ function CompanySelector({ onSelect }: { onSelect: (id: number) => void }) {
         }}
       />
 
-      {isLoading && <LinearProgress />}
+      {isLoading && <LinearProgress sx={{ borderRadius: 1 }} />}
 
-      <Stack spacing={1} sx={{ maxHeight: 300, overflow: 'auto' }}>
+      <Stack spacing={1} sx={{ maxHeight: 300, overflow: 'auto', minHeight: search.length > 2 ? 100 : 0 }}>
         {companies?.map((company: any) => (
           <Button
             key={company.id}
             fullWidth
             variant="outlined"
             onClick={() => onSelect(Number(company.id))}
-            sx={{ justifyContent: 'flex-start', textAlign: 'left', py: 1.5 }}
+            sx={{ 
+              justifyContent: 'flex-start', 
+              textAlign: 'left', 
+              py: 1.5,
+              borderColor: 'divider',
+              '&:hover': { bgcolor: 'action.hover', borderColor: 'primary.main' }
+            }}
           >
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'background.neutral' }}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.lighter', color: 'primary.main' }}>
                 <Iconify icon="solar:buildings-bold" width={16} />
               </Avatar>
               <Box>
-                <Typography variant="subtitle2">{company.fullName}</Typography>
-                <Typography variant="caption" color="text.secondary">{company.email || 'No email'}</Typography>
+                <Typography variant="subtitle2">{company.name || company.fullName}</Typography>
+                <Typography variant="caption" color="text.secondary">{company.email || company.phone || 'No contact info'}</Typography>
               </Box>
             </Stack>
           </Button>
         ))}
-        {search.length > 2 && !isLoading && (!companies || companies.length === 0) && (
-          <Typography variant="caption" sx={{ textAlign: 'center', color: 'text.secondary' }}>
-            No companies found.
-          </Typography>
+        
+        {search.length > 2 && !isLoading && companies.length === 0 && (
+          <Box sx={{ py: 3, textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              No companies match "{search}"
+            </Typography>
+          </Box>
+        )}
+
+        {search.length <= 2 && (
+          <Box sx={{ py: 2, textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+              Enter at least 3 characters to search
+            </Typography>
+          </Box>
         )}
       </Stack>
     </Stack>

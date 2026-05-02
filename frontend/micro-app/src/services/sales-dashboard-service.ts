@@ -128,3 +128,8 @@ export async function deleteSalesActivity(id: string | number): Promise<boolean>
   const response = await axios.delete(`/api/sales-dashboard/activities/${encodeURIComponent(id)}`);
   return unwrap<boolean>(response.data);
 }
+
+export async function deleteSalesOpportunity(id: string | number): Promise<boolean> {
+  const response = await axios.delete(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}`);
+  return unwrap<boolean>(response.data);
+}

@@ -28,6 +28,8 @@ export class CrmService {
     'activity_summary',
     'activity_state',
     'activity_date_deadline',
+    'active',
+    'is_won',
   ];
 
   private readonly stageModel = 'crm.stage';
@@ -75,9 +77,15 @@ export class CrmService {
     
     let status: 'open' | 'won' | 'lost' = 'open';
     if (lead.stage_id) {
+      const stageId = lead.stage_id[0];
       const stageName = lead.stage_id[1].toLowerCase();
-      if (stageName === 'won') status = 'won';
-      else if (stageName === 'lost') status = 'lost';
+      
+      // Check if stage is explicitly won
+      if (lead.is_won || stageName === 'won' || stageName.includes('won')) {
+        status = 'won';
+      } else if (stageName === 'lost' || stageName.includes('lost') || lead.active === false) {
+        status = 'lost';
+      }
     }
 
     return {
@@ -95,7 +103,8 @@ export class CrmService {
       status,
       expectedCloseDate: lead.date_deadline,
       nextActivity: lead.activity_summary || lead.activity_type_id ? {
-        id: lead.activity_ids?.[0],
+        id: lead.activity_ids?.[0] ? `act-${lead.activity_ids[0]}` : null,
+        odooId: lead.activity_ids?.[0],
         title: lead.activity_summary || (Array.isArray(lead.activity_type_id) ? lead.activity_type_id[1] : 'Activity'),
         dueDate: lead.activity_date_deadline,
         state: lead.activity_state as any,
@@ -150,12 +159,29 @@ export class CrmService {
   }
 
   async createActivity(data: any) {
-    return this.odooClient.execute('mail.activity', 'create', [
-      {
-        ...data,
-        res_model: this.model,
-      },
-    ]);
+    const { type, title, dueDate, opportunityId, res_id, ...rest } = data;
+    
+    // Normalize type to activity_type_id
+    let activity_type_id = data.activity_type_id;
+    if (!activity_type_id && type) {
+      const types = await this.odooClient.searchRead('mail.activity.type', [], ['id', 'name']);
+      const foundType = types.find((t: any) => t.name.toLowerCase().includes(type.toLowerCase()));
+      if (foundType) activity_type_id = foundType.id;
+    }
+
+    const payload = {
+      ...rest,
+      res_model: this.model,
+      res_id: Number(res_id || opportunityId),
+      summary: title || data.summary,
+      date_deadline: dueDate || data.date_deadline,
+    };
+
+    if (activity_type_id) {
+      payload['activity_type_id'] = activity_type_id;
+    }
+
+    return this.odooClient.execute('mail.activity', 'create', [payload]);
   }
 
   async updateActivity(id: number, data: any) {
@@ -209,6 +235,7 @@ export class CrmService {
       })),
       ...activities.map((a: any) => ({
         id: `act-${a.id}`,
+        odooId: a.id,
         type: 'activity',
         title: a.summary || (Array.isArray(a.activity_type_id) ? a.activity_type_id[1] : 'Activity'),
         content: a.note,

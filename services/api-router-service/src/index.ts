@@ -1159,10 +1159,33 @@ async function handleApiCompat(req: Request, res: Response) {
         return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/crm/${id}` });
       }
 
+      if (req.method === "DELETE" && /^\/opportunities\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/crm/${id}` });
+      }
+
+      if (req.method === "GET" && /^\/opportunities\/[^/]+\/timeline$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: `/v1/odoo/crm/${id}/timeline`,
+        });
+      }
+
       if (req.method === "PATCH" && /^\/opportunities\/[^/]+\/stage$/.test(rest)) {
         const id = rest.split("/")[2];
-        const nextStage = String(req.body?.stage || "").toLowerCase();
+        const { stage, stageId } = req.body || {};
 
+        if (stageId) {
+          return proxyTo(req, res, {
+            baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+            targetPath: `/v1/odoo/crm/${id}`,
+            method: "PUT",
+            body: { stage_id: Number(stageId) },
+          });
+        }
+
+        const nextStage = String(stage || "").toLowerCase();
         // Fetch Odoo stages to find the one matching our label
         const stagesRes = await fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm/stages"));
         const stages = Array.isArray(stagesRes.data) ? stagesRes.data : [];
@@ -1187,6 +1210,24 @@ async function handleApiCompat(req: Request, res: Response) {
           targetPath: `/v1/odoo/crm/${id}`,
           method: "PUT",
           body: { stage_id: targetStage.id },
+        });
+      }
+
+      if (req.method === "POST" && /^\/opportunities\/[^/]+\/activities$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: "/v1/odoo/crm/activities",
+          body: { ...req.body, res_id: Number(id) },
+        });
+      }
+
+      if (req.method === "PATCH" && /^\/activities\/[^/]+\/complete$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: `/v1/odoo/crm/activities/${id}/complete`,
+          method: "POST",
         });
       }
 

@@ -323,4 +323,18 @@ export const contactService = {
     const response = await axios.post(`/api/odoo/contacts/${contactId}/unlink-company`);
     return response.data;
   },
+  getCompanies: async (params?: any) => {
+    const response = await axios.get('/api/odoo/contacts/companies', {
+      params: {
+        page: params?.page,
+        pageSize: params?.pageSize,
+        search: params?.search ?? params?.q ?? '',
+      },
+    });
+    const companies = Array.isArray(response.data?.data) ? response.data.data : [];
+    return {
+      data: companies.map(normalizeOdooContact),
+      total: response.data?.total ?? companies.length,
+    };
+  },
 };
