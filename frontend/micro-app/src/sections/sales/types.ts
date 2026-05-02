@@ -38,6 +38,8 @@ export type SalesOpportunity = {
   email?: string;
   phone?: string;
   stage: SalesStage;
+  stageId?: number;
+  odooId?: number;
   probability?: number;
   expectedRevenue?: number;
   recurringRevenue?: number;

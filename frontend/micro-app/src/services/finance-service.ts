@@ -23,27 +23,15 @@ export type RevenueStats = {
 
 export async function getRevenueStats(): Promise<RevenueStats> {
   try {
-    const { data: invoices } = await billingService.getInvoices();
-    if (!Array.isArray(invoices)) {
-      return { totalRevenue: 0, paid: 0, outstanding: 0, overdue: 0, byStatus: {}, invoiceCount: 0 };
-    }
-
-    const totalRevenue = invoices.reduce((sum: number, item: any) => sum + toNumber(item?.totalAmount ?? item?.totalDue), 0);
-    const paid = invoices.reduce((sum: number, item: any) => sum + toNumber(item?.paidAmount), 0);
-    const overdue = invoices.reduce((sum: number, item: any) => sum + (item.isOverdue ? toNumber(item?.totalDue || item?.totalAmount) - toNumber(item?.paidAmount) : 0), 0);
-    const byStatus = invoices.reduce((acc: Record<string, number>, item: any) => {
-      const key = String(item?.status || 'unknown').toLowerCase();
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-
+    const summary = await billingService.getSummary();
+    
     return {
-      totalRevenue,
-      paid,
-      outstanding: Math.max(totalRevenue - paid, 0),
-      overdue: Math.max(overdue, 0),
-      byStatus,
-      invoiceCount: invoices.length,
+      totalRevenue: toNumber(summary?.totalInvoiced ?? 0),
+      paid: toNumber(summary?.totalPaid ?? 0),
+      outstanding: toNumber(summary?.totalOutstanding ?? 0),
+      overdue: toNumber(summary?.totalOverdueValue ?? 0),
+      byStatus: {}, // Status breakdown not provided by summary currently
+      invoiceCount: toNumber(summary?.invoiceCount ?? 0),
     };
   } catch (error) {
     console.error('[FinanceService] Failed to fetch revenue stats:', error);

@@ -112,7 +112,7 @@ export function SalesOpportunityTimeline({ opportunityId }: { opportunityId: str
                         size="small" 
                         color="error" 
                         disabled={deleteActivityMutation.isPending}
-                        onClick={() => deleteActivityMutation.mutate(item.id)}
+                        onClick={() => deleteActivityMutation.mutate(item.odooId || item.id)}
                       >
                         <Iconify icon="solar:trash-bin-trash-bold" width={14} />
                       </IconButton>

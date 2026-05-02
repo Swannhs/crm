@@ -37,8 +37,9 @@ export function SalesOpportunityDrawer({
   onEdit: () => void;
   onAddActivity: () => void;
   onLinkOrder: (orderId: string, opportunityId: string) => void;
-  onMoveStage: (id: string, stage: SalesStage) => void;
+  onMoveStage: (id: string, stage: SalesStage, stageId?: number) => void;
   onDelete?: (id: string) => void;
+  stages?: Array<{ id: number; name: string; sequence: number; is_won: boolean }>;
 }) {
   const [currentTab, setCurrentTab] = useState('overview');
 
@@ -104,7 +105,20 @@ export function SalesOpportunityDrawer({
                   select
                   label="Move stage"
                   value={item.stage}
-                  onChange={(e) => onMoveStage(item.id, e.target.value as SalesStage)}
+                  onChange={(e) => {
+                    const next = e.target.value as SalesStage;
+                    const stageInfo = stages?.find(s => {
+                      const label = s.name.toLowerCase();
+                      if (next === 'new' && label.includes('new')) return true;
+                      if (next === 'qualified' && label.includes('qual')) return true;
+                      if (next === 'proposal' && (label.includes('prop') || label.includes('quote'))) return true;
+                      if (next === 'negotiation' && label.includes('nego')) return true;
+                      if (next === 'won' && label.includes('won')) return true;
+                      if (next === 'lost' && label.includes('lost')) return true;
+                      return false;
+                    });
+                    onMoveStage(item.id, next, stageInfo?.id);
+                  }}
                   disabled={stageLoading}
                   fullWidth
                 >
@@ -123,8 +137,28 @@ export function SalesOpportunityDrawer({
                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                       <Button variant="contained" size="small" onClick={onEdit}>Edit</Button>
                       <Button variant="soft" size="small" onClick={onAddActivity}>Add activity</Button>
-                      <Button variant="soft" size="small" color="success" onClick={() => onMoveStage(item.id, 'won')}>Mark won</Button>
-                      <Button variant="soft" size="small" color="error" onClick={() => onMoveStage(item.id, 'lost')}>Mark lost</Button>
+                      <Button 
+                        variant="soft" 
+                        size="small" 
+                        color="success" 
+                        onClick={() => {
+                          const stageInfo = stages?.find(s => s.name.toLowerCase().includes('won'));
+                          onMoveStage(item.id, 'won', stageInfo?.id);
+                        }}
+                      >
+                        Mark won
+                      </Button>
+                      <Button 
+                        variant="soft" 
+                        size="small" 
+                        color="error" 
+                        onClick={() => {
+                          const stageInfo = stages?.find(s => s.name.toLowerCase().includes('lost'));
+                          onMoveStage(item.id, 'lost', stageInfo?.id);
+                        }}
+                      >
+                        Mark lost
+                      </Button>
                       {onDelete && (
                         <Button 
                           variant="soft" 

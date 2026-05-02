@@ -73,8 +73,8 @@ export async function updateSalesOpportunity(id: string, payload: OpportunityPay
   return unwrap<SalesOpportunity>(response.data);
 }
 
-export async function updateOpportunityStage(id: string, stage: SalesStage): Promise<SalesOpportunity> {
-  const response = await axios.patch(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}/stage`, { stage });
+export async function updateOpportunityStage(id: string, stage: SalesStage, stageId?: number): Promise<SalesOpportunity> {
+  const response = await axios.patch(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}/stage`, { stage, stageId });
   return unwrap<SalesOpportunity>(response.data);
 }
 

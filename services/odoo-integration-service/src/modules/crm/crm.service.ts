@@ -76,14 +76,15 @@ export class CrmService {
     const weightedValue = (expectedRevenue * probability) / 100;
     
     let status: 'open' | 'won' | 'lost' = 'open';
-    if (lead.stage_id) {
-      const stageId = lead.stage_id[0];
+    if (lead.active === false) {
+      status = 'lost';
+    } else if (lead.is_won) {
+      status = 'won';
+    } else if (lead.stage_id) {
       const stageName = lead.stage_id[1].toLowerCase();
-      
-      // Check if stage is explicitly won
-      if (lead.is_won || stageName === 'won' || stageName.includes('won')) {
+      if (stageName === 'won' || stageName.includes('won')) {
         status = 'won';
-      } else if (stageName === 'lost' || stageName.includes('lost') || lead.active === false) {
+      } else if (stageName === 'lost' || stageName.includes('lost')) {
         status = 'lost';
       }
     }
@@ -94,15 +95,16 @@ export class CrmService {
       name: lead.name,
       customerName: lead.partner_id ? lead.partner_id[1] : undefined,
       customerId: lead.partner_id ? lead.partner_id[0] : undefined,
-      companyName: lead.partner_id ? lead.partner_id[1] : undefined, // In Odoo, partner is the same
+      companyName: lead.partner_id ? lead.partner_id[1] : undefined,
       stage: lead.stage_id ? lead.stage_id[1] : 'New',
       stageId: lead.stage_id ? lead.stage_id[0] : undefined,
       expectedRevenue,
       probability,
       weightedValue,
       status,
+      active: lead.active,
       expectedCloseDate: lead.date_deadline,
-      nextActivity: lead.activity_summary || lead.activity_type_id ? {
+      nextActivity: (lead.activity_summary || lead.activity_type_id) ? {
         id: lead.activity_ids?.[0] ? `act-${lead.activity_ids[0]}` : null,
         odooId: lead.activity_ids?.[0],
         title: lead.activity_summary || (Array.isArray(lead.activity_type_id) ? lead.activity_type_id[1] : 'Activity'),
@@ -124,7 +126,7 @@ export class CrmService {
   }
 
   async remove(id: number) {
-    return this.odooClient.execute(this.model, 'unlink', [[id]]);
+    return this.odooClient.execute(this.model, 'write', [[id], { active: false }]);
   }
 
   async getStages() {
@@ -158,16 +160,20 @@ export class CrmService {
     );
   }
 
+  private async resolveActivityTypeId(type?: string): Promise<number | undefined> {
+    if (!type) return undefined;
+    const types = await this.odooClient.searchRead('mail.activity.type', [], ['id', 'name']);
+    const foundType = types.find((t: any) => 
+      t.name.toLowerCase().includes(type.toLowerCase()) || 
+      type.toLowerCase().includes(t.name.toLowerCase())
+    );
+    return foundType?.id;
+  }
+
   async createActivity(data: any) {
     const { type, title, dueDate, opportunityId, res_id, ...rest } = data;
     
-    // Normalize type to activity_type_id
-    let activity_type_id = data.activity_type_id;
-    if (!activity_type_id && type) {
-      const types = await this.odooClient.searchRead('mail.activity.type', [], ['id', 'name']);
-      const foundType = types.find((t: any) => t.name.toLowerCase().includes(type.toLowerCase()));
-      if (foundType) activity_type_id = foundType.id;
-    }
+    const activity_type_id = data.activity_type_id || await this.resolveActivityTypeId(type);
 
     const payload = {
       ...rest,
@@ -252,25 +258,29 @@ export class CrmService {
   async getPipelineSummary() {
     const leads = await this.odooClient.searchRead(
       this.model,
-      [['type', '=', 'opportunity']],
-      ['expected_revenue', 'probability', 'stage_id', 'planned_revenue'],
+      [['type', '=', 'opportunity'], ['active', '=', true]],
+      ['expected_revenue', 'probability', 'stage_id', 'planned_revenue', 'is_won'],
     );
 
     const totalOpenValue = leads
-      .filter((l: any) => l.stage_id && l.stage_id[1] !== 'Won' && l.stage_id[1] !== 'Lost')
+      .filter((l: any) => !l.is_won)
       .reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
 
     const weightedValue = leads
-      .filter((l: any) => l.stage_id && l.stage_id[1] !== 'Won' && l.stage_id[1] !== 'Lost')
+      .filter((l: any) => !l.is_won)
       .reduce((acc, curr) => acc + ((curr.expected_revenue || curr.planned_revenue || 0) * (curr.probability || 0)) / 100, 0);
 
     const wonValue = leads
-      .filter((l: any) => l.stage_id && l.stage_id[1] === 'Won')
+      .filter((l: any) => l.is_won)
       .reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
 
-    const lostValue = leads
-      .filter((l: any) => l.stage_id && l.stage_id[1] === 'Lost')
-      .reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
+    // To get lost value, we need to query archived ones too
+    const archivedLeads = await this.odooClient.searchRead(
+      this.model,
+      [['type', '=', 'opportunity'], ['active', '=', false]],
+      ['expected_revenue', 'planned_revenue'],
+    );
+    const lostValue = archivedLeads.reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
 
     return {
       totalOpenValue,

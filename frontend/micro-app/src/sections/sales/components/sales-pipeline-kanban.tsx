@@ -21,7 +21,7 @@ export function SalesPipelineKanban({
   stages?: Array<{ id: number; name: string; sequence: number; is_won: boolean }>;
   moving?: boolean;
   onOpen: (item: SalesOpportunity) => void;
-  onMove: (id: string, stage: SalesStage) => void;
+  onMove: (id: string, stage: SalesStage, stageId?: number) => void;
 }) {
   // If we have real Odoo stages, we could map them, but for now we keep the 6 canonical columns
   // and use the stages data to potentially enrich the labels or handle custom ordering.
@@ -87,7 +87,25 @@ export function SalesPipelineKanban({
             </Stack>
             <Stack spacing={1.5} sx={{ flexGrow: 1, minHeight: 100 }}>
               {rows.map((item) => (
-                <SalesOpportunityCard key={item.id} item={item} moving={moving} onOpen={() => onOpen(item)} onMove={(next) => onMove(item.id, next)} />
+                <SalesOpportunityCard 
+                  key={item.id} 
+                  item={item} 
+                  moving={moving} 
+                  onOpen={() => onOpen(item)} 
+                  onMove={(next) => {
+                    const nextStageInfo = stages?.find(s => {
+                      const label = s.name.toLowerCase();
+                      if (next === 'new' && label.includes('new')) return true;
+                      if (next === 'qualified' && label.includes('qual')) return true;
+                      if (next === 'proposal' && (label.includes('prop') || label.includes('quote'))) return true;
+                      if (next === 'negotiation' && label.includes('nego')) return true;
+                      if (next === 'won' && label.includes('won')) return true;
+                      if (next === 'lost' && label.includes('lost')) return true;
+                      return false;
+                    });
+                    onMove(item.id, next, nextStageInfo?.id);
+                  }} 
+                />
               ))}
               {!rows.length ? (
                 <Box

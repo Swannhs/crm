@@ -153,16 +153,20 @@ export class AccountingService {
     const totalPaid = totalInvoiced - totalOutstanding;
     
     const today = new Date().toISOString().split('T')[0];
-    const overdueCount = invoices.filter(inv => {
+    const overdueInvoices = invoices.filter(inv => {
         if (inv.payment_state === 'paid' || inv.state !== 'posted') return false;
         return inv.amount_residual > 0 && inv.invoice_date_due && inv.invoice_date_due < today;
-    }).length;
+    });
+
+    const totalOverdueValue = overdueInvoices.reduce((acc, curr) => acc + (curr.amount_residual || 0), 0);
 
     return {
       totalInvoiced,
       totalPaid,
       totalOutstanding,
-      overdueCount,
+      totalOverdueValue,
+      overdueCount: overdueInvoices.length,
+      invoiceCount: invoices.length,
     };
   }
 

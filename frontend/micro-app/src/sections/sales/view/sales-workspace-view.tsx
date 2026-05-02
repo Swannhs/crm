@@ -111,9 +111,9 @@ export function SalesWorkspaceView() {
     }
   };
 
-  const handleMoveStage = async (id: string, stage: SalesOpportunity['stage']) => {
+  const handleMoveStage = async (id: string, stage: SalesOpportunity['stage'], stageId?: number) => {
     try {
-      await stageMutation.mutateAsync({ id, stage });
+      await stageMutation.mutateAsync({ id, stage, stageId });
       toast.success('Stage updated');
       if (selectedOpportunity?.id === id) {
         setSelectedOpportunity({ ...selectedOpportunity, stage });
@@ -282,6 +282,7 @@ export function SalesWorkspaceView() {
             toast.error(error?.message || 'Delete unavailable');
           }
         }}
+        stages={stagesQuery.data}
       />
 
       <SalesOpportunityDialog
