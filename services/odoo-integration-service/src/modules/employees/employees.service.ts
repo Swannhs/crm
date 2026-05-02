@@ -323,12 +323,11 @@ export class EmployeesService {
 
   async remove(id: number) {
     try {
-      return this.odooClient.execute(this.hrEmployeeModel, 'unlink', [[id]]);
+      await this.odooClient.execute(this.hrEmployeeModel, 'write', [[id], { active: false }]);
     } catch {
-      return this.odooClient.execute(this.fallbackEmployeeModel, 'unlink', [
-        [id],
-      ]);
+      await this.odooClient.execute(this.fallbackEmployeeModel, 'write', [[id], { active: false }]);
     }
+    return { id, archived: true };
   }
 
   async getDepartments(paginationDto: PaginationDto) {

@@ -30,6 +30,7 @@ export class CrmService {
     'activity_date_deadline',
     'active',
     'is_won',
+    'tag_ids',
   ];
 
   private readonly stageModel = 'crm.stage';
@@ -37,18 +38,27 @@ export class CrmService {
 
   constructor(private readonly odooClient: OdooClientService) {}
 
-  async findAll(paginationDto: PaginationDto) {
-    const page = paginationDto.page ?? 1;
-    const pageSize = paginationDto.pageSize ?? 10;
-    const search = paginationDto.search;
+  async findAll(paginationDto: any) {
+    const { page = 1, pageSize = 20, search, stageId, type, active = true } = paginationDto;
+    const offset = (page - 1) * pageSize;
 
-    const domain: any[] = search
-      ? ['|', ['name', 'ilike', `%${search}%`], ['email_from', 'ilike', `%${search}%`]]
-      : [];
+    const domain: any[] = [['active', '=', active]];
+
+    if (search) {
+      domain.push('|', ['name', 'ilike', search], ['partner_id.name', 'ilike', search]);
+    }
+
+    if (stageId) {
+      domain.push(['stage_id', '=', Number(stageId)]);
+    }
+
+    if (type) {
+      domain.push(['type', '=', type]);
+    }
 
     const [data, total] = await Promise.all([
       this.odooClient.searchRead(this.model, domain, this.defaultFields, {
-        offset: (page - 1) * pageSize,
+        offset,
         limit: pageSize,
         order: 'create_date desc',
       }),
@@ -57,7 +67,13 @@ export class CrmService {
 
     const mappedData = data.map((lead: any) => this.normalizeOpportunity(lead));
 
-    return { data: mappedData, total };
+    return { 
+      data: mappedData, 
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
   }
 
   async findOne(id: number) {
@@ -71,49 +87,55 @@ export class CrmService {
   }
 
   private normalizeOpportunity(lead: any) {
-    const expectedRevenue = Number(lead.expected_revenue || lead.planned_revenue || 0);
-    const probability = Number(lead.probability || 0);
-    const weightedValue = (expectedRevenue * probability) / 100;
-    
-    let status: 'open' | 'won' | 'lost' = 'open';
-    if (lead.active === false) {
-      status = 'lost';
-    } else if (lead.is_won) {
-      status = 'won';
-    } else if (lead.stage_id) {
-      const stageName = lead.stage_id[1].toLowerCase();
-      if (stageName === 'won' || stageName.includes('won')) {
-        status = 'won';
-      } else if (stageName === 'lost' || stageName.includes('lost')) {
-        status = 'lost';
-      }
-    }
+    const stageLabel = Array.isArray(lead.stage_id) ? lead.stage_id[1] : '';
+    const probability = Number(lead.probability ?? 0);
+
+    let status: 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' = 'new';
+    const label = stageLabel.toLowerCase();
+
+    if (lead.is_won || label.includes('won') || probability === 100) status = 'won';
+    else if (lead.active === false || label.includes('lost') || (probability === 0 && label.includes('lost'))) status = 'lost';
+    else if (label.includes('nego')) status = 'negotiation';
+    else if (label.includes('prop') || label.includes('quote')) status = 'proposal';
+    else if (label.includes('qual')) status = 'qualified';
+    else if (label.includes('new')) status = 'new';
 
     return {
       id: lead.id,
-      odooId: lead.id,
       name: lead.name,
-      customerName: lead.partner_id ? lead.partner_id[1] : undefined,
-      customerId: lead.partner_id ? lead.partner_id[0] : undefined,
-      companyName: lead.partner_id ? lead.partner_id[1] : undefined,
-      stage: lead.stage_id ? lead.stage_id[1] : 'New',
-      stageId: lead.stage_id ? lead.stage_id[0] : undefined,
-      expectedRevenue,
+      partner: Array.isArray(lead.partner_id)
+        ? { id: lead.partner_id[0], name: lead.partner_id[1] }
+        : null,
+      email: lead.email_from,
+      phone: lead.phone,
       probability,
-      weightedValue,
-      status,
-      active: lead.active,
-      expectedCloseDate: lead.date_deadline,
-      nextActivity: (lead.activity_summary || lead.activity_type_id) ? {
-        id: lead.activity_ids?.[0] ? `act-${lead.activity_ids[0]}` : null,
-        odooId: lead.activity_ids?.[0],
-        title: lead.activity_summary || (Array.isArray(lead.activity_type_id) ? lead.activity_type_id[1] : 'Activity'),
-        dueDate: lead.activity_date_deadline,
-        state: lead.activity_state as any,
-        overdue: lead.activity_state === 'overdue',
-      } : null,
+      expectedRevenue: lead.expected_revenue || lead.planned_revenue || 0,
+      recurringRevenue: lead.recurring_revenue_monthly || 0,
+      stage: {
+        id: Array.isArray(lead.stage_id) ? lead.stage_id[0] : null,
+        name: stageLabel,
+        status,
+      },
+      user: Array.isArray(lead.user_id)
+        ? { id: lead.user_id[0], name: lead.user_id[1] }
+        : null,
+      priority: lead.priority,
+      tags: Array.isArray(lead.tag_ids) ? lead.tag_ids : [],
+      expectedClose: lead.date_deadline,
       createdAt: lead.create_date,
       updatedAt: lead.write_date,
+      type: lead.type,
+      active: lead.active,
+      nextActivity: lead.activity_summary
+        ? {
+            summary: lead.activity_summary,
+            deadline: lead.activity_date_deadline,
+            type: Array.isArray(lead.activity_type_id)
+              ? lead.activity_type_id[1]
+              : null,
+            state: lead.activity_state,
+          }
+        : null,
     };
   }
 
@@ -126,7 +148,8 @@ export class CrmService {
   }
 
   async remove(id: number) {
-    return this.odooClient.execute(this.model, 'write', [[id], { active: false }]);
+    await this.odooClient.execute(this.model, 'write', [[id], { active: false }]);
+    return { id, archived: true };
   }
 
   async getStages() {
@@ -274,7 +297,6 @@ export class CrmService {
       .filter((l: any) => l.is_won)
       .reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
 
-    // To get lost value, we need to query archived ones too
     const archivedLeads = await this.odooClient.searchRead(
       this.model,
       [['type', '=', 'opportunity'], ['active', '=', false]],

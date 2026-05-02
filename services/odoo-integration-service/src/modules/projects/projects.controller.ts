@@ -35,8 +35,9 @@ export class ProjectsController {
   }
 
   @Get('v1/projects/:id')
-  async getProject(@Param('id', ParseIntPipe) id: number) {
-    return this.projectsService.findOneProject(id);
+  async getProject(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.projectsService.findOneProject(numericId);
   }
 
   @Post('v1/projects')
@@ -53,8 +54,9 @@ export class ProjectsController {
   }
 
   @Delete('v1/projects/:id')
-  async deleteProject(@Param('id', ParseIntPipe) id: number) {
-    return this.projectsService.removeProject(id);
+  async deleteProject(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.projectsService.removeProject(numericId);
   }
 
   // Tasks
@@ -149,13 +151,15 @@ export class ProjectsController {
   }
 
   @Patch('v1/cards/:id')
-  async updateCard(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
-    return this.projectsService.updateTask(id, data);
+  async updateCard(@Param('id') id: string, @Body() data: any) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.projectsService.updateTask(numericId, data);
   }
 
   @Delete('v1/cards/:id')
-  async deleteCard(@Param('id', ParseIntPipe) id: number) {
-    return this.projectsService.removeTask(id);
+  async deleteCard(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.projectsService.removeTask(numericId);
   }
 
   // Timesheets

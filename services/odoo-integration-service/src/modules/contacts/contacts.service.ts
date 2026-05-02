@@ -541,7 +541,8 @@ export class ContactsService {
   }
 
   async remove(id: number) {
-    return this.odooClient.execute(this.model, 'write', [[id], { active: false }]);
+    await this.odooClient.execute(this.model, 'write', [[id], { active: false }]);
+    return { id, archived: true };
   }
 
   async getOrders(id: number) {
@@ -587,9 +588,10 @@ export class ContactsService {
   }
 
   async removeActivity(id: string) {
-    return this.prisma.contactActivity.delete({
+    await this.prisma.contactActivity.delete({
       where: { id },
     });
+    return { id, archived: true };
   }
 
   // --- Shifts / Attendance ---

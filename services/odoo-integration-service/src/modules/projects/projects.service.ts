@@ -99,7 +99,8 @@ export class ProjectsService {
   }
 
   async removeProject(id: number) {
-    return this.odooClient.execute(this.projectModel, 'unlink', [[id]]);
+    await this.odooClient.execute(this.projectModel, 'write', [[id], { active: false }]);
+    return { id, archived: true };
   }
 
   // Tasks
@@ -338,7 +339,8 @@ export class ProjectsService {
   }
 
   async removeTask(id: number) {
-    return this.odooClient.execute(this.taskModel, 'unlink', [[id]]);
+    await this.odooClient.execute(this.taskModel, 'write', [[id], { active: false }]);
+    return { id, archived: true };
   }
 
   // Timesheets / Worklogs

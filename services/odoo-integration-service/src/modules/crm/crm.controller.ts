@@ -58,20 +58,23 @@ export class CrmController {
   @Get(':id')
   @ApiOperation({ summary: 'Get details of a lead/opportunity' })
   @ApiResponse({ status: 200, type: LeadEntity })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.crmService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.crmService.findOne(numericId);
   }
 
   @Get(':id/timeline')
   @ApiOperation({ summary: 'Get timeline of a lead/opportunity' })
-  async getTimeline(@Param('id', ParseIntPipe) id: number) {
-    return this.crmService.getTimeline(id);
+  async getTimeline(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.crmService.getTimeline(numericId);
   }
 
   @Post(':id/notes')
   @ApiOperation({ summary: 'Create a note for an opportunity' })
-  async createNote(@Param('id', ParseIntPipe) id: number, @Body('body') body: string) {
-    return this.crmService.createNote(id, body);
+  async createNote(@Param('id') id: string, @Body('body') body: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.crmService.createNote(numericId, body);
   }
 
   @Post()
@@ -82,14 +85,16 @@ export class CrmController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a lead' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
-    return this.crmService.update(id, data);
+  async update(@Param('id') id: string, @Body() data: any) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.crmService.update(numericId, data);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a lead' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.crmService.remove(id);
+  async remove(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.crmService.remove(numericId);
   }
 
   @Post('activities')
@@ -112,7 +117,8 @@ export class CrmController {
 
   @Delete('activities/:id')
   @ApiOperation({ summary: 'Delete a CRM activity' })
-  async removeActivity(@Param('id', ParseIntPipe) id: number) {
-    return this.crmService.removeActivity(id);
+  async removeActivity(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.crmService.removeActivity(numericId);
   }
 }

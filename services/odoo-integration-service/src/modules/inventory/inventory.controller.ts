@@ -34,8 +34,9 @@ export class InventoryController {
   @Get('products/:id')
   @ApiOperation({ summary: 'Get product details' })
   @ApiResponse({ status: 200, type: ProductEntity })
-  async findProduct(@Param('id', ParseIntPipe) id: number) {
-    return this.inventoryService.findProduct(id);
+  async findProduct(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.inventoryService.findProduct(numericId);
   }
 
   @Post('products')
@@ -46,13 +47,15 @@ export class InventoryController {
 
   @Put('products/:id')
   @ApiOperation({ summary: 'Update a product' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
-    return this.inventoryService.updateProduct(id, data);
+  async update(@Param('id') id: string, @Body() data: any) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.inventoryService.updateProduct(numericId, data);
   }
 
   @Delete('products/:id')
   @ApiOperation({ summary: 'Delete a product' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.inventoryService.removeProduct(id);
+  async remove(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.inventoryService.removeProduct(numericId);
   }
 }

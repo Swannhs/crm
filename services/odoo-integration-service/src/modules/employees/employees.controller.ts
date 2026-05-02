@@ -252,8 +252,9 @@ export class EmployeesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get employee details' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.employeesService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.employeesService.findOne(numericId);
   }
 
   @Post()
@@ -285,8 +286,9 @@ export class EmployeesController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete employee (contract alias)' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.employeesService.remove(id);
+  async remove(@Param('id') id: string) {
+    const numericId = parseInt(String(id).replace(/^\D+/g, ''), 10);
+    return this.employeesService.remove(numericId);
   }
 
   @Get(':id/attendance')

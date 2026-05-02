@@ -125,7 +125,8 @@ export class AccountingService {
   }
 
   async remove(id: number) {
-    return this.odooClient.execute(this.model, 'unlink', [[id]]);
+    await this.odooClient.execute(this.model, 'unlink', [[id]]);
+    return { id, archived: true };
   }
 
   async post(id: number) {

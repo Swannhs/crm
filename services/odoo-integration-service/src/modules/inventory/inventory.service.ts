@@ -86,7 +86,8 @@ export class InventoryService {
   }
 
   async removeProduct(id: number) {
-    return this.odooClient.execute(this.productModel, 'unlink', [[id]]);
+    await this.odooClient.execute(this.productModel, 'write', [[id], { active: false }]);
+    return { id, archived: true };
   }
 
   async findAllCategories(paginationDto: PaginationDto) {
@@ -128,7 +129,8 @@ export class InventoryService {
   }
 
   async removeCategory(id: number) {
-    return this.odooClient.execute(this.categoryModel, 'unlink', [[id]]);
+    await this.odooClient.execute(this.categoryModel, 'unlink', [[id]]);
+    return { id, archived: true };
   }
 
   async findAllInventory(paginationDto: PaginationDto) {
@@ -168,7 +170,8 @@ export class InventoryService {
   }
 
   async removeInventory(id: number) {
-    return this.odooClient.execute(this.inventoryModel, 'unlink', [[id]]);
+    await this.odooClient.execute(this.inventoryModel, 'unlink', [[id]]);
+    return { id, archived: true };
   }
 
   async findAllLocations(paginationDto: PaginationDto) {
