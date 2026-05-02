@@ -4,7 +4,6 @@ import Typography from '@mui/material/Typography';
 import { alpha, Theme, SxProps, useTheme } from '@mui/material/styles';
 
 import { fCurrency } from 'src/utils/format-number';
-
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -29,13 +28,32 @@ export function BillingWidgetSummary({ title, total, icon, color = 'primary', sx
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        position: 'relative',
+        overflow: 'hidden',
+        background: `linear-gradient(135deg, ${alpha(theme.palette[color].lighter, 0.4)} 0%, ${alpha(theme.palette[color].light, 0.4)} 100%)`,
+        backdropFilter: 'blur(10px)',
+        border: `1px solid ${alpha(theme.palette[color].main, 0.2)}`,
+        boxShadow: `0 8px 32px 0 ${alpha(theme.palette[color].main, 0.1)}`,
+        '&:before': {
+          content: '""',
+          position: 'absolute',
+          top: -10,
+          right: -10,
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          background: alpha(theme.palette[color].main, 0.08),
+          zIndex: 0,
+        },
         ...sx,
       }}
       {...other}
     >
-      <Stack spacing={0.5}>
-        <Typography variant="h4">{fCurrency(total)}</Typography>
-        <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+      <Stack spacing={0.5} sx={{ zIndex: 1 }}>
+        <Typography variant="h3" sx={{ color: theme.palette[color].darker }}>
+           {fCurrency(total)}
+        </Typography>
+        <Typography variant="subtitle2" sx={{ color: theme.palette[color].darker, opacity: 0.72 }}>
           {title}
         </Typography>
       </Stack>
@@ -44,14 +62,15 @@ export function BillingWidgetSummary({ title, total, icon, color = 'primary', sx
         alignItems="center"
         justifyContent="center"
         sx={{
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          color: theme.palette[color].main,
-          bgcolor: alpha(theme.palette[color].main, 0.16),
+          width: 56,
+          height: 56,
+          borderRadius: 1.5,
+          color: theme.palette[color].dark,
+          bgcolor: alpha(theme.palette[color].main, 0.12),
+          zIndex: 1,
         }}
       >
-        <Iconify icon={icon} width={24} />
+        <Iconify icon={icon} width={32} />
       </Stack>
     </Card>
   );

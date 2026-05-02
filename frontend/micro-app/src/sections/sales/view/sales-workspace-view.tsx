@@ -47,11 +47,12 @@ import { SalesAnalyticsPanel } from '../components/sales-analytics-panel';
 import { SalesActivitiesPanel } from '../components/sales-activities-panel';
 import { SalesOpportunityDrawer } from '../components/sales-opportunity-drawer';
 import { SalesOpportunityDialog, type OpportunityFormValues } from '../components/sales-opportunity-dialog';
+import { SalesDashboardPanel } from '../components/sales-dashboard-panel';
 
 import type { SalesFilters, SalesActivity, SalesOpportunity } from '../types';
 
 export function SalesWorkspaceView() {
-  const [tab, setTab] = useState<SalesTab>('pipeline');
+  const [tab, setTab] = useState<SalesTab>('dashboard');
   const [search, setSearch] = useState('');
   const [syncOpen, setSyncOpen] = useState(false);
   const [opportunityOpen, setOpportunityOpen] = useState(false);
@@ -148,6 +149,14 @@ export function SalesWorkspaceView() {
         <SalesTabs value={tab} onChange={setTab} />
 
         <Box>
+          {tab === 'dashboard' && (
+            <SalesDashboardPanel
+              summary={summaryQuery.data}
+              pipelineByStage={analyticsQuery.data?.pipelineByStage}
+              recentActivities={activitiesQuery.data}
+            />
+          )}
+
           {tab === 'pipeline' ? (
             opportunitiesQuery.isError ? (
               <SalesErrorState

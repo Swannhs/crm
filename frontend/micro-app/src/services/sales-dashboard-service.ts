@@ -108,3 +108,13 @@ export async function getSalesStages(): Promise<Array<{ id: number; name: string
   const response = await axios.get('/api/odoo/crm/stages');
   return unwrap<any[]>(response.data);
 }
+
+export async function getSalesDashboard(): Promise<any> {
+  const response = await axios.get('/api/odoo/crm/dashboard');
+  return unwrap<any>(response.data);
+}
+
+export async function getOpportunityTimeline(id: string | number): Promise<any[]> {
+  const response = await axios.get(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}/timeline`);
+  return unwrap<any[]>(response.data);
+}

@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
@@ -9,6 +12,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import { formatOptionalCurrency } from '../utils';
+import { SalesOpportunityTimeline } from './sales-opportunity-timeline';
 
 import type { SalesStage, SalesOrderRow, SalesOpportunity } from '../types';
 
@@ -33,61 +37,104 @@ export function SalesOpportunityDrawer({
   onLinkOrder: (orderId: string, opportunityId: string) => void;
   onMoveStage: (id: string, stage: SalesStage) => void;
 }) {
+  const [currentTab, setCurrentTab] = useState('overview');
+
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 460 } } }}>
-      <Box sx={{ p: 3 }}>
+    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 480 } } }}>
+      <Box sx={{ p: 3, pb: 0 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>{item?.name || 'Opportunity details'}</Typography>
+        <Tabs value={currentTab} onChange={(e, val) => setCurrentTab(val)} sx={{ borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
+          <Tab label="Overview" value="overview" />
+          <Tab label="Timeline" value="timeline" />
+        </Tabs>
+      </Box>
+
+      <Box sx={{ p: 3, flexGrow: 1, overflowY: 'auto' }}>
         {item ? (
           <>
-            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-              <Chip size="small" label={item.stage.toUpperCase()} variant="soft" />
-              <Chip size="small" label={item.source === 'magento' ? 'External' : 'Internal'} variant="outlined" />
-            </Stack>
-            <Typography variant="body2" color="text.secondary">Customer / Company</Typography>
-            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{item.customerName || item.companyName || 'Unavailable'}</Typography>
-            <Typography variant="body2" color="text.secondary">Expected revenue</Typography>
-            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{formatOptionalCurrency(item.expectedRevenue)}</Typography>
-            <Typography variant="body2" color="text.secondary">Probability</Typography>
-            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{typeof item.probability === 'number' ? `${item.probability}%` : 'Unavailable'}</Typography>
-            <Typography variant="body2" color="text.secondary">Next activity</Typography>
-            <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{item.nextActivity?.title || 'No next activity'}</Typography>
-
-            <TextField
-              size="small"
-              select
-              label="Move stage"
-              value={item.stage}
-              onChange={(e) => onMoveStage(item.id, e.target.value as SalesStage)}
-              disabled={stageLoading}
-              sx={{ mb: 2, minWidth: 200 }}
-            >
-              <MenuItem value="new">New</MenuItem>
-              <MenuItem value="qualified">Qualified</MenuItem>
-              <MenuItem value="proposal">Proposal</MenuItem>
-              <MenuItem value="negotiation">Negotiation</MenuItem>
-              <MenuItem value="won">Won</MenuItem>
-              <MenuItem value="lost">Lost</MenuItem>
-            </TextField>
-
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>Linked orders</Typography>
-            <Stack spacing={1} sx={{ mb: 2 }}>
-              {orders.slice(0, 5).map((row) => (
-                <Stack key={row.id} direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography variant="body2">{row.ref}</Typography>
-                  <Button size="small" variant="outlined" onClick={() => onLinkOrder(row.id, item.id)}>Link order</Button>
+            {currentTab === 'overview' && (
+              <Stack spacing={3}>
+                <Stack direction="row" spacing={1}>
+                  <Chip size="small" label={item.stage.toUpperCase()} variant="soft" color="primary" />
+                  <Chip size="small" label={item.source === 'magento' ? 'External' : 'Internal'} variant="outlined" />
                 </Stack>
-              ))}
-              {!orders.length ? <Typography variant="caption" color="text.secondary">No orders available to link.</Typography> : null}
-            </Stack>
 
-            <Stack direction="row" spacing={1.25} flexWrap="wrap" useFlexGap>
-              <Button variant="contained" onClick={onEdit}>Edit</Button>
-              <Button variant="outlined" onClick={onAddActivity}>Add activity</Button>
-              <Button variant="outlined" color="success" onClick={() => onMoveStage(item.id, 'won')}>Mark won</Button>
-              <Button variant="outlined" color="error" onClick={() => onMoveStage(item.id, 'lost')}>Mark lost</Button>
-              <Button variant="text" disabled>Create quote/invoice unavailable</Button>
-            </Stack>
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Customer / Company</Typography>
+                  <Typography variant="subtitle2">{item.customerName || item.companyName || 'Unavailable'}</Typography>
+                </Box>
+
+                <Stack direction="row" spacing={3}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Expected revenue</Typography>
+                    <Typography variant="subtitle2">{formatOptionalCurrency(item.expectedRevenue)}</Typography>
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Probability</Typography>
+                    <Typography variant="subtitle2">{typeof item.probability === 'number' ? `${item.probability}%` : 'Unavailable'}</Typography>
+                  </Box>
+                </Stack>
+
+                <Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Next activity</Typography>
+                  <Typography variant="subtitle2" color={item.nextActivity?.overdue ? 'error.main' : 'text.primary'}>
+                    {item.nextActivity?.title || 'No next activity'}
+                    {item.nextActivity?.dueDate && ` (${item.nextActivity.dueDate})`}
+                  </Typography>
+                </Box>
+
+                <TextField
+                  size="small"
+                  select
+                  label="Move stage"
+                  value={item.stage}
+                  onChange={(e) => onMoveStage(item.id, e.target.value as SalesStage)}
+                  disabled={stageLoading}
+                  fullWidth
+                >
+                  <MenuItem value="new">New</MenuItem>
+                  <MenuItem value="qualified">Qualified</MenuItem>
+                  <MenuItem value="proposal">Proposal</MenuItem>
+                  <MenuItem value="negotiation">Negotiation</MenuItem>
+                  <MenuItem value="won">Won</MenuItem>
+                  <MenuItem value="lost">Lost</MenuItem>
+                </TextField>
+
+                <Divider />
+                
+                <Box>
+                   <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Quick Actions</Typography>
+                   <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      <Button variant="contained" size="small" onClick={onEdit}>Edit</Button>
+                      <Button variant="soft" size="small" onClick={onAddActivity}>Add activity</Button>
+                      <Button variant="soft" size="small" color="success" onClick={() => onMoveStage(item.id, 'won')}>Mark won</Button>
+                      <Button variant="soft" size="small" color="error" onClick={() => onMoveStage(item.id, 'lost')}>Mark lost</Button>
+                   </Stack>
+                </Box>
+
+                <Divider />
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>Link recent orders</Typography>
+                  <Stack spacing={1}>
+                    {orders.slice(0, 3).map((row) => (
+                      <Stack key={row.id} direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1.5, borderRadius: 1, bgcolor: 'background.neutral' }}>
+                        <Box>
+                          <Typography variant="subtitle2">{row.ref}</Typography>
+                          <Typography variant="caption" color="text.secondary">{formatOptionalCurrency(row.amount)}</Typography>
+                        </Box>
+                        <Button size="small" variant="outlined" onClick={() => onLinkOrder(row.id, item.id)}>Link</Button>
+                      </Stack>
+                    ))}
+                    {!orders.length ? <Typography variant="caption" color="text.secondary">No orders available to link.</Typography> : null}
+                  </Stack>
+                </Box>
+              </Stack>
+            )}
+
+            {currentTab === 'timeline' && (
+              <SalesOpportunityTimeline opportunityId={item.id} />
+            )}
           </>
         ) : (
           <Typography variant="body2" color="text.secondary">No opportunity selected.</Typography>

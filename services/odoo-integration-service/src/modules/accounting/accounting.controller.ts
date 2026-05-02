@@ -91,4 +91,16 @@ export class AccountingController {
 
     res.end(buffer);
   }
+
+  @Get('billing/summary')
+  @ApiOperation({ summary: 'Get billing summary' })
+  async getSummary() {
+    return this.accountingService.getSummary();
+  }
+
+  @Get('billing/graph')
+  @ApiOperation({ summary: 'Get billing revenue graph' })
+  async getGraph() {
+    return this.accountingService.getGraph();
+  }
 }

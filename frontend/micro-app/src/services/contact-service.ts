@@ -255,10 +255,14 @@ export const contactService = {
 
   // --- Activities ---
   getActivities: async (id: string) => {
-    const response = await axios.get(`/api/odoo/contacts/${id}/activities`);
+    const response = await axios.get(`/api/odoo/contacts/${id}/timeline`);
     return response.data || [];
   },
   createActivity: async (id: string, data: any) => {
+    if (data.type === 'note') {
+      const response = await axios.post(`/api/odoo/contacts/${id}/notes`, { body: data.content || data.body });
+      return response.data;
+    }
     const response = await axios.post(`/api/odoo/contacts/${id}/activities`, data);
     return response.data;
   },
@@ -287,6 +291,16 @@ export const contactService = {
   },
   clockOut: async (shiftId: string) => {
     const response = await axios.post(`/api/odoo/contacts/shifts/${shiftId}/clock-out`);
+    return response.data;
+  },
+  
+  // --- Timeline & Notes ---
+  getTimeline: async (id: string) => {
+    const response = await axios.get(`/api/odoo/contacts/${id}/timeline`);
+    return response.data || [];
+  },
+  createNote: async (id: string, body: string) => {
+    const response = await axios.post(`/api/odoo/contacts/${id}/notes`, { body });
     return response.data;
   },
 };

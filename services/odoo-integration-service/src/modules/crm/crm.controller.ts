@@ -38,6 +38,12 @@ export class CrmController {
     return this.crmService.findOne(id);
   }
 
+  @Get(':id/timeline')
+  @ApiOperation({ summary: 'Get timeline of a lead/opportunity' })
+  async getTimeline(@Param('id', ParseIntPipe) id: number) {
+    return this.crmService.getTimeline(id);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new lead' })
   async create(@Body() data: any) {
@@ -60,5 +66,41 @@ export class CrmController {
   @ApiOperation({ summary: 'List all CRM stages' })
   async getStages() {
     return this.crmService.getStages();
+  }
+
+  @Get('activities')
+  @ApiOperation({ summary: 'List all CRM activities' })
+  async getActivities(@Query() paginationDto: PaginationDto) {
+    return this.crmService.getActivities(paginationDto);
+  }
+
+  @Post('activities')
+  @ApiOperation({ summary: 'Create a new CRM activity' })
+  async createActivity(@Body() data: any) {
+    return this.crmService.createActivity(data);
+  }
+
+  @Put('activities/:id')
+  @ApiOperation({ summary: 'Update a CRM activity' })
+  async updateActivity(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.crmService.updateActivity(id, data);
+  }
+
+  @Post('activities/:id/complete')
+  @ApiOperation({ summary: 'Complete a CRM activity' })
+  async completeActivity(@Param('id', ParseIntPipe) id: number) {
+    return this.crmService.completeActivity(id);
+  }
+
+  @Get('summary')
+  @ApiOperation({ summary: 'Get CRM pipeline summary' })
+  async getSummary() {
+    return this.crmService.getPipelineSummary();
+  }
+
+  @Get('dashboard')
+  @ApiOperation({ summary: 'Get CRM dashboard data' })
+  async getDashboard() {
+    return this.crmService.getDashboard();
   }
 }

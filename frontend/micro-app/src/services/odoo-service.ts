@@ -262,3 +262,13 @@ export async function syncMagentoAllToOdoo(options?: OdooSyncOptions): Promise<O
     axios.post(`${ODOO_API_BASE}/sync/magento/all`, { ...options, dryRun: options?.dryRun ?? true })
   );
 }
+
+// --- Timeline & Notes ---
+
+export async function getOdooTimeline(id: string | number): Promise<any[]> {
+  return request<any[]>(() => axios.get(`${ODOO_API_BASE}/contacts/${id}/timeline`));
+}
+
+export async function createOdooNote(id: string | number, body: string): Promise<any> {
+  return request<any>(() => axios.post(`${ODOO_API_BASE}/contacts/${id}/notes`, { body }));
+}

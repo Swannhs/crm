@@ -414,11 +414,8 @@ async function handleApiCompat(req: Request, res: Response) {
     }
 
     if (module === "contact") {
-      return res.status(410).json({
-        message: "Deprecated CRM compatibility module.",
-        module,
-        canonical: "/api/odoo/contacts",
-      });
+      const targetPath = withQuery(req, `/v1/odoo/contacts${rest}`);
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
     }
 
     if (module === "odoo") {
@@ -457,87 +454,13 @@ async function handleApiCompat(req: Request, res: Response) {
 
     if (module === "billing") {
       if (req.method === "GET" && rest === "/graph") {
-        const months = Math.max(1, Math.min(24, Number(req.query.months ?? 6)));
-        const invoices = await fetchAllOdooInvoicesForGraph(req, { months, maxPages: 20 });
-
-        const monthKeys: string[] = [];
-        const cursor = new Date();
-        cursor.setDate(1);
-        for (let i = months - 1; i >= 0; i -= 1) {
-          const d = new Date(cursor.getFullYear(), cursor.getMonth() - i, 1);
-          monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-        }
-
-        const points = monthKeys.map((key) => {
-          const items = invoices.filter((inv: any) => {
-            const rawDate = inv?.invoice_date || inv?.create_date || inv?.invoice_date_due;
-            if (!rawDate) return false;
-            const d = new Date(rawDate);
-            if (Number.isNaN(d.getTime())) return false;
-            const invKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-            return invKey === key;
-          });
-
-          const invoiced = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_total), 0);
-          const outstanding = items.reduce((sum: number, inv: any) => sum + toNum(inv?.amount_residual), 0);
-          const paid = Math.max(0, invoiced - outstanding);
-          return { key, invoiced, paid, outstanding, count: items.length };
-        });
-
-        return res.json({
-          data: {
-            categories: monthKeys,
-            series: [
-              { name: "Invoiced", data: points.map((p) => p.invoiced) },
-              { name: "Paid", data: points.map((p) => p.paid) },
-              { name: "Outstanding", data: points.map((p) => p.outstanding) },
-            ],
-            monthly: points,
-            months,
-          },
-        });
+        const targetPath = withQuery(req, "/v1/odoo/billing/graph");
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
       }
 
       if (req.method === "GET" && rest === "/summary") {
-        const query = new URLSearchParams({
-          page: "1",
-          pageSize: String(req.query.pageSize ?? 200),
-          ...(req.query.search ? { search: String(req.query.search) } : {}),
-          ...(req.query.contactId ? { contactId: String(req.query.contactId) } : {}),
-        });
-
-        const [odooInvoicesRes, magentoOrdersRes] = await Promise.all([
-          fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, `/v1/odoo/invoices?${query.toString()}`)),
-          fetchMagentoOrders(req, new URLSearchParams({ pageSize: "100", currentPage: "1" })),
-        ]);
-
-        const invoices = Array.isArray(odooInvoicesRes.data?.data) ? odooInvoicesRes.data.data : [];
-        const magentoOrders = Array.isArray(magentoOrdersRes.data?.data?.items) ? magentoOrdersRes.data.data.items : [];
-        const { totalInvoiced, totalOutstanding, totalPaid } = invoiceTotals(invoices);
-        const overdueCount = invoices.filter((inv: any) => {
-          const dueDate = String(inv?.invoice_date_due ?? "");
-          if (!dueDate) return false;
-          const outstanding = toNum(inv?.amount_residual);
-          return outstanding > 0 && new Date(dueDate).getTime() < Date.now();
-        }).length;
-
-        return res.json({
-          data: {
-            totalInvoiced,
-            totalPaid,
-            totalOutstanding,
-            overdueCount,
-            invoiceCount: invoices.length,
-            magentoOrderCount: magentoOrders.length,
-            magentoRevenue: magentoOrders.reduce((sum: number, order: any) => sum + toNum(order?.grand_total), 0),
-          },
-          meta: {
-            upstream: {
-              odoo: { ok: odooInvoicesRes.ok, error: odooInvoicesRes.error },
-              magento: { ok: magentoOrdersRes.ok, error: magentoOrdersRes.error },
-            },
-          },
-        });
+        const targetPath = withQuery(req, "/v1/odoo/billing/summary");
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
       }
 
       if (req.method === "GET" && rest === "/invoices") {
@@ -1044,6 +967,12 @@ async function handleApiCompat(req: Request, res: Response) {
         });
       }
 
+      if (req.method === "GET" && /^\/opportunities\/\d+\/timeline$/.test(rest)) {
+        const id = rest.split("/")[2];
+        const targetPath = `/v1/odoo/crm/${id}/timeline`;
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
+      }
+
       if (req.method === "GET" && rest === "/opportunities") {
         const crmRes = await fetchUpstreamJsonSafe(req, odooCrmUrl);
         const crmItems = Array.isArray(crmRes.data?.data) ? crmRes.data.data : [];
@@ -1075,9 +1004,10 @@ async function handleApiCompat(req: Request, res: Response) {
               id: `lead-${String(lead?.id ?? "")}-next-activity`,
               type: String(Array.isArray(lead?.activity_type_id) ? lead.activity_type_id[1] : "todo").toLowerCase(),
               title: nextActivityTitle || "Follow-up",
-              dueDate: nextActivityDueDate || undefined,
-              overdue: Boolean(nextActivityDueDate && new Date(nextActivityDueDate).getTime() < Date.now()),
-            } : undefined,
+              dueDate: nextActivityDueDate || null,
+              state: lead?.activity_state || "planned",
+              overdue: lead?.activity_state === "overdue",
+            } : null,
           };
         });
 

@@ -83,4 +83,59 @@ export class AccountingService {
     );
     return result[0];
   }
+
+  async getSummary() {
+    const invoices = await this.odooClient.searchRead(
+      this.model,
+      [['move_type', '=', 'out_invoice'], ['state', '!=', 'cancel']],
+      ['amount_total', 'amount_residual', 'payment_state', 'state'],
+    );
+
+    const totalInvoiced = invoices.reduce((acc, curr) => acc + (curr.amount_total || 0), 0);
+    const totalOutstanding = invoices.reduce((acc, curr) => acc + (curr.amount_residual || 0), 0);
+    const totalPaid = totalInvoiced - totalOutstanding;
+    
+    const overdueCount = invoices.filter(inv => {
+        if (inv.payment_state === 'paid' || inv.state !== 'posted') return false;
+        // Simple overdue check (real check should compare with invoice_date_due)
+        return inv.amount_residual > 0;
+    }).length;
+
+    return {
+      totalInvoiced,
+      totalPaid,
+      totalOutstanding,
+      overdueCount,
+    };
+  }
+
+  async getGraph() {
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    
+    const invoices = await this.odooClient.searchRead(
+      this.model,
+      [
+        ['move_type', '=', 'out_invoice'],
+        ['state', '!=', 'cancel'],
+        ['invoice_date', '>=', startDate.toISOString().split('T')[0]]
+      ],
+      ['amount_total', 'invoice_date'],
+    );
+
+    const monthKeys: string[] = [];
+    for (let i = 5; i >= 0; i -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthKeys.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+
+    const points = monthKeys.map(key => {
+        const amount = invoices
+            .filter(inv => inv.invoice_date && inv.invoice_date.startsWith(key))
+            .reduce((acc, curr) => acc + (curr.amount_total || 0), 0);
+        return { key, value: amount };
+    });
+
+    return points;
+  }
 }

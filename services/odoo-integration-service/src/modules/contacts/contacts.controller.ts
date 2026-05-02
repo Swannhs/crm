@@ -259,4 +259,32 @@ export class ContactsController {
   async clockOut(@Param('shiftId') shiftId: string) {
     return this.contactsService.clockOut(shiftId);
   }
+
+  // --- Companies ---
+  @Get('companies')
+  @ApiOperation({ summary: 'List all companies' })
+  async getCompanies(@Query() paginationDto: PaginationDto) {
+    return this.contactsService.getCompanies(paginationDto);
+  }
+
+  // --- Timeline & Notes ---
+  @Get(':id/timeline')
+  @ApiOperation({ summary: 'Get contact timeline (activities & messages)' })
+  async getTimeline(@Param('id') id: string) {
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
+    if (!odooId) return [];
+    return this.contactsService.getTimeline(odooId);
+  }
+
+  @Post(':id/notes')
+  @ApiOperation({ summary: 'Create a new note (Odoo message)' })
+  async createNote(@Param('id') id: string, @Body('body') body: string) {
+    const odooId = /^\d+$/.test(id)
+      ? Number(id)
+      : await this.contactsService.resolveUuid(id);
+    if (!odooId) throw new Error('Contact not found');
+    return this.contactsService.createNote(odooId, body);
+  }
 }

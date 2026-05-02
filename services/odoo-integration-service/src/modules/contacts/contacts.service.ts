@@ -172,14 +172,40 @@ export class ContactsService {
       }),
     );
 
-    const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
-
     return {
       data: dataWithUuids,
       total,
       page,
       pageSize,
       totalPages,
+    };
+  }
+
+  async getCompanies(paginationDto: PaginationDto) {
+    const page = paginationDto.page ?? 1;
+    const pageSize = paginationDto.pageSize ?? 10;
+    const search = paginationDto.search;
+
+    const domain: any[] = [['is_company', '=', true]];
+    if (search) {
+      domain.push(['name', 'ilike', `%${search}%`]);
+    }
+
+    const [data, total] = await Promise.all([
+      this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        order: 'name asc',
+      }),
+      this.odooClient.execute(this.model, 'search_count', [domain]),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      pageSize,
+      totalPages: total > 0 ? Math.ceil(total / pageSize) : 0,
     };
   }
 
@@ -515,5 +541,75 @@ export class ContactsService {
       where: { id: shiftId },
       data: { clockOut: new Date() },
     });
+  }
+
+  // --- Odoo Timeline & Notes ---
+  async getTimeline(id: number) {
+    const [messages, activities] = await Promise.all([
+      this.odooClient.searchRead(
+        'mail.message',
+        [
+          ['res_id', '=', id],
+          ['model', '=', this.model],
+        ],
+        ['id', 'body', 'date', 'author_id', 'message_type', 'subtype_id'],
+        { order: 'date desc', limit: 50 },
+      ),
+      this.odooClient.searchRead(
+        'mail.activity',
+        [
+          ['res_id', '=', id],
+          ['res_model', '=', this.model],
+        ],
+        [
+          'id',
+          'summary',
+          'note',
+          'date_deadline',
+          'activity_type_id',
+          'user_id',
+          'state',
+        ],
+        { order: 'date_deadline desc', limit: 20 },
+      ),
+    ]);
+
+    // Combine and normalize
+    const timeline = [
+      ...messages.map((m: any) => ({
+        id: `msg-${m.id}`,
+        type: 'message',
+        date: m.date,
+        body: m.body,
+        author: m.author_id ? m.author_id[1] : 'System',
+        messageType: m.message_type,
+      })),
+      ...activities.map((a: any) => ({
+        id: `act-${a.id}`,
+        type: 'activity',
+        date: a.date_deadline,
+        summary: a.summary,
+        note: a.note,
+        state: a.state,
+        activityType: a.activity_type_id ? a.activity_type_id[1] : 'Activity',
+        assignedTo: a.user_id ? a.user_id[1] : 'Unassigned',
+      })),
+    ];
+
+    return timeline.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }
+
+  async createNote(id: number, body: string) {
+    return this.odooClient.execute('mail.message', 'create', [
+      {
+        body,
+        res_id: id,
+        model: this.model,
+        message_type: 'comment',
+        subtype_id: 1, // Note subtype usually 1
+      },
+    ]);
   }
 }

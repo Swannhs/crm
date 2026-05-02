@@ -1,4 +1,4 @@
-import { BillingListView } from 'src/sections/billing/view/billing-list-view';
+import { BillingDashboardView } from 'src/sections/billing/view/billing-dashboard-view';
 
 // ----------------------------------------------------------------------
 
@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <BillingListView />;
+  return <BillingDashboardView />;
 }

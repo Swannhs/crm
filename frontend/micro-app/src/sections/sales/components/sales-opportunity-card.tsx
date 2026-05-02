@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -81,14 +82,20 @@ export function SalesOpportunityCard({
           <Stack direction="row" spacing={1} alignItems="center">
             <Box
               sx={{
-                width: 6,
-                height: 6,
+                width: 8,
+                height: 8,
                 borderRadius: '50%',
-                bgcolor: item.nextActivity.overdue ? 'error.main' : 'warning.main',
+                bgcolor: 
+                  item.nextActivity.state === 'overdue' || item.nextActivity.overdue ? 'error.main' : 
+                  item.nextActivity.state === 'today' ? 'warning.main' : 
+                  'success.main',
               }}
             />
-            <Typography variant="caption" sx={{ fontWeight: 'medium' }}>
-              Next: {item.nextActivity.title}
+            <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+              {item.nextActivity.state === 'overdue' ? 'Overdue: ' : 
+               item.nextActivity.state === 'today' ? 'Today: ' : 
+               'Next: '}
+              {item.nextActivity.title}
             </Typography>
           </Stack>
         </Box>
