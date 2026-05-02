@@ -1272,11 +1272,27 @@ async function handleApiCompat(req: Request, res: Response) {
         });
       }
 
+      if (req.method === "POST" && /^\/sync\/magento-to-odoo\/(preview|run)$/.test(rest)) {
+        return res.status(410).json({
+          message: "Magento-to-Odoo sales sync is disabled. Odoo is the source of truth for CRM sales data.",
+          module,
+          path: rest,
+        });
+      }
+
+      if (req.method === "POST" && /^\/orders\/[^/]+\/link-opportunity$/.test(rest)) {
+        return res.status(410).json({
+          message: "Magento order linking is disabled. Manage sales links in Odoo.",
+          module,
+          path: rest,
+        });
+      }
+
       return notImplemented(res, {
         module,
         method: req.method,
         path: rest,
-        hint: "Implemented: GET /summary, GET /orders, GET /leads, GET /opportunities, GET /activities, GET /analytics, POST /opportunities, PATCH /opportunities/:id, PATCH /opportunities/:id/stage",
+        hint: "Implemented: summary, orders, leads, opportunities CRUD/archive/stage, timeline, notes, activities CRUD/complete, analytics. Disabled: Magento sync and order linking.",
       });
     }
 

@@ -135,8 +135,8 @@ export function BillingListView() {
         await refetch();
         showToast({ message: 'Invoice deleted successfully.', severity: 'success' });
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete invoice';
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Failed to delete invoice';
       showToast({ message, severity: 'warning' });
     }
     confirmDelete.onFalse();
@@ -512,7 +512,11 @@ export function BillingListView() {
           <Iconify icon="solar:download-bold" sx={{ mr: 1 }} />
           Download PDF
         </MenuItem>
-        <MenuItem onClick={confirmDelete.onTrue} sx={{ color: 'error.main' }}>
+        <MenuItem
+          onClick={confirmDelete.onTrue}
+          disabled={!selectedInvoice || String(selectedInvoice.status).toLowerCase() === 'posted'}
+          sx={{ color: 'error.main' }}
+        >
           <Iconify icon="solar:trash-bin-trash-bold" sx={{ mr: 1 }} />
           Delete
         </MenuItem>
@@ -520,12 +524,21 @@ export function BillingListView() {
 
       <Dialog open={confirmDelete.value} onClose={confirmDelete.onFalse}>
         <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>Are you sure you want to delete this invoice?</DialogContent>
+        <DialogContent>
+          {selectedInvoice && String(selectedInvoice.status).toLowerCase() === 'posted'
+            ? 'Posted invoices cannot be deleted. Use the cancel or credit note flow in Odoo.'
+            : 'Are you sure you want to delete this draft invoice?'}
+        </DialogContent>
         <DialogActions>
           <Button onClick={confirmDelete.onFalse} variant="outlined">
             Cancel
           </Button>
-          <Button onClick={handleDelete} variant="contained" color="error">
+          <Button
+            onClick={handleDelete}
+            variant="contained"
+            color="error"
+            disabled={!selectedInvoice || String(selectedInvoice.status).toLowerCase() === 'posted'}
+          >
             Delete
           </Button>
         </DialogActions>

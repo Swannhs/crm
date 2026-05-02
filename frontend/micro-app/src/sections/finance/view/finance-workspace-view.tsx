@@ -258,7 +258,7 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
                           {line.quantity} x {fCurrency(line.priceUnit)}
                         </Typography>
                       </Box>
-                      <Typography variant="subtitle2">{fCurrency(line.priceSubtotal)}</Typography>
+                      <Typography variant="subtitle2">{fCurrency(line.priceTotal ?? line.priceSubtotal)}</Typography>
                     </Stack>
                   ))}
                 </Stack>

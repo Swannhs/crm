@@ -27,6 +27,11 @@ export type SalesSummary = {
   weightedValue?: number;
   wonValue?: number;
   lostValue?: number;
+  archivedValue?: number;
+  openCount?: number;
+  wonCount?: number;
+  lostCount?: number;
+  archivedCount?: number;
   winRate?: number;
   sources?: {
     magentoOrders?: number;
@@ -93,12 +98,16 @@ export type SalesOrderRow = {
 
 export type SalesActivity = {
   id: string;
+  odooId?: number;
   opportunityId?: string;
   contactId?: string;
   type: 'call' | 'email' | 'meeting' | 'todo' | 'note';
   title: string;
+  note?: string;
   dueDate?: string;
   completed?: boolean;
+  state?: string;
+  assignedTo?: string;
   createdAt?: string;
 };
 

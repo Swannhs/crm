@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { parseOdooNumericId } from '../../common/parse-odoo-numeric-id';
 import { CrmController } from './crm.controller';
 import { CrmService } from './crm.service';
 
@@ -27,6 +28,7 @@ describe('CrmService', () => {
           active: true,
           is_won: false,
           tag_ids: [],
+          activity_ids: [88],
           activity_summary: 'Call back',
           activity_date_deadline: '2026-05-03',
           activity_type_id: [2, 'Call'],
@@ -54,10 +56,15 @@ describe('CrmService', () => {
       stage: { id: 3, name: 'Proposal', status: 'proposal' },
       user: { id: 9, name: 'Alice' },
       nextActivity: {
+        id: 'act-88',
+        odooId: 88,
+        title: 'Call back',
         summary: 'Call back',
+        dueDate: '2026-05-03',
         deadline: '2026-05-03',
         type: 'Call',
         state: 'planned',
+        overdue: false,
       },
     });
   });
@@ -72,12 +79,34 @@ describe('CrmService', () => {
 
   it('validates activity payloads and falls back to an available Odoo activity type', async () => {
     const execute = jest.fn().mockResolvedValue(99);
+    const searchRead = jest.fn()
+      .mockResolvedValueOnce([{ id: 5, name: 'To Do' }])
+      .mockResolvedValueOnce([{
+        id: 99,
+        res_id: 42,
+        summary: 'Follow up',
+        note: 'Details',
+        date_deadline: '2026-05-10',
+        activity_type_id: [5, 'To Do'],
+        user_id: [2, 'Alice'],
+        state: 'planned',
+        create_date: '2026-05-02',
+      }]);
     const service = makeService({
-      searchRead: jest.fn().mockResolvedValue([{ id: 5, name: 'To Do' }]),
+      searchRead,
       execute,
     });
 
-    await expect(service.createActivity({ opportunityId: 42, type: 'followup', title: 'Follow up' })).resolves.toBe(99);
+    await expect(service.createActivity({ opportunityId: 42, type: 'followup', title: 'Follow up' })).resolves.toMatchObject({
+      id: '99',
+      odooId: 99,
+      opportunityId: '42',
+      type: 'todo',
+      title: 'Follow up',
+      dueDate: '2026-05-10',
+      completed: false,
+      assignedTo: 'Alice',
+    });
     expect(execute).toHaveBeenCalledWith('mail.activity', 'create', [
       expect.objectContaining({
         res_model: 'crm.lead',
@@ -99,9 +128,61 @@ describe('CrmService', () => {
     await expect(service.createActivity({ opportunityId: 42, title: '' })).rejects.toBeInstanceOf(BadRequestException);
     expect(execute).not.toHaveBeenCalled();
   });
+
+  it('returns normalized activity rows and predictable complete/delete responses', async () => {
+    const execute = jest.fn().mockResolvedValue(true);
+    const service = makeService({
+      searchRead: jest.fn().mockResolvedValue([{
+        id: 77,
+        res_id: 42,
+        summary: 'Demo',
+        date_deadline: '2026-05-10',
+        activity_type_id: [3, 'Call'],
+        user_id: [2, 'Alice'],
+        state: 'done',
+        create_date: '2026-05-02',
+      }]),
+      execute,
+    });
+
+    await expect(service.getActivities({ page: 1, pageSize: 20 })).resolves.toEqual([
+      expect.objectContaining({ id: '77', odooId: 77, opportunityId: '42', type: 'call', completed: true }),
+    ]);
+    await expect(service.completeActivity(77)).resolves.toEqual({ id: 77, completed: true });
+    await expect(service.removeActivity(77)).resolves.toEqual({ id: 77, deleted: true });
+  });
+
+  it('separates inactive archived opportunities from lost opportunities in pipeline summary', async () => {
+    const service = makeService({
+      searchRead: jest.fn().mockResolvedValue([
+        { expected_revenue: 100, probability: 50, stage_id: [1, 'New'], is_won: false, active: true },
+        { expected_revenue: 200, probability: 100, stage_id: [2, 'Won'], is_won: true, active: true },
+        { expected_revenue: 300, probability: 0, stage_id: [3, 'Lost'], is_won: false, active: false },
+        { expected_revenue: 400, probability: 20, stage_id: [4, 'Dormant'], is_won: false, active: false },
+      ]),
+    });
+
+    await expect(service.getPipelineSummary()).resolves.toMatchObject({
+      totalOpenValue: 100,
+      weightedValue: 50,
+      wonValue: 200,
+      lostValue: 300,
+      archivedValue: 400,
+      openCount: 1,
+      wonCount: 1,
+      lostCount: 1,
+      archivedCount: 1,
+      opportunityCount: 4,
+    });
+  });
 });
 
 describe('CrmController ID parsing', () => {
+  it('parses prefixed Odoo IDs directly', () => {
+    expect(parseOdooNumericId('act-123')).toBe(123);
+    expect(() => parseOdooNumericId('foo')).toThrow(BadRequestException);
+  });
+
   it('accepts prefixed Odoo IDs', async () => {
     const crmService = { findOne: jest.fn().mockResolvedValue({ id: 123 }) };
     const controller = new CrmController(crmService as any);

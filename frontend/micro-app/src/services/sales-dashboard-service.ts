@@ -183,12 +183,12 @@ export async function createOpportunityNote(id: string | number, body: string): 
   return unwrap<any>(response.data);
 }
 
-export async function deleteSalesActivity(id: string | number): Promise<boolean> {
+export async function deleteSalesActivity(id: string | number): Promise<{ id: number; deleted: boolean }> {
   const response = await axios.delete(`/api/sales-dashboard/activities/${encodeURIComponent(id)}`);
-  return unwrap<boolean>(response.data);
+  return unwrap<{ id: number; deleted: boolean }>(response.data);
 }
 
-export async function deleteSalesOpportunity(id: string | number): Promise<boolean> {
+export async function deleteSalesOpportunity(id: string | number): Promise<{ id: number; archived: boolean }> {
   const response = await axios.delete(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}`);
-  return unwrap<boolean>(response.data);
+  return unwrap<{ id: number; archived: boolean }>(response.data);
 }

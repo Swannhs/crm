@@ -86,6 +86,22 @@ export class CrmService {
     return this.normalizeOpportunity(lead);
   }
 
+  private getOpportunityStatus(lead: any): 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' {
+    const stageLabel = Array.isArray(lead.stage_id) ? lead.stage_id[1] : '';
+    const probability = Number(lead.probability ?? 0);
+    const label = stageLabel.toLowerCase();
+
+    let stageStatus: 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' = 'new';
+    if (lead.is_won || label.includes('won') || probability === 100) stageStatus = 'won';
+    else if (lead.active === false || label.includes('lost') || (probability === 0 && label.includes('lost'))) stageStatus = 'lost';
+    else if (label.includes('nego')) stageStatus = 'negotiation';
+    else if (label.includes('prop') || label.includes('quote')) stageStatus = 'proposal';
+    else if (label.includes('qual')) stageStatus = 'qualified';
+    else if (label.includes('new')) stageStatus = 'new';
+
+    return stageStatus;
+  }
+
   private normalizeOpportunity(lead: any) {
     const stageLabel = Array.isArray(lead.stage_id) ? lead.stage_id[1] : '';
     const stageId = Array.isArray(lead.stage_id) ? lead.stage_id[0] : null;
@@ -94,16 +110,8 @@ export class CrmService {
     const probability = Number(lead.probability ?? 0);
     const expectedRevenue = Number(lead.expected_revenue || lead.planned_revenue || 0);
     const weightedValue = (expectedRevenue * probability) / 100;
-
-    let stageStatus: 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' = 'new';
-    const label = stageLabel.toLowerCase();
-
-    if (lead.is_won || label.includes('won') || probability === 100) stageStatus = 'won';
-    else if (lead.active === false || label.includes('lost') || (probability === 0 && label.includes('lost'))) stageStatus = 'lost';
-    else if (label.includes('nego')) stageStatus = 'negotiation';
-    else if (label.includes('prop') || label.includes('quote')) stageStatus = 'proposal';
-    else if (label.includes('qual')) stageStatus = 'qualified';
-    else if (label.includes('new')) stageStatus = 'new';
+    const stageStatus = this.getOpportunityStatus(lead);
+    const activityId = Array.isArray(lead.activity_ids) ? lead.activity_ids[0] : undefined;
 
     return {
       id: lead.id,
@@ -141,12 +149,17 @@ export class CrmService {
       active: lead.active,
       nextActivity: lead.activity_summary
         ? {
-            summary: lead.activity_summary,
-            deadline: lead.activity_date_deadline,
+            id: activityId ? `act-${activityId}` : undefined,
+            odooId: activityId,
             type: Array.isArray(lead.activity_type_id)
               ? lead.activity_type_id[1]
-              : null,
+              : 'todo',
+            title: lead.activity_summary,
+            summary: lead.activity_summary,
+            dueDate: lead.activity_date_deadline,
+            deadline: lead.activity_date_deadline,
             state: lead.activity_state,
+            overdue: lead.activity_state === 'overdue',
           }
         : null,
     };
@@ -203,7 +216,7 @@ export class CrmService {
       domain.push(['summary', 'ilike', `%${paginationDto.search}%`]);
     }
 
-    return this.odooClient.searchRead(
+    const activities = await this.odooClient.searchRead(
       'mail.activity',
       domain,
       [
@@ -216,9 +229,48 @@ export class CrmService {
         'activity_type_id',
         'user_id',
         'state',
+        'create_date',
       ],
       { order: 'date_deadline asc', limit: 100 },
     );
+
+    return activities.map((activity: any) => this.normalizeActivity(activity));
+  }
+
+  private normalizeActivity(activity: any) {
+    const rawType = Array.isArray(activity.activity_type_id)
+      ? String(activity.activity_type_id[1]).toLowerCase()
+      : 'todo';
+
+    return {
+      id: String(activity.id),
+      odooId: activity.id,
+      opportunityId: activity.res_id ? String(activity.res_id) : undefined,
+      contactId: undefined,
+      type: rawType.includes('mail')
+        ? 'email'
+        : rawType.includes('call')
+          ? 'call'
+          : rawType.includes('meet')
+            ? 'meeting'
+            : 'todo',
+      title: activity.summary || 'Activity',
+      note: activity.note,
+      dueDate: activity.date_deadline,
+      completed: activity.state === 'done',
+      state: activity.state,
+      assignedTo: Array.isArray(activity.user_id) ? activity.user_id[1] : undefined,
+      createdAt: activity.create_date,
+    };
+  }
+
+  private async findActivity(id: number) {
+    const [activity] = await this.odooClient.searchRead(
+      'mail.activity',
+      [['id', '=', id]],
+      ['id', 'res_id', 'summary', 'note', 'date_deadline', 'activity_type_id', 'user_id', 'state', 'create_date'],
+    );
+    return activity ? this.normalizeActivity(activity) : null;
   }
 
   private async resolveActivityTypeId(type?: string): Promise<number | undefined> {
@@ -271,19 +323,23 @@ export class CrmService {
       activity_type_id,
     };
 
-    return this.odooClient.execute('mail.activity', 'create', [payload]);
+    const activityId = await this.odooClient.execute('mail.activity', 'create', [payload]);
+    return this.findActivity(Number(activityId));
   }
 
   async updateActivity(id: number, data: any) {
-    return this.odooClient.execute('mail.activity', 'write', [[id], data]);
+    await this.odooClient.execute('mail.activity', 'write', [[id], data]);
+    return this.findActivity(id);
   }
 
   async completeActivity(id: number) {
-    return this.odooClient.execute('mail.activity', 'action_done', [[id]]);
+    await this.odooClient.execute('mail.activity', 'action_done', [[id]]);
+    return { id, completed: true };
   }
 
   async removeActivity(id: number) {
-    return this.odooClient.execute('mail.activity', 'unlink', [[id]]);
+    await this.odooClient.execute('mail.activity', 'unlink', [[id]]);
+    return { id, deleted: true };
   }
 
   async createNote(id: number, body: string) {
@@ -342,34 +398,46 @@ export class CrmService {
   async getPipelineSummary() {
     const leads = await this.odooClient.searchRead(
       this.model,
-      [['type', '=', 'opportunity'], ['active', '=', true]],
-      ['expected_revenue', 'probability', 'stage_id', 'planned_revenue', 'is_won'],
+      [['type', '=', 'opportunity']],
+      ['expected_revenue', 'probability', 'stage_id', 'planned_revenue', 'is_won', 'active'],
     );
 
-    const totalOpenValue = leads
-      .filter((l: any) => !l.is_won)
-      .reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
+    const summary = leads.reduce((acc: any, lead: any) => {
+      const value = Number(lead.expected_revenue || lead.planned_revenue || 0);
+      const weighted = (value * Number(lead.probability || 0)) / 100;
+      const status = this.getOpportunityStatus({ ...lead, active: true });
+      const stageLabel = Array.isArray(lead.stage_id) ? String(lead.stage_id[1] ?? '').toLowerCase() : '';
 
-    const weightedValue = leads
-      .filter((l: any) => !l.is_won)
-      .reduce((acc, curr) => acc + ((curr.expected_revenue || curr.planned_revenue || 0) * (curr.probability || 0)) / 100, 0);
+      if (lead.is_won || status === 'won') {
+        acc.wonValue += value;
+        acc.wonCount += 1;
+      } else if (stageLabel.includes('lost') || status === 'lost') {
+        acc.lostValue += value;
+        acc.lostCount += 1;
+      } else if (lead.active === false) {
+        acc.archivedValue += value;
+        acc.archivedCount += 1;
+      } else {
+        acc.totalOpenValue += value;
+        acc.weightedValue += weighted;
+        acc.openCount += 1;
+      }
 
-    const wonValue = leads
-      .filter((l: any) => l.is_won)
-      .reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
-
-    const archivedLeads = await this.odooClient.searchRead(
-      this.model,
-      [['type', '=', 'opportunity'], ['active', '=', false]],
-      ['expected_revenue', 'planned_revenue'],
-    );
-    const lostValue = archivedLeads.reduce((acc, curr) => acc + (curr.expected_revenue || curr.planned_revenue || 0), 0);
+      return acc;
+    }, {
+      totalOpenValue: 0,
+      weightedValue: 0,
+      wonValue: 0,
+      lostValue: 0,
+      archivedValue: 0,
+      openCount: 0,
+      wonCount: 0,
+      lostCount: 0,
+      archivedCount: 0,
+    });
 
     return {
-      totalOpenValue,
-      weightedValue,
-      wonValue,
-      lostValue,
+      ...summary,
       opportunityCount: leads.length,
     };
   }
