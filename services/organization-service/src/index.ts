@@ -6,6 +6,8 @@ import {
   MembershipController,
   UserAccessController,
   CrmConfigurationController,
+  GoalController,
+  HabitController,
 } from "./controllers/organization.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 import { attachRoleContext, requireOrgRoles } from "./middleware/authorization.js";
@@ -24,6 +26,9 @@ const onboardingCtrl = new OnboardingController();
 const membershipCtrl = new MembershipController();
 const userAccessCtrl = new UserAccessController();
 const crmConfigCtrl = new CrmConfigurationController();
+const goalCtrl = new GoalController();
+const habitCtrl = new HabitController();
+
 const ownerOrAdmin = requireOrgRoles(['org_owner', 'org_admin']) as any;
 const ownerOnly = requireOrgRoles(['org_owner']) as any;
 const managerUp = requireOrgRoles(['org_owner', 'org_admin', 'org_manager']) as any;
@@ -150,6 +155,18 @@ app.get("/v1/onboarding/status", identityMiddleware as any, attachRoleContext as
 app.post("/v1/onboarding/status", identityMiddleware as any, attachRoleContext as any, (req, res) =>
   onboardingCtrl.create(cast(req), res)
 );
+
+// --- Goals ---
+app.get("/v1/goals", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.list(cast(req), res));
+app.post("/v1/goals", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.create(cast(req), res));
+app.patch("/v1/goals/:goalId", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.update(cast(req), res));
+app.delete("/v1/goals/:goalId", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.remove(cast(req), res));
+
+// --- Habits ---
+app.get("/v1/habits", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.list(cast(req), res));
+app.post("/v1/habits", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.create(cast(req), res));
+app.patch("/v1/habits/:habitId", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.update(cast(req), res));
+app.delete("/v1/habits/:habitId", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.remove(cast(req), res));
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "organization-service (TS)" }));

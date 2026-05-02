@@ -169,6 +169,29 @@ exports.Prisma.OnboardingStatusScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.GoalScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  userId: 'userId',
+  title: 'title',
+  category: 'category',
+  progress: 'progress',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.HabitScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  userId: 'userId',
+  title: 'title',
+  momentum: 'momentum',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -199,7 +222,9 @@ exports.Prisma.ModelName = {
   Organization: 'Organization',
   OrganizationMembership: 'OrganizationMembership',
   Location: 'Location',
-  OnboardingStatus: 'OnboardingStatus'
+  OnboardingStatus: 'OnboardingStatus',
+  Goal: 'Goal',
+  Habit: 'Habit'
 };
 
 /**

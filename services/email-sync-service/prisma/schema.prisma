@@ -18,6 +18,9 @@ model EmailAccount {
   lastSyncAt      DateTime?
   syncStatus      String   @default("idle") // idle, syncing, error
   errorMessage    String?
+  accessToken     String?
+  refreshToken    String?
+  expiresAt       DateTime?
   settings        Json?    // Sync preferences
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

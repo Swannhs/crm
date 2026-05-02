@@ -11,7 +11,7 @@ const { app, logger } = createServiceApp({
 app.use('/api/v1/email', emailRoutes);
 
 // Health check endpoint
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: any, res: any) => {
   res.json({
     status: 'healthy',
     service: 'email-sync-service',
@@ -20,9 +20,15 @@ app.get('/health', (_req, res) => {
   });
 });
 
+import { EmailSyncWorker } from './worker/sync-worker.js';
+
 // Start server
 app.listen(config.port, '0.0.0.0', () => {
   logger.info({ port: config.port, nodeEnv: config.nodeEnv }, 'email-sync-service listening');
+  
+  // Start the background sync worker
+  const syncWorker = new EmailSyncWorker();
+  syncWorker.start();
 });
 
 export default app;

@@ -55,4 +55,10 @@ export class CrmController {
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.crmService.remove(id);
   }
+
+  @Get('stages')
+  @ApiOperation({ summary: 'List all CRM stages' })
+  async getStages() {
+    return this.crmService.getStages();
+  }
 }

@@ -52,7 +52,7 @@ export class MarketingController {
   @Get('activity')
   @ApiOperation({ summary: 'Get recent marketing activity' })
   async getActivity() {
-    return [];
+    return this.marketingService.getActivity();
   }
 
   // --- Campaigns (UTM) ---

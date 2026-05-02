@@ -30,6 +30,9 @@ export class CrmService {
     'activity_date_deadline',
   ];
 
+  private readonly stageModel = 'crm.stage';
+  private readonly stageFields = ['id', 'name', 'sequence', 'is_won'];
+
   constructor(private readonly odooClient: OdooClientService) {}
 
   async findAll(paginationDto: PaginationDto) {
@@ -72,5 +75,11 @@ export class CrmService {
 
   async remove(id: number) {
     return this.odooClient.execute(this.model, 'unlink', [[id]]);
+  }
+
+  async getStages() {
+    return this.odooClient.searchRead(this.stageModel, [], this.stageFields, {
+      order: 'sequence asc',
+    });
   }
 }

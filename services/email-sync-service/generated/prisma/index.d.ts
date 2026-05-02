@@ -1659,6 +1659,9 @@ export namespace Prisma {
     lastSyncAt: Date | null
     syncStatus: string | null
     errorMessage: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    expiresAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1673,6 +1676,9 @@ export namespace Prisma {
     lastSyncAt: Date | null
     syncStatus: string | null
     errorMessage: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    expiresAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1687,6 +1693,9 @@ export namespace Prisma {
     lastSyncAt: number
     syncStatus: number
     errorMessage: number
+    accessToken: number
+    refreshToken: number
+    expiresAt: number
     settings: number
     createdAt: number
     updatedAt: number
@@ -1704,6 +1713,9 @@ export namespace Prisma {
     lastSyncAt?: true
     syncStatus?: true
     errorMessage?: true
+    accessToken?: true
+    refreshToken?: true
+    expiresAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1718,6 +1730,9 @@ export namespace Prisma {
     lastSyncAt?: true
     syncStatus?: true
     errorMessage?: true
+    accessToken?: true
+    refreshToken?: true
+    expiresAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1732,6 +1747,9 @@ export namespace Prisma {
     lastSyncAt?: true
     syncStatus?: true
     errorMessage?: true
+    accessToken?: true
+    refreshToken?: true
+    expiresAt?: true
     settings?: true
     createdAt?: true
     updatedAt?: true
@@ -1820,6 +1838,9 @@ export namespace Prisma {
     lastSyncAt: Date | null
     syncStatus: string
     errorMessage: string | null
+    accessToken: string | null
+    refreshToken: string | null
+    expiresAt: Date | null
     settings: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -1852,6 +1873,9 @@ export namespace Prisma {
     lastSyncAt?: boolean
     syncStatus?: boolean
     errorMessage?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
     settings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1871,6 +1895,9 @@ export namespace Prisma {
     lastSyncAt?: boolean
     syncStatus?: boolean
     errorMessage?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
     settings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1886,6 +1913,9 @@ export namespace Prisma {
     lastSyncAt?: boolean
     syncStatus?: boolean
     errorMessage?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
     settings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1901,12 +1931,15 @@ export namespace Prisma {
     lastSyncAt?: boolean
     syncStatus?: boolean
     errorMessage?: boolean
+    accessToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
     settings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type EmailAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "userId" | "email" | "provider" | "isConnected" | "lastSyncAt" | "syncStatus" | "errorMessage" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["emailAccount"]>
+  export type EmailAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orgId" | "userId" | "email" | "provider" | "isConnected" | "lastSyncAt" | "syncStatus" | "errorMessage" | "accessToken" | "refreshToken" | "expiresAt" | "settings" | "createdAt" | "updatedAt", ExtArgs["result"]["emailAccount"]>
   export type EmailAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     emails?: boolean | EmailAccount$emailsArgs<ExtArgs>
     threads?: boolean | EmailAccount$threadsArgs<ExtArgs>
@@ -1933,6 +1966,9 @@ export namespace Prisma {
       lastSyncAt: Date | null
       syncStatus: string
       errorMessage: string | null
+      accessToken: string | null
+      refreshToken: string | null
+      expiresAt: Date | null
       settings: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -2371,6 +2407,9 @@ export namespace Prisma {
     readonly lastSyncAt: FieldRef<"EmailAccount", 'DateTime'>
     readonly syncStatus: FieldRef<"EmailAccount", 'String'>
     readonly errorMessage: FieldRef<"EmailAccount", 'String'>
+    readonly accessToken: FieldRef<"EmailAccount", 'String'>
+    readonly refreshToken: FieldRef<"EmailAccount", 'String'>
+    readonly expiresAt: FieldRef<"EmailAccount", 'DateTime'>
     readonly settings: FieldRef<"EmailAccount", 'Json'>
     readonly createdAt: FieldRef<"EmailAccount", 'DateTime'>
     readonly updatedAt: FieldRef<"EmailAccount", 'DateTime'>
@@ -11360,6 +11399,9 @@ export namespace Prisma {
     lastSyncAt: 'lastSyncAt',
     syncStatus: 'syncStatus',
     errorMessage: 'errorMessage',
+    accessToken: 'accessToken',
+    refreshToken: 'refreshToken',
+    expiresAt: 'expiresAt',
     settings: 'settings',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -11655,6 +11697,9 @@ export namespace Prisma {
     lastSyncAt?: DateTimeNullableFilter<"EmailAccount"> | Date | string | null
     syncStatus?: StringFilter<"EmailAccount"> | string
     errorMessage?: StringNullableFilter<"EmailAccount"> | string | null
+    accessToken?: StringNullableFilter<"EmailAccount"> | string | null
+    refreshToken?: StringNullableFilter<"EmailAccount"> | string | null
+    expiresAt?: DateTimeNullableFilter<"EmailAccount"> | Date | string | null
     settings?: JsonNullableFilter<"EmailAccount">
     createdAt?: DateTimeFilter<"EmailAccount"> | Date | string
     updatedAt?: DateTimeFilter<"EmailAccount"> | Date | string
@@ -11673,6 +11718,9 @@ export namespace Prisma {
     lastSyncAt?: SortOrderInput | SortOrder
     syncStatus?: SortOrder
     errorMessage?: SortOrderInput | SortOrder
+    accessToken?: SortOrderInput | SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11694,6 +11742,9 @@ export namespace Prisma {
     lastSyncAt?: DateTimeNullableFilter<"EmailAccount"> | Date | string | null
     syncStatus?: StringFilter<"EmailAccount"> | string
     errorMessage?: StringNullableFilter<"EmailAccount"> | string | null
+    accessToken?: StringNullableFilter<"EmailAccount"> | string | null
+    refreshToken?: StringNullableFilter<"EmailAccount"> | string | null
+    expiresAt?: DateTimeNullableFilter<"EmailAccount"> | Date | string | null
     settings?: JsonNullableFilter<"EmailAccount">
     createdAt?: DateTimeFilter<"EmailAccount"> | Date | string
     updatedAt?: DateTimeFilter<"EmailAccount"> | Date | string
@@ -11712,6 +11763,9 @@ export namespace Prisma {
     lastSyncAt?: SortOrderInput | SortOrder
     syncStatus?: SortOrder
     errorMessage?: SortOrderInput | SortOrder
+    accessToken?: SortOrderInput | SortOrder
+    refreshToken?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     settings?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11733,6 +11787,9 @@ export namespace Prisma {
     lastSyncAt?: DateTimeNullableWithAggregatesFilter<"EmailAccount"> | Date | string | null
     syncStatus?: StringWithAggregatesFilter<"EmailAccount"> | string
     errorMessage?: StringNullableWithAggregatesFilter<"EmailAccount"> | string | null
+    accessToken?: StringNullableWithAggregatesFilter<"EmailAccount"> | string | null
+    refreshToken?: StringNullableWithAggregatesFilter<"EmailAccount"> | string | null
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"EmailAccount"> | Date | string | null
     settings?: JsonNullableWithAggregatesFilter<"EmailAccount">
     createdAt?: DateTimeWithAggregatesFilter<"EmailAccount"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"EmailAccount"> | Date | string
@@ -12473,6 +12530,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12491,6 +12551,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12509,6 +12572,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12527,6 +12593,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12545,6 +12614,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12560,6 +12632,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12575,6 +12650,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13551,6 +13629,9 @@ export namespace Prisma {
     lastSyncAt?: SortOrder
     syncStatus?: SortOrder
     errorMessage?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
     settings?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13566,6 +13647,9 @@ export namespace Prisma {
     lastSyncAt?: SortOrder
     syncStatus?: SortOrder
     errorMessage?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -13580,6 +13664,9 @@ export namespace Prisma {
     lastSyncAt?: SortOrder
     syncStatus?: SortOrder
     errorMessage?: SortOrder
+    accessToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15267,6 +15354,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15284,6 +15374,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15352,6 +15445,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15369,6 +15465,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15503,6 +15602,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15520,6 +15622,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15569,6 +15674,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15586,6 +15694,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15603,6 +15714,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15620,6 +15734,9 @@ export namespace Prisma {
     lastSyncAt?: Date | string | null
     syncStatus?: string
     errorMessage?: string | null
+    accessToken?: string | null
+    refreshToken?: string | null
+    expiresAt?: Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15653,6 +15770,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15670,6 +15790,9 @@ export namespace Prisma {
     lastSyncAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     syncStatus?: StringFieldUpdateOperationsInput | string
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    accessToken?: NullableStringFieldUpdateOperationsInput | string | null
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     settings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

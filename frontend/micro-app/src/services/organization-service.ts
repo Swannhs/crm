@@ -170,6 +170,48 @@ export async function updateCrmAutomationRules(data: { rules: any[] }) {
   return response.data?.data ?? response.data;
 }
 
+// --- Goals ---
+export async function getGoals() {
+  const response = await axiosInstance.get('/org/v1/goals');
+  return response.data?.data ?? [];
+}
+
+export async function createGoal(data: any) {
+  const response = await axiosInstance.post('/org/v1/goals', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function updateGoal(goalId: string, data: any) {
+  const response = await axiosInstance.patch(`/org/v1/goals/${goalId}`, data);
+  return response.data?.data ?? response.data;
+}
+
+export async function deleteGoal(goalId: string) {
+  const response = await axiosInstance.delete(`/org/v1/goals/${goalId}`);
+  return response.data?.data ?? response.data;
+}
+
+// --- Habits ---
+export async function getHabits() {
+  const response = await axiosInstance.get('/org/v1/habits');
+  return response.data?.data ?? [];
+}
+
+export async function createHabit(data: any) {
+  const response = await axiosInstance.post('/org/v1/habits', data);
+  return response.data?.data ?? response.data;
+}
+
+export async function updateHabit(habitId: string, data: any) {
+  const response = await axiosInstance.patch(`/org/v1/habits/${habitId}`, data);
+  return response.data?.data ?? response.data;
+}
+
+export async function deleteHabit(habitId: string) {
+  const response = await axiosInstance.delete(`/org/v1/habits/${habitId}`);
+  return response.data?.data ?? response.data;
+}
+
 export const organizationService = {
   getOrganizationDetails,
   getOrganizationWorkspace,
@@ -203,4 +245,12 @@ export const organizationService = {
   deleteCrmCustomField,
   getCrmAutomationRules,
   updateCrmAutomationRules,
+  getGoals,
+  createGoal,
+  updateGoal,
+  deleteGoal,
+  getHabits,
+  createHabit,
+  updateHabit,
+  deleteHabit,
 };

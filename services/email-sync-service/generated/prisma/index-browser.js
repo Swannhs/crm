@@ -131,6 +131,9 @@ exports.Prisma.EmailAccountScalarFieldEnum = {
   lastSyncAt: 'lastSyncAt',
   syncStatus: 'syncStatus',
   errorMessage: 'errorMessage',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  expiresAt: 'expiresAt',
   settings: 'settings',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

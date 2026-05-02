@@ -24,7 +24,7 @@ function notImplemented(res: Response, meta: { module: string; path: string; met
   res.status(501).json({ message: "API not implemented in microservices yet.", ...meta });
 }
 
-async function proxyTo(req: Request, res: Response, opts: { baseUrl: string; targetPath: string }) {
+async function proxyTo(req: Request, res: Response, opts: { baseUrl: string; targetPath: string; method?: string; body?: any }) {
   try {
     const url = new URL(opts.targetPath, opts.baseUrl);
 
@@ -37,14 +37,16 @@ async function proxyTo(req: Request, res: Response, opts: { baseUrl: string; tar
       headers.set(k, Array.isArray(v) ? v.join(",") : String(v));
     }
 
-    const init: RequestInit = { method: req.method, headers };
+    const method = opts.method || req.method;
+    const init: RequestInit = { method, headers };
 
-    if (!["GET", "HEAD"].includes(req.method)) {
-      if (req.is("application/json")) {
-        init.body = JSON.stringify(req.body ?? {});
+    if (!["GET", "HEAD"].includes(method)) {
+      const body = opts.body !== undefined ? opts.body : req.body;
+      if (req.is("application/json") || opts.body !== undefined) {
+        init.body = JSON.stringify(body ?? {});
         headers.set("content-type", "application/json");
       } else if (req.is("application/x-www-form-urlencoded")) {
-        init.body = new URLSearchParams(req.body ?? {}).toString();
+        init.body = new URLSearchParams(body ?? {}).toString();
         headers.set("content-type", "application/x-www-form-urlencoded");
       } else {
         res.status(415).json({ message: "Unsupported Content-Type for proxy." });
@@ -1218,11 +1220,51 @@ async function handleApiCompat(req: Request, res: Response) {
         });
       }
 
+      if (req.method === "POST" && rest === "/opportunities") {
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: "/v1/odoo/crm" });
+      }
+
+      if (req.method === "PATCH" && /^\/opportunities\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath: `/v1/odoo/crm/${id}` });
+      }
+
+      if (req.method === "PATCH" && /^\/opportunities\/[^/]+\/stage$/.test(rest)) {
+        const id = rest.split("/")[2];
+        const nextStage = String(req.body?.stage || "").toLowerCase();
+
+        // Fetch Odoo stages to find the one matching our label
+        const stagesRes = await fetchUpstreamJsonSafe(req, toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/crm/stages"));
+        const stages = Array.isArray(stagesRes.data) ? stagesRes.data : [];
+
+        const targetStage = stages.find((s: any) => {
+          const label = String(s.name).toLowerCase();
+          if (nextStage === "new" && label.includes("new")) return true;
+          if (nextStage === "qualified" && label.includes("qual")) return true;
+          if (nextStage === "proposal" && (label.includes("prop") || label.includes("quote"))) return true;
+          if (nextStage === "negotiation" && label.includes("nego")) return true;
+          if (nextStage === "won" && label.includes("won")) return true;
+          if (nextStage === "lost" && label.includes("lost")) return true;
+          return false;
+        });
+
+        if (!targetStage) {
+          return res.status(400).json({ message: `Could not find Odoo stage for label: ${nextStage}` });
+        }
+
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: `/v1/odoo/crm/${id}`,
+          method: "PUT",
+          body: { stage_id: targetStage.id },
+        });
+      }
+
       return notImplemented(res, {
         module,
         method: req.method,
         path: rest,
-        hint: "Implemented: GET /summary, GET /orders, GET /leads, GET /opportunities, GET /activities, GET /analytics",
+        hint: "Implemented: GET /summary, GET /orders, GET /leads, GET /opportunities, GET /activities, GET /analytics, POST /opportunities, PATCH /opportunities/:id, PATCH /opportunities/:id/stage",
       });
     }
 

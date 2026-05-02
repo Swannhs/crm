@@ -788,3 +788,93 @@ export class UserAccessService {
     return this.membershipSvc.removeMembership(orgId, requesterUserId, userId);
   }
 }
+
+export class GoalService {
+  private goalRepo = new (require('../repositories/organization.repository.js')).GoalRepository();
+  private orgSvc = new OrganizationService();
+
+  async getGoals(orgId: string, userId: string) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    return this.goalRepo.findMany(orgId, userId);
+  }
+
+  async createGoal(orgId: string, userId: string, data: any) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    if (!data.title) throw new Error('Title is required');
+    
+    return this.goalRepo.create({
+      organizationId: orgId,
+      userId,
+      title: data.title,
+      category: data.category || 'General',
+      progress: data.progress || 0,
+      metadata: data.metadata || {},
+    });
+  }
+
+  async updateGoal(orgId: string, userId: string, goalId: string, data: any) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    const existing = await this.goalRepo.findById(orgId, userId, goalId);
+    if (!existing) throw new Error('Goal not found');
+
+    return this.goalRepo.update(goalId, {
+      title: data.title ?? existing.title,
+      category: data.category ?? existing.category,
+      progress: data.progress ?? existing.progress,
+      metadata: data.metadata ?? existing.metadata,
+    });
+  }
+
+  async removeGoal(orgId: string, userId: string, goalId: string) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    const existing = await this.goalRepo.findById(orgId, userId, goalId);
+    if (!existing) return { deleted: false };
+
+    await this.goalRepo.delete(goalId);
+    return { deleted: true };
+  }
+}
+
+export class HabitService {
+  private habitRepo = new (require('../repositories/organization.repository.js')).HabitRepository();
+  private orgSvc = new OrganizationService();
+
+  async getHabits(orgId: string, userId: string) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    return this.habitRepo.findMany(orgId, userId);
+  }
+
+  async createHabit(orgId: string, userId: string, data: any) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    if (!data.title) throw new Error('Title is required');
+    
+    return this.habitRepo.create({
+      organizationId: orgId,
+      userId,
+      title: data.title,
+      momentum: data.momentum || [],
+      metadata: data.metadata || {},
+    });
+  }
+
+  async updateHabit(orgId: string, userId: string, habitId: string, data: any) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    const existing = await this.habitRepo.findById(orgId, userId, habitId);
+    if (!existing) throw new Error('Habit not found');
+
+    return this.habitRepo.update(habitId, {
+      title: data.title ?? existing.title,
+      momentum: data.momentum ?? existing.momentum,
+      metadata: data.metadata ?? existing.metadata,
+    });
+  }
+
+  async removeHabit(orgId: string, userId: string, habitId: string) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    const existing = await this.habitRepo.findById(orgId, userId, habitId);
+    if (!existing) return { deleted: false };
+
+    await this.habitRepo.delete(habitId);
+    return { deleted: true };
+  }
+}

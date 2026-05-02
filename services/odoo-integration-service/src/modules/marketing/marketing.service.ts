@@ -800,6 +800,51 @@ export class MarketingService {
     });
   }
 
+  async getActivity() {
+    const limit = 20;
+    const [campaigns, mailings, segments] = await Promise.all([
+      this.odooClient.searchRead(this.campaignModel, [], ['id', 'name', 'write_date'], { limit, order: 'write_date desc' }),
+      this.odooClient.searchRead(this.mailingModel, [], ['id', 'subject', 'state', 'write_date'], { limit, order: 'write_date desc' }),
+      this.odooClient.searchRead(this.mailingListModel, [], ['id', 'name', 'write_date'], { limit, order: 'write_date desc' }),
+    ]);
+
+    const activities: any[] = [];
+
+    (campaigns || []).forEach((c: any) => {
+      activities.push({
+        id: `campaign-${c.id}`,
+        type: 'campaign',
+        action: 'updated',
+        title: c.name,
+        date: c.write_date,
+      });
+    });
+
+    (mailings || []).forEach((m: any) => {
+      activities.push({
+        id: `mailing-${m.id}`,
+        type: 'mailing',
+        action: m.state === 'done' ? 'sent' : 'updated',
+        title: m.subject || 'Untitled Mailing',
+        date: m.write_date,
+      });
+    });
+
+    (segments || []).forEach((s: any) => {
+      activities.push({
+        id: `segment-${s.id}`,
+        type: 'segment',
+        action: 'updated',
+        title: s.name,
+        date: s.write_date,
+      });
+    });
+
+    return activities
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, limit);
+  }
+
   async addSuppressionEntry(orgId: string, payload: any) {
     const channel = String(payload?.channel || '').toLowerCase();
     if (!['email', 'sms'].includes(channel))

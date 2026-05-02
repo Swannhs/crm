@@ -3,37 +3,67 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
+import { fToNow } from 'src/utils/format-time';
+import { useMarketingActivity } from './hooks/use-marketing';
 
 // ----------------------------------------------------------------------
 
 export function MarketingRecentActivity() {
-  const activities = [
-    { id: 1, type: 'Email Sent', campaign: 'Holiday Special', time: '10 mins ago', icon: 'solar:letter-bold', color: 'info' },
-    { id: 2, type: 'Automation Triggered', campaign: 'Welcome Flow', time: '2 hours ago', icon: 'solar:magic-stick-3-bold', color: 'success' },
-    { id: 3, type: 'Link Clicked', campaign: 'Flash Sale', time: '5 hours ago', icon: 'solar:cursor-bold', color: 'warning' },
-    { id: 4, type: 'New Lead', campaign: 'Referral Program', time: '1 day ago', icon: 'solar:user-plus-bold', color: 'primary' },
-  ];
+  const { data: activities = [], isLoading } = useMarketingActivity();
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'campaign': return 'solar:rocket-bold';
+      case 'mailing': return 'solar:letter-bold';
+      case 'segment': return 'solar:users-group-rounded-bold';
+      default: return 'solar:bell-bold';
+    }
+  };
+
+  const getColor = (type: string) => {
+    switch (type) {
+      case 'campaign': return 'primary';
+      case 'mailing': return 'info';
+      case 'segment': return 'warning';
+      default: return 'secondary';
+    }
+  };
 
   return (
-    <Card sx={{ p: 3 }}>
+    <Card sx={{ p: 3, height: '100%' }}>
       <Typography variant="h6" sx={{ mb: 3 }}>Recent Activity</Typography>
-      <Stack spacing={3}>
-        {activities.map((item) => (
-          <Stack key={item.id} direction="row" spacing={2}>
-            <Avatar sx={{ bgcolor: `${item.color}.lighter`, color: `${item.color}.main` }}>
-              <Iconify icon={item.icon} width={20} />
-            </Avatar>
-            <Box>
-              <Typography variant="subtitle2">{item.type}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {item.campaign} • {item.time}
-              </Typography>
-            </Box>
-          </Stack>
-        ))}
-      </Stack>
+      
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+          <CircularProgress size={32} />
+        </Box>
+      ) : (
+        <Stack spacing={3}>
+          {activities.length === 0 && (
+            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', py: 3 }}>
+              No recent activity.
+            </Typography>
+          )}
+          {activities.map((item: any) => (
+            <Stack key={item.id} direction="row" spacing={2}>
+              <Avatar sx={{ bgcolor: (theme: any) => theme.palette[getColor(item.type)].lighter, color: (theme: any) => theme.palette[getColor(item.type)].main }}>
+                <Iconify icon={getIcon(item.type)} width={20} />
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle2">
+                  {item.title}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)} {item.action} • {fToNow(item.date)}
+                </Typography>
+              </Box>
+            </Stack>
+          ))}
+        </Stack>
+      )}
     </Card>
   );
 }

@@ -17,6 +17,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 
 import { useMarketingSummary } from '../hooks/use-marketing';
+import { MarketingRecentActivity } from '../marketing-recent-activity';
 import { MarketingSummaryCards } from '../components/marketing-summary-cards';
 
 // ----------------------------------------------------------------------
@@ -152,6 +153,14 @@ export function MarketingDashboardView() {
             </Card>
           </Grid>
         ))}
+
+        <Grid item xs={12} md={8}>
+          {/* Placeholder for future detailed analytics or charts */}
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <MarketingRecentActivity />
+        </Grid>
       </Grid>
     </DashboardContent>
   );

@@ -19,7 +19,7 @@ export class AnalyticsService {
       this.odooClient.execute('sale.order', 'search_count', [
         [['state', '=', 'sale']],
       ]),
-      // Total revenue (Simplified sum via read_group or search_read)
+      // Total revenue
       this.odooClient.searchRead(
         'sale.order',
         [['state', 'in', ['sale', 'done']]],
@@ -37,7 +37,34 @@ export class AnalyticsService {
       opportunities,
       activeSales: sales,
       totalRevenue,
-      currency: 'USD', // Odoo usually provides this, hardcoded for now
+      currency: 'USD',
     };
+  }
+
+  async getRevenueStreams() {
+    // In real Odoo, this would use read_group on sale.order grouping by date_order:month
+    // For now, we'll return a structured response that the frontend can use.
+    // If mock mode, it will return some generated data.
+    return this.odooClient.execute('sale.order', 'read_group', [
+      [['state', 'in', ['sale', 'done']]],
+      ['amount_total:sum'],
+      ['date_order:month'],
+    ]);
+  }
+
+  async getOrderDistribution() {
+    return this.odooClient.execute('sale.order', 'read_group', [
+      [],
+      ['id:count'],
+      ['state'],
+    ]);
+  }
+
+  async getCustomerGrowth() {
+    return this.odooClient.execute('res.partner', 'read_group', [
+      [['customer_rank', '>', 0]],
+      ['id:count'],
+      ['create_date:month'],
+    ]);
   }
 }

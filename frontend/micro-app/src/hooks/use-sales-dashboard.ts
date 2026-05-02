@@ -17,6 +17,7 @@ import {
   updateOpportunityStage,
   updateSalesOpportunity,
   previewMagentoToOdooSync,
+  getSalesStages,
 } from 'src/services/sales-dashboard-service';
 
 export const salesDashboardKeys = {
@@ -27,7 +28,12 @@ export const salesDashboardKeys = {
   opportunities: (filters?: SalesFilters) => [...salesDashboardKeys.all, 'opportunities', filters ?? {}] as const,
   activities: (filters?: SalesFilters) => [...salesDashboardKeys.all, 'activities', filters ?? {}] as const,
   analytics: (filters?: SalesFilters) => [...salesDashboardKeys.all, 'analytics', filters ?? {}] as const,
+  stages: () => [...salesDashboardKeys.all, 'stages'] as const,
 };
+
+export function useSalesStages() {
+  return useQuery({ queryKey: salesDashboardKeys.stages(), queryFn: getSalesStages, staleTime: 60 * 60 * 1000 });
+}
 
 export function useSalesSummary(filters?: SalesFilters) {
   return useQuery({ queryKey: salesDashboardKeys.summary(filters), queryFn: () => getSalesSummary(filters), staleTime: 30 * 1000 });

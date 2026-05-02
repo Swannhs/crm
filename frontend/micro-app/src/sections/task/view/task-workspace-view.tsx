@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
+import useSWR from 'swr';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
@@ -15,10 +15,12 @@ import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
-
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
+import { projectService } from 'src/services/project-service';
+import { organizationService } from 'src/services/organization-service';
 
 // ----------------------------------------------------------------------
 
@@ -48,7 +50,7 @@ export function TaskWorkspaceView() {
           color="primary"
           startIcon={<Iconify icon="solar:add-circle-bold" />}
         >
-          New Task
+          New Entry
         </Button>
       }
     >
@@ -80,25 +82,55 @@ export function TaskWorkspaceView() {
 // --- Tab Components ---
 
 function TaskListsTab() {
+  const { data: tasks = [], isLoading, mutate } = useSWR('/api/projects/v1/tasks', projectService.getTasks);
+  const [search, setSearch] = useState('');
+
+  const filteredTasks = tasks.filter((t: any) => 
+    t?.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleToggle = async (taskId: number, currentStage: any) => {
+    // Basic toggle logic if stage mapping is known, otherwise just optimistic update
+    // e.g. mapping "Done" vs "To Do"
+    // await projectService.updateTask(String(taskId), { stage_id: ... })
+  };
+
+  if (isLoading) return <CircularProgress />;
+
   return (
     <Card sx={{ p: 0 }}>
        <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">Personal Task Board</Typography>
-          <TextField size="small" placeholder="Search tasks..." sx={{ minWidth: 240 }} />
+          <TextField 
+            size="small" 
+            placeholder="Search tasks..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ minWidth: 240 }} 
+          />
        </Box>
        <Divider />
        <Stack>
-          {[
-            { title: 'Update Organization Logo', priority: 'High', due: 'Today' },
-            { title: 'Review Marketing Funnel', priority: 'Medium', due: 'Tomorrow' },
-          ].map((task, i) => (
-             <Box key={i} sx={{ p: 2.5, borderBottom: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center' }}>
-                <Checkbox size="small" />
+          {filteredTasks.length === 0 && (
+             <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
+                No active tasks found.
+             </Box>
+          )}
+          {filteredTasks.map((task: any) => (
+             <Box key={task.id} sx={{ p: 2.5, borderBottom: (theme) => `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center' }}>
+                <Checkbox size="small" onChange={() => handleToggle(task.id, task.stage_id)} />
                 <Box sx={{ flexGrow: 1, ml: 1 }}>
-                   <Typography variant="subtitle2">{task.title}</Typography>
-                   <Typography variant="caption" color="text.secondary">Due {task.due}</Typography>
+                   <Typography variant="subtitle2">{task.name}</Typography>
+                   <Typography variant="caption" color="text.secondary">
+                     {task.date_deadline ? `Due ${new Date(task.date_deadline).toLocaleDateString()}` : 'No deadline'}
+                   </Typography>
                 </Box>
-                <Chip label={task.priority} size="small" color={task.priority === 'High' ? 'error' : 'warning'} variant="soft" />
+                <Chip 
+                  label={task.priority === '1' ? 'High' : task.priority === '0' ? 'Normal' : 'Low'} 
+                  size="small" 
+                  color={task.priority === '1' ? 'error' : 'default'} 
+                  variant="soft" 
+                />
              </Box>
           ))}
        </Stack>
@@ -107,15 +139,23 @@ function TaskListsTab() {
 }
 
 function TaskGoalsTab() {
+  const { data: goals = [], isLoading, mutate } = useSWR('/org/v1/goals', organizationService.getGoals);
+
+  if (isLoading) return <CircularProgress />;
+
   return (
     <Grid container spacing={3}>
-       {[
-         { title: 'Global Expansion 2026', progress: 65, cat: 'Strategic' },
-         { title: 'Revenue Milestone $1M', progress: 42, cat: 'Financial' },
-       ].map((goal) => (
-          <Grid item xs={12} md={6} key={goal.title}>
+       {goals.length === 0 && (
+          <Grid item xs={12}>
+            <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
+              No strategic goals defined.
+            </Box>
+          </Grid>
+       )}
+       {goals.map((goal: any) => (
+          <Grid item xs={12} md={6} key={goal.id}>
              <Card sx={{ p: 3 }}>
-                <Typography variant="overline" color="primary">{goal.cat}</Typography>
+                <Typography variant="overline" color="primary">{goal.category}</Typography>
                 <Typography variant="h6" sx={{ mt: 1, mb: 2 }}>{goal.title}</Typography>
                 <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between' }}>
                    <Typography variant="caption" color="text.secondary">Tactical Progress</Typography>
@@ -130,24 +170,39 @@ function TaskGoalsTab() {
 }
 
 function TaskHabitsTab() {
+  const { data: habits = [], isLoading, mutate } = useSWR('/org/v1/habits', organizationService.getHabits);
+
+  if (isLoading) return <CircularProgress />;
+
   return (
     <Card sx={{ p: 3 }}>
        <Typography variant="h6" sx={{ mb: 3 }}>Habit Momentum</Typography>
        <Stack spacing={3}>
-          {['Morning Briefing', 'Code Review', 'Organizational Audit'].map((habit) => (
-             <Box key={habit} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle2">{habit}</Typography>
-                <Stack direction="row" spacing={1}>
-                   {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                      <Box key={day} sx={{ 
-                         width: 24, height: 24, borderRadius: 0.5, 
-                         bgcolor: day < 4 ? 'primary.main' : 'background.neutral',
-                         opacity: day < 4 ? 1 : 0.4
-                      }} />
-                   ))}
-                </Stack>
-             </Box>
-          ))}
+          {habits.length === 0 && (
+            <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+              No habits configured.
+            </Box>
+          )}
+          {habits.map((habit: any) => {
+             const momentum = Array.isArray(habit.momentum) ? habit.momentum : [];
+             return (
+               <Box key={habit.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="subtitle2">{habit.title}</Typography>
+                  <Stack direction="row" spacing={1}>
+                     {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+                        const isDone = momentum[dayIndex];
+                        return (
+                           <Box key={dayIndex} sx={{ 
+                              width: 24, height: 24, borderRadius: 0.5, 
+                              bgcolor: isDone ? 'primary.main' : 'background.neutral',
+                              opacity: isDone ? 1 : 0.4
+                           }} />
+                        );
+                     })}
+                  </Stack>
+               </Box>
+             );
+          })}
        </Stack>
     </Card>
   );

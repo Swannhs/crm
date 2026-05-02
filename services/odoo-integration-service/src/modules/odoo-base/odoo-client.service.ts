@@ -278,6 +278,53 @@ export class OdooClientService {
         );
         return true;
 
+      case 'read_group':
+        // Simplified read_group for mock data
+        // Args: domain, fields, groupby, offset, limit, orderby, lazy
+        const rgDomain = args[0] || [];
+        const rgFields = args[1] || [];
+        const rgGroupby = args[2] || [];
+        
+        const filteredRecords = this.filterByDomain(store, rgDomain);
+        
+        // Very basic grouping (only support single groupby for now)
+        if (rgGroupby.length > 0) {
+          const groupField = rgGroupby[0].split(':')[0];
+          const groups: Record<string, any> = {};
+          
+          filteredRecords.forEach(rec => {
+            let key = rec[groupField];
+            // Handle dates (month grouping)
+            if (rgGroupby[0].endsWith(':month') && key) {
+              key = new Date(key).toLocaleString('default', { month: 'short', year: 'numeric' });
+            }
+            key = String(key || 'Other');
+            
+            if (!groups[key]) {
+              groups[key] = { [groupField]: key, [`${groupField}_count`]: 0 };
+              rgFields.forEach(f => {
+                if (f.endsWith(':sum')) groups[key][f.split(':')[0]] = 0;
+                if (f.endsWith(':count')) groups[key][f.split(':')[0]] = 0;
+              });
+            }
+            
+            groups[key][`${groupField}_count`]++;
+            rgFields.forEach(f => {
+              if (f.endsWith(':sum')) {
+                const fn = f.split(':')[0];
+                groups[key][fn] += Number(rec[fn] || 0);
+              }
+              if (f.endsWith(':count')) {
+                const fn = f.split(':')[0];
+                groups[key][fn]++;
+              }
+            });
+          });
+          
+          return Object.values(groups);
+        }
+        return [];
+
       case 'action_post':
         return true;
 

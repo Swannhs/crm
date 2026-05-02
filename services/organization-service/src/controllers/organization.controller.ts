@@ -363,3 +363,71 @@ export class CrmConfigurationController {
     }
   }
 }
+
+export class GoalController {
+  private svc = new (require('../services/organization.service.js')).GoalService();
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getGoals(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.createGoal(req.identity.orgId, req.identity.userId, req.body);
+      return res.status(201).json({ data });
+    } catch (err: any) { return res.status(400).json({ message: err.message }); }
+  }
+
+  async update(req: AuthenticatedRequest, res: Response) {
+    try {
+      const goalId = req.params.goalId;
+      const data = await this.svc.updateGoal(req.identity.orgId, req.identity.userId, goalId, req.body);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async remove(req: AuthenticatedRequest, res: Response) {
+    try {
+      const goalId = req.params.goalId;
+      const data = await this.svc.removeGoal(req.identity.orgId, req.identity.userId, goalId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+}
+
+export class HabitController {
+  private svc = new (require('../services/organization.service.js')).HabitService();
+
+  async list(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.getHabits(req.identity.orgId, req.identity.userId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async create(req: AuthenticatedRequest, res: Response) {
+    try {
+      const data = await this.svc.createHabit(req.identity.orgId, req.identity.userId, req.body);
+      return res.status(201).json({ data });
+    } catch (err: any) { return res.status(400).json({ message: err.message }); }
+  }
+
+  async update(req: AuthenticatedRequest, res: Response) {
+    try {
+      const habitId = req.params.habitId;
+      const data = await this.svc.updateHabit(req.identity.orgId, req.identity.userId, habitId, req.body);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async remove(req: AuthenticatedRequest, res: Response) {
+    try {
+      const habitId = req.params.habitId;
+      const data = await this.svc.removeHabit(req.identity.orgId, req.identity.userId, habitId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+}

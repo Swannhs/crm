@@ -28,6 +28,7 @@ import {
   useCreateSalesOpportunity,
   useUpdateOpportunityStage,
   usePreviewMagentoToOdooSync,
+  useSalesStages,
 } from 'src/hooks/use-sales-dashboard';
 
 import { toast } from 'src/components/snackbar';
@@ -68,6 +69,7 @@ export function SalesWorkspaceView() {
   const ordersQuery = useSalesOrders(filters);
   const activitiesQuery = useSalesActivities(filters);
   const analyticsQuery = useSalesAnalytics(filters);
+  const stagesQuery = useSalesStages();
 
   const createOpportunityMutation = useCreateSalesOpportunity();
   const updateOpportunityMutation = useUpdateSalesOpportunity();
@@ -87,6 +89,7 @@ export function SalesWorkspaceView() {
     ordersQuery.refetch();
     activitiesQuery.refetch();
     analyticsQuery.refetch();
+    stagesQuery.refetch();
   };
 
   const handleOpportunitySubmit = async (values: OpportunityFormValues) => {
@@ -155,6 +158,7 @@ export function SalesWorkspaceView() {
             ) : (
               <SalesPipelineKanban
                 opportunities={opportunitiesQuery.data ?? []}
+                stages={stagesQuery.data}
                 moving={stageMutation.isPending}
                 onOpen={(item) => setSelectedOpportunity(item)}
                 onMove={handleMoveStage}

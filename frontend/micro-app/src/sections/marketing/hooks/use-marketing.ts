@@ -9,6 +9,13 @@ export function useMarketingSummary() {
   });
 }
 
+export function useMarketingActivity() {
+  return useQuery({
+    queryKey: ['marketing', 'activity'],
+    queryFn: marketingService.getActivity,
+  });
+}
+
 export function useMarketingCampaigns() {
   return useQuery({
     queryKey: ['marketing', 'campaigns'],

@@ -103,3 +103,8 @@ export async function linkOrderToOpportunity(orderId: string, opportunityId: str
     opportunityId,
   });
 }
+
+export async function getSalesStages(): Promise<Array<{ id: number; name: string; sequence: number; is_won: boolean }>> {
+  const response = await axios.get('/api/odoo/crm/stages');
+  return unwrap<any[]>(response.data);
+}

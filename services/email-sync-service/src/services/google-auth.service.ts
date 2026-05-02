@@ -24,7 +24,7 @@ export class GoogleAuthService {
       access_type: 'offline',
       scope: scopes,
       prompt: 'consent',
-      state: Buffer.from(JSON.stringify({ orgId, userId })).toString('base64')
+      state: Buffer.from(JSON.stringify({ orgId, userId, provider: 'gmail' })).toString('base64')
     });
   }
 

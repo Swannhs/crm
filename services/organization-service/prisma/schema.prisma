@@ -80,3 +80,34 @@ model OnboardingStatus {
   @@index([userId])
   @@map("onboarding_statuses")
 }
+
+model Goal {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  userId         String       @map("user_id") @db.VarChar(80)
+  title          String
+  category       String
+  progress       Int          @default(0) // 0 to 100
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("goals")
+}
+
+model Habit {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  userId         String       @map("user_id") @db.VarChar(80)
+  title          String
+  momentum       Json         @default("[]") // Array of booleans or dates
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("habits")
+}

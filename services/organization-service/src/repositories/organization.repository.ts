@@ -96,3 +96,47 @@ export class MembershipRepository {
     });
   }
 }
+
+export class GoalRepository {
+  async findMany(orgId: string, userId: string) {
+    return db.goal.findMany({ where: { organizationId: orgId, userId }, orderBy: { createdAt: 'desc' } });
+  }
+
+  async findById(orgId: string, userId: string, id: string) {
+    return db.goal.findFirst({ where: { id, organizationId: orgId, userId } });
+  }
+
+  async create(data: any) {
+    return db.goal.create({ data });
+  }
+
+  async update(id: string, data: any) {
+    return db.goal.update({ where: { id }, data });
+  }
+
+  async delete(id: string) {
+    return db.goal.delete({ where: { id } });
+  }
+}
+
+export class HabitRepository {
+  async findMany(orgId: string, userId: string) {
+    return db.habit.findMany({ where: { organizationId: orgId, userId }, orderBy: { createdAt: 'desc' } });
+  }
+
+  async findById(orgId: string, userId: string, id: string) {
+    return db.habit.findFirst({ where: { id, organizationId: orgId, userId } });
+  }
+
+  async create(data: any) {
+    return db.habit.create({ data });
+  }
+
+  async update(id: string, data: any) {
+    return db.habit.update({ where: { id }, data });
+  }
+
+  async delete(id: string) {
+    return db.habit.delete({ where: { id } });
+  }
+}
