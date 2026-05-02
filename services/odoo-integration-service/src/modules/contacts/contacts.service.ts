@@ -17,9 +17,16 @@ export class ContactsService {
     'is_company',
     'street',
     'city',
+    'zip',
     'country_id',
     'supplier_rank',
     'employee',
+    'parent_id',
+    'website',
+    'vat',
+    'create_date',
+    'write_date',
+    'child_ids',
   ];
 
   async import(file: Express.Multer.File) {
@@ -200,12 +207,81 @@ export class ContactsService {
       this.odooClient.execute(this.model, 'search_count', [domain]),
     ]);
 
+    const normalizedData = data.map((c: any) => this.normalizePartner(c));
+
     return {
-      data,
+      data: normalizedData,
       total,
       page,
       pageSize,
       totalPages: total > 0 ? Math.ceil(total / pageSize) : 0,
+    };
+  }
+
+  async findCompany(id: number) {
+    const [company] = await this.odooClient.searchRead(
+      this.model,
+      [['id', '=', id], ['is_company', '=', true]],
+      this.defaultFields,
+    );
+    if (!company) return null;
+    return this.normalizePartner(company);
+  }
+
+  async createCompany(data: any) {
+    return this.create({
+      ...data,
+      isCompany: true,
+    });
+  }
+
+  async updateCompany(id: number, data: any) {
+    return this.update(id, data);
+  }
+
+  async removeCompany(id: number) {
+    return this.remove(id);
+  }
+
+  async getCompanyContacts(id: number) {
+    const contacts = await this.odooClient.searchRead(
+      this.model,
+      [['parent_id', '=', id]],
+      this.defaultFields,
+    );
+    return contacts.map((c: any) => this.normalizePartner(c));
+  }
+
+  async linkCompany(contactId: number, companyId: number) {
+    return this.odooClient.execute(this.model, 'write', [[contactId], { parent_id: companyId }]);
+  }
+
+  async unlinkCompany(contactId: number) {
+    return this.odooClient.execute(this.model, 'write', [[contactId], { parent_id: false }]);
+  }
+
+  private normalizePartner(partner: any) {
+    return {
+      id: partner.id, // We'll handle UUID mapping in the controllers if needed, but Odoo ID is fine for canonical API
+      odooId: partner.id,
+      name: partner.name,
+      email: partner.email || undefined,
+      phone: partner.phone || undefined,
+      mobile: partner.mobile || undefined,
+      website: partner.website || undefined,
+      vat: partner.vat || undefined,
+      isCompany: partner.is_company,
+      parentId: partner.parent_id ? partner.parent_id[0] : undefined,
+      parentName: partner.parent_id ? partner.parent_id[1] : undefined,
+      address: {
+        street: partner.street || undefined,
+        city: partner.city || undefined,
+        zip: partner.zip || undefined,
+        country: partner.country_id ? partner.country_id[1] : undefined,
+      },
+      contactCount: Array.isArray(partner.child_ids) ? partner.child_ids.length : 0,
+      createdAt: partner.create_date,
+      updatedAt: partner.write_date,
     };
   }
 

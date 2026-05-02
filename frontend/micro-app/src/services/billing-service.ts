@@ -2,18 +2,32 @@ import axios from 'src/utils/axios';
 
 // ----------------------------------------------------------------------
 
+export type IInvoiceLine = {
+  id: number;
+  name: string;
+  quantity: number;
+  priceUnit: number;
+  priceSubtotal: number;
+  productName?: string;
+};
+
 export type IInvoice = {
   _id: string;
   id: string;
   no: string;
   customerName: string;
+  customerId?: number;
   totalDue: number;
   totalAmount: number;
   paidAmount: number;
   status: string;
   deliveryStatus: string;
   dueDate: string;
+  invoiceDate: string;
   createdAt: string;
+  isOverdue: boolean;
+  currency?: string;
+  lines?: IInvoiceLine[];
   billTo?: string;
   contactName?: string;
 };
@@ -29,32 +43,52 @@ function toNumber(value: unknown): number {
 }
 
 function normalizeOdooInvoice(invoice: any, index: number = 0): IInvoice {
-  const id = String(invoice?.id ?? invoice?._id ?? `invoice-${index}`);
-  const partnerName = Array.isArray(invoice?.partner_id)
-    ? String(invoice.partner_id[1] ?? '')
-    : String(invoice?.partner ?? invoice?.customerName ?? '');
-  const amountTotal = toNumber(invoice?.amount_total ?? invoice?.amountTotal ?? 0);
-  const amountResidual = toNumber(invoice?.amount_residual ?? invoice?.amountResidual ?? 0);
+  const id = String(invoice?.id ?? invoice?.odooId ?? invoice?._id ?? `invoice-${index}`);
+  
+  // Backend returns normalized shape now, but we keep fallback for legacy
+  const customerName = invoice?.customerName || 
+    (Array.isArray(invoice?.partner_id) ? invoice.partner_id[1] : invoice?.partner_id) || 
+    invoice?.billTo || 
+    'Unknown customer';
+
+  const amountTotal = toNumber(invoice?.amountTotal ?? invoice?.amount_total ?? 0);
+  const amountResidual = toNumber(invoice?.amountResidual ?? invoice?.amount_residual ?? 0);
+
+  const lines = Array.isArray(invoice?.lines) 
+    ? invoice.lines.map((l: any) => ({
+        id: l.id,
+        name: l.name,
+        quantity: toNumber(l.quantity),
+        priceUnit: toNumber(l.priceUnit || l.price_unit),
+        priceSubtotal: toNumber(l.priceSubtotal || l.price_subtotal),
+        productName: l.productName,
+      }))
+    : undefined;
 
   return {
     _id: id,
     id,
-    no: String(invoice?.name ?? '').trim() || 'Unnumbered invoice',
-    customerName: partnerName || 'Unknown customer',
+    no: String(invoice?.number ?? invoice?.name ?? '').trim() || 'Unnumbered invoice',
+    customerName,
+    customerId: invoice?.customerId || (Array.isArray(invoice?.partner_id) ? invoice.partner_id[0] : undefined),
     totalDue: amountResidual,
     totalAmount: amountTotal,
     paidAmount: Math.max(0, amountTotal - amountResidual),
-    status: String(invoice?.state ?? invoice?.status ?? 'draft'),
-    deliveryStatus: String(invoice?.payment_state ?? invoice?.paymentState ?? 'not_paid'),
-    dueDate: invoice?.dueDate ?? invoice?.invoice_date_due ?? invoice?.invoiceDate ?? '',
-    createdAt: invoice?.createdAt ?? invoice?.create_date ?? '',
-    billTo: partnerName || invoice?.billTo,
-    contactName: partnerName || invoice?.contactName,
+    status: String(invoice?.state ?? 'draft'),
+    deliveryStatus: String(invoice?.paymentState ?? invoice?.payment_state ?? 'not_paid'),
+    dueDate: invoice?.dueDate || invoice?.invoice_date_due || '',
+    invoiceDate: invoice?.invoiceDate || invoice?.invoice_date || '',
+    createdAt: invoice?.createdAt || invoice?.create_date || '',
+    isOverdue: !!invoice?.isOverdue,
+    currency: invoice?.currency,
+    lines,
+    billTo: customerName,
+    contactName: customerName,
   };
 }
 
 function normalizeInvoicesResponse(payload: any): IInvoice[] {
-  const invoices = Array.isArray(payload) ? payload : payload?.data;
+  const invoices = Array.isArray(payload) ? payload : (payload?.data || payload?.invoices);
   if (!Array.isArray(invoices)) return [];
   return invoices.map((invoice, index) => normalizeOdooInvoice(invoice, index));
 }

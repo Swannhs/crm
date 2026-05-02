@@ -11,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
+import { Label } from 'src/components/label';
 import { formatOptionalCurrency } from '../utils';
 import { SalesOpportunityTimeline } from './sales-opportunity-timeline';
 
@@ -70,17 +71,30 @@ export function SalesOpportunityDrawer({
                     <Typography variant="subtitle2">{formatOptionalCurrency(item.expectedRevenue)}</Typography>
                   </Box>
                   <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Weighted value</Typography>
+                    <Typography variant="subtitle2" color="primary.main">{formatOptionalCurrency(item.weightedValue)}</Typography>
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Probability</Typography>
                     <Typography variant="subtitle2">{typeof item.probability === 'number' ? `${item.probability}%` : 'Unavailable'}</Typography>
                   </Box>
                 </Stack>
 
                 <Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Next activity</Typography>
-                  <Typography variant="subtitle2" color={item.nextActivity?.overdue ? 'error.main' : 'text.primary'}>
-                    {item.nextActivity?.title || 'No next activity'}
-                    {item.nextActivity?.dueDate && ` (${item.nextActivity.dueDate})`}
-                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Status / Next activity</Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Label
+                      variant="soft"
+                      color={(item.status === 'won' && 'success') || (item.status === 'lost' && 'error') || 'info'}
+                      sx={{ textTransform: 'capitalize' }}
+                    >
+                      {item.status}
+                    </Label>
+                    <Typography variant="subtitle2" color={item.nextActivity?.overdue ? 'error.main' : 'text.primary'}>
+                      {item.nextActivity?.title || 'No next activity'}
+                      {item.nextActivity?.dueDate && ` (${item.nextActivity.dueDate})`}
+                    </Typography>
+                  </Stack>
                 </Box>
 
                 <TextField

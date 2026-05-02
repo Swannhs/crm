@@ -77,6 +77,7 @@ export function SalesWorkspaceView() {
   const stageMutation = useUpdateOpportunityStage();
   const createActivityMutation = useCreateSalesActivity();
   const completeActivityMutation = useCompleteSalesActivity();
+  const deleteActivityMutation = useDeleteSalesActivity();
   const linkOrderMutation = useLinkOrderToOpportunity();
   const previewSyncMutation = usePreviewMagentoToOdooSync();
   const runSyncMutation = useRunMagentoToOdooSync();
@@ -229,7 +230,16 @@ export function SalesWorkspaceView() {
                     toast.error(error?.message || 'Complete unavailable');
                   }
                 }}
+                onDelete={async (id) => {
+                  try {
+                    await deleteActivityMutation.mutateAsync(id);
+                    toast.success('Activity deleted');
+                  } catch (error: any) {
+                    toast.error(error?.message || 'Delete unavailable');
+                  }
+                }}
                 completing={completeActivityMutation.isPending}
+                deleting={deleteActivityMutation.isPending}
               />
             )
           ) : null}

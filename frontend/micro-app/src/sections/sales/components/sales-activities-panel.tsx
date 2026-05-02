@@ -18,11 +18,15 @@ function startOfDay(date: Date) {
 export function SalesActivitiesPanel({
   rows,
   onComplete,
+  onDelete,
   completing,
+  deleting,
 }: {
   rows: SalesActivity[];
   onComplete: (id: string) => void;
+  onDelete?: (id: string) => void;
   completing?: boolean;
+  deleting?: boolean;
 }) {
   if (!rows.length) {
     return <SalesEmptyState title="No activities yet" description="Add follow-up activities from an opportunity to track next actions." />;
@@ -61,7 +65,10 @@ export function SalesActivitiesPanel({
                   <Typography variant="body2">{row.title}</Typography>
                   <Typography variant="caption" color="text.secondary">{row.type.toUpperCase()} • {row.dueDate ? new Date(row.dueDate).toLocaleString() : 'No due date'} • {row.opportunityId || row.contactId || 'No link'}</Typography>
                 </Stack>
-                <Button size="small" variant="outlined" disabled={row.completed || completing} onClick={() => onComplete(row.id)}>Complete</Button>
+                <Stack direction="row" spacing={1}>
+                   <Button size="small" variant="outlined" disabled={row.completed || completing} onClick={() => onComplete(row.id)}>Complete</Button>
+                   <Button size="small" variant="soft" color="error" disabled={deleting} onClick={() => onDelete?.(row.id)}>Delete</Button>
+                </Stack>
               </Stack>
             ))}
             <Divider />

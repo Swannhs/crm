@@ -1190,6 +1190,22 @@ async function handleApiCompat(req: Request, res: Response) {
         });
       }
 
+      if (req.method === "POST" && /^\/opportunities\/[^/]+\/notes$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: `/v1/odoo/crm/${id}/notes`,
+        });
+      }
+
+      if (req.method === "DELETE" && /^\/activities\/[^/]+$/.test(rest)) {
+        const id = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: `/v1/odoo/crm/activities/${id}`,
+        });
+      }
+
       return notImplemented(res, {
         module,
         method: req.method,

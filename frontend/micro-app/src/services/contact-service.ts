@@ -17,6 +17,14 @@ export type IContact = {
   contactType: string[];
   photo?: string;
   createdAt: string;
+  companyId?: number;
+  companyName?: string;
+  company?: {
+    id: number;
+    name: string;
+    email?: string;
+    phone?: string;
+  };
 };
 
 export type IContactsPaginatedResponse = {
@@ -85,6 +93,9 @@ const normalizeOdooContact = (contact: any): IContact => {
     status: contact?.status ?? 'new',
     contactType: [normalizedType],
     createdAt: contact?.createdAt ?? contact?.create_date ?? new Date().toISOString(),
+    companyId: contact?.companyId || (Array.isArray(contact?.parent_id) ? contact.parent_id[0] : undefined),
+    companyName: contact?.companyName || (Array.isArray(contact?.parent_id) ? contact.parent_id[1] : undefined),
+    company: contact?.company,
   };
 };
 
@@ -301,6 +312,15 @@ export const contactService = {
   },
   createNote: async (id: string, body: string) => {
     const response = await axios.post(`/api/odoo/contacts/${id}/notes`, { body });
+    return response.data;
+  },
+  // --- Company Relationship ---
+  linkCompany: async (contactId: string | number, companyId: string | number) => {
+    const response = await axios.post(`/api/odoo/contacts/${contactId}/link-company`, { companyId });
+    return response.data;
+  },
+  unlinkCompany: async (contactId: string | number) => {
+    const response = await axios.post(`/api/odoo/contacts/${contactId}/unlink-company`);
     return response.data;
   },
 };

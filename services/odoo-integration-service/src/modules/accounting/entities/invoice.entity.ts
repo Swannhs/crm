@@ -5,32 +5,45 @@ export class InvoiceEntity {
   id: number;
 
   @ApiProperty()
-  name: string;
+  odooId: number;
 
   @ApiProperty()
-  partner_id: [number, string];
-
-  @ApiProperty({ required: false })
-  invoice_date?: string;
-
-  @ApiProperty({ required: false })
-  invoice_date_due?: string;
-
-  @ApiProperty({ required: false })
-  amount_total?: number;
-
-  @ApiProperty({ required: false })
-  amount_untaxed?: number;
-
-  @ApiProperty({ required: false })
-  amount_residual?: number;
+  number: string;
 
   @ApiProperty()
-  state: 'draft' | 'posted' | 'cancel';
+  customerName: string;
+
+  @ApiProperty({ required: false })
+  customerId?: number;
+
+  @ApiProperty({ required: false })
+  invoiceDate?: string;
+
+  @ApiProperty({ required: false })
+  dueDate?: string;
 
   @ApiProperty()
-  payment_state: 'not_paid' | 'in_payment' | 'paid' | 'partial' | 'reversed';
+  amountTotal: number;
 
   @ApiProperty()
-  move_type: 'out_invoice' | 'in_invoice' | 'out_refund' | 'in_refund';
+  amountResidual: number;
+
+  @ApiProperty({ required: false })
+  amountUntaxed?: number;
+
+  @ApiProperty()
+  paymentState: string;
+
+  @ApiProperty()
+  state: string;
+
+  @ApiProperty()
+  isOverdue: boolean;
+
+  @ApiProperty({ required: false })
+  currency?: string;
+
+  @ApiProperty({ required: false, type: 'array', items: { type: 'object' } })
+  lines?: any[];
+}
 }

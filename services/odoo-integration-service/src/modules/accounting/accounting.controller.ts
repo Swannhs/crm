@@ -36,6 +36,10 @@ export class AccountingController {
   async findAllInvoices(
     @Query() paginationDto: PaginationDto,
     @Query('contactId') contactId?: string,
+    @Query('state') state?: string,
+    @Query('paymentState') paymentState?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
   ) {
     let odooId: number | undefined;
     if (contactId) {
@@ -43,7 +47,8 @@ export class AccountingController {
         ? Number(contactId)
         : (await this.contactsService.resolveUuid(contactId)) || undefined;
     }
-    return this.accountingService.findAllInvoices(paginationDto, odooId);
+    const filters = { state, paymentState, dateFrom, dateTo };
+    return this.accountingService.findAllInvoices(paginationDto, odooId, filters);
   }
 
   @Get('invoices/:id')
@@ -100,7 +105,8 @@ export class AccountingController {
 
   @Get('billing/graph')
   @ApiOperation({ summary: 'Get billing revenue graph' })
-  async getGraph() {
-    return this.accountingService.getGraph();
+  async getGraph(@Query('months') months?: string) {
+    const count = months ? parseInt(months, 10) : 6;
+    return this.accountingService.getGraph(count);
   }
 }

@@ -18,6 +18,8 @@ import {
   updateSalesOpportunity,
   previewMagentoToOdooSync,
   getSalesStages,
+  deleteSalesActivity,
+  createOpportunityNote,
 } from 'src/services/sales-dashboard-service';
 
 export const salesDashboardKeys = {
@@ -29,6 +31,7 @@ export const salesDashboardKeys = {
   activities: (filters?: SalesFilters) => [...salesDashboardKeys.all, 'activities', filters ?? {}] as const,
   analytics: (filters?: SalesFilters) => [...salesDashboardKeys.all, 'analytics', filters ?? {}] as const,
   stages: () => [...salesDashboardKeys.all, 'stages'] as const,
+  timeline: (id: string | number) => [...salesDashboardKeys.all, 'timeline', id] as const,
 };
 
 export function useSalesStages() {
@@ -67,6 +70,7 @@ async function invalidateSales(queryClient: ReturnType<typeof useQueryClient>) {
     queryClient.invalidateQueries({ queryKey: ['sales-dashboard', 'opportunities'] }),
     queryClient.invalidateQueries({ queryKey: ['sales-dashboard', 'activities'] }),
     queryClient.invalidateQueries({ queryKey: ['sales-dashboard', 'analytics'] }),
+    queryClient.invalidateQueries({ queryKey: ['sales-dashboard', 'timeline'] }),
   ]);
 }
 
@@ -103,6 +107,19 @@ export function useCreateSalesActivity() {
 export function useCompleteSalesActivity() {
   const queryClient = useQueryClient();
   return useMutation({ mutationFn: completeSalesActivity, onSuccess: async () => invalidateSales(queryClient) });
+}
+
+export function useDeleteSalesActivity() {
+  const queryClient = useQueryClient();
+  return useMutation({ mutationFn: deleteSalesActivity, onSuccess: async () => invalidateSales(queryClient) });
+}
+
+export function useCreateOpportunityNote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string | number; body: string }) => createOpportunityNote(id, body),
+    onSuccess: async () => invalidateSales(queryClient),
+  });
 }
 
 export function usePreviewMagentoToOdooSync() {

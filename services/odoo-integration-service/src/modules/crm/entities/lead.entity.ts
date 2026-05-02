@@ -5,29 +5,48 @@ export class LeadEntity {
   id: number;
 
   @ApiProperty()
+  odooId: number;
+
+  @ApiProperty()
   name: string;
 
   @ApiProperty({ required: false })
-  partner_id?: [number, string];
+  customerName?: string;
 
   @ApiProperty({ required: false })
-  email_from?: string;
+  customerId?: number;
 
   @ApiProperty({ required: false })
-  phone?: string;
-
-  @ApiProperty({ required: false })
-  probability?: number;
-
-  @ApiProperty({ required: false })
-  planned_revenue?: number;
-
-  @ApiProperty({ required: false })
-  stage_id?: [number, string];
+  companyName?: string;
 
   @ApiProperty()
-  type: 'lead' | 'opportunity';
+  stage: string;
 
   @ApiProperty({ required: false })
-  description?: string;
+  stageId?: number;
+
+  @ApiProperty()
+  expectedRevenue: number;
+
+  @ApiProperty()
+  probability: number;
+
+  @ApiProperty()
+  weightedValue: number;
+
+  @ApiProperty()
+  status: 'open' | 'won' | 'lost';
+
+  @ApiProperty({ required: false })
+  expectedCloseDate?: string;
+
+  @ApiProperty({ required: false })
+  nextActivity?: any;
+
+  @ApiProperty()
+  createdAt: string;
+
+  @ApiProperty()
+  updatedAt: string;
+}
 }

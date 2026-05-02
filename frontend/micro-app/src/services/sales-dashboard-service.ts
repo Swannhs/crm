@@ -118,3 +118,13 @@ export async function getOpportunityTimeline(id: string | number): Promise<any[]
   const response = await axios.get(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}/timeline`);
   return unwrap<any[]>(response.data);
 }
+
+export async function createOpportunityNote(id: string | number, body: string): Promise<any> {
+  const response = await axios.post(`/api/sales-dashboard/opportunities/${encodeURIComponent(id)}/notes`, { body });
+  return unwrap<any>(response.data);
+}
+
+export async function deleteSalesActivity(id: string | number): Promise<boolean> {
+  const response = await axios.delete(`/api/sales-dashboard/activities/${encodeURIComponent(id)}`);
+  return unwrap<boolean>(response.data);
+}

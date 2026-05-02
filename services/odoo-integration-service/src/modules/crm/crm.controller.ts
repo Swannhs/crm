@@ -24,6 +24,30 @@ import { IdentityGuard } from '../../common/guards/identity.guard.js';
 export class CrmController {
   constructor(private readonly crmService: CrmService) {}
 
+  @Get('stages')
+  @ApiOperation({ summary: 'List all CRM stages' })
+  async getStages() {
+    return this.crmService.getStages();
+  }
+
+  @Get('activities')
+  @ApiOperation({ summary: 'List all CRM activities' })
+  async getActivities(@Query() paginationDto: PaginationDto) {
+    return this.crmService.getActivities(paginationDto);
+  }
+
+  @Get('summary')
+  @ApiOperation({ summary: 'Get CRM pipeline summary' })
+  async getSummary() {
+    return this.crmService.getPipelineSummary();
+  }
+
+  @Get('dashboard')
+  @ApiOperation({ summary: 'Get CRM dashboard data' })
+  async getDashboard() {
+    return this.crmService.getDashboard();
+  }
+
   @Get()
   @ApiOperation({ summary: 'List all leads and opportunities' })
   @ApiResponse({ status: 200, type: [LeadEntity] })
@@ -44,6 +68,12 @@ export class CrmController {
     return this.crmService.getTimeline(id);
   }
 
+  @Post(':id/notes')
+  @ApiOperation({ summary: 'Create a note for an opportunity' })
+  async createNote(@Param('id', ParseIntPipe) id: number, @Body('body') body: string) {
+    return this.crmService.createNote(id, body);
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new lead' })
   async create(@Body() data: any) {
@@ -60,18 +90,6 @@ export class CrmController {
   @ApiOperation({ summary: 'Delete a lead' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.crmService.remove(id);
-  }
-
-  @Get('stages')
-  @ApiOperation({ summary: 'List all CRM stages' })
-  async getStages() {
-    return this.crmService.getStages();
-  }
-
-  @Get('activities')
-  @ApiOperation({ summary: 'List all CRM activities' })
-  async getActivities(@Query() paginationDto: PaginationDto) {
-    return this.crmService.getActivities(paginationDto);
   }
 
   @Post('activities')
@@ -92,15 +110,9 @@ export class CrmController {
     return this.crmService.completeActivity(id);
   }
 
-  @Get('summary')
-  @ApiOperation({ summary: 'Get CRM pipeline summary' })
-  async getSummary() {
-    return this.crmService.getPipelineSummary();
-  }
-
-  @Get('dashboard')
-  @ApiOperation({ summary: 'Get CRM dashboard data' })
-  async getDashboard() {
-    return this.crmService.getDashboard();
+  @Delete('activities/:id')
+  @ApiOperation({ summary: 'Delete a CRM activity' })
+  async removeActivity(@Param('id', ParseIntPipe) id: number) {
+    return this.crmService.removeActivity(id);
   }
 }

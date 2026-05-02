@@ -67,6 +67,69 @@ export class ContactsController {
     return this.contactsService.getAnalytics(paginationDto);
   }
 
+  // --- Companies ---
+  @Get('companies')
+  @ApiOperation({ summary: 'List all companies' })
+  async getCompanies(@Query() paginationDto: PaginationDto) {
+    return this.contactsService.getCompanies(paginationDto);
+  }
+
+  @Get('companies/:id')
+  @ApiOperation({ summary: 'Get company details' })
+  async findCompany(@Param('id', ParseIntPipe) id: number) {
+    return this.contactsService.findCompany(id);
+  }
+
+  @Post('companies')
+  @ApiOperation({ summary: 'Create a new company' })
+  async createCompany(@Body() data: any) {
+    return this.contactsService.createCompany(data);
+  }
+
+  @Put('companies/:id')
+  @ApiOperation({ summary: 'Update a company' })
+  async updateCompany(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: any,
+  ) {
+    return this.contactsService.updateCompany(id, data);
+  }
+
+  @Delete('companies/:id')
+  @ApiOperation({ summary: 'Delete a company' })
+  async removeCompany(@Param('id', ParseIntPipe) id: number) {
+    return this.contactsService.removeCompany(id);
+  }
+
+  @Get('companies/:id/contacts')
+  @ApiOperation({ summary: 'Get contacts belonging to a company' })
+  async getCompanyContacts(@Param('id', ParseIntPipe) id: number) {
+    return this.contactsService.getCompanyContacts(id);
+  }
+
+  @Post(':contactId/link-company')
+  @ApiOperation({ summary: 'Link a contact to a company' })
+  async linkCompany(
+    @Param('contactId') contactId: string,
+    @Body('companyId', ParseIntPipe) companyId: number,
+  ) {
+    const odooContactId = /^\d+$/.test(contactId)
+      ? Number(contactId)
+      : await this.contactsService.resolveUuid(contactId);
+    if (!odooContactId) throw new Error('Contact not found');
+    return this.contactsService.linkCompany(odooContactId, companyId);
+  }
+
+  @Post(':contactId/unlink-company')
+  @ApiOperation({ summary: 'Unlink a contact from its company' })
+  async unlinkCompany(@Param('contactId') contactId: string) {
+    const odooContactId = /^\d+$/.test(contactId)
+      ? Number(contactId)
+      : await this.contactsService.resolveUuid(contactId);
+    if (!odooContactId) throw new Error('Contact not found');
+    return this.contactsService.unlinkCompany(odooContactId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get contact details' })
   @ApiResponse({ status: 200, type: ContactEntity })
@@ -260,12 +323,7 @@ export class ContactsController {
     return this.contactsService.clockOut(shiftId);
   }
 
-  // --- Companies ---
-  @Get('companies')
-  @ApiOperation({ summary: 'List all companies' })
-  async getCompanies(@Query() paginationDto: PaginationDto) {
-    return this.contactsService.getCompanies(paginationDto);
-  }
+
 
   // --- Timeline & Notes ---
   @Get(':id/timeline')

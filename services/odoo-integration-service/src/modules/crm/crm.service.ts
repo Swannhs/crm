@@ -41,7 +41,7 @@ export class CrmService {
     const search = paginationDto.search;
 
     const domain: any[] = search
-      ? ['|', ['name', 'ilike', search], ['email_from', 'ilike', search]]
+      ? ['|', ['name', 'ilike', `%${search}%`], ['email_from', 'ilike', `%${search}%`]]
       : [];
 
     const [data, total] = await Promise.all([
@@ -53,15 +53,7 @@ export class CrmService {
       this.odooClient.execute(this.model, 'search_count', [domain]),
     ]);
 
-    const mappedData = data.map((lead: any) => ({
-      ...lead,
-      nextActivity: lead.activity_summary || lead.activity_type_id ? {
-        title: lead.activity_summary || (Array.isArray(lead.activity_type_id) ? lead.activity_type_id[1] : 'Activity'),
-        dueDate: lead.activity_date_deadline,
-        state: lead.activity_state,
-        overdue: lead.activity_state === 'overdue',
-      } : null,
-    }));
+    const mappedData = data.map((lead: any) => this.normalizeOpportunity(lead));
 
     return { data: mappedData, total };
   }
@@ -72,7 +64,46 @@ export class CrmService {
       [['id', '=', id]],
       this.defaultFields,
     );
-    return lead;
+    if (!lead) return null;
+    return this.normalizeOpportunity(lead);
+  }
+
+  private normalizeOpportunity(lead: any) {
+    const expectedRevenue = Number(lead.expected_revenue || lead.planned_revenue || 0);
+    const probability = Number(lead.probability || 0);
+    const weightedValue = (expectedRevenue * probability) / 100;
+    
+    let status: 'open' | 'won' | 'lost' = 'open';
+    if (lead.stage_id) {
+      const stageName = lead.stage_id[1].toLowerCase();
+      if (stageName === 'won') status = 'won';
+      else if (stageName === 'lost') status = 'lost';
+    }
+
+    return {
+      id: lead.id,
+      odooId: lead.id,
+      name: lead.name,
+      customerName: lead.partner_id ? lead.partner_id[1] : undefined,
+      customerId: lead.partner_id ? lead.partner_id[0] : undefined,
+      companyName: lead.partner_id ? lead.partner_id[1] : undefined, // In Odoo, partner is the same
+      stage: lead.stage_id ? lead.stage_id[1] : 'New',
+      stageId: lead.stage_id ? lead.stage_id[0] : undefined,
+      expectedRevenue,
+      probability,
+      weightedValue,
+      status,
+      expectedCloseDate: lead.date_deadline,
+      nextActivity: lead.activity_summary || lead.activity_type_id ? {
+        id: lead.activity_ids?.[0],
+        title: lead.activity_summary || (Array.isArray(lead.activity_type_id) ? lead.activity_type_id[1] : 'Activity'),
+        dueDate: lead.activity_date_deadline,
+        state: lead.activity_state as any,
+        overdue: lead.activity_state === 'overdue',
+      } : null,
+      createdAt: lead.create_date,
+      updatedAt: lead.write_date,
+    };
   }
 
   async create(data: any) {
@@ -133,6 +164,22 @@ export class CrmService {
 
   async completeActivity(id: number) {
     return this.odooClient.execute('mail.activity', 'action_done', [[id]]);
+  }
+
+  async removeActivity(id: number) {
+    return this.odooClient.execute('mail.activity', 'unlink', [[id]]);
+  }
+
+  async createNote(id: number, body: string) {
+    return this.odooClient.execute('mail.message', 'create', [
+      {
+        body,
+        res_id: id,
+        model: this.model,
+        message_type: 'comment',
+        subtype_id: 1,
+      },
+    ]);
   }
 
   async getTimeline(id: number) {

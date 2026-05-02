@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -54,6 +55,7 @@ import { Scrollbar } from 'src/components/scrollbar';
 // ----------------------------------------------------------------------
 
 export function ContactOverviewTab({ contact }: any) {
+  const companyDialog = useBoolean();
   const insights = contact?.insights || {
     totalSpent: 0,
     engagement: 0,
@@ -83,6 +85,52 @@ export function ContactOverviewTab({ contact }: any) {
                   <Typography variant="subtitle2">{contact.address || 'No address provided'}</Typography>
                 </Grid>
               </Grid>
+            </Card>
+
+            <Card sx={{ p: 3, border: (theme) => `1px solid ${theme.palette.divider}`, boxShadow: 'none' }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Typography variant="h6">Company Relationship</Typography>
+                {contact.companyId ? (
+                   <Button 
+                    size="small" 
+                    color="error" 
+                    variant="soft" 
+                    onClick={async () => {
+                      if (confirm('Unlink this contact from their company?')) {
+                        try {
+                          await contactService.unlinkCompany(contact.id);
+                          showToast({ message: 'Company unlinked' });
+                          window.location.reload();
+                        } catch (e: any) {
+                          showToast({ message: e.message, severity: 'error' });
+                        }
+                      }
+                    }}
+                  >
+                    Unlink
+                  </Button>
+                ) : (
+                  <Button size="small" variant="soft" color="primary" onClick={() => companyDialog.onTrue()}>
+                    Link Company
+                  </Button>
+                )}
+              </Stack>
+
+              {contact.companyId ? (
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Avatar sx={{ bgcolor: 'primary.lighter', color: 'primary.main', borderRadius: 1 }}>
+                    <Iconify icon="solar:buildings-bold" />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle2">{contact.companyName}</Typography>
+                    <Typography variant="caption" color="text.secondary">Linked Odoo Partner ID: {contact.companyId}</Typography>
+                  </Box>
+                </Stack>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  This contact is not currently associated with a company in Odoo.
+                </Typography>
+              )}
             </Card>
 
             <Card sx={{ p: 3, border: (theme) => `1px solid ${theme.palette.divider}`, boxShadow: 'none' }}>
@@ -152,7 +200,29 @@ export function ContactOverviewTab({ contact }: any) {
           </Stack>
         </Grid>
       </Grid>
-    </Stack>
+
+      <Dialog open={companyDialog.value} onClose={companyDialog.onFalse} fullWidth maxWidth="xs">
+        <DialogTitle>Link to Company</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              Search for an existing Odoo company to link this contact to.
+            </Typography>
+            <CompanySelector onSelect={async (companyId) => {
+              try {
+                await contactService.linkCompany(contact.id, companyId);
+                showToast({ message: 'Company linked' });
+                window.location.reload();
+              } catch (e: any) {
+                showToast({ message: e.message, severity: 'error' });
+              }
+            }} />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={companyDialog.onFalse}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
   );
 }
 
@@ -1510,6 +1580,60 @@ export function TasksTab({ tasks, loading, refetch, contactId }: any) {
           <Button color="error" variant="contained" onClick={handleDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
+    </Stack>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function CompanySelector({ onSelect }: { onSelect: (id: number) => void }) {
+  const [search, setSearch] = useState('');
+  const { data: companies, isLoading } = useQuery({
+    queryKey: ['companies-search', search],
+    queryFn: () => contactService.getContactsByType('company', search),
+    enabled: search.length > 2,
+  });
+
+  return (
+    <Stack spacing={2}>
+      <TextField
+        fullWidth
+        placeholder="Type company name..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        InputProps={{
+          startAdornment: <Iconify icon="solar:magnifer-bold" sx={{ color: 'text.disabled', mr: 1 }} />,
+        }}
+      />
+
+      {isLoading && <LinearProgress />}
+
+      <Stack spacing={1} sx={{ maxHeight: 300, overflow: 'auto' }}>
+        {companies?.map((company: any) => (
+          <Button
+            key={company.id}
+            fullWidth
+            variant="outlined"
+            onClick={() => onSelect(Number(company.id))}
+            sx={{ justifyContent: 'flex-start', textAlign: 'left', py: 1.5 }}
+          >
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'background.neutral' }}>
+                <Iconify icon="solar:buildings-bold" width={16} />
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle2">{company.fullName}</Typography>
+                <Typography variant="caption" color="text.secondary">{company.email || 'No email'}</Typography>
+              </Box>
+            </Stack>
+          </Button>
+        ))}
+        {search.length > 2 && !isLoading && (!companies || companies.length === 0) && (
+          <Typography variant="caption" sx={{ textAlign: 'center', color: 'text.secondary' }}>
+            No companies found.
+          </Typography>
+        )}
+      </Stack>
     </Stack>
   );
 }

@@ -265,6 +265,20 @@ export async function syncMagentoAllToOdoo(options?: OdooSyncOptions): Promise<O
 
 // --- Timeline & Notes ---
 
+export async function getOdooCompanyContacts(id: string | number): Promise<OdooContact[]> {
+  return request<OdooContact[]>(() => axios.get(`${ODOO_API_BASE}/contacts/companies/${id}/contacts`));
+}
+
+export async function linkOdooCompany(contactId: string | number, companyId: string | number): Promise<boolean> {
+  return request<boolean>(() => axios.post(`${ODOO_API_BASE}/contacts/${contactId}/link-company`, { companyId }));
+}
+
+export async function unlinkOdooCompany(contactId: string | number): Promise<boolean> {
+  return request<boolean>(() => axios.post(`${ODOO_API_BASE}/contacts/${contactId}/unlink-company`));
+}
+
+// --- Timeline & Notes ---
+
 export async function getOdooTimeline(id: string | number): Promise<any[]> {
   return request<any[]>(() => axios.get(`${ODOO_API_BASE}/contacts/${id}/timeline`));
 }

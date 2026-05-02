@@ -16,6 +16,7 @@ export type RevenueStats = {
   totalRevenue: number;
   paid: number;
   outstanding: number;
+  overdue: number;
   byStatus: Record<string, number>;
   invoiceCount: number;
 };
@@ -24,11 +25,12 @@ export async function getRevenueStats(): Promise<RevenueStats> {
   try {
     const { data: invoices } = await billingService.getInvoices();
     if (!Array.isArray(invoices)) {
-      return { totalRevenue: 0, paid: 0, outstanding: 0, byStatus: {}, invoiceCount: 0 };
+      return { totalRevenue: 0, paid: 0, outstanding: 0, overdue: 0, byStatus: {}, invoiceCount: 0 };
     }
 
     const totalRevenue = invoices.reduce((sum: number, item: any) => sum + toNumber(item?.totalAmount ?? item?.totalDue), 0);
     const paid = invoices.reduce((sum: number, item: any) => sum + toNumber(item?.paidAmount), 0);
+    const overdue = invoices.reduce((sum: number, item: any) => sum + (item.isOverdue ? toNumber(item?.totalDue || item?.totalAmount) - toNumber(item?.paidAmount) : 0), 0);
     const byStatus = invoices.reduce((acc: Record<string, number>, item: any) => {
       const key = String(item?.status || 'unknown').toLowerCase();
       acc[key] = (acc[key] || 0) + 1;
@@ -39,6 +41,7 @@ export async function getRevenueStats(): Promise<RevenueStats> {
       totalRevenue,
       paid,
       outstanding: Math.max(totalRevenue - paid, 0),
+      overdue: Math.max(overdue, 0),
       byStatus,
       invoiceCount: invoices.length,
     };

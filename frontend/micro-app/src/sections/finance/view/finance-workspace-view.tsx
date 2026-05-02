@@ -29,6 +29,7 @@ import { financeService } from 'src/services/finance-service';
 import { showToast } from 'src/components/toast';
 import { Form, RHFTextField } from 'src/components/hook-form';
 
+import { Label } from 'src/components/label';
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
 // ----------------------------------------------------------------------
@@ -231,8 +232,31 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
               Customer: {invoice.customerName || invoice.billTo || 'Unknown'}
             </Typography>
             <Typography variant="body2">Status: {invoice.status || 'Draft'}</Typography>
-            <Typography variant="body2">Due: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}</Typography>
-            <Typography variant="h4">{fCurrency(invoice.totalDue || invoice.totalAmount || 0)}</Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Typography variant="h4">{fCurrency(invoice.totalDue || invoice.totalAmount || 0)}</Typography>
+              {invoice.isOverdue && (
+                <Label color="error" variant="filled">OVERDUE</Label>
+              )}
+            </Stack>
+
+            {invoice.lines && invoice.lines.length > 0 && (
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Line Items</Typography>
+                <Stack spacing={1.5} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
+                  {invoice.lines.map((line: any) => (
+                    <Stack key={line.id} direction="row" justifyContent="space-between" alignItems="center">
+                      <Box>
+                        <Typography variant="body2">{line.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {line.quantity} x {fCurrency(line.priceUnit)}
+                        </Typography>
+                      </Box>
+                      <Typography variant="subtitle2">{fCurrency(line.priceSubtotal)}</Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+              </Box>
+            )}
             <Stack direction="row" spacing={1}>
               {String(invoice.status || '').toLowerCase() === 'draft' && (
                 <Button
@@ -394,7 +418,11 @@ export function FinanceWorkspaceView({ section, invoiceId, mode = 'list' }: Prop
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>Outstanding</Typography>
-                      <Typography variant="subtitle2" sx={{ color: 'error.main' }}>{fCurrency(revenueQuery.data?.outstanding || 0)}</Typography>
+                      <Typography variant="subtitle2" sx={{ color: 'warning.main' }}>{fCurrency(revenueQuery.data?.outstanding || 0)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>Overdue</Typography>
+                      <Typography variant="subtitle2" sx={{ color: 'error.main', fontWeight: 'bold' }}>{fCurrency(revenueQuery.data?.overdue || 0)}</Typography>
                     </Box>
                     <Divider sx={{ borderStyle: 'dashed' }} />
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
