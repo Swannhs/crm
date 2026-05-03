@@ -65,7 +65,10 @@ app.post("/v1/notifications/mark-seen/:id/:userId", auth, (req, res) => res.json
 
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
-  cors: { origin: "*" }
+  cors: { 
+    origin: process.env.ALLOWED_ORIGIN || "*",
+    credentials: true
+  }
 });
 
 io.on("connection", (socket) => {

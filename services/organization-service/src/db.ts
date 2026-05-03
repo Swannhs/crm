@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated-rbac/prisma/index.js";
+import { PrismaClient } from "@prisma/client";
 
 export const prisma = new PrismaClient();
 export const db = prisma;

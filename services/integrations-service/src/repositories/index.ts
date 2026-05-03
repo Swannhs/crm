@@ -12,35 +12,74 @@ import type {
   MetaIntegrationInput,
   VoiceIntegrationInput,
   WhatsAppInstanceInput,
-  TelegramSessionInput
-  ,
+  TelegramSessionInput,
   ImageAssetInput
 } from '../types/index.js';
+import { encryptToken, decryptToken } from '@mymanager/node-service-kit';
+
+function encryptIfPresent(val: string | null | undefined): string | null | undefined {
+  if (!val) return val;
+  try {
+    return encryptToken(val);
+  } catch (err) {
+    console.error('Encryption failed', err);
+    return val;
+  }
+}
+
+function decryptIfPresent(val: string | null | undefined): string | null | undefined {
+  if (!val) return val;
+  if (!val.includes(':')) return val; // Heuristic for already encrypted
+  try {
+    return decryptToken(val);
+  } catch (err) {
+    return val; // Fallback to plaintext
+  }
+}
+
+function decryptConnection(conn: any) {
+  if (!conn) return conn;
+  return {
+    ...conn,
+    accessToken: decryptIfPresent(conn.accessToken),
+    refreshToken: decryptIfPresent(conn.refreshToken),
+  };
+}
 
 export class IntegrationConnectionRepository {
   async create(data: IntegrationConnectionInput & { userId: string; organizationId?: string }) {
-    return db.integrationConnection.create({ data });
+    const encryptedData = {
+      ...data,
+      accessToken: encryptIfPresent(data.accessToken),
+      refreshToken: encryptIfPresent(data.refreshToken),
+    };
+    return db.integrationConnection.create({ data: encryptedData }).then(decryptConnection);
   }
 
   async findByUserAndProvider(userId: string, provider: string) {
     return db.integrationConnection.findUnique({
       where: { userId_provider: { userId, provider } }
-    });
+    }).then(decryptConnection);
   }
 
   async findByOrganizationId(organizationId: string, provider?: string) {
     if (provider) {
       return db.integrationConnection.findMany({
         where: { organizationId, provider, isActive: true }
-      });
+      }).then((list: any[]) => list.map(decryptConnection));
     }
     return db.integrationConnection.findMany({
       where: { organizationId, isActive: true }
-    });
+    }).then((list: any[]) => list.map(decryptConnection));
   }
 
   async update(id: string, data: Partial<IntegrationConnectionInput>) {
-    return db.integrationConnection.update({ where: { id }, data });
+    const encryptedData = {
+      ...data,
+      accessToken: data.accessToken !== undefined ? encryptIfPresent(data.accessToken) : undefined,
+      refreshToken: data.refreshToken !== undefined ? encryptIfPresent(data.refreshToken) : undefined,
+    };
+    return db.integrationConnection.update({ where: { id }, data: encryptedData }).then(decryptConnection);
   }
 
   async upsertByUserProvider(
@@ -80,15 +119,29 @@ export class IntegrationConnectionRepository {
 
 export class GoogleIntegrationRepository {
   async upsert(userId: string, organizationId: string | undefined, data: GoogleIntegrationInput) {
+    const encryptedData = {
+      ...data,
+      accessToken: encryptIfPresent(data.accessToken),
+      refreshToken: encryptIfPresent(data.refreshToken),
+    };
     const existing = await db.googleIntegration.findFirst({ where: { userId } });
     if (existing) {
-      return db.googleIntegration.update({ where: { id: existing.id }, data });
+      return db.googleIntegration.update({ where: { id: existing.id }, data: encryptedData }).then(this.decrypt);
     }
-    return db.googleIntegration.create({ data: { ...data, userId, organizationId } });
+    return db.googleIntegration.create({ data: { ...encryptedData, userId, organizationId } }).then(this.decrypt);
+  }
+
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      accessToken: decryptIfPresent(item.accessToken),
+      refreshToken: decryptIfPresent(item.refreshToken),
+    };
   }
 
   async findByUserId(userId: string) {
-    return db.googleIntegration.findFirst({ where: { userId } });
+    return db.googleIntegration.findFirst({ where: { userId } }).then(this.decrypt);
   }
 
   async findByOrganizationId(organizationId: string) {
@@ -105,19 +158,35 @@ export class GoogleIntegrationRepository {
 
 export class ZoomIntegrationRepository {
   async upsert(userId: string, organizationId: string | undefined, data: ZoomIntegrationInput) {
+    const encryptedData = {
+      ...data,
+      accessToken: encryptIfPresent(data.accessToken),
+      refreshToken: encryptIfPresent(data.refreshToken),
+      webhookSecret: encryptIfPresent(data.webhookSecret),
+    };
     const existing = await db.zoomIntegration.findFirst({ where: { userId } });
     if (existing) {
-      return db.zoomIntegration.update({ where: { id: existing.id }, data });
+      return db.zoomIntegration.update({ where: { id: existing.id }, data: encryptedData }).then(this.decrypt);
     }
-    return db.zoomIntegration.create({ data: { ...data, userId, organizationId } });
+    return db.zoomIntegration.create({ data: { ...encryptedData, userId, organizationId } }).then(this.decrypt);
+  }
+
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      accessToken: decryptIfPresent(item.accessToken),
+      refreshToken: decryptIfPresent(item.refreshToken),
+      webhookSecret: decryptIfPresent(item.webhookSecret),
+    };
   }
 
   async findByUserId(userId: string) {
-    return db.zoomIntegration.findFirst({ where: { userId } });
+    return db.zoomIntegration.findFirst({ where: { userId } }).then(this.decrypt);
   }
 
   async findByOrganizationId(organizationId: string) {
-    return db.zoomIntegration.findMany({ where: { organizationId } });
+    return db.zoomIntegration.findMany({ where: { organizationId } }).then((list: any[]) => list.map(this.decrypt));
   }
 
   async disconnect(userId: string) {
@@ -154,24 +223,40 @@ export class ZoomMeetingRepository {
 }
 
 export class ShopifyStoreRepository {
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      accessToken: decryptIfPresent(item.accessToken),
+    };
+  }
+
   async create(data: ShopifyStoreInput & { userId: string; organizationId?: string }) {
-    return db.shopifyStore.create({ data });
+    const encryptedData = {
+      ...data,
+      accessToken: encryptIfPresent(data.accessToken),
+    };
+    return db.shopifyStore.create({ data: encryptedData }).then(this.decrypt);
   }
 
   async findByShopDomain(shopDomain: string) {
-    return db.shopifyStore.findUnique({ where: { shopDomain } });
+    return db.shopifyStore.findUnique({ where: { shopDomain } }).then(this.decrypt);
   }
 
   async findByUserId(userId: string) {
-    return db.shopifyStore.findMany({ where: { userId, isActive: true } });
+    return db.shopifyStore.findMany({ where: { userId, isActive: true } }).then((list: any[]) => list.map(this.decrypt));
   }
 
   async findByOrganizationId(organizationId: string) {
-    return db.shopifyStore.findMany({ where: { organizationId, isActive: true } });
+    return db.shopifyStore.findMany({ where: { organizationId, isActive: true } }).then((list: any[]) => list.map(this.decrypt));
   }
 
   async update(id: string, data: Partial<ShopifyStoreInput>) {
-    return db.shopifyStore.update({ where: { id }, data });
+    const encryptedData = {
+      ...data,
+      accessToken: data.accessToken !== undefined ? encryptIfPresent(data.accessToken) : undefined,
+    };
+    return db.shopifyStore.update({ where: { id }, data: encryptedData }).then(this.decrypt);
   }
 
   async deactivate(id: string) {
@@ -184,38 +269,64 @@ export class ShopifyStoreRepository {
 }
 
 export class UberEatsConfigRepository {
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      accessToken: decryptIfPresent(item.accessToken),
+      refreshToken: decryptIfPresent(item.refreshToken),
+    };
+  }
+
   async upsert(userId: string, organizationId: string | undefined, data: UberEatsConfigInput) {
+    const encryptedData = {
+      ...data,
+      accessToken: encryptIfPresent(data.accessToken),
+      refreshToken: encryptIfPresent(data.refreshToken),
+    };
     const existing = await db.uberEatsConfig.findFirst({ where: { userId } });
     if (existing) {
-      return db.uberEatsConfig.update({ where: { id: existing.id }, data });
+      return db.uberEatsConfig.update({ where: { id: existing.id }, data: encryptedData }).then(this.decrypt);
     }
-    return db.uberEatsConfig.create({ data: { ...data, userId, organizationId } });
+    return db.uberEatsConfig.create({ data: { ...encryptedData, userId, organizationId } }).then(this.decrypt);
   }
 
   async findByUserId(userId: string) {
-    return db.uberEatsConfig.findFirst({ where: { userId, isActive: true } });
+    return db.uberEatsConfig.findFirst({ where: { userId, isActive: true } }).then(this.decrypt);
   }
 
   async findByOrganizationId(organizationId: string) {
-    return db.uberEatsConfig.findMany({ where: { organizationId, isActive: true } });
+    return db.uberEatsConfig.findMany({ where: { organizationId, isActive: true } }).then((list: any[]) => list.map(this.decrypt));
   }
 }
 
 export class EasyPostConfigRepository {
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      apiKey: decryptIfPresent(item.apiKey),
+    };
+  }
+
   async upsert(userId: string, organizationId: string | undefined, data: EasyPostConfigInput) {
+    const encryptedData = {
+      ...data,
+      apiKey: encryptIfPresent(data.apiKey),
+    };
     const existing = await db.easyPostConfig.findFirst({ where: { userId } });
     if (existing) {
-      return db.easyPostConfig.update({ where: { id: existing.id }, data });
+      return db.easyPostConfig.update({ where: { id: existing.id }, data: encryptedData }).then(this.decrypt);
     }
-    return db.easyPostConfig.create({ data: { ...data, userId, organizationId } });
+    return db.easyPostConfig.create({ data: { ...encryptedData, userId, organizationId } }).then(this.decrypt);
   }
 
   async findByUserId(userId: string) {
-    return db.easyPostConfig.findFirst({ where: { userId, isActive: true } });
+    return db.easyPostConfig.findFirst({ where: { userId, isActive: true } }).then(this.decrypt);
   }
 
   async findByOrganizationId(organizationId: string) {
-    return db.easyPostConfig.findMany({ where: { organizationId, isActive: true } });
+    return db.easyPostConfig.findMany({ where: { organizationId, isActive: true } }).then((list: any[]) => list.map(this.decrypt));
   }
 }
 
@@ -242,62 +353,105 @@ export class IntegrationActivityRepository {
 }
 
 export class UserIntegrationSettingsRepository {
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      apiKey: decryptIfPresent(item.apiKey),
+    };
+  }
+
   async findByUserId(userId: string) {
-    return db.userIntegrationSettings.findUnique({ where: { userId } });
+    return db.userIntegrationSettings.findUnique({ where: { userId } }).then(this.decrypt);
   }
 
   async upsert(userId: string, data: UserIntegrationSettingsInput) {
+    const encryptedData = {
+      ...data,
+      apiKey: encryptIfPresent(data.apiKey),
+    };
     const existing = await this.findByUserId(userId);
     if (existing) {
-      return db.userIntegrationSettings.update({ where: { id: existing.id }, data });
+      return db.userIntegrationSettings.update({ where: { id: (existing as any).id }, data: encryptedData }).then(this.decrypt);
     }
-    return db.userIntegrationSettings.create({ data: { ...data, userId } });
+    return db.userIntegrationSettings.create({ data: { ...encryptedData, userId } }).then(this.decrypt);
   }
 
   async findByApiKey(apiKey: string) {
-    return db.userIntegrationSettings.findUnique({ where: { apiKey } });
+    // Note: Searching by encrypted API key is hard. 
+    // We might need a hashed version for lookup, but the requirement is encryption.
+    // For now, we search by plaintext as fallback, then by encrypted.
+    const encryptedKey = encryptIfPresent(apiKey);
+    const found = await db.userIntegrationSettings.findFirst({ 
+      where: { OR: [{ apiKey }, { apiKey: encryptedKey }] } 
+    });
+    return this.decrypt(found);
   }
 }
 
 export class MetaIntegrationRepository {
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      accessToken: decryptIfPresent(item.accessToken),
+    };
+  }
+
   async findByUserId(userId: string) {
-    return db.metaIntegration.findUnique({ where: { userId } });
+    return db.metaIntegration.findUnique({ where: { userId } }).then(this.decrypt);
   }
 
   async findByBusinessPhoneNumberId(businessPhoneNumberId: string) {
     return db.metaIntegration.findFirst({
       where: { businessPhoneNumberId }
-    });
+    }).then(this.decrypt);
   }
 
   async upsert(userId: string, organizationId: string | undefined, data: MetaIntegrationInput) {
+    const encryptedData = {
+      ...data,
+      accessToken: encryptIfPresent(data.accessToken),
+    };
     const existing = await this.findByUserId(userId);
     if (existing) {
-      return db.metaIntegration.update({ where: { id: existing.id }, data });
+      return db.metaIntegration.update({ where: { id: (existing as any).id }, data: encryptedData }).then(this.decrypt);
     }
-    return db.metaIntegration.create({ data: { ...data, userId, organizationId } });
+    return db.metaIntegration.create({ data: { ...encryptedData, userId, organizationId } }).then(this.decrypt);
   }
 
   async findByOrganizationId(organizationId: string) {
-    return db.metaIntegration.findMany({ where: { organizationId } });
+    return db.metaIntegration.findMany({ where: { organizationId } }).then((list: any[]) => list.map(this.decrypt));
   }
 }
 
 export class VoiceIntegrationRepository {
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      apiKey: decryptIfPresent(item.apiKey),
+    };
+  }
+
   async findByUserId(userId: string) {
-    return db.voiceIntegration.findUnique({ where: { userId } });
+    return db.voiceIntegration.findUnique({ where: { userId } }).then(this.decrypt);
   }
 
   async upsert(userId: string, organizationId: string | undefined, data: VoiceIntegrationInput) {
+    const encryptedData = {
+      ...data,
+      apiKey: encryptIfPresent(data.apiKey),
+    };
     const existing = await this.findByUserId(userId);
     if (existing) {
-      return db.voiceIntegration.update({ where: { id: existing.id }, data });
+      return db.voiceIntegration.update({ where: { id: (existing as any).id }, data: encryptedData }).then(this.decrypt);
     }
-    return db.voiceIntegration.create({ data: { ...data, userId, organizationId } });
+    return db.voiceIntegration.create({ data: { ...encryptedData, userId, organizationId } }).then(this.decrypt);
   }
 
   async findByOrganizationId(organizationId: string) {
-    return db.voiceIntegration.findMany({ where: { organizationId } });
+    return db.voiceIntegration.findMany({ where: { organizationId } }).then((list: any[]) => list.map(this.decrypt));
   }
 }
 

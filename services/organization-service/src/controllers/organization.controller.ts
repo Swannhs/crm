@@ -6,6 +6,8 @@ import {
   MembershipService,
   UserAccessService,
   CrmConfigurationService,
+  GoalService,
+  HabitService,
 } from '../services/organization.service.js';
 import { AuthenticatedRequest } from '../middleware/identity.js';
 
@@ -365,7 +367,7 @@ export class CrmConfigurationController {
 }
 
 export class GoalController {
-  private svc = new (require('../services/organization.service.js')).GoalService();
+  private svc = new GoalService();
 
   async list(req: AuthenticatedRequest, res: Response) {
     try {
@@ -399,7 +401,7 @@ export class GoalController {
 }
 
 export class HabitController {
-  private svc = new (require('../services/organization.service.js')).HabitService();
+  private svc = new HabitService();
 
   async list(req: AuthenticatedRequest, res: Response) {
     try {

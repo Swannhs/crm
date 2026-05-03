@@ -27,4 +27,9 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   type?: string;
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @Type(() => Boolean)
+  active?: boolean;
 }

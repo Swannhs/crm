@@ -1,4 +1,4 @@
-export { createServiceApp } from "./web/createServiceApp.js";
+export { createServiceApp, createRateLimiter } from "./web/createServiceApp.js";
 export { requireIdentityContext } from "./web/requireIdentityContext.js";
 export {
   ORG_ROLES,
@@ -18,3 +18,4 @@ export {
   publishJson as publishKafkaJson,
   startKafkaConsumer,
 } from "./kafka/kafka.js";
+export { encryptToken, decryptToken } from "./crypto.js";

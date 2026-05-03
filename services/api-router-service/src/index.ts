@@ -1,5 +1,11 @@
-import { createServiceApp } from "@mymanager/node-service-kit";
+import { createServiceApp, createRateLimiter } from "@mymanager/node-service-kit";
 import { API_ROUTER_CONFIG } from "./config.js";
+
+const authRateLimiter = createRateLimiter({
+  windowMs: 1 * 60 * 1000,
+  max: 10,
+  message: { success: false, error: "Too many login attempts, please try again in a minute." }
+});
 
 const { app, logger } = createServiceApp({
   serviceName: "api-router-service",
@@ -7,6 +13,8 @@ const { app, logger } = createServiceApp({
   urlEncodedLimit: "50mb",
   enableCors: false
 });
+
+app.use("/api/auth/sign-in", authRateLimiter);
 
 import type { Request, Response } from "express";
 

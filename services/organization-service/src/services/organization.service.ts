@@ -4,6 +4,8 @@ import {
   LocationRepository,
   OnboardingRepository,
   MembershipRepository,
+  GoalRepository,
+  HabitRepository,
 } from '../repositories/organization.repository.js';
 import { KeycloakAdminService } from './keycloak-admin.service.js';
 import {
@@ -790,7 +792,7 @@ export class UserAccessService {
 }
 
 export class GoalService {
-  private goalRepo = new (require('../repositories/organization.repository.js')).GoalRepository();
+  private goalRepo = new GoalRepository();
   private orgSvc = new OrganizationService();
 
   async getGoals(orgId: string, userId: string) {
@@ -836,7 +838,7 @@ export class GoalService {
 }
 
 export class HabitService {
-  private habitRepo = new (require('../repositories/organization.repository.js')).HabitRepository();
+  private habitRepo = new HabitRepository();
   private orgSvc = new OrganizationService();
 
   async getHabits(orgId: string, userId: string) {
