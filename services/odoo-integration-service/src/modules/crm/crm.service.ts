@@ -89,17 +89,22 @@ export class CrmService {
   private getOpportunityStatus(lead: any): 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' {
     const stageLabel = Array.isArray(lead.stage_id) ? lead.stage_id[1] : '';
     const probability = Number(lead.probability ?? 0);
-    const label = stageLabel.toLowerCase();
+    const label = String(stageLabel ?? '').toLowerCase();
 
-    let stageStatus: 'new' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost' = 'new';
-    if (lead.is_won || label.includes('won') || probability === 100) stageStatus = 'won';
-    else if (lead.active === false || label.includes('lost') || (probability === 0 && label.includes('lost'))) stageStatus = 'lost';
-    else if (label.includes('nego')) stageStatus = 'negotiation';
-    else if (label.includes('prop') || label.includes('quote')) stageStatus = 'proposal';
-    else if (label.includes('qual')) stageStatus = 'qualified';
-    else if (label.includes('new')) stageStatus = 'new';
+    // 1. Won condition
+    if (lead.is_won || label.includes('won') || probability === 100) return 'won';
 
-    return stageStatus;
+    // 2. Lost condition (requires explicit loss or 0% probability while inactive)
+    const isExplicitlyLost = label.includes('lost') || (probability === 0 && lead.active === false);
+    if (isExplicitlyLost) return 'lost';
+
+    // 3. Mapping based on stage name keywords
+    if (label.includes('nego')) return 'negotiation';
+    if (label.includes('prop') || label.includes('quote')) return 'proposal';
+    if (label.includes('qual')) return 'qualified';
+    if (label.includes('new')) return 'new';
+
+    return 'new';
   }
 
   private normalizeOpportunity(lead: any) {
@@ -405,7 +410,7 @@ export class CrmService {
     const summary = leads.reduce((acc: any, lead: any) => {
       const value = Number(lead.expected_revenue || lead.planned_revenue || 0);
       const weighted = (value * Number(lead.probability || 0)) / 100;
-      const status = this.getOpportunityStatus({ ...lead, active: true });
+      const status = this.getOpportunityStatus(lead);
       const stageLabel = Array.isArray(lead.stage_id) ? String(lead.stage_id[1] ?? '').toLowerCase() : '';
 
       if (lead.is_won || status === 'won') {

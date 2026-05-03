@@ -41,22 +41,27 @@ export class OdooClientService {
       id: Math.floor(Math.random() * 1000000),
     };
 
+    const startTime = Date.now();
     try {
+      this.logger.debug(`Sending JSON-RPC call: ${service}.${method}`);
       const response = await axios.post(`${this.url}/jsonrpc`, payload, {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 5000,
+        timeout: 10000, // Increased timeout for production hardening
       });
 
+      const duration = Date.now() - startTime;
       if (response.data?.error) {
+        this.logger.error(`Odoo error in ${service}.${method} (${duration}ms): ${JSON.stringify(response.data.error)}`);
         throw new Error(response.data.error.message || 'Odoo JSON-RPC Error');
       }
 
+      this.logger.debug(`JSON-RPC call ${service}.${method} succeeded in ${duration}ms`);
       return response.data?.result;
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `JSON-RPC error at ${service}.${method}: ${errorMessage}`,
+        `JSON-RPC error at ${service}.${method} after ${duration}ms: ${errorMessage}`,
       );
       throw error;
     }
@@ -65,6 +70,7 @@ export class OdooClientService {
   async authenticate(username?: string, password?: string): Promise<number> {
     try {
       if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
+        this.logger.log(`Attempting Odoo authentication for database: ${this.db}`);
         const uid = await this.jsonRpcCall('common', 'authenticate', [
           this.db,
           username ||
@@ -80,6 +86,7 @@ export class OdooClientService {
           );
         }
 
+        this.logger.log(`Odoo authenticated successfully, UID: ${uid}`);
         this.uid = uid;
         return uid;
       }
@@ -102,6 +109,8 @@ export class OdooClientService {
     kwargs: any = {},
   ): Promise<any> {
     if (!this.uid) await this.authenticate();
+
+    this.logger.log(`Odoo Execute: ${model}.${method}`);
 
     try {
       if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
