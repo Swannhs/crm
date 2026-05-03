@@ -155,39 +155,54 @@ export class OutlookAuthService {
   async fetchMessages(refreshToken: string, lastSyncAt?: Date) {
     const accessToken = await this.getAccessToken(refreshToken);
 
-    let url = 'https://graph.microsoft.com/v1.0/me/messages?$top=50&$select=id,subject,body,bodyPreview,from,toRecipients,receivedDateTime,sentDateTime,hasAttachments,categories,conversationId';
+    let url = 'https://graph.microsoft.com/v1.0/me/messages?$top=100&$select=id,subject,body,bodyPreview,from,toRecipients,ccRecipients,bccRecipients,receivedDateTime,sentDateTime,hasAttachments,categories,conversationId';
     
     if (lastSyncAt) {
       const filter = `receivedDateTime ge ${lastSyncAt.toISOString()}`;
       url += `&$filter=${encodeURIComponent(filter)}`;
     }
 
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
+    const results: any[] = [];
+    while (url) {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
 
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`Failed to fetch Outlook messages: ${err}`);
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`Failed to fetch Outlook messages: ${err}`);
+      }
+
+      const payload = await response.json() as any;
+      const messages = payload.value || [];
+      for (const msg of messages) {
+        results.push(this.parseOutlookMessage(msg));
+      }
+      url = payload["@odata.nextLink"] || "";
     }
 
-    const payload = await response.json() as any;
-    const messages = payload.value || [];
+    return results;
+  }
 
-    return messages.map((msg: any) => ({
+  parseOutlookMessage(msg: any) {
+    return {
       messageId: msg.id,
       threadId: msg.conversationId,
       subject: msg.subject,
       fromName: msg.from?.emailAddress?.name,
       fromEmail: msg.from?.emailAddress?.address,
-      toEmails: msg.toRecipients?.map((r: any) => r.emailAddress?.address) || [],
-      textBody: msg.body?.contentType === 'text' ? msg.body.content : undefined,
-      htmlBody: msg.body?.contentType === 'html' ? msg.body.content : undefined,
+      toEmails: msg.toRecipients?.map((r: any) => r.emailAddress?.address).filter(Boolean) || [],
+      ccEmails: msg.ccRecipients?.map((r: any) => r.emailAddress?.address).filter(Boolean) || [],
+      bccEmails: msg.bccRecipients?.map((r: any) => r.emailAddress?.address).filter(Boolean) || [],
+      textBody: msg.body?.contentType?.toLowerCase() === 'text' ? msg.body.content : undefined,
+      htmlBody: msg.body?.contentType?.toLowerCase() === 'html' ? msg.body.content : undefined,
       snippet: msg.bodyPreview,
-      sentAt: new Date(msg.sentDateTime),
-      receivedAt: new Date(msg.receivedDateTime),
-      hasAttachments: msg.hasAttachments,
-      labels: msg.categories || []
-    }));
+      sentAt: msg.sentDateTime ? new Date(msg.sentDateTime) : new Date(),
+      receivedAt: msg.receivedDateTime ? new Date(msg.receivedDateTime) : new Date(),
+      hasAttachments: !!msg.hasAttachments,
+      attachmentCount: msg.hasAttachments ? 1 : 0,
+      labels: msg.categories || [],
+      attachmentMetadata: []
+    };
   }
 }

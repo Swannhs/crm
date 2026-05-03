@@ -191,6 +191,16 @@ export async function deleteGoal(goalId: string) {
   return response.data?.data ?? response.data;
 }
 
+export async function completeGoal(goalId: string) {
+  const response = await axiosInstance.post(`/org/v1/goals/${goalId}/complete`);
+  return response.data?.data ?? response.data;
+}
+
+export async function archiveGoal(goalId: string) {
+  const response = await axiosInstance.post(`/org/v1/goals/${goalId}/archive`);
+  return response.data?.data ?? response.data;
+}
+
 // --- Habits ---
 export async function getHabits() {
   const response = await axiosInstance.get('/org/v1/habits');
@@ -209,6 +219,11 @@ export async function updateHabit(habitId: string, data: any) {
 
 export async function deleteHabit(habitId: string) {
   const response = await axiosInstance.delete(`/org/v1/habits/${habitId}`);
+  return response.data?.data ?? response.data;
+}
+
+export async function checkInHabit(habitId: string, date?: string) {
+  const response = await axiosInstance.post(`/org/v1/habits/${habitId}/check-in`, { date });
   return response.data?.data ?? response.data;
 }
 
@@ -249,8 +264,11 @@ export const organizationService = {
   createGoal,
   updateGoal,
   deleteGoal,
+  completeGoal,
+  archiveGoal,
   getHabits,
   createHabit,
   updateHabit,
   deleteHabit,
+  checkInHabit,
 };

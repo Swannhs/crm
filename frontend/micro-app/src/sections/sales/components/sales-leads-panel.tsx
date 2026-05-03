@@ -1,4 +1,6 @@
 import type { SalesLeadRow } from 'src/services/sales-dashboard-service';
+import { useQuery } from '@tanstack/react-query';
+import { scoringService } from 'src/services/scoring-service';
 
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
@@ -14,6 +16,12 @@ import { formatOptionalCurrency } from '../utils';
 import { SalesEmptyState } from './sales-empty-state';
 
 export function SalesLeadsPanel({ leads, search }: { leads: SalesLeadRow[]; search: string }) {
+  const { data: hotLeads = [] } = useQuery({
+    queryKey: ['hot-lead-scores'],
+    queryFn: () => scoringService.getHotLeads(100, 0),
+    staleTime: 30 * 1000,
+  });
+  const scoreById = new Map(hotLeads.map((lead: any) => [String(lead.leadOdooId ?? lead.id), Number(lead.score || 0)]));
   const query = search.trim().toLowerCase();
   const filtered = !query
     ? leads
@@ -43,6 +51,7 @@ export function SalesLeadsPanel({ leads, search }: { leads: SalesLeadRow[]; sear
               <TableCell>Email</TableCell>
               <TableCell>Phone</TableCell>
               <TableCell>Priority</TableCell>
+              <TableCell>Score</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -54,6 +63,7 @@ export function SalesLeadsPanel({ leads, search }: { leads: SalesLeadRow[]; sear
                 <TableCell>{lead.email || 'Unavailable'}</TableCell>
                 <TableCell>{lead.phone || 'Unavailable'}</TableCell>
                 <TableCell>{lead.priority || 'Unavailable'}</TableCell>
+                <TableCell>{scoreById.get(String(lead.id)) ?? 0}</TableCell>
               </TableRow>
             ))}
           </TableBody>

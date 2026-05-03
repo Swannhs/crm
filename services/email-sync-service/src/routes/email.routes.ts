@@ -5,8 +5,9 @@ import { GoogleAuthService } from "../services/google-auth.service.js";
 
 import { prisma } from "../lib/prisma.js";
 
-import { encrypt, decrypt } from "../lib/encryption.js";
+import { encrypt } from "../lib/encryption.js";
 import { OutlookAuthService } from "../services/outlook-auth.service.js";
+import { EmailSyncService } from "../services/email-sync.service.js";
 
 const router = Router();
 // @ts-ignore - temporary fix for missing type declarations
@@ -14,6 +15,7 @@ const identityMiddleware = (req: any, res: any, next: any) =>
   requireIdentityContext(req, res, next);
 const googleAuthService = new GoogleAuthService();
 const outlookAuthService = new OutlookAuthService();
+const emailSyncService = new EmailSyncService();
 
 // All routes require identity context
 router.use(identityMiddleware);
@@ -140,7 +142,7 @@ router.get("/callback", async (req, res, next) => {
 
     // Upsert EmailAccount
     const account = await prisma.emailAccount.upsert({
-      where: { email },
+      where: { orgId_userId_provider_email: { orgId, userId, provider, email } },
       update: {
         isConnected: true,
         accessToken: encryptedAccessToken,
@@ -170,6 +172,24 @@ router.get("/callback", async (req, res, next) => {
         isConnected: account.isConnected,
       },
       message: "Email account connected successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// POST /email/accounts/:id/sync - manually trigger sync for an owned account
+router.post("/accounts/:id/sync", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
+    const accountId = req.params.id;
+
+    const result = await emailSyncService.syncAccountById(accountId, { orgId, userId });
+    return res.json({
+      success: true,
+      data: result,
+      message: "Account sync completed",
     });
   } catch (error) {
     return next(error);
@@ -247,8 +267,10 @@ router.get("/messages", async (req: any, res, next) => {
 });
 
 import { MailService } from "../services/mail.service.js";
+import { SequenceService } from "../services/sequence.service.js";
 
 const mailService = new MailService();
+const sequenceService = new SequenceService();
 
 // ... existing code ...
 
@@ -432,6 +454,117 @@ router.post("/sequences", async (req: any, res, next) => {
       data: sequence,
       message: "Email sequence created successfully",
     });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// POST /email/sequences/:id/enroll
+router.post("/sequences/:id/enroll", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const sequenceId = req.params.id;
+    const { contactEmail, contactId, dealId, firstName, companyName, dealName } = req.body;
+    if (!contactEmail) {
+      return res.status(400).json({ success: false, error: "contactEmail is required" });
+    }
+    const enrollment = await sequenceService.enrollContact({
+      orgId,
+      sequenceId,
+      contactEmail: String(contactEmail).toLowerCase(),
+      contactId,
+      dealId,
+      firstName,
+      companyName,
+      dealName,
+    });
+    return res.status(201).json({ success: true, data: enrollment, message: "Contact enrolled successfully" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// GET /email/sequences/:id/enrollments
+router.get("/sequences/:id/enrollments", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const sequenceId = req.params.id;
+    const enrollments = await sequenceService.listEnrollments(orgId, sequenceId);
+    return res.json({ success: true, data: enrollments, message: "Enrollments retrieved successfully" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// POST /email/sequences/enrollments/:id/pause
+router.post("/sequences/enrollments/:id/pause", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const enrollment = await sequenceService.pauseEnrollment(orgId, req.params.id);
+    return res.json({ success: true, data: enrollment, message: "Enrollment paused" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// POST /email/sequences/enrollments/:id/resume
+router.post("/sequences/enrollments/:id/resume", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const enrollment = await sequenceService.resumeEnrollment(orgId, req.params.id);
+    return res.json({ success: true, data: enrollment, message: "Enrollment resumed" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// POST /email/sequences/enrollments/:id/cancel
+router.post("/sequences/enrollments/:id/cancel", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const enrollment = await sequenceService.cancelEnrollment(orgId, req.params.id);
+    return res.json({ success: true, data: enrollment, message: "Enrollment cancelled" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// GET /email/sequences/enrollments/:id/timeline
+router.get("/sequences/enrollments/:id/timeline", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const timeline = await sequenceService.getEnrollmentTimeline(orgId, req.params.id);
+    return res.json({ success: true, data: timeline, message: "Timeline retrieved successfully" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// GET /email/sequences/enrollments/:id/status
+router.get("/sequences/enrollments/:id/status", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const status = await sequenceService.getEnrollmentStatus(orgId, req.params.id);
+    return res.json({
+      success: true,
+      data: status,
+      message: "Enrollment status retrieved successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// POST /email/sequences/unsubscribe
+router.post("/sequences/unsubscribe", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, error: "email is required" });
+    }
+    const count = await sequenceService.unsubscribeByEmail(orgId, String(email).toLowerCase());
+    return res.json({ success: true, data: { updated: count }, message: "Unsubscribe processed" });
   } catch (error) {
     return next(error);
   }

@@ -31,6 +31,7 @@ import { useContactRealtime } from 'src/hooks/use-contact-realtime';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { contactService } from 'src/services/contact-service';
 import { billingService } from 'src/services/billing-service';
+import { scoringService } from 'src/services/scoring-service';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -75,6 +76,11 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
     queryKey: ['contact', id],
     queryFn: () => contactService.getContact(id),
     staleTime: 60 * 1000,
+  });
+  const { data: contactScore } = useQuery({
+    queryKey: ['contact-score', id],
+    queryFn: () => scoringService.getContactScore(id),
+    staleTime: 30 * 1000,
   });
 
   const [invoicesPage, setInvoicesPage] = useState(0);
@@ -370,6 +376,9 @@ export function ContactDetailsView({ id, mode = 'overview' }: Props) {
               </Label>
               <Label color="info" variant="soft">
                 {contact.contactType?.[0] || 'Member'}
+              </Label>
+              <Label color={(Number(contactScore?.score || 0) >= 60 ? 'warning' : 'default') as any} variant="soft">
+                Score {Number(contactScore?.score || 0)}
               </Label>
             </Stack>
 

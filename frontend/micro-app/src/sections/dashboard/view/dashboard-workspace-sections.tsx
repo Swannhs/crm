@@ -1,5 +1,7 @@
 'use client';
 
+import useSWR from 'swr';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -12,22 +14,38 @@ import LinearProgress from '@mui/material/LinearProgress';
 
 import { Iconify } from 'src/components/iconify';
 import { Chart, useChart } from 'src/components/chart';
+import { dashboardService, DashboardRange } from 'src/services/dashboard-service';
 
 // ----------------------------------------------------------------------
 
-export function DashboardAnalyticsTab() {
+type DashboardAnalyticsTabProps = {
+  range: DashboardRange;
+};
+
+export function DashboardAnalyticsTab({ range }: DashboardAnalyticsTabProps) {
   const theme = useTheme();
+  const { data: overview } = useSWR(['dashboard-overview', range], () => dashboardService.getOverview(range));
+  const { data: revenueGraph = [] } = useSWR(['dashboard-graph-revenue', range], () => dashboardService.getGraph('revenue', range));
+  const { data: activity = [] } = useSWR(['dashboard-activity'], () => dashboardService.getActivity(3));
+  const { data: attention = [] } = useSWR(['dashboard-attention'], () => dashboardService.getAttention());
+
+  const revenueSeries = Array.isArray(revenueGraph)
+    ? revenueGraph.map((item: any) => Number(item.value ?? 0))
+    : [];
+  const revenueCategories = Array.isArray(revenueGraph)
+    ? revenueGraph.map((item: any) => String(item.month ?? item.stage ?? ''))
+    : [];
 
   return (
     <Grid container spacing={3}>
       {/* Financial Summary */}
       <Grid item xs={12} md={4}>
         <AnalyticsWidgetSummary
-          title="Profit & Loss"
-          total="$48,240"
-          percent={2.6}
+          title="Revenue"
+          total={`$${Number(overview?.revenue ?? 0).toFixed(2)}`}
+          percent={Number(overview?.conversionRate ?? 0).toFixed(1)}
           chart={{
-            series: [10, 41, 35, 51, 49, 62, 69, 91, 148],
+            series: revenueSeries.length ? revenueSeries : [0],
           }}
         />
       </Grid>
@@ -37,19 +55,18 @@ export function DashboardAnalyticsTab() {
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
             <Box>
               <Typography variant="h6">Business Performance</Typography>
-              <Typography variant="caption" color="text.secondary">Lead conversion vs Revenue growth</Typography>
+              <Typography variant="caption" color="text.secondary">Revenue trend and customer growth</Typography>
             </Box>
             <Button variant="soft" size="small" endIcon={<Iconify icon="eva:chevron-down-fill" />}>This Month</Button>
           </Stack>
           <Chart
             type="bar"
             series={[
-              { name: 'Leads', data: [44, 55, 41, 67, 22, 43, 21, 49] },
-              { name: 'Revenue', data: [13, 23, 20, 8, 13, 27, 33, 12] },
+              { name: 'Revenue', data: revenueSeries.length ? revenueSeries : [0] },
             ]}
             options={useChart({
               colors: [theme.palette.primary.main, theme.palette.info.main],
-              xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'] },
+              xaxis: { categories: revenueCategories.length ? revenueCategories : ['No data'] },
             })}
             height={300}
           />
@@ -62,9 +79,9 @@ export function DashboardAnalyticsTab() {
           <Typography variant="h6" sx={{ mb: 2 }}>Organization Goals</Typography>
           <Stack spacing={3}>
             {[
-              { label: 'Member Retention', value: 85, color: 'primary' },
-              { label: 'Annual Revenue', value: 62, color: 'success' },
-              { label: 'Staff Training', value: 45, color: 'warning' },
+              { label: 'Lead Conversion', value: Math.min(100, Number(overview?.conversionRate ?? 0)), color: 'primary' },
+              { label: 'Activity Completion', value: overview?.totalActivities ? Math.min(100, ((Number(overview?.completedActivities ?? 0) / Number(overview?.totalActivities ?? 1)) * 100)) : 0, color: 'success' },
+              { label: 'Customer Growth', value: Math.min(100, Math.max(0, Number(overview?.customerNetGrowth ?? 0))), color: 'warning' },
             ].map((goal) => (
               <Box key={goal.label}>
                 <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
@@ -89,10 +106,13 @@ export function DashboardAnalyticsTab() {
           <Typography variant="h6" sx={{ mb: 2 }}>Recent Alerts</Typography>
           <Stack spacing={2.5}>
             {[
-              { title: 'New High-Value Lead', time: '15m ago', icon: 'solar:user-plus-bold', color: 'info' },
-              { title: 'Payment Overdue: #INV-482', time: '2h ago', icon: 'solar:bill-list-bold', color: 'error' },
-              { title: 'Staff Meeting Reminder', time: '5h ago', icon: 'solar:calendar-bold', color: 'primary' },
-            ].map((alert) => (
+              ...attention.map((item: any) => ({
+                title: `${item.label}: ${item.value}`,
+                time: 'Needs attention',
+                icon: item.severity === 'high' ? 'solar:danger-bold' : 'solar:info-circle-bold',
+                color: item.severity === 'high' ? 'error' : 'info',
+              })),
+            ].map((alert: any) => (
               <Stack key={alert.title} direction="row" spacing={2} alignItems="center">
                 <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: `${alert.color}.lighter`, color: `${alert.color}.main`, display: 'flex' }}>
                    <Iconify icon={alert.icon} />
@@ -116,10 +136,11 @@ export function DashboardAnalyticsTab() {
           <Divider />
           <Stack>
             {[
-              { task: 'Review new instructor contracts', priority: 'High' },
-              { task: 'Update monthly marketing spend', priority: 'Medium' },
-              { task: 'Prepare for Q3 board meeting', priority: 'Low' },
-            ].map((item) => (
+              ...activity.map((item: any) => ({
+                task: item.title,
+                priority: item.state === 'done' ? 'Completed' : 'Planned',
+              })),
+            ].map((item: any) => (
               <Box key={item.task} sx={{ p: 2, display: 'flex', alignItems: 'center', borderBottom: (theme) => `1px solid ${theme.palette.divider}`, '&:last-child': { borderBottom: 0 } }}>
                 <Iconify icon="solar:check-square-bold" sx={{ mr: 2, color: 'text.disabled' }} />
                 <Box sx={{ flexGrow: 1 }}>

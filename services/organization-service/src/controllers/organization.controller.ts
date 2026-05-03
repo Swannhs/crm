@@ -385,7 +385,7 @@ export class GoalController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      const goalId = req.params.goalId;
+      const goalId = String(req.params.goalId || '');
       const data = await this.svc.updateGoal(req.identity.orgId, req.identity.userId, goalId, req.body);
       return res.json({ data });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
@@ -393,8 +393,24 @@ export class GoalController {
 
   async remove(req: AuthenticatedRequest, res: Response) {
     try {
-      const goalId = req.params.goalId;
+      const goalId = String(req.params.goalId || '');
       const data = await this.svc.removeGoal(req.identity.orgId, req.identity.userId, goalId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async complete(req: AuthenticatedRequest, res: Response) {
+    try {
+      const goalId = String(req.params.goalId || '');
+      const data = await this.svc.completeGoal(req.identity.orgId, req.identity.userId, goalId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async archive(req: AuthenticatedRequest, res: Response) {
+    try {
+      const goalId = String(req.params.goalId || '');
+      const data = await this.svc.archiveGoal(req.identity.orgId, req.identity.userId, goalId);
       return res.json({ data });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }
@@ -419,7 +435,7 @@ export class HabitController {
 
   async update(req: AuthenticatedRequest, res: Response) {
     try {
-      const habitId = req.params.habitId;
+      const habitId = String(req.params.habitId || '');
       const data = await this.svc.updateHabit(req.identity.orgId, req.identity.userId, habitId, req.body);
       return res.json({ data });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
@@ -427,8 +443,21 @@ export class HabitController {
 
   async remove(req: AuthenticatedRequest, res: Response) {
     try {
-      const habitId = req.params.habitId;
+      const habitId = String(req.params.habitId || '');
       const data = await this.svc.removeHabit(req.identity.orgId, req.identity.userId, habitId);
+      return res.json({ data });
+    } catch (err: any) { return res.status(500).json({ message: err.message }); }
+  }
+
+  async checkIn(req: AuthenticatedRequest, res: Response) {
+    try {
+      const habitId = String(req.params.habitId || '');
+      const data = await this.svc.checkInHabit(
+        req.identity.orgId,
+        req.identity.userId,
+        habitId,
+        req.body?.date,
+      );
       return res.json({ data });
     } catch (err: any) { return res.status(500).json({ message: err.message }); }
   }

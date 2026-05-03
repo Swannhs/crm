@@ -12,10 +12,18 @@ const envSchema = z.object({
   GMAIL_CLIENT_ID: z.string().optional(),
   GMAIL_CLIENT_SECRET: z.string().optional(),
   OUTLOOK_CLIENT_ID: z.string().optional(),
-  OUTLOOK_CLIENT_SECRET: z.string().optional()
+  OUTLOOK_CLIENT_SECRET: z.string().optional(),
+  ENCRYPTION_KEY: z.string().optional(),
+  EMAIL_SYNC_INTERVAL_MS: z.string().optional()
 });
 
 const envVars = envSchema.parse(process.env);
+
+if (envVars.NODE_ENV === "production") {
+  if (!envVars.ENCRYPTION_KEY || envVars.ENCRYPTION_KEY.trim().length < 32) {
+    throw new Error("ENCRYPTION_KEY must be set to a strong value (>=32 chars) in production");
+  }
+}
 
 export const config = {
   nodeEnv: envVars.NODE_ENV,
@@ -35,5 +43,7 @@ export const config = {
   outlook: {
     clientId: envVars.OUTLOOK_CLIENT_ID,
     clientSecret: envVars.OUTLOOK_CLIENT_SECRET
-  }
+  },
+  encryptionKey: envVars.ENCRYPTION_KEY,
+  emailSyncIntervalMs: envVars.EMAIL_SYNC_INTERVAL_MS ? parseInt(envVars.EMAIL_SYNC_INTERVAL_MS, 10) : 5 * 60 * 1000
 };

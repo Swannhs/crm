@@ -161,12 +161,15 @@ app.get("/v1/goals", identityMiddleware as any, attachRoleContext as any, (req, 
 app.post("/v1/goals", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.create(cast(req), res));
 app.patch("/v1/goals/:goalId", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.update(cast(req), res));
 app.delete("/v1/goals/:goalId", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.remove(cast(req), res));
+app.post("/v1/goals/:goalId/complete", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.complete(cast(req), res));
+app.post("/v1/goals/:goalId/archive", identityMiddleware as any, attachRoleContext as any, (req, res) => goalCtrl.archive(cast(req), res));
 
 // --- Habits ---
 app.get("/v1/habits", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.list(cast(req), res));
 app.post("/v1/habits", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.create(cast(req), res));
 app.patch("/v1/habits/:habitId", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.update(cast(req), res));
 app.delete("/v1/habits/:habitId", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.remove(cast(req), res));
+app.post("/v1/habits/:habitId/check-in", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.checkIn(cast(req), res));
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "organization-service (TS)" }));

@@ -1,12 +1,21 @@
 import { prisma } from "../lib/prisma.js";
 import { decrypt } from "../lib/encryption.js";
 import { GoogleAuthService } from "./google-auth.service.js";
-import { OutlookAuthService } from "./outlook-auth.service.ts";
+import { OutlookAuthService } from "./outlook-auth.service.js";
 
 const googleAuth = new GoogleAuthService();
 const outlookAuth = new OutlookAuthService();
 
 export class MailService {
+  constructor(
+    private readonly deps: {
+      db?: typeof prisma;
+      decryptFn?: typeof decrypt;
+      gmail?: GoogleAuthService;
+      outlook?: OutlookAuthService;
+    } = {}
+  ) {}
+
   async sendEmail(params: {
     orgId: string,
     userId: string,
@@ -22,14 +31,20 @@ export class MailService {
   }) {
     const { orgId, userId, accountId, to, subject, body, cc, bcc, isHtml, relatedDealId, relatedContactId } = params;
 
+    const db = this.deps.db ?? prisma;
+    const decryptFn = this.deps.decryptFn ?? decrypt;
+    const gmailClient = this.deps.gmail ?? googleAuth;
+    const outlookClient = this.deps.outlook ?? outlookAuth;
+
     let account;
     if (accountId) {
-      account = await prisma.emailAccount.findFirst({
-        where: { id: accountId, orgId }
+      account = await db.emailAccount.findFirst({
+        where: { id: accountId, orgId, userId, isConnected: true }
       });
     } else {
-      account = await prisma.emailAccount.findFirst({
-        where: { orgId, isConnected: true }
+      account = await db.emailAccount.findFirst({
+        where: { orgId, userId, isConnected: true },
+        orderBy: { createdAt: "desc" }
       });
     }
 
@@ -37,22 +52,22 @@ export class MailService {
       throw new Error("No connected email account found");
     }
 
-    const decryptedRefreshToken = decrypt(account.refreshToken);
+    const decryptedRefreshToken = decryptFn(account.refreshToken);
     if (!decryptedRefreshToken) {
       throw new Error("Failed to decrypt authentication tokens");
     }
 
     let sendResult: any = {};
     if (account.provider === "gmail") {
-      sendResult = await googleAuth.sendEmail(decryptedRefreshToken, { to, subject, body, cc, bcc, isHtml });
+      sendResult = await gmailClient.sendEmail(decryptedRefreshToken, { to, subject, body, cc, bcc, isHtml });
     } else if (account.provider === "outlook") {
-      sendResult = await outlookAuth.sendEmail(decryptedRefreshToken, { to, subject, body, cc, bcc, isHtml });
+      sendResult = await outlookClient.sendEmail(decryptedRefreshToken, { to, subject, body, cc, bcc, isHtml });
     }
 
     const messageId = sendResult.id || `sent-${Date.now()}`;
 
     // Persist to database
-    const emailRecord = await prisma.email.create({
+    const emailRecord = await db.email.create({
       data: {
         orgId,
         accountId: account.id,

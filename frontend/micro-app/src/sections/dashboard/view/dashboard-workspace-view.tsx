@@ -9,6 +9,7 @@ import { useTheme } from '@mui/material/styles';
 import { paths } from 'src/routes/paths';
 
 import { Iconify } from 'src/components/iconify';
+import { DashboardRange } from 'src/services/dashboard-service';
 
 import { FeatureRouteShell } from 'src/sections/parity/feature-route-shell';
 
@@ -27,6 +28,7 @@ type Props = {
 export function DashboardWorkspaceView({ mode = 'analytics' }: Props) {
   const theme = useTheme();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [range, setRange] = useState<DashboardRange>('30d');
 
   const title = mode === 'ecommerce' ? 'Shop Performance' : 'Executive Analytics';
   const description = mode === 'ecommerce' 
@@ -43,14 +45,26 @@ export function DashboardWorkspaceView({ mode = 'analytics' }: Props) {
       ]}
       action={
         mode === 'analytics' && (
-          <Button
-            variant="soft"
-            color="primary"
-            startIcon={<Iconify icon="solar:settings-bold" />}
-            onClick={() => setIsSettingsOpen(true)}
-          >
-            Customize Dashboard
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {(['7d', '30d', '90d'] as DashboardRange[]).map((item) => (
+              <Button
+                key={item}
+                size="small"
+                variant={range === item ? 'contained' : 'outlined'}
+                onClick={() => setRange(item)}
+              >
+                {item}
+              </Button>
+            ))}
+            <Button
+              variant="soft"
+              color="primary"
+              startIcon={<Iconify icon="solar:settings-bold" />}
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              Customize Dashboard
+            </Button>
+          </Box>
         )
       }
     >
@@ -58,7 +72,7 @@ export function DashboardWorkspaceView({ mode = 'analytics' }: Props) {
         {mode === 'ecommerce' ? (
           <DashboardEcommerceTab />
         ) : (
-          <DashboardAnalyticsTab />
+          <DashboardAnalyticsTab range={range} />
         )}
       </Box>
 

@@ -11,7 +11,7 @@ model EmailAccount {
   id              String   @id @default(uuid())
   orgId           String
   userId          String
-  email           String   @unique
+  email           String
   provider        String   // gmail, outlook
   isConnected     Boolean  @default(true)
   lastSyncAt      DateTime?
@@ -31,6 +31,7 @@ model EmailAccount {
   @@index([orgId])
   @@index([userId])
   @@index([orgId, userId])
+  @@unique([orgId, userId, provider, email])
   @@map("email_accounts")
 }
 
@@ -39,7 +40,7 @@ model Email {
   orgId         String
   accountId     String
   threadId      String?
-  messageId     String   @unique // Provider's message ID
+  messageId     String
   subject       String?
   fromName      String?
   fromEmail     String
@@ -52,6 +53,7 @@ model Email {
   snippet       String?
   hasAttachments Boolean @default(false)
   attachmentCount Int   @default(0)
+  attachmentMetadata Json?
   labels        String[] // Gmail labels or Outlook categories
   isRead        Boolean  @default(false)
   isStarred     Boolean  @default(false)
@@ -79,6 +81,7 @@ model Email {
   @@index([relatedContactId])
   @@index([orgId, fromEmail])
   @@index([orgId, sentAt])
+  @@unique([accountId, messageId])
   @@map("emails")
 }
 
@@ -175,8 +178,11 @@ model SequenceEnrollment {
   contactEmail  String
   contactId     String?
   dealId        String?
-  status        String   @default("active") // active, paused, completed, unsubscribed
+  status        String   @default("active") // active, paused, completed, unsubscribed, cancelled, replied
   currentStep   Int      @default(0)
+  firstName     String?
+  companyName   String?
+  dealName      String?
   startedAt     DateTime @default(now())
   completedAt   DateTime?
   unsubscribedAt DateTime?

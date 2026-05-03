@@ -835,6 +835,36 @@ export class GoalService {
     await this.goalRepo.delete(goalId);
     return { deleted: true };
   }
+
+  async completeGoal(orgId: string, userId: string, goalId: string) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    const existing = await this.goalRepo.findById(orgId, userId, goalId);
+    if (!existing) throw new Error('Goal not found');
+
+    return this.goalRepo.update(goalId, {
+      progress: 100,
+      metadata: {
+        ...(existing.metadata as any),
+        completedAt: new Date().toISOString(),
+        status: 'completed',
+      },
+    });
+  }
+
+  async archiveGoal(orgId: string, userId: string, goalId: string) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    const existing = await this.goalRepo.findById(orgId, userId, goalId);
+    if (!existing) throw new Error('Goal not found');
+
+    return this.goalRepo.update(goalId, {
+      metadata: {
+        ...(existing.metadata as any),
+        archived: true,
+        archivedAt: new Date().toISOString(),
+        status: 'archived',
+      },
+    });
+  }
 }
 
 export class HabitService {
@@ -878,5 +908,23 @@ export class HabitService {
 
     await this.habitRepo.delete(habitId);
     return { deleted: true };
+  }
+
+  async checkInHabit(orgId: string, userId: string, habitId: string, checkInDate?: string) {
+    await this.orgSvc.getOrganization(orgId, userId);
+    const existing = await this.habitRepo.findById(orgId, userId, habitId);
+    if (!existing) throw new Error('Habit not found');
+
+    const date = (checkInDate || new Date().toISOString().slice(0, 10)).slice(0, 10);
+    const prev = Array.isArray(existing.momentum) ? existing.momentum : [];
+    const nextMomentum = Array.from(new Set([...prev.map((d: any) => String(d)), date])).sort();
+
+    return this.habitRepo.update(habitId, {
+      momentum: nextMomentum,
+      metadata: {
+        ...(existing.metadata as any),
+        lastCheckInAt: new Date().toISOString(),
+      },
+    });
   }
 }

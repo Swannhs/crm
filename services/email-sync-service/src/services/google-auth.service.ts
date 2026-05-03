@@ -119,27 +119,30 @@ export class GoogleAuthService {
       q += ` after:${seconds}`;
     }
 
-    const response = await gmail.users.messages.list({
-      userId: 'me',
-      q,
-      maxResults: 50
-    });
-
-    const messages = response.data.messages || [];
     const results = [];
-
-    for (const msg of messages) {
-      const details = await gmail.users.messages.get({
+    let pageToken: string | undefined;
+    do {
+      const response = await gmail.users.messages.list({
         userId: 'me',
-        id: msg.id!
+        q,
+        maxResults: 100,
+        pageToken
       });
-      results.push(this.parseGmailMessage(details.data));
-    }
+      const messages = response.data.messages || [];
+      for (const msg of messages) {
+        const details = await gmail.users.messages.get({
+          userId: 'me',
+          id: msg.id!
+        });
+        results.push(this.parseGmailMessage(details.data));
+      }
+      pageToken = response.data.nextPageToken || undefined;
+    } while (pageToken);
 
     return results;
   }
 
-  private parseGmailMessage(data: any) {
+  parseGmailMessage(data: any) {
     const headers = data.payload.headers;
     const getHeader = (name: string) => headers.find((h: any) => h.name.toLowerCase() === name.toLowerCase())?.value;
 
@@ -157,14 +160,22 @@ export class GoogleAuthService {
     let textBody = '';
     let htmlBody = '';
 
+    const attachments: Array<{ filename: string; mimeType?: string; size?: number; attachmentId?: string }> = [];
     const extractBody = (part: any) => {
       if (part.mimeType === 'text/plain' && part.body.data) {
         textBody = Buffer.from(part.body.data, 'base64').toString();
       } else if (part.mimeType === 'text/html' && part.body.data) {
         htmlBody = Buffer.from(part.body.data, 'base64').toString();
-      } else if (part.parts) {
-        part.parts.forEach(extractBody);
       }
+      if (part.filename) {
+        attachments.push({
+          filename: part.filename,
+          mimeType: part.mimeType,
+          size: part.body?.size,
+          attachmentId: part.body?.attachmentId
+        });
+      }
+      if (part.parts) part.parts.forEach(extractBody);
     };
 
     extractBody(data.payload);
@@ -183,7 +194,10 @@ export class GoogleAuthService {
       htmlBody,
       snippet: data.snippet,
       sentAt: date ? new Date(date) : new Date(),
-      labels: data.labelIds || []
+      labels: data.labelIds || [],
+      hasAttachments: attachments.length > 0,
+      attachmentCount: attachments.length,
+      attachmentMetadata: attachments
     };
   }
 }

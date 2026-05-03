@@ -136,3 +136,129 @@ model MarketingDeliveryEvent {
   @@index([orgId, provider, providerEventId])
   @@index([orgId, provider, providerMessageId])
 }
+
+model ScoringRule {
+  id        String   @id @default(uuid())
+  orgId     String
+  scope     String   @default("both") // contact | lead | both
+  category  String
+  name      String
+  weight    Int      @default(10)
+  condition Json?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId, active])
+}
+
+model ContactScore {
+  id               String   @id @default(uuid())
+  orgId            String
+  contactOdooId    Int
+  score            Int
+  breakdown        Json?
+  lastCalculatedAt DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([orgId, contactOdooId])
+  @@index([orgId, score])
+}
+
+model LeadScore {
+  id               String   @id @default(uuid())
+  orgId            String
+  leadOdooId       Int
+  score            Int
+  breakdown        Json?
+  lastCalculatedAt DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([orgId, leadOdooId])
+  @@index([orgId, score])
+}
+
+model SupportTicket {
+  id                String   @id @default(uuid())
+  orgId             String
+  subject           String
+  description       String?
+  status            String   @default("open") // open | in_progress | waiting_customer | resolved | closed
+  priority          String   @default("medium") // low | medium | high | urgent
+  assigneeUserId    String?
+  customerContactId Int?
+  customerCompanyId Int?
+  slaDueAt          DateTime?
+  slaBreached       Boolean  @default(false)
+  createdByUserId   String?
+  closedAt          DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  notes   SupportTicketNote[]
+  replies SupportTicketReply[]
+
+  @@index([orgId, status, priority])
+  @@index([orgId, assigneeUserId])
+  @@index([orgId, customerContactId])
+}
+
+model SupportTicketNote {
+  id         String   @id @default(uuid())
+  orgId      String
+  ticketId   String
+  body       String
+  authorId   String?
+  createdAt  DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, ticketId])
+}
+
+model SupportTicketReply {
+  id         String   @id @default(uuid())
+  orgId      String
+  ticketId   String
+  body       String
+  authorId   String?
+  visibleToCustomer Boolean @default(true)
+  createdAt  DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, ticketId])
+}
+
+model SupportKnowledgeCategory {
+  id          String   @id @default(uuid())
+  orgId       String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles SupportKnowledgeArticle[]
+
+  @@index([orgId, name])
+}
+
+model SupportKnowledgeArticle {
+  id          String   @id @default(uuid())
+  orgId       String
+  categoryId  String?
+  title       String
+  body        String
+  isPublic    Boolean  @default(false)
+  publishedAt DateTime?
+  createdByUserId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category SupportKnowledgeCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, isPublic, publishedAt])
+  @@index([orgId, categoryId])
+}

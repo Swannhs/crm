@@ -110,6 +110,24 @@ export class ProjectsService {
     const search = paginationDto.search;
 
     const domain: any[] = search ? [['name', 'ilike', search]] : [];
+    const assignedToMe = String((paginationDto as any).assignedToMe || '').toLowerCase() === 'true';
+    const dueToday = String((paginationDto as any).dueToday || '').toLowerCase() === 'true';
+    const overdue = String((paginationDto as any).overdue || '').toLowerCase() === 'true';
+    const completed = String((paginationDto as any).completed || '').toLowerCase() === 'true';
+    const currentUserId = Number((paginationDto as any).currentUserId || 0);
+
+    if (assignedToMe && Number.isFinite(currentUserId) && currentUserId > 0) {
+      domain.push(['user_ids', 'in', [currentUserId]]);
+    }
+    if (dueToday) {
+      domain.push(['date_deadline', '=', new Date().toISOString().slice(0, 10)]);
+    }
+    if (overdue) {
+      domain.push(['date_deadline', '<', new Date().toISOString().slice(0, 10)]);
+    }
+    if (completed) {
+      domain.push(['kanban_state', '=', 'done']);
+    }
 
     const [data, total] = await Promise.all([
       this.odooClient.searchRead(this.taskModel, domain, this.taskFields, {
@@ -154,6 +172,11 @@ export class ProjectsService {
       payload,
     ]);
     return this.findOneTask(Number(id));
+  }
+
+  async completeTask(id: number) {
+    await this.odooClient.execute(this.taskModel, 'write', [[id], { kanban_state: 'done' }]);
+    return this.findOneTask(id);
   }
 
   async findColumnsByProject(projectId: number) {

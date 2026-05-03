@@ -39,12 +39,30 @@ export async function getProjectBoards(projectId: string) {
 
 export async function getTasks() {
   const response = await axiosInstance.get('/api/projects/v1/tasks');
-  return response.data?.data ?? response.data ?? [];
+  if (Array.isArray(response.data?.data)) return response.data.data;
+  if (Array.isArray(response.data)) return response.data;
+  if (Array.isArray(response.data?.data?.data)) return response.data.data.data;
+  return [];
 }
 
 export async function createTask(data: any) {
   const response = await axiosInstance.post('/api/projects/v1/tasks', data);
   return response.data;
+}
+
+export async function updateTask(id: string, data: any) {
+  const response = await axiosInstance.put(`/api/projects/v1/tasks/${id}`, data);
+  return response.data?.data ?? response.data;
+}
+
+export async function completeTask(id: string) {
+  const response = await axiosInstance.post(`/api/projects/v1/tasks/${id}/complete`);
+  return response.data?.data ?? response.data;
+}
+
+export async function deleteTask(id: string) {
+  const response = await axiosInstance.delete(`/api/projects/v1/tasks/${id}`);
+  return response.data?.data ?? response.data;
 }
 
 export async function createBoard(projectId: string, data: any) {
@@ -148,6 +166,9 @@ export const projectService = {
   getProjectBoards,
   getTasks,
   createTask,
+  updateTask,
+  completeTask,
+  deleteTask,
   createBoard,
   getBoard,
   getColumns,

@@ -17,6 +17,9 @@ import { EmployeesModule } from './modules/employees/employees.module.js';
 import { BookingModule } from './modules/booking/booking.module.js';
 import { OdooAdapterModule } from './modules/odoo-adapter/odoo-adapter.module.js';
 import { CalendarModule } from './modules/calendar/calendar.module.js';
+import { ScoresModule } from './modules/scores/scores.module.js';
+import { SupportModule } from './modules/support/support.module.js';
+import { HealthModule } from './modules/health/health.module.js';
 
 @Module({
   imports: [
@@ -36,6 +39,9 @@ import { CalendarModule } from './modules/calendar/calendar.module.js';
     EmployeesModule,
     BookingModule,
     CalendarModule,
+    ScoresModule,
+    SupportModule,
+    HealthModule,
     OdooAdapterModule,
     MagentoCompatibilityModule,
   ],

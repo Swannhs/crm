@@ -10,11 +10,20 @@ export class OdooClientService {
   private db: string;
   private password: string;
   private uid: number | null = null;
+  private readonly nodeEnv: string;
+  private readonly isProduction: boolean;
+  private readonly allowMockFallback: boolean;
 
   // Shared in-memory store across requests (static)
   private static mockStore: Record<string, any[]> = { ...INITIAL_MOCK_DATA };
 
   constructor(private configService: ConfigService) {
+    this.nodeEnv = this.configService.get<string>('NODE_ENV') || process.env.NODE_ENV || 'development';
+    this.isProduction = this.nodeEnv === 'production';
+    const explicitMockFlag =
+      this.configService.get<string>('ODOO_ALLOW_MOCK_FALLBACK') ?? process.env.ODOO_ALLOW_MOCK_FALLBACK;
+    this.allowMockFallback = explicitMockFlag === undefined ? !this.isProduction : explicitMockFlag === 'true';
+
     this.url =
       this.configService.get<string>('ODOO_BASE_URL') ||
       'http://odoo-demo:8069';
@@ -43,7 +52,9 @@ export class OdooClientService {
 
     const startTime = Date.now();
     try {
-      this.logger.debug(`Sending JSON-RPC call: ${service}.${method}`);
+      if (!this.isProduction) {
+        this.logger.debug(`Sending JSON-RPC call: ${service}.${method}`);
+      }
       const response = await axios.post(`${this.url}/jsonrpc`, payload, {
         headers: { 'Content-Type': 'application/json' },
         timeout: 10000, // Increased timeout for production hardening
@@ -55,7 +66,9 @@ export class OdooClientService {
         throw new Error(response.data.error.message || 'Odoo JSON-RPC Error');
       }
 
-      this.logger.debug(`JSON-RPC call ${service}.${method} succeeded in ${duration}ms`);
+      if (!this.isProduction) {
+        this.logger.debug(`JSON-RPC call ${service}.${method} succeeded in ${duration}ms`);
+      }
       return response.data?.result;
     } catch (error) {
       const duration = Date.now() - startTime;
@@ -69,7 +82,8 @@ export class OdooClientService {
 
   async authenticate(username?: string, password?: string): Promise<number> {
     try {
-      if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
+      const isMockHost = this.url.includes('odoo-demo') || this.url.includes('localhost');
+      if (!isMockHost) {
         this.logger.log(`Attempting Odoo authentication for database: ${this.db}`);
         const uid = await this.jsonRpcCall('common', 'authenticate', [
           this.db,
@@ -91,12 +105,16 @@ export class OdooClientService {
         return uid;
       }
 
+      if (!this.allowMockFallback) {
+        throw new Error('Mock Odoo host is not allowed without ODOO_ALLOW_MOCK_FALLBACK=true');
+      }
       this.uid = 1;
       return 1;
     } catch (error) {
-      this.logger.warn(
-        `Odoo JSON-RPC authentication failed, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      if (!this.allowMockFallback) {
+        throw error;
+      }
+      this.logger.warn('Odoo authentication failed; using mock fallback mode.');
       this.uid = 1;
       return 1;
     }
@@ -110,10 +128,13 @@ export class OdooClientService {
   ): Promise<any> {
     if (!this.uid) await this.authenticate();
 
-    this.logger.log(`Odoo Execute: ${model}.${method}`);
+    if (!this.isProduction) {
+      this.logger.debug(`Odoo Execute: ${model}.${method}`);
+    }
 
     try {
-      if (!this.url.includes('odoo-demo') && !this.url.includes('localhost')) {
+      const isMockHost = this.url.includes('odoo-demo') || this.url.includes('localhost');
+      if (!isMockHost) {
         return await this.jsonRpcCall('object', 'execute_kw', [
           this.db,
           this.uid,
@@ -124,11 +145,15 @@ export class OdooClientService {
           kwargs,
         ]);
       }
+      if (!this.allowMockFallback) {
+        throw new Error('Mock Odoo execution is disabled in this environment');
+      }
       return this.handleMockExecute(model, method, args, kwargs);
     } catch (error) {
-      this.logger.warn(
-        `Odoo JSON-RPC execution failed for ${model}.${method}, falling back to mock mode: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      if (!this.allowMockFallback) {
+        throw error;
+      }
+      this.logger.warn(`Odoo call failed for ${model}.${method}; using mock fallback mode.`);
       return this.handleMockExecute(model, method, args, kwargs);
     }
   }

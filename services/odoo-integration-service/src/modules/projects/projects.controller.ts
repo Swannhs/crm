@@ -70,6 +70,21 @@ export class ProjectsController {
     return this.projectsService.createTask(data);
   }
 
+  @Put('v1/tasks/:id')
+  async updateTask(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
+    return this.projectsService.updateTask(id, data);
+  }
+
+  @Post('v1/tasks/:id/complete')
+  async completeTask(@Param('id', ParseIntPipe) id: number) {
+    return this.projectsService.completeTask(id);
+  }
+
+  @Delete('v1/tasks/:id')
+  async deleteTask(@Param('id', ParseIntPipe) id: number) {
+    return this.projectsService.removeTask(id);
+  }
+
   // Kanban Compatibility (Mapping Boards/Columns/Cards to Tasks)
   @Get('v1/projects/:projectId/boards')
   async getProjectBoards(@Param('projectId', ParseIntPipe) projectId: number) {

@@ -77,6 +77,28 @@ describe('CrmService', () => {
     expect(execute).toHaveBeenCalledWith('crm.lead', 'write', [[42], { active: false }]);
   });
 
+  it('maps opportunity stage updates to Odoo stage_id payloads', async () => {
+    const execute = jest.fn().mockResolvedValue(true);
+    const searchRead = jest.fn().mockResolvedValueOnce([{
+      id: 42,
+      name: 'Deal',
+      partner_id: [7, 'Acme Inc'],
+      stage_id: [5, 'Negotiation'],
+      probability: 80,
+      active: true,
+      type: 'opportunity',
+    }]);
+    const service = makeService({ execute, searchRead });
+
+    await service.update(42, { stageId: 5 });
+
+    expect(execute).toHaveBeenCalledWith(
+      'crm.lead',
+      'write',
+      [[42], expect.objectContaining({ stage_id: 5 })],
+    );
+  });
+
   it('validates activity payloads and falls back to an available Odoo activity type', async () => {
     const execute = jest.fn().mockResolvedValue(99);
     const searchRead = jest.fn()

@@ -4,12 +4,32 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 import { rateLimit } from 'express-rate-limit';
+import { randomUUID } from 'crypto';
 
 async function bootstrap() {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  if (nodeEnv === 'production' && !process.env.ALLOWED_ORIGIN) {
+    throw new Error('ALLOWED_ORIGIN must be set in production.');
+  }
+  if (nodeEnv === 'production' && process.env.ALLOWED_ORIGIN === '*') {
+    throw new Error('Wildcard CORS origin is not allowed in production.');
+  }
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
+  app.use((req: any, res: any, next: any) => {
+    const requestId = req.headers['x-request-id'] || randomUUID();
+    req.requestId = requestId;
+    res.setHeader('x-request-id', String(requestId));
+    next();
+  });
+
+  const corsOrigin =
+    nodeEnv === 'production'
+      ? (process.env.ALLOWED_ORIGIN || '').split(',').map((item) => item.trim()).filter(Boolean)
+      : process.env.ALLOWED_ORIGIN || '*';
+
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGIN || '*',
+    origin: corsOrigin,
     credentials: true,
   });
 
