@@ -34,7 +34,9 @@ export class CrmController {
   @Get('activities')
   @ApiOperation({ summary: 'List all CRM activities' })
   async getActivities(@Query() paginationDto: PaginationDto) {
-    return this.crmService.getActivities(paginationDto);
+    const pageSize = Math.max(1, Math.min(100, Number(paginationDto.pageSize || 10)));
+    const page = Math.max(1, Number(paginationDto.page || 1));
+    return this.crmService.getActivities({ ...paginationDto, pageSize, page });
   }
 
   @Get('summary')
@@ -53,7 +55,10 @@ export class CrmController {
   @ApiOperation({ summary: 'List all leads and opportunities' })
   @ApiResponse({ status: 200, type: [LeadEntity] })
   async findAll(@Query() paginationDto: PaginationDto) {
-    return this.crmService.findAll(paginationDto);
+    const pageSize = Math.max(1, Math.min(100, Number(paginationDto.pageSize || 10)));
+    const page = Math.max(1, Number(paginationDto.page || 1));
+    const active = paginationDto.active !== undefined ? paginationDto.active : true;
+    return this.crmService.findAll({ ...paginationDto, pageSize, page, active });
   }
 
   @Get(':id')

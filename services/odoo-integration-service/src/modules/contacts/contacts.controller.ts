@@ -58,20 +58,28 @@ export class ContactsController {
   @ApiOperation({ summary: 'List all contacts' })
   @ApiResponse({ status: 200, type: [ContactEntity] })
   async findAll(@Query() paginationDto: PaginationDto) {
-    return this.contactsService.findAll(paginationDto);
+    const pageSize = Math.max(1, Math.min(100, Number(paginationDto.pageSize || 10)));
+    const page = Math.max(1, Number(paginationDto.page || 1));
+    const active = paginationDto.active !== undefined ? paginationDto.active : true;
+    return this.contactsService.findAll({ ...paginationDto, pageSize, page, active });
   }
 
   @Get('analytics')
   @ApiOperation({ summary: 'Get contacts analytics' })
   async getAnalytics(@Query() paginationDto: PaginationDto) {
-    return this.contactsService.getAnalytics(paginationDto);
+    const pageSize = Math.max(1, Math.min(100, Number(paginationDto.pageSize || 10)));
+    const page = Math.max(1, Number(paginationDto.page || 1));
+    return this.contactsService.getAnalytics({ ...paginationDto, pageSize, page });
   }
 
   // --- Companies ---
   @Get('companies')
   @ApiOperation({ summary: 'List all companies' })
   async getCompanies(@Query() paginationDto: PaginationDto) {
-    return this.contactsService.getCompanies(paginationDto);
+    const pageSize = Math.max(1, Math.min(100, Number(paginationDto.pageSize || 10)));
+    const page = Math.max(1, Number(paginationDto.page || 1));
+    const active = paginationDto.active !== undefined ? paginationDto.active : true;
+    return this.contactsService.getCompanies({ ...paginationDto, pageSize, page, active });
   }
 
   @Get('companies/:id')
@@ -306,7 +314,9 @@ export class ContactsController {
       ? Number(id)
       : await this.contactsService.resolveUuid(id);
     if (!odooId) return { data: [], total: 0 };
-    return this.contactsService.getShifts(odooId, paginationDto);
+    const pageSize = Math.max(1, Math.min(100, Number(paginationDto.pageSize || 10)));
+    const page = Math.max(1, Number(paginationDto.page || 1));
+    return this.contactsService.getShifts(odooId, { ...paginationDto, pageSize, page });
   }
 
   @Post(':id/clock-in')

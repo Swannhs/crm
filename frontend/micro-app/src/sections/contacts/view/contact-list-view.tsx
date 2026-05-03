@@ -252,14 +252,14 @@ export function ContactListView() {
   const handleDeleteContact = async () => {
     try {
       await contactService.deleteContact(selectedContact.id || selectedContact._id);
-      showToast({ message: 'Contact deleted successfully.', severity: 'success' });
+      showToast({ message: 'Contact archived successfully.', severity: 'success' });
       deleteConfirm.onFalse();
       setSelectedContact(null);
       await refetch();
       await refetchGraph();
       await refetchSummary();
     } catch (error) {
-      showToast({ message: 'Failed to delete contact', severity: 'warning' });
+      showToast({ message: 'Failed to archive contact', severity: 'warning' });
     }
   };
 
@@ -492,7 +492,7 @@ export function ContactListView() {
         </MenuItem>
         <Divider sx={{ borderStyle: 'dashed' }} />
         <MenuItem onClick={() => { deleteConfirm.onTrue(); handleCloseMenu(); }} sx={{ color: 'error.main' }}>
-           <Iconify icon="solar:trash-bin-trash-bold" sx={{ mr: 1 }} /> Delete contact
+           <Iconify icon="solar:archive-bold" sx={{ mr: 1 }} /> Archive contact
         </MenuItem>
       </Menu>
 
@@ -546,14 +546,14 @@ export function ContactListView() {
       </Dialog>
 
       <Dialog open={deleteConfirm.value} onClose={deleteConfirm.onFalse}>
-        <DialogTitle>Delete Contact?</DialogTitle>
+        <DialogTitle>Archive Contact?</DialogTitle>
         <DialogContent>
-          Are you sure you want to permanently delete <b>{selectedContact?.fullName}</b>? 
-          This action will remove all associated data including invoices and activities.
+          Are you sure you want to archive <b>{selectedContact?.fullName}</b>? 
+          This will hide the contact from active lists but preserve history.
         </DialogContent>
         <DialogActions>
           <Button onClick={deleteConfirm.onFalse}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={handleDeleteContact}>Delete Permanently</Button>
+          <Button variant="contained" color="error" onClick={handleDeleteContact}>Archive</Button>
         </DialogActions>
       </Dialog>
 

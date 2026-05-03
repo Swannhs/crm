@@ -41,6 +41,13 @@ export class AccountingController {
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
+    const pageSize = Math.max(1, Math.min(100, Number(paginationDto.pageSize || 10)));
+    const page = Math.max(1, Number(paginationDto.page || 1));
+
+    if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
+      throw new Error('dateFrom cannot be later than dateTo');
+    }
+
     let odooId: number | undefined;
     if (contactId) {
       odooId = /^\d+$/.test(contactId)
@@ -48,7 +55,7 @@ export class AccountingController {
         : (await this.contactsService.resolveUuid(contactId)) || undefined;
     }
     const filters = { state, paymentState, dateFrom, dateTo };
-    return this.accountingService.findAllInvoices(paginationDto, odooId, filters);
+    return this.accountingService.findAllInvoices({ ...paginationDto, pageSize, page }, odooId, filters);
   }
 
   @Get('invoices/:id')
@@ -106,7 +113,7 @@ export class AccountingController {
   @Get('billing/graph')
   @ApiOperation({ summary: 'Get billing revenue graph' })
   async getGraph(@Query('months') months?: string) {
-    const count = months ? parseInt(months, 10) : 6;
+    const count = Math.max(1, Math.min(24, months ? parseInt(months, 10) : 6));
     return this.accountingService.getGraph(count);
   }
 }

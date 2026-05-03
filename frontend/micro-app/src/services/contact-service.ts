@@ -155,15 +155,8 @@ export const contactService = {
 
   getContactsByType: async (type: string, id?: string, params?: any) => {
     if (type === 'company' || type === 'vendor') {
-      const response = await axios.get('/api/odoo/companies', {
-        params: {
-          page: params?.page,
-          pageSize: params?.pageSize,
-          search: id || params?.search || params?.q || '',
-        },
-      });
-      const contacts = Array.isArray(response.data?.data) ? response.data.data : [];
-      return contacts.map(normalizeOdooContact);
+      const result = await contactService.getCompanies(params);
+      return result.data;
     }
 
     const response = await axios.get('/api/odoo/contacts', {
