@@ -210,7 +210,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/swann/WebstormProjects/mymanager-main/microservices/services/organization-service/generated-rbac/prisma",
+      "value": "/app/services/organization-service/generated-rbac/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -232,7 +232,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/swann/WebstormProjects/mymanager-main/microservices/services/organization-service/prisma/schema.prisma",
+    "sourceFilePath": "/app/services/organization-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

@@ -283,7 +283,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/swann/WebstormProjects/mymanager-main/microservices/services/email-sync-service/generated/prisma",
+      "value": "/app/services/email-sync-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -297,7 +297,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/swann/WebstormProjects/mymanager-main/microservices/services/email-sync-service/prisma/schema.prisma",
+    "sourceFilePath": "/app/services/email-sync-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

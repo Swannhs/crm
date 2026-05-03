@@ -148,7 +148,7 @@ case $CMD in
         if [ "$ENV" = "dev" ] && [ "$#" -eq 0 ]; then
             DB_SERVICES=(
                 keycloak-db organization-db integrations-db realtime-db
-                email-sync-db odoo-integration-db magento-integration-db
+                email-sync-db odoo-integration-db
             )
             CORE_SERVICES=(kafka redis api-router-service)
             APP_SERVICES=()

@@ -260,7 +260,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/workspace/services/realtime-service/generated/prisma",
+      "value": "/app/services/realtime-service/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -269,7 +269,7 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "linux-musl-openssl-3.0.x",
+        "value": "debian-openssl-3.0.x",
         "native": true
       },
       {
@@ -278,7 +278,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/workspace/services/realtime-service/prisma/schema.prisma",
+    "sourceFilePath": "/app/services/realtime-service/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

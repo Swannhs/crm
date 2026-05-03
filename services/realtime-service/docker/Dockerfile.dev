@@ -1,24 +1,27 @@
-FROM node:24-alpine
+FROM node:24-bookworm-slim
 
-ARG SERVICE_NAME
-ARG SERVICE_PORT
-
-ENV SERVICE_NAME=${SERVICE_NAME}
-ENV PORT=${SERVICE_PORT}
-ENV NODE_ENV=development
-
-WORKDIR /workspace/services/${SERVICE_NAME}
-
-RUN apk add --no-cache openssl libc6-compat \
+RUN apt-get update && apt-get install -y openssl libc6 \
+  && rm -rf /var/lib/apt/lists/* \
   && corepack enable
 
-EXPOSE ${SERVICE_PORT}
+ARG SERVICE_NAME
+ENV SERVICE_NAME=${SERVICE_NAME}
+WORKDIR /app
 
-ENV SHARED_INSTALL_TIMEOUT_SECONDS=1800
-ENV SHARED_INSTALL_STALE_SECONDS=180
-ENV SHARED_INSTALL_POLL_SECONDS=2
+# Copy root workspace files
+COPY package.json yarn.lock .yarnrc.yml* ./
+# Copy common dependency
+COPY common/node-service-kit ./common/node-service-kit
+# Copy service package.json
+COPY services/${SERVICE_NAME}/package.json ./services/${SERVICE_NAME}/package.json
 
-COPY services/${SERVICE_NAME}/docker/entrypoint.dev.sh /usr/local/bin/node-service-dev-entrypoint.sh
-RUN chmod +x /usr/local/bin/node-service-dev-entrypoint.sh
+# Install dependencies at build time
+RUN yarn install
 
-CMD ["/usr/local/bin/node-service-dev-entrypoint.sh"]
+WORKDIR /app/services/${SERVICE_NAME}
+
+COPY services/${SERVICE_NAME}/docker/entrypoint.standalone.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["yarn", "dev"]

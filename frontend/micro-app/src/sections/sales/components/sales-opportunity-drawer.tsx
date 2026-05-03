@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
@@ -78,8 +77,12 @@ export function SalesOpportunityDrawer({
             {currentTab === 'overview' && (
               <Stack spacing={3}>
                 <Stack direction="row" spacing={1}>
-                  <Chip size="small" label={item.stage.toUpperCase()} variant="soft" color="primary" />
-                  <Chip size="small" label={item.source === 'magento' ? 'External' : 'Internal'} variant="outlined" />
+                  <Label variant="soft" color="primary">
+                    {item.stage.toUpperCase()}
+                  </Label>
+                  <Label variant="outlined">
+                    {item.source === 'magento' ? 'External' : 'Internal'}
+                  </Label>
                 </Stack>
 
                 <Box>

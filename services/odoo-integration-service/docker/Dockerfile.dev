@@ -1,13 +1,27 @@
-FROM node:24-alpine
+FROM node:24-bookworm-slim
 
-ENV NODE_ENV=development
-ENV PORT=7200
+RUN apt-get update && apt-get install -y openssl libc6 \
+  && rm -rf /var/lib/apt/lists/* \
+  && corepack enable
 
-WORKDIR /workspace/services/odoo-integration-service
+ARG SERVICE_NAME
+ENV SERVICE_NAME=${SERVICE_NAME}
+WORKDIR /app
 
-RUN corepack enable
+# Copy root workspace files
+COPY package.json yarn.lock .yarnrc.yml* ./
+# Copy common dependency
+COPY common/node-service-kit ./common/node-service-kit
+# Copy service package.json
+COPY services/${SERVICE_NAME}/package.json ./services/${SERVICE_NAME}/package.json
 
-EXPOSE 7200
+# Install dependencies at build time
+RUN yarn install
 
-# Host handles dependencies via bind mount
-CMD ["npm", "run", "start:dev"]
+WORKDIR /app/services/${SERVICE_NAME}
+
+COPY services/${SERVICE_NAME}/docker/entrypoint.standalone.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["yarn", "dev"]

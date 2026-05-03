@@ -8,11 +8,11 @@ services:
         SERVICE_PORT: 7010
     container_name: organization-service
     volumes:
-      - ../../../node_modules:/workspace/node_modules
-      - ../../../services/organization-service:/workspace/services/organization-service
-      - ../../../common:/workspace/common
-      - ../../../package.json:/workspace/package.json
-      - ../../../yarn.lock:/workspace/yarn.lock
+      - ../../../services/organization-service:/app/services/organization-service
+      - /app/services/organization-service/node_modules
+      - ../../../common:/app/common
+      - ../../../package.json:/app/package.json
+      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7010
       KAFKA_BROKERS: kafka:9092
@@ -38,11 +38,11 @@ services:
         SERVICE_PORT: 7001
     container_name: api-router-service
     volumes:
-      - ../../../node_modules:/workspace/node_modules
-      - ../../../services/api-router-service:/workspace/services/api-router-service
-      - ../../../common:/workspace/common
-      - ../../../package.json:/workspace/package.json
-      - ../../../yarn.lock:/workspace/yarn.lock
+      - ../../../services/api-router-service:/app/services/api-router-service
+      - /app/services/api-router-service/node_modules
+      - ../../../common:/app/common
+      - ../../../package.json:/app/package.json
+      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7001
       KEYCLOAK_TOKEN_URL: http://keycloak:8080/realms/mymanager/protocol/openid-connect/token
@@ -69,11 +69,11 @@ services:
         SERVICE_PORT: 7030
     container_name: realtime-service
     volumes:
-      - ../../../node_modules:/workspace/node_modules
-      - ../../../services/realtime-service:/workspace/services/realtime-service
-      - ../../../common:/workspace/common
-      - ../../../package.json:/workspace/package.json
-      - ../../../yarn.lock:/workspace/yarn.lock
+      - ../../../services/realtime-service:/app/services/realtime-service
+      - /app/services/realtime-service/node_modules
+      - ../../../common:/app/common
+      - ../../../package.json:/app/package.json
+      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7030
       KAFKA_BROKERS: kafka:9092
@@ -98,11 +98,11 @@ services:
         SERVICE_PORT: 7140
     container_name: integrations-service
     volumes:
-      - ../../../node_modules:/workspace/node_modules
-      - ../../../services/integrations-service:/workspace/services/integrations-service
-      - ../../../common:/workspace/common
-      - ../../../package.json:/workspace/package.json
-      - ../../../yarn.lock:/workspace/yarn.lock
+      - ../../../services/integrations-service:/app/services/integrations-service
+      - /app/services/integrations-service/node_modules
+      - ../../../common:/app/common
+      - ../../../package.json:/app/package.json
+      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7140
       KAFKA_BROKERS: kafka:9092
@@ -127,11 +127,11 @@ services:
         SERVICE_PORT: 7200
     container_name: odoo-integration-service
     volumes:
-      - ../../../node_modules:/workspace/node_modules
-      - ../../../services/odoo-integration-service:/workspace/services/odoo-integration-service
-      - ../../../common:/workspace/common
-      - ../../../package.json:/workspace/package.json
-      - ../../../yarn.lock:/workspace/yarn.lock
+      - ../../../services/odoo-integration-service:/app/services/odoo-integration-service
+      - /app/services/odoo-integration-service/node_modules
+      - ../../../common:/app/common
+      - ../../../package.json:/app/package.json
+      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7200
       ODOO_BASE_URL: ${ODOO_BASE_URL:-http://odoo:8069}
@@ -159,11 +159,11 @@ services:
         SERVICE_PORT: 7160
     container_name: email-sync-service
     volumes:
-      - ../../../node_modules:/workspace/node_modules
-      - ../../../services/email-sync-service:/workspace/services/email-sync-service
-      - ../../../common:/workspace/common
-      - ../../../package.json:/workspace/package.json
-      - ../../../yarn.lock:/workspace/yarn.lock
+      - ../../../services/email-sync-service:/app/services/email-sync-service
+      - /app/services/email-sync-service/node_modules
+      - ../../../common:/app/common
+      - ../../../package.json:/app/package.json
+      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7160
       DATABASE_URL: postgres://emailsync:emailsync@email-sync-db:5432/email_sync_service
@@ -185,11 +185,11 @@ services:
         SERVICE_PORT: 7040
     container_name: booking-service
     volumes:
-      - ../../../node_modules:/workspace/node_modules
-      - ../../../services/booking-service:/workspace/services/booking-service
-      - ../../../common:/workspace/common
-      - ../../../package.json:/workspace/package.json
-      - ../../../yarn.lock:/workspace/yarn.lock
+      - ../../../services/booking-service:/app/services/booking-service
+      - /app/services/booking-service/node_modules
+      - ../../../common:/app/common
+      - ../../../package.json:/app/package.json
+      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7040
       DATABASE_URL: postgres://booking:booking@booking-db:5432/booking
