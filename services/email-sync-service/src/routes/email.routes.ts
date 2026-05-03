@@ -246,10 +246,16 @@ router.get("/messages", async (req: any, res, next) => {
   }
 });
 
+import { MailService } from "../services/mail.service.js";
+
+const mailService = new MailService();
+
+// ... existing code ...
+
 // POST /email/send - Send an email
 router.post("/send", async (req: any, res, next) => {
   try {
-    const { to, subject, body, cc, bcc, dealId, isHtml, accountId } = req.body;
+    const { to, subject, body, cc, bcc, dealId, contactId, isHtml, accountId } = req.body;
     const orgId = req.identity!.orgId;
     const userId = req.identity!.userId;
 
@@ -260,93 +266,18 @@ router.post("/send", async (req: any, res, next) => {
       });
     }
 
-    let account;
-    if (accountId) {
-      account = await prisma.emailAccount.findFirst({
-        where: { id: accountId, orgId, userId },
-      });
-    } else {
-      account = await prisma.emailAccount.findFirst({
-        where: { orgId, userId, provider: "gmail", isConnected: true },
-      });
-    }
-
-    if (!account) {
-      return res.status(404).json({
-        success: false,
-        error: "No connected email account found",
-      });
-    }
-
-    if (!account.refreshToken) {
-      return res.status(400).json({
-        success: false,
-        error: "Email account is missing required authentication tokens",
-      });
-    }
-
-    const decryptedRefreshToken = decrypt(account.refreshToken);
-    if (!decryptedRefreshToken) {
-      return res.status(400).json({
-        success: false,
-        error: "Failed to decrypt authentication tokens",
-      });
-    }
-
-    let sendResult: any = {};
-    if (account.provider === "gmail") {
-      sendResult = await googleAuthService.sendEmail(
-        decryptedRefreshToken,
-        {
-          to,
-          subject,
-          body,
-          cc,
-          bcc,
-          isHtml,
-        },
-      );
-    } else if (account.provider === "outlook") {
-      // For outlook, we usually need an access token, not a refresh token directly.
-      // If we don't have a valid access token, we would refresh it first.
-      // But let's assume outlookAuthService.sendEmail handles token refresh or takes the refresh token.
-      sendResult = await outlookAuthService.sendEmail(
-        decryptedRefreshToken,
-        {
-          to,
-          subject,
-          body,
-          cc,
-          bcc,
-          isHtml,
-        },
-      );
-    }
-
-    if (!sendResult.id) {
-      // Outlook doesn't always return ID in send endpoint unless we save to Drafts first
-      // We will generate a temporary one if missing
-      sendResult.id = `sent-${Date.now()}`;
-    }
-
-    // Persist to database
-    const emailRecord = await prisma.email.create({
-      data: {
-        orgId,
-        accountId: account.id,
-        messageId: sendResult.id,
-        subject,
-        fromEmail: account.email,
-        toEmails: Array.isArray(to) ? to : [to],
-        ccEmails: cc ? (Array.isArray(cc) ? cc : [cc]) : [],
-        bccEmails: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : [],
-        textBody: isHtml ? undefined : body,
-        htmlBody: isHtml ? body : undefined,
-        direction: "outbound",
-        sentAt: new Date(),
-        receivedAt: new Date(), // It's a sent email, so just use now
-        relatedDealId: dealId,
-      },
+    const emailRecord = await mailService.sendEmail({
+      orgId,
+      userId,
+      accountId,
+      to,
+      subject,
+      body,
+      cc,
+      bcc,
+      isHtml,
+      relatedDealId: dealId,
+      relatedContactId: contactId
     });
 
     return res.json({

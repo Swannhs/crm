@@ -11,8 +11,6 @@ services:
       - ../../../services/organization-service:/app/services/organization-service
       - /app/services/organization-service/node_modules
       - ../../../common:/app/common
-      - ../../../package.json:/app/package.json
-      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7010
       KAFKA_BROKERS: kafka:9092
@@ -21,6 +19,7 @@ services:
       KEYCLOAK_REALM: mymanager
       KEYCLOAK_ADMIN_USERNAME: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
     depends_on:
       kafka:
         condition: service_started
@@ -41,8 +40,6 @@ services:
       - ../../../services/api-router-service:/app/services/api-router-service
       - /app/services/api-router-service/node_modules
       - ../../../common:/app/common
-      - ../../../package.json:/app/package.json
-      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7001
       KEYCLOAK_TOKEN_URL: http://keycloak:8080/realms/mymanager/protocol/openid-connect/token
@@ -57,6 +54,7 @@ services:
       INTEGRATIONS_SERVICE_BASE_URL: http://integrations-service:7140
       FINANCE_SERVICE_BASE_URL: http://finance-service:7170
       MONOLITH_BASE_URL: http://monolith:5000
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
     ports:
       - "7001:7001"
 
@@ -72,13 +70,12 @@ services:
       - ../../../services/realtime-service:/app/services/realtime-service
       - /app/services/realtime-service/node_modules
       - ../../../common:/app/common
-      - ../../../package.json:/app/package.json
-      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7030
       KAFKA_BROKERS: kafka:9092
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgres://realtime:realtime@realtime-db:5432/realtime
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
     depends_on:
       kafka:
         condition: service_started
@@ -101,13 +98,12 @@ services:
       - ../../../services/integrations-service:/app/services/integrations-service
       - /app/services/integrations-service/node_modules
       - ../../../common:/app/common
-      - ../../../package.json:/app/package.json
-      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7140
       KAFKA_BROKERS: kafka:9092
       DATABASE_URL: postgres://integrations:integrations@integrations-db:5432/integrations
       ODOO_INTEGRATION_SERVICE_URL: http://odoo-integration-service:7200
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
     depends_on:
       kafka:
         condition: service_started
@@ -130,8 +126,6 @@ services:
       - ../../../services/odoo-integration-service:/app/services/odoo-integration-service
       - /app/services/odoo-integration-service/node_modules
       - ../../../common:/app/common
-      - ../../../package.json:/app/package.json
-      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7200
       ODOO_BASE_URL: ${ODOO_BASE_URL:-http://odoo:8069}
@@ -142,6 +136,7 @@ services:
       DATABASE_URL: postgres://odoo_integration:odoo_integration@odoo-integration-db:5432/odoo_integration
       MARKETING_WEBHOOK_PROVIDERS: ${MARKETING_WEBHOOK_PROVIDERS:-}
       MARKETING_WEBHOOK_SECRET: ${MARKETING_WEBHOOK_SECRET:-}
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
     depends_on:
       odoo-integration-db:
         condition: service_healthy
@@ -162,14 +157,14 @@ services:
       - ../../../services/email-sync-service:/app/services/email-sync-service
       - /app/services/email-sync-service/node_modules
       - ../../../common:/app/common
-      - ../../../package.json:/app/package.json
-      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7160
       DATABASE_URL: postgres://emailsync:emailsync@email-sync-db:5432/email_sync_service
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: mymanager
       KEYCLOAK_CLIENT_ID: crm-api
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-super-secret-key-32-chars-long!}
     depends_on:
       email-sync-db:
         condition: service_healthy
@@ -188,12 +183,11 @@ services:
       - ../../../services/booking-service:/app/services/booking-service
       - /app/services/booking-service/node_modules
       - ../../../common:/app/common
-      - ../../../package.json:/app/package.json
-      - ../../../yarn.lock:/app/yarn.lock
     environment:
       PORT: 7040
       DATABASE_URL: postgres://booking:booking@booking-db:5432/booking
       ODOO_SERVICE_URL: http://odoo-integration-service:7200
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
     depends_on:
       booking-db:
         condition: service_healthy

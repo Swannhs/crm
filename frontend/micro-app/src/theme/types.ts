@@ -48,3 +48,18 @@ declare module '@mui/material/Button' {
     soft: true;
   }
 }
+
+declare module '@mui/material/Chip' {
+  interface ChipPropsVariantOverrides {
+    soft: true;
+  }
+}
+
+declare module '@mui/material/Badge' {
+  interface BadgePropsVariantOverrides {
+    online: true;
+    alway: true;
+    busy: true;
+    offline: true;
+  }
+}

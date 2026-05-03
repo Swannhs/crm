@@ -11,7 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@mymanager/node-service-kit": "0.1.0",
+    "@mymanager/node-service-kit": "file:../../common/node-service-kit",
     "knex": "^3.1.0",
     "pg": "^8.13.1",
     "@prisma/client": "^6.19.3"

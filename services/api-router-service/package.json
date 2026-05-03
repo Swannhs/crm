@@ -11,7 +11,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@mymanager/node-service-kit": "0.1.0"
+    "@mymanager/node-service-kit": "file:../../common/node-service-kit"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

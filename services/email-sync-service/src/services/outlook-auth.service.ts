@@ -84,25 +84,7 @@ export class OutlookAuthService {
       isHtml?: boolean;
     }
   ) {
-    // First, exchange refresh token for an access token
-    const tokenParams = new URLSearchParams({
-      client_id: this.clientId,
-      client_secret: config.outlook.clientSecret || '',
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token'
-    });
-
-    const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: tokenParams.toString()
-    });
-
-    if (!tokenResponse.ok) {
-      throw new Error(`Failed to refresh Outlook token`);
-    }
-
-    const { access_token } = await tokenResponse.json() as any;
+    const accessToken = await this.getAccessToken(refreshToken);
 
     const toRecipients = (Array.isArray(params.to) ? params.to : [params.to]).map(email => ({
       emailAddress: { address: email }
@@ -133,7 +115,7 @@ export class OutlookAuthService {
     const sendResponse = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${access_token}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(message)
@@ -145,5 +127,67 @@ export class OutlookAuthService {
     }
 
     return { success: true };
+  }
+
+  private async getAccessToken(refreshToken: string) {
+    const tokenParams = new URLSearchParams({
+      client_id: this.clientId,
+      client_secret: config.outlook.clientSecret || '',
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token'
+    });
+
+    const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: tokenParams.toString()
+    });
+
+    if (!tokenResponse.ok) {
+      const err = await tokenResponse.text();
+      throw new Error(`Failed to refresh Outlook token: ${err}`);
+    }
+
+    const data = await tokenResponse.json() as any;
+    return data.access_token;
+  }
+
+  async fetchMessages(refreshToken: string, lastSyncAt?: Date) {
+    const accessToken = await this.getAccessToken(refreshToken);
+
+    let url = 'https://graph.microsoft.com/v1.0/me/messages?$top=50&$select=id,subject,body,bodyPreview,from,toRecipients,receivedDateTime,sentDateTime,hasAttachments,categories,conversationId';
+    
+    if (lastSyncAt) {
+      const filter = `receivedDateTime ge ${lastSyncAt.toISOString()}`;
+      url += `&$filter=${encodeURIComponent(filter)}`;
+    }
+
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Failed to fetch Outlook messages: ${err}`);
+    }
+
+    const payload = await response.json() as any;
+    const messages = payload.value || [];
+
+    return messages.map((msg: any) => ({
+      messageId: msg.id,
+      threadId: msg.conversationId,
+      subject: msg.subject,
+      fromName: msg.from?.emailAddress?.name,
+      fromEmail: msg.from?.emailAddress?.address,
+      toEmails: msg.toRecipients?.map((r: any) => r.emailAddress?.address) || [],
+      textBody: msg.body?.contentType === 'text' ? msg.body.content : undefined,
+      htmlBody: msg.body?.contentType === 'html' ? msg.body.content : undefined,
+      snippet: msg.bodyPreview,
+      sentAt: new Date(msg.sentDateTime),
+      receivedAt: new Date(msg.receivedDateTime),
+      hasAttachments: msg.hasAttachments,
+      labels: msg.categories || []
+    }));
   }
 }

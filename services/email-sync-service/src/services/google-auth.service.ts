@@ -103,4 +103,87 @@ export class GoogleAuthService {
 
     return res.data;
   }
+
+  async fetchMessages(refreshToken: string, lastSyncAt?: Date) {
+    const client = new google.auth.OAuth2(
+      config.gmail.clientId,
+      config.gmail.clientSecret
+    );
+    client.setCredentials({ refresh_token: refreshToken });
+    const gmail = google.gmail({ version: 'v1', auth: client });
+
+    let q = 'label:INBOX';
+    if (lastSyncAt) {
+      // Gmail 'after' query is in seconds
+      const seconds = Math.floor(lastSyncAt.getTime() / 1000);
+      q += ` after:${seconds}`;
+    }
+
+    const response = await gmail.users.messages.list({
+      userId: 'me',
+      q,
+      maxResults: 50
+    });
+
+    const messages = response.data.messages || [];
+    const results = [];
+
+    for (const msg of messages) {
+      const details = await gmail.users.messages.get({
+        userId: 'me',
+        id: msg.id!
+      });
+      results.push(this.parseGmailMessage(details.data));
+    }
+
+    return results;
+  }
+
+  private parseGmailMessage(data: any) {
+    const headers = data.payload.headers;
+    const getHeader = (name: string) => headers.find((h: any) => h.name.toLowerCase() === name.toLowerCase())?.value;
+
+    const fromRaw = getHeader('From') || '';
+    const toRaw = getHeader('To') || '';
+    
+    // Simple regex to extract email from "Name <email@example.com>"
+    const emailRegex = /<([^>]+)>/;
+    const fromEmail = fromRaw.match(emailRegex)?.[1] || fromRaw;
+    const fromName = fromRaw.replace(emailRegex, '').replace(/"/g, '').trim();
+
+    const subject = getHeader('Subject');
+    const date = getHeader('Date');
+
+    let textBody = '';
+    let htmlBody = '';
+
+    const extractBody = (part: any) => {
+      if (part.mimeType === 'text/plain' && part.body.data) {
+        textBody = Buffer.from(part.body.data, 'base64').toString();
+      } else if (part.mimeType === 'text/html' && part.body.data) {
+        htmlBody = Buffer.from(part.body.data, 'base64').toString();
+      } else if (part.parts) {
+        part.parts.forEach(extractBody);
+      }
+    };
+
+    extractBody(data.payload);
+
+    return {
+      messageId: data.id,
+      threadId: data.threadId,
+      subject,
+      fromName,
+      fromEmail,
+      toEmails: toRaw ? toRaw.split(',').map((s: string) => {
+        const m = s.match(emailRegex);
+        return m ? m[1] : s.trim();
+      }) : [],
+      textBody,
+      htmlBody,
+      snippet: data.snippet,
+      sentAt: date ? new Date(date) : new Date(),
+      labels: data.labelIds || []
+    };
+  }
 }

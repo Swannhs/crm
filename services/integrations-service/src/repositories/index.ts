@@ -198,23 +198,39 @@ export class ZoomIntegrationRepository {
 }
 
 export class ZoomMeetingRepository {
+  private decrypt(item: any) {
+    if (!item) return item;
+    return {
+      ...item,
+      password: decryptIfPresent(item.password),
+    };
+  }
+
   async create(data: ZoomMeetingInput & { userId: string; organizationId?: string }) {
-    return db.zoomMeeting.create({ data });
+    const encryptedData = {
+      ...data,
+      password: encryptIfPresent(data.password),
+    };
+    return db.zoomMeeting.create({ data: encryptedData }).then(this.decrypt);
   }
 
   async findByZoomId(zoomId: string) {
-    return db.zoomMeeting.findUnique({ where: { zoomId } });
+    return db.zoomMeeting.findUnique({ where: { zoomId } }).then(this.decrypt);
   }
 
   async findByUserId(userId: string) {
     return db.zoomMeeting.findMany({
       where: { userId },
       orderBy: { startTime: 'desc' }
-    });
+    }).then((list: any[]) => list.map(this.decrypt));
   }
 
   async update(id: string, data: Partial<ZoomMeetingInput>) {
-    return db.zoomMeeting.update({ where: { id }, data });
+    const encryptedData = {
+      ...data,
+      password: data.password ? encryptIfPresent(data.password) : undefined,
+    };
+    return db.zoomMeeting.update({ where: { id }, data: encryptedData }).then(this.decrypt);
   }
 
   async delete(id: string) {

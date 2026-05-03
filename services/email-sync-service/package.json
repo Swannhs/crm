@@ -13,7 +13,7 @@
     "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@mymanager/node-service-kit": "*",
+    "@mymanager/node-service-kit": "file:../../common/node-service-kit",
     "@prisma/client": "^6.19.3",
     "express": "^4.21.0",
     "zod": "^3.23.8",

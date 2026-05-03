@@ -2,10 +2,6 @@
   "name": "@mymanager/microservices",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "common/*",
-    "services/*"
-  ],
   "scripts": {
     "compose:dev": "./manage.sh dev up",
     "compose:web-test": "./manage.sh test up",

@@ -8,17 +8,23 @@ ARG SERVICE_NAME
 ENV SERVICE_NAME=${SERVICE_NAME}
 WORKDIR /app
 
-# Copy root workspace files
-COPY package.json yarn.lock .yarnrc.yml* ./
-# Copy common dependency
+# Copy internal shared dependency
 COPY common/node-service-kit ./common/node-service-kit
-# Copy service package.json
+
+# Copy service manifest first for caching
 COPY services/${SERVICE_NAME}/package.json ./services/${SERVICE_NAME}/package.json
 
-# Install dependencies at build time
+# Install dependencies ONLY for this service
+WORKDIR /app/services/${SERVICE_NAME}
 RUN yarn install
 
+# Copy rest of the service source
+WORKDIR /app
+COPY services/${SERVICE_NAME} ./services/${SERVICE_NAME}
+
 WORKDIR /app/services/${SERVICE_NAME}
+# Handle prisma if present
+RUN if [ -f "prisma/schema.prisma" ]; then npx prisma generate; fi
 
 COPY services/${SERVICE_NAME}/docker/entrypoint.standalone.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

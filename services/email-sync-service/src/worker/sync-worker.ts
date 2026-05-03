@@ -1,8 +1,12 @@
 import { prisma } from "../lib/prisma.js";
-
 import { decrypt } from "../lib/encryption.js";
+import { GoogleAuthService } from "../services/google-auth.service.js";
+import { OutlookAuthService } from "../services/outlook-auth.service.js";
+import { SequenceService } from "../services/sequence.service.js";
 
-
+const googleAuth = new GoogleAuthService();
+const outlookAuth = new OutlookAuthService();
+const sequenceService = new SequenceService();
 
 export class EmailSyncWorker {
   private isRunning = false;
@@ -15,10 +19,24 @@ export class EmailSyncWorker {
     
     console.log("Starting Email Sync Worker...");
     // Run immediately
-    this.runSync();
+    this.runSync().catch(err => console.error("Initial sync failed:", err));
+    
+    // Process sequences immediately too
+    this.runSequenceProcessing().catch(err => console.error("Initial sequence processing failed:", err));
     
     // Then run on interval
-    this.intervalId = setInterval(() => this.runSync(), this.syncIntervalMs);
+    this.intervalId = setInterval(async () => {
+      await this.runSync();
+      await this.runSequenceProcessing();
+    }, this.syncIntervalMs);
+  }
+
+  private async runSequenceProcessing() {
+    try {
+      await sequenceService.processPendingActivities();
+    } catch (error) {
+      console.error("Error in sequence processing:", error);
+    }
   }
 
   stop() {
@@ -78,22 +96,15 @@ export class EmailSyncWorker {
         throw new Error("Failed to decrypt token");
       }
 
-      // Placeholder for actual message fetching logic
-      // In a real implementation, you would:
-      // 1. Exchange refresh token for access token
-      // 2. Fetch messages since lastSyncAt
-      // 3. Save messages to DB
-      // 4. Update syncLog with counts
-      
-      let emailsSynced = 0;
+      let fetchedMessages: any[] = [];
       
       if (account.provider === 'gmail') {
-         // gmail sync logic placeholder
-         // emailsSynced = await this.syncGmail(account, refreshToken);
+         fetchedMessages = await googleAuth.fetchMessages(refreshToken, account.lastSyncAt);
       } else if (account.provider === 'outlook') {
-         // outlook sync logic placeholder
-         // emailsSynced = await this.syncOutlook(account, refreshToken);
+         fetchedMessages = await outlookAuth.fetchMessages(refreshToken, account.lastSyncAt);
       }
+
+      const emailsSynced = await this.saveMessages(account, fetchedMessages);
 
       // Mark success
       await prisma.emailAccount.update({
@@ -136,5 +147,46 @@ export class EmailSyncWorker {
         }
       });
     }
+  }
+
+  private async saveMessages(account: any, messages: any[]) {
+    let count = 0;
+    for (const msg of messages) {
+      // Determine direction
+      const direction = msg.fromEmail?.toLowerCase() === account.email.toLowerCase() ? "outbound" : "inbound";
+
+      await prisma.email.upsert({
+        where: { messageId: msg.messageId },
+        update: {
+          subject: msg.subject,
+          textBody: msg.textBody,
+          htmlBody: msg.htmlBody,
+          snippet: msg.snippet,
+          isRead: msg.isRead,
+          labels: msg.labels,
+          updatedAt: new Date()
+        },
+        create: {
+          orgId: account.orgId,
+          accountId: account.id,
+          messageId: msg.messageId,
+          threadId: msg.threadId,
+          subject: msg.subject,
+          fromName: msg.fromName,
+          fromEmail: msg.fromEmail,
+          toEmails: msg.toEmails,
+          textBody: msg.textBody,
+          htmlBody: msg.htmlBody,
+          snippet: msg.snippet,
+          isRead: msg.isRead || false,
+          direction,
+          sentAt: msg.sentAt || new Date(),
+          receivedAt: msg.receivedAt || new Date(),
+          labels: msg.labels || []
+        }
+      });
+      count++;
+    }
+    return count;
   }
 }
