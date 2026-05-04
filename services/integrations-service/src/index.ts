@@ -158,6 +158,8 @@ app.get("/v1/integrations/whatsapp/status/:instanceId", auth, (req, res) => what
 app.get("/v1/integrations/telegram/sessions", auth, (req, res) => telegramCtrl.getSessions(cast(req), res));
 app.post("/v1/integrations/telegram/sessions", auth, (req, res) => telegramCtrl.createSession(cast(req), res));
 app.delete("/v1/integrations/telegram/sessions/:sessionId", auth, (req, res) => telegramCtrl.deleteSession(cast(req), res));
+app.post("/v1/integrations/telegram/send-otp", auth, (req, res) => telegramCtrl.sendOtp(cast(req), res));
+app.post("/v1/integrations/telegram/verify-otp", auth, (req, res) => telegramCtrl.verifyOtp(cast(req), res));
 
 // --- Odoo ---
 app.post("/v1/integrations/odoo/connect", auth, (req, res) => odooCtrl.connect(cast(req), res));

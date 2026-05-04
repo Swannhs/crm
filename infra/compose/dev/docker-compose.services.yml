@@ -51,8 +51,10 @@ services:
       DOCUMENTS_SERVICE_BASE_URL: http://documents-service:7080
       PAYMENTS_SERVICE_BASE_URL: http://payments-service:7090
       EMPLOYEES_SERVICE_BASE_URL: http://employees-service:7070
+      ORGANIZATION_SERVICE_BASE_URL: http://organization-service:7010
       INTEGRATIONS_SERVICE_BASE_URL: http://integrations-service:7140
       FINANCE_SERVICE_BASE_URL: http://finance-service:7170
+      REALTIME_SERVICE_BASE_URL: http://realtime-service:7030
       MONOLITH_BASE_URL: http://monolith:5000
       TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
     ports:

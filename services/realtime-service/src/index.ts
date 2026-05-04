@@ -9,7 +9,9 @@ import {
   LiveChatStatisticsController,
   OmniConversationController,
   OmniMessageController,
-  OmniAIController
+  OmniAIController,
+  OmniAgentController,
+  InboxCompatController
 } from "./controllers/index.js";
 import { identityMiddleware } from "./middleware/identity.js";
 
@@ -26,6 +28,8 @@ const statsCtrl = new LiveChatStatisticsController();
 const omniConvCtrl = new OmniConversationController();
 const omniMsgCtrl = new OmniMessageController();
 const omniAICtrl = new OmniAIController();
+const omniAgentCtrl = new OmniAgentController();
+const inboxCompatCtrl = new InboxCompatController();
 
 // --- Live Chat ---
 app.post("/v1/livechat/channels", auth, (req, res) => channelCtrl.getChannelsByAdminId(cast(req), res));
@@ -54,6 +58,23 @@ app.get("/v1/omni/conversations/:conversationId/history", auth, route(omniMsgCtr
 app.post("/v1/omni/messages", auth, route(omniMsgCtrl.addMessage.bind(omniMsgCtrl)));
 app.post("/v1/omni/ai/translate", auth, route(omniAICtrl.translate.bind(omniAICtrl)));
 app.post("/v1/omni/ai/suggest-reply", auth, route(omniAICtrl.suggestReply.bind(omniAICtrl)));
+
+// --- Agent Management ---
+app.post("/v1/agent/add_agent", auth, route(omniAgentCtrl.addAgent.bind(omniAgentCtrl)));
+app.post("/v1/agent/update_agent_in_chat", auth, route(omniAgentCtrl.updateAgentInChat.bind(omniAgentCtrl)));
+app.get("/v1/agent/get_my_assigned_chats", auth, route(omniAgentCtrl.getMyAssignedChats.bind(omniAgentCtrl)));
+app.get("/v1/agent/get_my_task", auth, route(omniAgentCtrl.getMyTask.bind(omniAgentCtrl)));
+app.post("/v1/agent/create_task", auth, route(omniAgentCtrl.createMyTask.bind(omniAgentCtrl)));
+app.patch("/v1/agent/update_task", auth, route(omniAgentCtrl.updateMyTask.bind(omniAgentCtrl)));
+app.post("/v1/agent/complete_task", auth, route(omniAgentCtrl.completeMyTask.bind(omniAgentCtrl)));
+app.delete("/v1/agent/delete_task", auth, route(omniAgentCtrl.deleteMyTask.bind(omniAgentCtrl)));
+
+// --- Inbox compatibility ---
+app.get("/v1/inbox/get_chats", auth, route(inboxCompatCtrl.getChats.bind(inboxCompatCtrl)));
+app.post("/v1/inbox/get_convo", auth, route(inboxCompatCtrl.getConvo.bind(inboxCompatCtrl)));
+app.post("/v1/inbox/send_text", auth, route(inboxCompatCtrl.sendText.bind(inboxCompatCtrl)));
+app.post("/v1/inbox/send_image", auth, route(inboxCompatCtrl.sendImage.bind(inboxCompatCtrl)));
+app.all("/v1/inbox/webhook/:uid", route(inboxCompatCtrl.webhook.bind(inboxCompatCtrl)));
 
 // --- Notifications (Dummy) ---
 app.get("/v1/notifications", auth, (req, res) => res.json({ data: [], total: 0 }));

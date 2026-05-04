@@ -376,6 +376,13 @@ async function handleApiCompat(req: Request, res: Response) {
     }
   }
 
+  if (module === "inbox" && /^\/webhook\/[^/]+$/.test(rest)) {
+    return proxyTo(req, res, {
+      baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+      targetPath: `/v1/inbox${rest}`
+    });
+  }
+
   const ident = identityOr401(req, res);
   if (!ident) return;
 
@@ -429,6 +436,88 @@ async function handleApiCompat(req: Request, res: Response) {
       return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
     }
 
+    if (module === "phonebook") {
+      if (req.method === "POST" && rest === "/add") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: "/v1/odoo/contacts",
+        });
+      }
+
+      if (req.method === "POST" && rest === "/import_contacts") {
+        const contacts = Array.isArray(req.body?.contacts) ? req.body.contacts : [];
+        if (!contacts.length) {
+          return res.status(400).json({ message: "contacts array is required" });
+        }
+
+        const results: Array<{ ok: boolean; data?: any; error?: string; input?: any }> = [];
+        for (const item of contacts) {
+          try {
+            const payload = {
+              name: String(item?.name || item?.fullName || "").trim(),
+              email: item?.email ? String(item.email) : undefined,
+              phone: item?.phone ? String(item.phone) : undefined,
+              mobile: item?.mobile ? String(item.mobile) : undefined,
+              company: item?.company ? String(item.company) : undefined,
+              jobTitle: item?.jobTitle ? String(item.jobTitle) : undefined,
+              notes: item?.notes ? String(item.notes) : undefined,
+            };
+
+            if (!payload.name) {
+              results.push({ ok: false, error: "name is required", input: item });
+              continue;
+            }
+
+            const upstream = await fetch(
+              toAbsoluteUrl(API_ROUTER_CONFIG.odooIntegrationBaseUrl, "/v1/odoo/contacts"),
+              {
+                method: "POST",
+                headers: {
+                  ...getForwardHeaders(req),
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+              }
+            );
+
+            if (!upstream.ok) {
+              const text = await upstream.text();
+              results.push({ ok: false, error: `upstream ${upstream.status}: ${text}`, input: item });
+              continue;
+            }
+
+            const data = await upstream.json();
+            results.push({ ok: true, data });
+          } catch (error: any) {
+            results.push({ ok: false, error: String(error?.message || error), input: item });
+          }
+        }
+
+        const created = results.filter((r) => r.ok).length;
+        const failed = results.length - created;
+        return res.status(created > 0 ? 200 : 502).json({
+          imported: created,
+          failed,
+          total: results.length,
+          results,
+        });
+      }
+
+      if (req.method === "GET" && rest === "/get_uid_contacts") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl,
+          targetPath: withQuery(req, "/v1/odoo/contacts"),
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: add, import_contacts, get_uid_contacts",
+      });
+    }
+
     if (module === "odoo") {
       const targetPath = withQuery(req, `/v1/odoo${rest}`);
       return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
@@ -437,6 +526,326 @@ async function handleApiCompat(req: Request, res: Response) {
     if (module === "marketing") {
       const targetPath = withQuery(req, `/v1/marketing${rest}`);
       return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
+    }
+
+    if (module === "user") {
+      if (req.method === "POST" && rest === "/update_meta") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: "/v1/integrations/meta",
+          method: "PUT"
+        });
+      }
+
+      if ((req.method === "POST" || req.method === "PUT" || req.method === "PATCH") && rest === "/update_profile") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/user/update_profile",
+          method: "POST",
+          body: req.body || {}
+        });
+      }
+
+      if (req.method === "POST" && rest === "/return_media_url") {
+        const mediaUrl = String(req.body?.mediaUrl || req.body?.url || req.body?.imageUrl || '').trim();
+        const dataUrl = String(req.body?.dataUrl || '').trim();
+        const fallbackName = String(req.body?.name || req.body?.fileName || 'media').trim();
+
+        if (mediaUrl) {
+          return res.json({ success: true, data: { mediaUrl }, media_url: mediaUrl });
+        }
+
+        if (dataUrl.startsWith("data:")) {
+          const safeName = fallbackName.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const generated = `/uploads/${safeName}`;
+          return res.json({ success: true, data: { mediaUrl: generated }, media_url: generated });
+        }
+
+        return res.status(400).json({
+          success: false,
+          message: "mediaUrl/url/imageUrl or dataUrl is required"
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: update_meta, update_profile, return_media_url",
+      });
+    }
+
+    if (module === "qr") {
+      if (req.method === "POST" && rest === "/gen_qr") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: "/v1/integrations/whatsapp/instances",
+          method: "POST",
+          body: { name: req.body?.name || req.body?.instanceName || "WhatsApp Instance" }
+        });
+      }
+
+      if (req.method === "GET" && rest === "/get_all") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: "/v1/integrations/whatsapp/instances"
+        });
+      }
+
+      if (req.method === "POST" && rest === "/del_instance") {
+        const instanceId = String(req.body?.instanceId || req.body?.id || '').trim();
+        if (!instanceId) return res.status(400).json({ success: false, message: 'instanceId is required' });
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: `/v1/integrations/whatsapp/instances/${encodeURIComponent(instanceId)}`,
+          method: "DELETE"
+        });
+      }
+
+      if (req.method === "POST" && rest === "/change_instance_status") {
+        const instanceId = String(req.body?.instanceId || req.body?.id || '').trim();
+        if (!instanceId) return res.status(400).json({ success: false, message: 'instanceId is required' });
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: `/v1/integrations/whatsapp/status/${encodeURIComponent(instanceId)}`,
+          method: "GET"
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: gen_qr, get_all, del_instance, change_instance_status",
+      });
+    }
+
+    if (module === "telegram") {
+      if (req.method === "POST" && rest === "/send_otp") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: "/v1/integrations/telegram/send-otp"
+        });
+      }
+
+      if (req.method === "POST" && rest === "/verify_otp") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: "/v1/integrations/telegram/verify-otp"
+        });
+      }
+
+      if (req.method === "GET" && rest === "/sessions") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: "/v1/integrations/telegram/sessions"
+        });
+      }
+
+      if ((req.method === "GET" || req.method === "DELETE") && /^\/delete_session\/[^/]+$/.test(rest)) {
+        const sessionId = rest.split("/")[2];
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.integrationsServiceBaseUrl,
+          targetPath: `/v1/integrations/telegram/sessions/${encodeURIComponent(sessionId)}`,
+          method: "DELETE"
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: send_otp, verify_otp, sessions, delete_session/:sessionId",
+      });
+    }
+
+    if (module === "chat_flow") {
+      if (req.method === "POST" && rest === "/insert_flow_beta") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/chat_flow/insert_flow_beta",
+        });
+      }
+      if (req.method === "GET" && rest === "/get_flows_beta") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/chat_flow/get_flows_beta",
+        });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: insert_flow_beta, get_flows_beta" });
+    }
+
+    if (module === "chatbot") {
+      if (req.method === "POST" && rest === "/add_beta_chatbot") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/chatbot/add_beta_chatbot",
+        });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: add_beta_chatbot" });
+    }
+
+    if (module === "wa_call") {
+      if (req.method === "POST" && rest === "/insert_flow") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/wa_call/insert_flow",
+        });
+      }
+      if (req.method === "POST" && rest === "/create_broadcast") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/wa_call/create_broadcast",
+        });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: insert_flow, create_broadcast" });
+    }
+
+    if (module === "broadcast") {
+      if (req.method === "POST" && rest === "/create_template_campaign") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/broadcast/create_template_campaign",
+        });
+      }
+      if (req.method === "GET" && rest === "/dashboard") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/broadcast/dashboard",
+        });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: create_template_campaign, dashboard" });
+    }
+
+    if (module === "templet") {
+      if (req.method === "POST" && rest === "/add_new") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.organizationServiceBaseUrl,
+          targetPath: "/v1/compat/templet/add_new",
+        });
+      }
+      return notImplemented(res, { module, method: req.method, path: rest, hint: "Implemented: add_new" });
+    }
+
+    if (module === "inbox") {
+      if (req.method === "GET" && rest === "/get_chats") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: withQuery(req, "/v1/inbox/get_chats")
+        });
+      }
+      if (req.method === "POST" && rest === "/get_convo") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/inbox/get_convo"
+        });
+      }
+      if (req.method === "POST" && rest === "/send_text") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/inbox/send_text"
+        });
+      }
+      if (req.method === "POST" && rest === "/send_image") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/inbox/send_image"
+        });
+      }
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: get_chats, get_convo, send_text, send_image, webhook/:uid",
+      });
+    }
+
+    if (module === "ai") {
+      if (req.method === "POST" && rest === "/translate") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/omni/ai/translate"
+        });
+      }
+      if (req.method === "POST" && rest === "/suggest_reply") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/omni/ai/suggest-reply"
+        });
+      }
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: translate, suggest_reply",
+      });
+    }
+
+    if (module === "agent") {
+      if (req.method === "POST" && rest === "/add_agent") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/agent/add_agent"
+        });
+      }
+
+      if (req.method === "POST" && rest === "/update_agent_in_chat") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/agent/update_agent_in_chat"
+        });
+      }
+
+      if (req.method === "GET" && rest === "/get_my_assigned_chats") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: withQuery(req, "/v1/agent/get_my_assigned_chats")
+        });
+      }
+
+      if (req.method === "GET" && rest === "/get_my_task") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: withQuery(req, "/v1/agent/get_my_task")
+        });
+      }
+
+      if (req.method === "POST" && rest === "/create_task") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/agent/create_task"
+        });
+      }
+
+      if ((req.method === "PATCH" || req.method === "POST") && rest === "/update_task") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/agent/update_task",
+          method: "PATCH"
+        });
+      }
+
+      if (req.method === "POST" && rest === "/complete_task") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/agent/complete_task"
+        });
+      }
+
+      if ((req.method === "DELETE" || req.method === "POST") && rest === "/delete_task") {
+        return proxyTo(req, res, {
+          baseUrl: API_ROUTER_CONFIG.realtimeServiceBaseUrl,
+          targetPath: "/v1/agent/delete_task",
+          method: "DELETE"
+        });
+      }
+
+      return notImplemented(res, {
+        module,
+        method: req.method,
+        path: rest,
+        hint: "Implemented: add_agent, update_agent_in_chat, get_my_assigned_chats, get_my_task, create_task, update_task, complete_task, delete_task",
+      });
     }
 
     if (module === "image-library") {

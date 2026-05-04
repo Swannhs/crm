@@ -86,6 +86,28 @@ export interface OmniParticipantInput {
   role?: string;
 }
 
+export interface OmniAgentInput {
+  organizationId: string;
+  userId: string;
+  displayName?: string;
+  email?: string;
+  status?: string;
+  isActive?: boolean;
+  metadata?: any;
+}
+
+export interface OmniAgentTaskInput {
+  organizationId: string;
+  agentId: string;
+  conversationId?: string;
+  title: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  dueAt?: Date;
+  metadata?: any;
+}
+
 export interface OmniMessageReceivedEvent {
   provider: 'whatsapp' | 'telegram';
   instanceId: string;

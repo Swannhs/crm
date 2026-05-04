@@ -662,6 +662,7 @@ export class WhatsAppService {
 
 export class TelegramService {
   private repo = new TelegramSessionRepository();
+  private static otpStore = new Map<string, { otp: string; expiresAt: number }>();
 
   async getSessions(userId: string) {
     return this.repo.findByUserId(userId);
@@ -682,6 +683,44 @@ export class TelegramService {
 
   async deleteSession(sessionId: string) {
     return this.repo.delete(sessionId);
+  }
+
+  async sendOtp(userId: string, organizationId: string | undefined, phone: string) {
+    const normalizedPhone = String(phone || '').trim();
+    if (!normalizedPhone) throw new Error('phone is required');
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+    const key = `${organizationId || 'global'}:${normalizedPhone}`;
+    TelegramService.otpStore.set(key, { otp, expiresAt });
+
+    // Ensure there is at least one session for this user/org.
+    const existing = (await this.getSessions(userId)).find((session) => session.organizationId === organizationId);
+    if (!existing) {
+      await this.createSession(userId, organizationId, `Telegram ${normalizedPhone}`);
+    }
+
+    return {
+      sent: true,
+      expiresInSeconds: 300,
+      // Dev-only compatibility field.
+      otp,
+    };
+  }
+
+  async verifyOtp(organizationId: string | undefined, phone: string, otp: string) {
+    const normalizedPhone = String(phone || '').trim();
+    const code = String(otp || '').trim();
+    if (!normalizedPhone || !code) throw new Error('phone and otp are required');
+    const key = `${organizationId || 'global'}:${normalizedPhone}`;
+    const record = TelegramService.otpStore.get(key);
+    if (!record) return { verified: false, reason: 'OTP not found' };
+    if (record.expiresAt < Date.now()) {
+      TelegramService.otpStore.delete(key);
+      return { verified: false, reason: 'OTP expired' };
+    }
+    if (record.otp !== code) return { verified: false, reason: 'Invalid OTP' };
+    TelegramService.otpStore.delete(key);
+    return { verified: true };
   }
 }
 

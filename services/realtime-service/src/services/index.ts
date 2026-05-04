@@ -7,7 +7,9 @@ import {
   SocketConnectionRepository,
   OmniConversationRepository,
   OmniMessageRepository,
-  OmniParticipantRepository
+  OmniParticipantRepository,
+  OmniAgentRepository,
+  OmniAgentTaskRepository
 } from '../repositories/index.js';
 import type { 
   LiveChatChannelInput, 
@@ -17,7 +19,8 @@ import type {
   ChatStatisticsInput,
   OmniConversationInput,
   OmniMessageInput,
-  OmniParticipantInput
+  OmniParticipantInput,
+  OmniAgentTaskInput
 } from '../types/index.js';
 
 export class LiveChatChannelService {
@@ -249,5 +252,51 @@ export class OmniMessageService {
 
   async updateMessageStatus(id: string, status: string) {
     return this.repo.updateStatus(id, status);
+  }
+}
+
+export class OmniAgentService {
+  private agentRepo = new OmniAgentRepository();
+  private taskRepo = new OmniAgentTaskRepository();
+  private conversationRepo = new OmniConversationRepository();
+  private omniConversationService = new OmniConversationService();
+
+  async addAgent(organizationId: string, userId: string, data: { displayName?: string; email?: string; status?: string; metadata?: any }) {
+    return this.agentRepo.upsertByOrgAndUser(organizationId, userId, {
+      displayName: data.displayName,
+      email: data.email,
+      status: data.status || 'available',
+      isActive: true,
+      metadata: data.metadata
+    });
+  }
+
+  async assignAgentToChat(conversationId: string, agentId: string) {
+    return this.omniConversationService.assignAgent(conversationId, agentId);
+  }
+
+  async getAssignedChats(organizationId: string, agentId: string) {
+    return this.conversationRepo.findByOrganizationIdAndAssignedAgent(organizationId, agentId);
+  }
+
+  async getMyTasks(organizationId: string, agentId: string) {
+    return this.taskRepo.findByAgentId(agentId, organizationId);
+  }
+
+  async createTask(data: OmniAgentTaskInput) {
+    return this.taskRepo.create(data);
+  }
+
+  async updateTask(
+    organizationId: string,
+    agentId: string,
+    taskId: string,
+    data: Partial<Pick<OmniAgentTaskInput, 'title' | 'description' | 'status' | 'priority' | 'dueAt' | 'metadata'>>
+  ) {
+    return this.taskRepo.updateById(taskId, organizationId, agentId, data);
+  }
+
+  async deleteTask(organizationId: string, agentId: string, taskId: string) {
+    return this.taskRepo.deleteById(taskId, organizationId, agentId);
   }
 }

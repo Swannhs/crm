@@ -1,5 +1,17 @@
 import { db } from '../db.js';
-import type { LiveChatChannelInput, LiveChatMessageInput, LiveChatContactInput, LiveChatWidgetSettingInput, SocketConnectionInput, ChatStatisticsInput, OmniConversationInput, OmniMessageInput, OmniParticipantInput } from '../types/index.js';
+import type {
+  LiveChatChannelInput,
+  LiveChatMessageInput,
+  LiveChatContactInput,
+  LiveChatWidgetSettingInput,
+  SocketConnectionInput,
+  ChatStatisticsInput,
+  OmniConversationInput,
+  OmniMessageInput,
+  OmniParticipantInput,
+  OmniAgentInput,
+  OmniAgentTaskInput
+} from '../types/index.js';
 
 export class LiveChatChannelRepository {
   async create(data: LiveChatChannelInput) {
@@ -190,6 +202,14 @@ export class OmniConversationRepository {
     });
   }
 
+  async findByOrganizationIdAndAssignedAgent(organizationId: string, assignedAgentId: string) {
+    return db.omniConversation.findMany({
+      where: { organizationId, assignedAgentId },
+      orderBy: { updatedAt: 'desc' },
+      include: { participants: true }
+    });
+  }
+
   async findByOrganizationAndProviderRef(organizationId: string, provider: string, providerRef: string) {
     return db.omniConversation.findFirst({
       where: { organizationId, provider, providerRef }
@@ -244,5 +264,51 @@ export class OmniParticipantRepository {
 
   async delete(id: string) {
     return db.omniParticipant.delete({ where: { id } });
+  }
+}
+
+export class OmniAgentRepository {
+  async upsertByOrgAndUser(organizationId: string, userId: string, data: Partial<OmniAgentInput>) {
+    const existing = await db.omniAgent.findFirst({ where: { organizationId, userId } });
+    if (existing) {
+      return db.omniAgent.update({
+        where: { id: existing.id },
+        data
+      });
+    }
+
+    return db.omniAgent.create({
+      data: {
+        organizationId,
+        userId,
+        ...data
+      }
+    });
+  }
+}
+
+export class OmniAgentTaskRepository {
+  async findByAgentId(agentId: string, organizationId: string) {
+    return db.omniAgentTask.findMany({
+      where: { agentId, organizationId },
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }]
+    });
+  }
+
+  async create(data: OmniAgentTaskInput) {
+    return db.omniAgentTask.create({ data });
+  }
+
+  async updateById(id: string, organizationId: string, agentId: string, data: Partial<OmniAgentTaskInput>) {
+    return db.omniAgentTask.updateMany({
+      where: { id, organizationId, agentId },
+      data
+    });
+  }
+
+  async deleteById(id: string, organizationId: string, agentId: string) {
+    return db.omniAgentTask.deleteMany({
+      where: { id, organizationId, agentId }
+    });
   }
 }

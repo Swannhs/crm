@@ -617,6 +617,29 @@ export class TelegramController {
       return res.status(500).json({ success: false, message: err.message });
     }
   }
+
+  async sendOtp(req: AuthenticatedRequest, res: Response) {
+    try {
+      const phone = String(req.body?.phone || req.body?.mobile || '').trim();
+      if (!phone) return res.status(400).json({ success: false, message: 'phone is required' });
+      const data = await this.svc.sendOtp(req.identity.userId, req.identity.orgId, phone);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  async verifyOtp(req: AuthenticatedRequest, res: Response) {
+    try {
+      const phone = String(req.body?.phone || req.body?.mobile || '').trim();
+      const otp = String(req.body?.otp || req.body?.code || '').trim();
+      if (!phone || !otp) return res.status(400).json({ success: false, message: 'phone and otp are required' });
+      const data = await this.svc.verifyOtp(req.identity.orgId, phone, otp);
+      return res.json({ success: true, data });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
+  }
 }
 
 export class VoiceIntegrationController {

@@ -113,6 +113,37 @@ export class OrganizationService {
     return this.toOrganizationDto(updated);
   }
 
+  async updateUserProfile(orgId: string, userId: string, payload: any) {
+    const org = await this.getOrganization(orgId, userId);
+    const metadata = { ...asRecord(org?.metadata) };
+    const userProfiles = { ...asRecord(metadata.userProfiles) };
+    const existing = asRecord(userProfiles[userId]);
+
+    const next = {
+      ...existing,
+      fullName: payload?.fullName !== undefined ? cleanString(payload.fullName) : existing.fullName || '',
+      email: payload?.email !== undefined ? cleanString(payload.email) : existing.email || '',
+      phone: payload?.phone !== undefined ? cleanString(payload.phone) : existing.phone || '',
+      avatar: payload?.avatar !== undefined ? cleanString(payload.avatar) : existing.avatar || '',
+      timezone: payload?.timezone !== undefined ? cleanString(payload.timezone) : existing.timezone || '',
+      updatedAt: new Date().toISOString(),
+    };
+
+    userProfiles[userId] = next;
+    const updated = await this.orgRepo.update(orgId, {
+      metadata: {
+        ...metadata,
+        userProfiles,
+      },
+    });
+
+    return {
+      organizationId: updated.id,
+      userId,
+      profile: next,
+    };
+  }
+
   async getWorkspace(orgId: string, userId: string) {
     const org = await this.getOrganization(orgId, userId);
     const memberships = await this.membershipRepo.findMany(orgId);
@@ -510,6 +541,154 @@ export class CrmConfigurationService {
 
     await this.persistCrm(orgId, metadata, { automationRules: rules });
     return rules;
+  }
+
+  private getAutomationCompat(org: any) {
+    const metadata = asRecord(org?.metadata);
+    const crm = asRecord(metadata.crm);
+    return {
+      metadata,
+      crm,
+      chatFlows: asArray<any>(crm.chatFlows),
+      betaChatbots: asArray<any>(crm.betaChatbots),
+      waCallFlows: asArray<any>(crm.waCallFlows),
+      waCallBroadcasts: asArray<any>(crm.waCallBroadcasts),
+      templateCampaigns: asArray<any>(crm.templateCampaigns),
+      templates: asArray<any>(crm.templates),
+    };
+  }
+
+  async insertFlowBeta(orgId: string, userId: string, payload: any) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { metadata, chatFlows } = this.getAutomationCompat(org);
+    const now = new Date().toISOString();
+    const flow = {
+      id: randomUUID(),
+      name: cleanString(payload?.name) || 'Untitled flow',
+      trigger: cleanString(payload?.trigger),
+      nodes: asArray(payload?.nodes),
+      edges: asArray(payload?.edges),
+      enabled: Boolean(payload?.enabled),
+      createdAt: now,
+      updatedAt: now,
+    };
+    const next = [flow, ...chatFlows];
+    await this.persistCrm(orgId, metadata, { chatFlows: next });
+    return flow;
+  }
+
+  async getFlowsBeta(orgId: string, userId: string) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { chatFlows } = this.getAutomationCompat(org);
+    return chatFlows;
+  }
+
+  async addBetaChatbot(orgId: string, userId: string, payload: any) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { metadata, betaChatbots } = this.getAutomationCompat(org);
+    const now = new Date().toISOString();
+    const chatbot = {
+      id: randomUUID(),
+      name: cleanString(payload?.name) || 'Chatbot',
+      flowId: cleanString(payload?.flowId || payload?.betaFlowId) || null,
+      channel: cleanString(payload?.channel) || 'whatsapp',
+      isActive: payload?.isActive !== false,
+      config: asRecord(payload?.config),
+      createdAt: now,
+      updatedAt: now,
+    };
+    const next = [chatbot, ...betaChatbots];
+    await this.persistCrm(orgId, metadata, { betaChatbots: next });
+    return chatbot;
+  }
+
+  async insertWaCallFlow(orgId: string, userId: string, payload: any) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { metadata, waCallFlows } = this.getAutomationCompat(org);
+    const now = new Date().toISOString();
+    const flow = {
+      id: randomUUID(),
+      name: cleanString(payload?.name) || 'WA Call Flow',
+      script: cleanString(payload?.script),
+      steps: asArray(payload?.steps),
+      enabled: payload?.enabled !== false,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const next = [flow, ...waCallFlows];
+    await this.persistCrm(orgId, metadata, { waCallFlows: next });
+    return flow;
+  }
+
+  async createTemplateCampaign(orgId: string, userId: string, payload: any) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { metadata, templateCampaigns } = this.getAutomationCompat(org);
+    const now = new Date().toISOString();
+    const campaign = {
+      id: randomUUID(),
+      name: cleanString(payload?.name) || 'Template Campaign',
+      templateId: cleanString(payload?.templateId) || null,
+      audience: asRecord(payload?.audience),
+      status: cleanString(payload?.status) || 'draft',
+      sentCount: Number(payload?.sentCount || 0),
+      deliveredCount: Number(payload?.deliveredCount || 0),
+      readCount: Number(payload?.readCount || 0),
+      failedCount: Number(payload?.failedCount || 0),
+      createdAt: now,
+      updatedAt: now,
+    };
+    const next = [campaign, ...templateCampaigns];
+    await this.persistCrm(orgId, metadata, { templateCampaigns: next });
+    return campaign;
+  }
+
+  async getBroadcastDashboard(orgId: string, userId: string) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { templateCampaigns } = this.getAutomationCompat(org);
+    const total = templateCampaigns.length;
+    const sent = templateCampaigns.reduce((s, c) => s + Number(c.sentCount || 0), 0);
+    const delivered = templateCampaigns.reduce((s, c) => s + Number(c.deliveredCount || 0), 0);
+    const read = templateCampaigns.reduce((s, c) => s + Number(c.readCount || 0), 0);
+    const failed = templateCampaigns.reduce((s, c) => s + Number(c.failedCount || 0), 0);
+    return { totalCampaigns: total, sent, delivered, read, failed, campaigns: templateCampaigns };
+  }
+
+  async createWaCallBroadcast(orgId: string, userId: string, payload: any) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { metadata, waCallBroadcasts } = this.getAutomationCompat(org);
+    const now = new Date().toISOString();
+    const broadcast = {
+      id: randomUUID(),
+      name: cleanString(payload?.name) || 'WA Call Broadcast',
+      flowId: cleanString(payload?.flowId) || null,
+      audience: asRecord(payload?.audience),
+      status: cleanString(payload?.status) || 'scheduled',
+      scheduledAt: payload?.scheduledAt || null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const next = [broadcast, ...waCallBroadcasts];
+    await this.persistCrm(orgId, metadata, { waCallBroadcasts: next });
+    return broadcast;
+  }
+
+  async addTemplate(orgId: string, userId: string, payload: any) {
+    const org = await this.orgSvc.getOrganization(orgId, userId);
+    const { metadata, templates } = this.getAutomationCompat(org);
+    const now = new Date().toISOString();
+    const template = {
+      id: randomUUID(),
+      name: cleanString(payload?.name) || 'Template',
+      language: cleanString(payload?.language) || 'en',
+      category: cleanString(payload?.category) || 'marketing',
+      body: cleanString(payload?.body),
+      variables: asArray(payload?.variables),
+      createdAt: now,
+      updatedAt: now,
+    };
+    const next = [template, ...templates];
+    await this.persistCrm(orgId, metadata, { templates: next });
+    return template;
   }
 }
 

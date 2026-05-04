@@ -8,6 +8,7 @@ import {
   CrmConfigurationController,
   GoalController,
   HabitController,
+  AutomationCompatController,
 } from "./controllers/organization.controller.js";
 import { identityMiddleware } from "./middleware/identity.js";
 import { attachRoleContext, requireOrgRoles } from "./middleware/authorization.js";
@@ -28,6 +29,7 @@ const userAccessCtrl = new UserAccessController();
 const crmConfigCtrl = new CrmConfigurationController();
 const goalCtrl = new GoalController();
 const habitCtrl = new HabitController();
+const automationCompatCtrl = new AutomationCompatController();
 
 const ownerOrAdmin = requireOrgRoles(['org_owner', 'org_admin']) as any;
 const ownerOnly = requireOrgRoles(['org_owner']) as any;
@@ -170,6 +172,35 @@ app.post("/v1/habits", identityMiddleware as any, attachRoleContext as any, (req
 app.patch("/v1/habits/:habitId", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.update(cast(req), res));
 app.delete("/v1/habits/:habitId", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.remove(cast(req), res));
 app.post("/v1/habits/:habitId/check-in", identityMiddleware as any, attachRoleContext as any, (req, res) => habitCtrl.checkIn(cast(req), res));
+
+// --- Automation Compat ---
+app.post("/v1/compat/chat_flow/insert_flow_beta", identityMiddleware as any, attachRoleContext as any, managerUp, (req, res) =>
+  automationCompatCtrl.insertFlowBeta(cast(req), res)
+);
+app.get("/v1/compat/chat_flow/get_flows_beta", identityMiddleware as any, attachRoleContext as any, (req, res) =>
+  automationCompatCtrl.getFlowsBeta(cast(req), res)
+);
+app.post("/v1/compat/chatbot/add_beta_chatbot", identityMiddleware as any, attachRoleContext as any, managerUp, (req, res) =>
+  automationCompatCtrl.addBetaChatbot(cast(req), res)
+);
+app.post("/v1/compat/wa_call/insert_flow", identityMiddleware as any, attachRoleContext as any, managerUp, (req, res) =>
+  automationCompatCtrl.insertWaCallFlow(cast(req), res)
+);
+app.post("/v1/compat/broadcast/create_template_campaign", identityMiddleware as any, attachRoleContext as any, managerUp, (req, res) =>
+  automationCompatCtrl.createTemplateCampaign(cast(req), res)
+);
+app.get("/v1/compat/broadcast/dashboard", identityMiddleware as any, attachRoleContext as any, (req, res) =>
+  automationCompatCtrl.dashboard(cast(req), res)
+);
+app.post("/v1/compat/wa_call/create_broadcast", identityMiddleware as any, attachRoleContext as any, managerUp, (req, res) =>
+  automationCompatCtrl.createWaCallBroadcast(cast(req), res)
+);
+app.post("/v1/compat/templet/add_new", identityMiddleware as any, attachRoleContext as any, managerUp, (req, res) =>
+  automationCompatCtrl.addTemplate(cast(req), res)
+);
+app.post("/v1/compat/user/update_profile", identityMiddleware as any, attachRoleContext as any, (req, res) =>
+  automationCompatCtrl.updateUserProfile(cast(req), res)
+);
 
 // --- Health ---
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "organization-service (TS)" }));
