@@ -74,7 +74,7 @@ export class OutlookAuthService {
   }
 
   async sendEmail(
-    refreshToken: string,
+    accessToken: string,
     params: {
       to: string | string[];
       subject: string;
@@ -84,8 +84,6 @@ export class OutlookAuthService {
       isHtml?: boolean;
     }
   ) {
-    const accessToken = await this.getAccessToken(refreshToken);
-
     const toRecipients = (Array.isArray(params.to) ? params.to : [params.to]).map(email => ({
       emailAddress: { address: email }
     }));
@@ -149,11 +147,10 @@ export class OutlookAuthService {
     }
 
     const data = await tokenResponse.json() as any;
-    return data.access_token;
+    return data;
   }
 
-  async fetchMessages(refreshToken: string, lastSyncAt?: Date) {
-    const accessToken = await this.getAccessToken(refreshToken);
+  async fetchMessages(accessToken: string, lastSyncAt?: Date) {
 
     let url = 'https://graph.microsoft.com/v1.0/me/messages?$top=100&$select=id,subject,body,bodyPreview,from,toRecipients,ccRecipients,bccRecipients,receivedDateTime,sentDateTime,hasAttachments,categories,conversationId';
     
@@ -185,6 +182,18 @@ export class OutlookAuthService {
   }
 
   parseOutlookMessage(msg: any) {
+    const labels = msg.categories || [];
+    if (msg.parentFolderId) labels.push(msg.parentFolderId);
+
+    const attachmentMetadata = Array.isArray(msg.attachments)
+      ? msg.attachments.map((a: any) => ({
+          filename: a.name,
+          mimeType: a.contentType,
+          size: a.size,
+          attachmentId: a.id
+        }))
+      : [];
+
     return {
       messageId: msg.id,
       threadId: msg.conversationId,
@@ -200,9 +209,19 @@ export class OutlookAuthService {
       sentAt: msg.sentDateTime ? new Date(msg.sentDateTime) : new Date(),
       receivedAt: msg.receivedDateTime ? new Date(msg.receivedDateTime) : new Date(),
       hasAttachments: !!msg.hasAttachments,
-      attachmentCount: msg.hasAttachments ? 1 : 0,
-      labels: msg.categories || [],
-      attachmentMetadata: []
+      attachmentCount: attachmentMetadata.length || (msg.hasAttachments ? 1 : 0),
+      labels,
+      isRead: msg.isRead !== false,
+      attachmentMetadata
     };
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    const data: any = await this.getAccessToken(refreshToken);
+    const accessToken = data?.access_token;
+    if (!accessToken) throw new Error("Failed to refresh Outlook access token");
+    const nextRefreshToken = data?.refresh_token || refreshToken;
+    const expiresAt = data?.expires_in ? new Date(Date.now() + Number(data.expires_in) * 1000) : undefined;
+    return { accessToken, refreshToken: nextRefreshToken, expiresAt };
   }
 }

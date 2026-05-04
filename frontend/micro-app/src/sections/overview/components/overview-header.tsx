@@ -3,6 +3,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
@@ -65,7 +66,7 @@ export function OverviewHeader({ rangeMode, onRangeChange, onRefresh, loading }:
           <MenuItem value="180d">Last 6 months</MenuItem>
         </Select>
 
-        <Button
+        <LoadingButton
           color="inherit"
           variant="soft"
           onClick={onRefresh}
@@ -73,7 +74,7 @@ export function OverviewHeader({ rangeMode, onRangeChange, onRefresh, loading }:
           startIcon={<Iconify icon="solar:refresh-bold" />}
         >
           Refresh
-        </Button>
+        </LoadingButton>
 
         <Box sx={{ flexGrow: 1, display: { md: 'none' } }} />
 

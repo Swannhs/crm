@@ -872,6 +872,7 @@ export function CommerceInventoryTable({
     locationId: '',
     quantity: '0',
   });
+  const [editItem, setEditItem] = useState<ICommerceInventoryItem | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [createTouched, setCreateTouched] = useState(false);
   const lowStockCount = items.filter((item) => item.availableQuantity > 0 && item.availableQuantity <= 5).length;
@@ -1001,8 +1002,7 @@ export function CommerceInventoryTable({
               <TableCell>Source</TableCell>
               <TableCell>Reserved</TableCell>
               <TableCell>Available</TableCell>
-              <TableCell>Quantity</TableCell>
-              <TableCell>ID</TableCell>
+              <TableCell>Total Qty</TableCell>
               <TableCell align="right">Action</TableCell>
             </TableRow>
           </TableHead>
@@ -1031,50 +1031,42 @@ export function CommerceInventoryTable({
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <TextField
-                    size="small"
-                    type="number"
-                    value={drafts[item.id] ?? String(item.quantity)}
-                    onChange={(event) =>
-                      setDrafts((prev) => ({
-                        ...prev,
-                        [item.id]: event.target.value,
-                      }))
-                    }
-                    sx={{ maxWidth: 120 }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    {item.id}
-                  </Typography>
+                  <Tooltip title="Click to quick edit quantity" arrow>
+                    <Chip
+                      size="small"
+                      label={item.quantity}
+                      color="default"
+                      variant="soft"
+                      onClick={() => {
+                        setEditItem(item);
+                        setDrafts((prev) => ({ ...prev, [item.id]: String(item.quantity) }));
+                      }}
+                      sx={{
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        '&:hover': { opacity: 0.72 }
+                      }}
+                    />
+                  </Tooltip>
                 </TableCell>
                 <TableCell align="right">
                   <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <Button
-                      size="small"
-                      variant="contained"
-                      disabled={isSaving}
-                      onClick={() => onSave(item.id, Number(drafts[item.id] ?? item.quantity))}
-                    >
-                      {isSaving ? 'Saving...' : 'Save'}
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      variant="outlined"
-                      disabled={isDeleting}
-                      onClick={() => setPendingDeleteId(item.id)}
-                    >
-                      {isDeleting ? 'Deleting...' : 'Delete'}
-                    </Button>
+                    <IconButton size="small" color="primary" onClick={() => {
+                      setEditItem(item);
+                      setDrafts((prev) => ({ ...prev, [item.id]: String(item.quantity) }));
+                    }}>
+                      <Iconify icon="solar:pen-bold-duotone" width={20} />
+                    </IconButton>
+                    <IconButton size="small" color="error" onClick={() => setPendingDeleteId(item.id)}>
+                      <Iconify icon="solar:trash-bin-trash-bold" width={20} />
+                    </IconButton>
                   </Stack>
                 </TableCell>
               </TableRow>
             ))}
             {items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} sx={{ py: 8, textAlign: 'center' }}>
+                <TableCell colSpan={7} sx={{ py: 8, textAlign: 'center' }}>
                   <Typography variant="subtitle1">No inventory records found.</Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Try another search or verify stock quant data in Odoo.
@@ -1095,11 +1087,50 @@ export function CommerceInventoryTable({
         rowsPerPageOptions={[10, 20, 50]}
       />
 
+      <Dialog open={Boolean(editItem)} onClose={() => setEditItem(null)} fullWidth maxWidth="xs">
+        <DialogTitle>Quick edit quantity</DialogTitle>
+        <DialogContent sx={{ pb: 3 }}>
+          {editItem && (
+            <Stack spacing={3} sx={{ pt: 1 }}>
+              <Box>
+                <Typography variant="subtitle1">{editItem.productName}</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Location: {editItem.locationName || 'N/A'}
+                </Typography>
+              </Box>
+              <TextField
+                fullWidth
+                label="New Quantity"
+                type="number"
+                value={drafts[editItem.id] ?? ''}
+                onChange={(event) => setDrafts((prev) => ({ ...prev, [editItem.id]: event.target.value }))}
+                autoFocus
+              />
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditItem(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={isSaving || !editItem}
+            onClick={() => {
+              if (editItem) {
+                onSave(editItem.id, Number(drafts[editItem.id] ?? editItem.quantity));
+                setEditItem(null);
+              }
+            }}
+          >
+            {isSaving ? 'Saving...' : 'Save changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog open={Boolean(pendingDeleteId)} onClose={() => setPendingDeleteId(null)}>
         <DialogTitle>Delete inventory record?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            This will permanently delete quant ID {pendingDeleteId || '-'}.
+            This will permanently delete quant record for {items.find(i => i.id === pendingDeleteId)?.productName || 'this item'}.
           </Typography>
         </DialogContent>
         <DialogActions>

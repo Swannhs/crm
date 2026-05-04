@@ -114,28 +114,21 @@ export default function CalendarForm({ event, onClose, onDelete, onCreate, onUpd
                 {...field}
                 label="Start date"
                 format="DD/MM/YYYY hh:mm a"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    InputProps: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Iconify icon="solar:calendar-bold" />
-                        </InputAdornment>
-                      ),
-                    },
-                  },
-                  layout: {
-                    sx: {
-                      '& .MuiDateCalendar-root': {
-                        width: 360,
-                        height: 360,
-                      },
-                      '& .MuiPickersLayout-root': {
-                        minWidth: 360,
-                      },
-                    },
-                  },
+                slots={{
+                  textField: (params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Iconify icon="solar:calendar-bold" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  ),
                 }}
               />
             )}
@@ -148,29 +141,22 @@ export default function CalendarForm({ event, onClose, onDelete, onCreate, onUpd
               <MobileDateTimePicker
                 {...field}
                 label="End date"
-                format="dd/MM/yyyy hh:mm a"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    InputProps: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Iconify icon="solar:calendar-bold" />
-                        </InputAdornment>
-                      ),
-                    },
-                  },
-                  layout: {
-                    sx: {
-                      '& .MuiDateCalendar-root': {
-                        width: 360,
-                        height: 360,
-                      },
-                      '& .MuiPickersLayout-root': {
-                        minWidth: 360,
-                      },
-                    },
-                  },
+                format="DD/MM/YYYY hh:mm a"
+                slots={{
+                  textField: (params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <Iconify icon="solar:calendar-bold" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  ),
                 }}
               />
             )}

@@ -181,6 +181,7 @@ model SequenceEnrollment {
   status        String   @default("active") // active, paused, completed, unsubscribed, cancelled, replied
   currentStep   Int      @default(0)
   firstName     String?
+  lastName      String?
   companyName   String?
   dealName      String?
   startedAt     DateTime @default(now())

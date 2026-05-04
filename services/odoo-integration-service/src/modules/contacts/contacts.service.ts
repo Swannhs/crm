@@ -145,17 +145,28 @@ export class ContactsService {
     const pageSize = paginationDto.pageSize ?? 10;
     const search = paginationDto.search;
     const type = paginationDto.type;
+    const includeArchived = paginationDto.active === false;
 
-    const domain = await this.buildDomain(search, type);
+    const domain = await this.buildDomain(search, type, includeArchived);
 
-    const [data, total] = await Promise.all([
-      this.odooClient.searchRead(this.model, domain, this.defaultFields, {
-        offset: (page - 1) * pageSize,
+    const total = await this.odooClient.execute(this.model, 'search_count', [domain]);
+    const offset = (page - 1) * pageSize;
+
+    let data = await this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+      offset,
+      limit: pageSize,
+      order: 'write_date desc',
+    });
+
+    // Defensive fallback: in some Odoo states search_count may be non-zero while
+    // the ordered search_read page returns empty; retry with a simpler order.
+    if (total > 0 && Array.isArray(data) && data.length === 0) {
+      data = await this.odooClient.searchRead(this.model, domain, this.defaultFields, {
+        offset,
         limit: pageSize,
-        order: 'write_date desc',
-      }),
-      this.odooClient.execute(this.model, 'search_count', [domain]),
-    ]);
+        order: 'id desc',
+      });
+    }
 
     const dataWithUuids = await Promise.all(
       data.map(async (c: any) => {

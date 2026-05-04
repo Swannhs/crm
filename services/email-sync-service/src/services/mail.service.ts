@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { decrypt } from "../lib/encryption.js";
+import { decrypt, encrypt } from "../lib/encryption.js";
 import { GoogleAuthService } from "./google-auth.service.js";
 import { OutlookAuthService } from "./outlook-auth.service.js";
 
@@ -11,10 +11,83 @@ export class MailService {
     private readonly deps: {
       db?: typeof prisma;
       decryptFn?: typeof decrypt;
+      encryptFn?: typeof encrypt;
       gmail?: GoogleAuthService;
       outlook?: OutlookAuthService;
     } = {}
   ) {}
+
+  private isExpired(expiresAt?: Date | null) {
+    if (!expiresAt) return false;
+    return expiresAt.getTime() <= Date.now() + 60_000;
+  }
+
+  private isRevokedTokenError(error: unknown) {
+    const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    return message.includes("invalid_grant") || message.includes("invalid token") || message.includes("token has expired") || message.includes("unauthorized");
+  }
+
+  private async resolveAccessToken(account: any, db: typeof prisma, decryptFn: typeof decrypt, encryptFn: typeof encrypt) {
+    const currentAccessToken = account.accessToken ? decryptFn(account.accessToken) : "";
+    const currentRefreshToken = account.refreshToken ? decryptFn(account.refreshToken) : "";
+
+    if (currentAccessToken && !this.isExpired(account.expiresAt)) {
+      return { accessToken: currentAccessToken };
+    }
+
+    if (!currentRefreshToken) {
+      throw new Error("No refresh token available");
+    }
+
+    try {
+      if (account.provider === "gmail") {
+        const refreshed = await (this.deps.gmail ?? googleAuth).refreshAccessToken(currentRefreshToken);
+        await db.emailAccount.update({
+          where: { id: account.id },
+          data: {
+            accessToken: encryptFn(refreshed.accessToken),
+            refreshToken: refreshed.refreshToken ? encryptFn(refreshed.refreshToken) : account.refreshToken,
+            expiresAt: new Date(Date.now() + 55 * 60 * 1000),
+            isConnected: true,
+            errorMessage: null,
+            settings: { ...(account.settings as object || {}), requiresReconnect: false },
+          },
+        });
+        return { accessToken: refreshed.accessToken };
+      }
+
+      if (account.provider === "outlook") {
+        const refreshed = await (this.deps.outlook ?? outlookAuth).refreshAccessToken(currentRefreshToken);
+        await db.emailAccount.update({
+          where: { id: account.id },
+          data: {
+            accessToken: encryptFn(refreshed.accessToken),
+            refreshToken: refreshed.refreshToken ? encryptFn(refreshed.refreshToken) : account.refreshToken,
+            expiresAt: refreshed.expiresAt,
+            isConnected: true,
+            errorMessage: null,
+            settings: { ...(account.settings as object || {}), requiresReconnect: false },
+          },
+        });
+        return { accessToken: refreshed.accessToken };
+      }
+
+      throw new Error(`Unsupported provider: ${account.provider}`);
+    } catch (error) {
+      if (this.isRevokedTokenError(error)) {
+        await db.emailAccount.update({
+          where: { id: account.id },
+          data: {
+            isConnected: false,
+            syncStatus: "error",
+            errorMessage: "Token revoked. Reconnect required.",
+            settings: { ...(account.settings as object || {}), requiresReconnect: true },
+          },
+        });
+      }
+      throw error;
+    }
+  }
 
   async sendEmail(params: {
     orgId: string,
@@ -33,6 +106,7 @@ export class MailService {
 
     const db = this.deps.db ?? prisma;
     const decryptFn = this.deps.decryptFn ?? decrypt;
+    const encryptFn = this.deps.encryptFn ?? encrypt;
     const gmailClient = this.deps.gmail ?? googleAuth;
     const outlookClient = this.deps.outlook ?? outlookAuth;
 
@@ -48,25 +122,21 @@ export class MailService {
       });
     }
 
-    if (!account || !account.refreshToken) {
+    if (!account) {
       throw new Error("No connected email account found");
     }
 
-    const decryptedRefreshToken = decryptFn(account.refreshToken);
-    if (!decryptedRefreshToken) {
-      throw new Error("Failed to decrypt authentication tokens");
-    }
+    const { accessToken } = await this.resolveAccessToken(account, db, decryptFn, encryptFn);
 
     let sendResult: any = {};
     if (account.provider === "gmail") {
-      sendResult = await gmailClient.sendEmail(decryptedRefreshToken, { to, subject, body, cc, bcc, isHtml });
+      sendResult = await gmailClient.sendEmail(accessToken, { to, subject, body, cc, bcc, isHtml });
     } else if (account.provider === "outlook") {
-      sendResult = await outlookClient.sendEmail(decryptedRefreshToken, { to, subject, body, cc, bcc, isHtml });
+      sendResult = await outlookClient.sendEmail(accessToken, { to, subject, body, cc, bcc, isHtml });
     }
 
     const messageId = sendResult.id || `sent-${Date.now()}`;
 
-    // Persist to database
     const emailRecord = await db.email.create({
       data: {
         orgId,
@@ -74,7 +144,7 @@ export class MailService {
         messageId,
         subject,
         fromEmail: account.email,
-        fromName: account.email, // Best guess
+        fromName: account.email,
         toEmails: Array.isArray(to) ? to : [to],
         ccEmails: cc ? (Array.isArray(cc) ? cc : [cc]) : [],
         bccEmails: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : [],

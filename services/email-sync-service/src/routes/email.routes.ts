@@ -201,10 +201,22 @@ router.get("/messages", async (req: any, res, next) => {
   try {
     const { accountId, search, limit, offset, threadId, folder } = req.query;
     const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
 
-    const where: any = { orgId };
+    const ownedAccounts = await prisma.emailAccount.findMany({
+      where: { orgId, userId },
+      select: { id: true },
+    });
+    const ownedAccountIds = new Set(ownedAccounts.map((a) => a.id));
+
+    const where: any = { orgId, accountId: { in: [...ownedAccountIds] } };
     
-    if (accountId) where.accountId = accountId;
+    if (accountId) {
+      if (!ownedAccountIds.has(String(accountId))) {
+        return res.status(404).json({ success: false, error: "Email account not found" });
+      }
+      where.accountId = accountId;
+    }
     if (threadId) where.threadId = threadId;
     
     if (search) {
@@ -260,6 +272,41 @@ router.get("/messages", async (req: any, res, next) => {
         offset: skip,
       },
       message: "Email messages retrieved successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// GET /email/accounts/:id/sync-logs
+router.get("/accounts/:id/sync-logs", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
+    const accountId = req.params.id;
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 50;
+
+    const logs = await emailSyncService.getAccountSyncLogs(accountId, { orgId, userId }, limit);
+    return res.json({
+      success: true,
+      data: logs,
+      message: "Sync logs retrieved successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// GET /email/sync/status
+router.get("/sync/status", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const userId = req.identity!.userId;
+    const status = await emailSyncService.getSyncStatus({ orgId, userId });
+    return res.json({
+      success: true,
+      data: status,
+      message: "Sync status retrieved successfully",
     });
   } catch (error) {
     return next(error);
@@ -399,11 +446,7 @@ router.post("/templates", async (req: any, res, next) => {
 router.get("/sequences", async (req: any, res, next) => {
   try {
     const orgId = req.identity!.orgId;
-
-    const sequences = await prisma.emailSequence.findMany({
-      where: { orgId },
-      orderBy: { createdAt: 'desc' }
-    });
+    const sequences = await sequenceService.listSequences(orgId);
 
     return res.json({
       success: true,
@@ -418,36 +461,10 @@ router.get("/sequences", async (req: any, res, next) => {
 // POST /email/sequences - Create email sequence
 router.post("/sequences", async (req: any, res, next) => {
   try {
-    const { name, description, steps } = req.body;
+    const { name, description, steps, isActive } = req.body;
     const orgId = req.identity!.orgId;
     const userId = req.identity!.userId;
-
-    if (!name || !steps || !Array.isArray(steps)) {
-      return res.status(400).json({
-        success: false,
-        error: "Name and steps array are required",
-      });
-    }
-
-    // Calculate total duration from steps
-    let totalDuration = 0;
-    for (const step of steps) {
-      if (step.delayDays) {
-        totalDuration += step.delayDays;
-      }
-    }
-
-    const sequence = await prisma.emailSequence.create({
-      data: {
-        orgId,
-        createdBy: userId,
-        name,
-        description,
-        steps,
-        totalDuration,
-        isActive: true,
-      }
-    });
+    const sequence = await sequenceService.createSequence({ orgId, userId, name, description, steps, isActive });
 
     res.status(201).json({
       success: true,
@@ -459,12 +476,52 @@ router.post("/sequences", async (req: any, res, next) => {
   }
 });
 
+// GET /email/sequences/:id
+router.get("/sequences/:id([a-zA-Z0-9-]+)", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const sequence = await sequenceService.getSequence(orgId, req.params.id);
+    return res.json({ success: true, data: sequence, message: "Email sequence retrieved successfully" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// PATCH /email/sequences/:id
+router.patch("/sequences/:id([a-zA-Z0-9-]+)", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const sequence = await sequenceService.updateSequence({
+      orgId,
+      sequenceId: req.params.id,
+      name: req.body?.name,
+      description: req.body?.description,
+      isActive: req.body?.isActive,
+      steps: req.body?.steps,
+    });
+    return res.json({ success: true, data: sequence, message: "Email sequence updated successfully" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// DELETE /email/sequences/:id
+router.delete("/sequences/:id([a-zA-Z0-9-]+)", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const result = await sequenceService.deleteSequence(orgId, req.params.id);
+    return res.json({ success: true, data: result, message: "Email sequence deleted successfully" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 // POST /email/sequences/:id/enroll
 router.post("/sequences/:id/enroll", async (req: any, res, next) => {
   try {
     const orgId = req.identity!.orgId;
     const sequenceId = req.params.id;
-    const { contactEmail, contactId, dealId, firstName, companyName, dealName } = req.body;
+    const { contactEmail, contactId, dealId, firstName, lastName, companyName, dealName } = req.body;
     if (!contactEmail) {
       return res.status(400).json({ success: false, error: "contactEmail is required" });
     }
@@ -475,6 +532,7 @@ router.post("/sequences/:id/enroll", async (req: any, res, next) => {
       contactId,
       dealId,
       firstName,
+      lastName,
       companyName,
       dealName,
     });
@@ -502,6 +560,17 @@ router.post("/sequences/enrollments/:id/pause", async (req: any, res, next) => {
     const orgId = req.identity!.orgId;
     const enrollment = await sequenceService.pauseEnrollment(orgId, req.params.id);
     return res.json({ success: true, data: enrollment, message: "Enrollment paused" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// GET /email/sequences/enrollments/:id
+router.get("/sequences/enrollments/:id", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const enrollment = await sequenceService.getEnrollment(orgId, req.params.id);
+    return res.json({ success: true, data: enrollment, message: "Enrollment retrieved successfully" });
   } catch (error) {
     return next(error);
   }
@@ -565,6 +634,26 @@ router.post("/sequences/unsubscribe", async (req: any, res, next) => {
     }
     const count = await sequenceService.unsubscribeByEmail(orgId, String(email).toLowerCase());
     return res.json({ success: true, data: { updated: count }, message: "Unsubscribe processed" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// POST /email/sequences/enrollments/:id/events
+router.post("/sequences/enrollments/:id/events", async (req: any, res, next) => {
+  try {
+    const orgId = req.identity!.orgId;
+    const { event, message } = req.body;
+    if (!event) {
+      return res.status(400).json({ success: false, error: "event is required" });
+    }
+    const result = await sequenceService.trackEnrollmentEvent({
+      orgId,
+      enrollmentId: req.params.id,
+      event,
+      message,
+    });
+    return res.json({ success: true, data: result, message: "Enrollment event tracked" });
   } catch (error) {
     return next(error);
   }

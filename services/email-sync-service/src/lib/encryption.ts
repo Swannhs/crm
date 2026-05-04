@@ -60,7 +60,6 @@ export function decrypt(encryptedText: string): string {
     
     return decrypted;
   } catch (err) {
-    console.error("Failed to decrypt string");
     return ""; // Or throw
   }
 }

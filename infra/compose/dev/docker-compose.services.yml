@@ -170,7 +170,7 @@ services:
       KEYCLOAK_REALM: mymanager
       KEYCLOAK_CLIENT_ID: crm-api
       TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-super-secret-key-32-chars-long!}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
     depends_on:
       email-sync-db:
         condition: service_healthy

@@ -42,7 +42,7 @@ export class GoogleAuthService {
   }
 
   async sendEmail(
-    refreshToken: string,
+    accessToken: string,
     params: {
       to: string | string[];
       subject: string;
@@ -56,7 +56,7 @@ export class GoogleAuthService {
       config.gmail.clientId,
       config.gmail.clientSecret
     );
-    client.setCredentials({ refresh_token: refreshToken });
+    client.setCredentials({ access_token: accessToken });
 
     const gmail = google.gmail({ version: 'v1', auth: client });
 
@@ -104,12 +104,12 @@ export class GoogleAuthService {
     return res.data;
   }
 
-  async fetchMessages(refreshToken: string, lastSyncAt?: Date) {
+  async fetchMessages(accessToken: string, lastSyncAt?: Date) {
     const client = new google.auth.OAuth2(
       config.gmail.clientId,
       config.gmail.clientSecret
     );
-    client.setCredentials({ refresh_token: refreshToken });
+    client.setCredentials({ access_token: accessToken });
     const gmail = google.gmail({ version: 'v1', auth: client });
 
     let q = 'label:INBOX';
@@ -132,7 +132,8 @@ export class GoogleAuthService {
       for (const msg of messages) {
         const details = await gmail.users.messages.get({
           userId: 'me',
-          id: msg.id!
+          id: msg.id!,
+          format: "full"
         });
         results.push(this.parseGmailMessage(details.data));
       }
@@ -140,6 +141,18 @@ export class GoogleAuthService {
     } while (pageToken);
 
     return results;
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    const client = new google.auth.OAuth2(
+      config.gmail.clientId,
+      config.gmail.clientSecret
+    );
+    client.setCredentials({ refresh_token: refreshToken });
+    const tokenResponse = await client.getAccessToken();
+    const accessToken = tokenResponse?.token;
+    if (!accessToken) throw new Error("Failed to refresh Gmail access token");
+    return { accessToken, refreshToken };
   }
 
   parseGmailMessage(data: any) {
@@ -156,6 +169,8 @@ export class GoogleAuthService {
 
     const subject = getHeader('Subject');
     const date = getHeader('Date');
+    const ccRaw = getHeader('Cc') || '';
+    const bccRaw = getHeader('Bcc') || '';
 
     let textBody = '';
     let htmlBody = '';
@@ -190,11 +205,21 @@ export class GoogleAuthService {
         const m = s.match(emailRegex);
         return m ? m[1] : s.trim();
       }) : [],
+      ccEmails: ccRaw ? ccRaw.split(',').map((s: string) => {
+        const m = s.match(emailRegex);
+        return m ? m[1] : s.trim();
+      }) : [],
+      bccEmails: bccRaw ? bccRaw.split(',').map((s: string) => {
+        const m = s.match(emailRegex);
+        return m ? m[1] : s.trim();
+      }) : [],
       textBody,
       htmlBody,
       snippet: data.snippet,
       sentAt: date ? new Date(date) : new Date(),
+      receivedAt: date ? new Date(date) : new Date(),
       labels: data.labelIds || [],
+      isRead: !(data.labelIds || []).includes("UNREAD"),
       hasAttachments: attachments.length > 0,
       attachmentCount: attachments.length,
       attachmentMetadata: attachments

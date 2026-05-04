@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { decrypt } from "../lib/encryption.js";
+import { decrypt, encrypt } from "../lib/encryption.js";
 import { GoogleAuthService } from "./google-auth.service.js";
 import { OutlookAuthService } from "./outlook-auth.service.js";
 
@@ -12,7 +12,10 @@ type Account = {
   userId: string;
   email: string;
   provider: string;
+  settings?: Record<string, unknown> | null;
   refreshToken: string | null;
+  accessToken: string | null;
+  expiresAt?: Date | null;
   lastSyncAt: Date | null;
   syncStatus: string;
 };
@@ -22,10 +25,16 @@ export class EmailSyncService {
     private readonly deps: {
       db?: typeof prisma;
       decryptFn?: typeof decrypt;
+      encryptFn?: typeof encrypt;
       gmail?: GoogleAuthService;
       outlook?: OutlookAuthService;
     } = {},
   ) {}
+
+  private isRevokedTokenError(error: unknown) {
+    const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    return message.includes("invalid_grant") || message.includes("invalid token") || message.includes("token has expired") || message.includes("unauthorized");
+  }
 
   async syncEligibleAccounts() {
     const db = this.deps.db ?? prisma;
@@ -34,10 +43,32 @@ export class EmailSyncService {
         isConnected: true,
         OR: [{ syncStatus: "idle" }, { syncStatus: "error" }],
       },
+      select: { id: true },
     });
 
     for (const account of accounts) {
-      await this.syncAccountById(account.id);
+      try {
+        await this.syncWithRetry(account.id);
+      } catch (error) {
+        console.error("Email sync failed after retries", { accountId: account.id, error: error instanceof Error ? error.message : String(error) });
+      }
+    }
+  }
+
+  private async syncWithRetry(accountId: string, maxRetries = 2) {
+    let attempt = 0;
+    for (;;) {
+      try {
+        return await this.syncAccountById(accountId);
+      } catch (error) {
+        if (error instanceof Error && error.message === "Account is already syncing") {
+          return { skipped: true, reason: "already_syncing", accountId };
+        }
+        if (attempt >= maxRetries) throw error;
+        attempt += 1;
+        const waitMs = 500 * Math.pow(2, attempt);
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
+      }
     }
   }
 
@@ -73,17 +104,8 @@ export class EmailSyncService {
     });
 
     try {
-      if (!account.refreshToken) {
-        throw new Error("No refresh token available");
-      }
-
-      const decryptFn = this.deps.decryptFn ?? decrypt;
-      const refreshToken = decryptFn(account.refreshToken);
-      if (!refreshToken) {
-        throw new Error("Failed to decrypt token");
-      }
-
-      const fetchedMessages = await this.fetchProviderMessages(account, refreshToken);
+      const auth = await this.resolveAccessToken(account);
+      const fetchedMessages = await this.fetchProviderMessages(account, auth.accessToken);
       const result = await this.saveMessages(account, fetchedMessages);
 
       await db.emailAccount.update({
@@ -92,6 +114,7 @@ export class EmailSyncService {
           syncStatus: "idle",
           lastSyncAt: new Date(),
           errorMessage: null,
+          settings: { ...(account.settings || {}), requiresReconnect: false },
         },
       });
 
@@ -108,11 +131,14 @@ export class EmailSyncService {
 
       return { accountId: account.id, ...result };
     } catch (error: any) {
+      const revoked = this.isRevokedTokenError(error);
       await db.emailAccount.update({
         where: { id: account.id },
         data: {
+          isConnected: revoked ? false : undefined,
           syncStatus: "error",
-          errorMessage: error.message || "Unknown error",
+          errorMessage: revoked ? "Token revoked. Reconnect required." : error.message || "Unknown error",
+          settings: revoked ? { ...(account.settings || {}), requiresReconnect: true } : undefined,
         },
       });
 
@@ -129,15 +155,68 @@ export class EmailSyncService {
     }
   }
 
-  private async fetchProviderMessages(account: Account, refreshToken: string) {
+  private async resolveAccessToken(account: Account) {
+    const db = this.deps.db ?? prisma;
+    const decryptFn = this.deps.decryptFn ?? decrypt;
+    const encryptFn = this.deps.encryptFn ?? encrypt;
+    const gmailClient = this.deps.gmail ?? googleAuth;
+    const outlookClient = this.deps.outlook ?? outlookAuth;
+
+    const accessToken = account.accessToken ? decryptFn(account.accessToken) : "";
+    const refreshToken = account.refreshToken ? decryptFn(account.refreshToken) : "";
+
+    if (!refreshToken && !accessToken) {
+      throw new Error("No refresh token available");
+    }
+
+    if (accessToken && account.expiresAt && account.expiresAt.getTime() > Date.now() + 60_000) {
+      return { accessToken };
+    }
+
+    if (!refreshToken) {
+      return { accessToken };
+    }
+
+    if (account.provider === "gmail") {
+      const refreshed = await gmailClient.refreshAccessToken(refreshToken);
+      await db.emailAccount.update({
+        where: { id: account.id },
+        data: {
+          accessToken: encryptFn(refreshed.accessToken),
+          refreshToken: refreshed.refreshToken ? encryptFn(refreshed.refreshToken) : account.refreshToken,
+          expiresAt: new Date(Date.now() + 55 * 60 * 1000),
+          isConnected: true,
+        },
+      });
+      return { accessToken: refreshed.accessToken };
+    }
+
+    if (account.provider === "outlook") {
+      const refreshed = await outlookClient.refreshAccessToken(refreshToken);
+      await db.emailAccount.update({
+        where: { id: account.id },
+        data: {
+          accessToken: encryptFn(refreshed.accessToken),
+          refreshToken: refreshed.refreshToken ? encryptFn(refreshed.refreshToken) : account.refreshToken,
+          expiresAt: refreshed.expiresAt,
+          isConnected: true,
+        },
+      });
+      return { accessToken: refreshed.accessToken };
+    }
+
+    throw new Error(`Unsupported provider: ${account.provider}`);
+  }
+
+  private async fetchProviderMessages(account: Account, accessToken: string) {
     const gmailClient = this.deps.gmail ?? googleAuth;
     const outlookClient = this.deps.outlook ?? outlookAuth;
 
     if (account.provider === "gmail") {
-      return gmailClient.fetchMessages(refreshToken, account.lastSyncAt ?? undefined);
+      return gmailClient.fetchMessages(accessToken, account.lastSyncAt ?? undefined);
     }
     if (account.provider === "outlook") {
-      return outlookClient.fetchMessages(refreshToken, account.lastSyncAt ?? undefined);
+      return outlookClient.fetchMessages(accessToken, account.lastSyncAt ?? undefined);
     }
     throw new Error(`Unsupported provider: ${account.provider}`);
   }
@@ -158,6 +237,32 @@ export class EmailSyncService {
       const bccEmails = (msg.bccEmails ?? []).filter(Boolean);
 
       const assoc = await this.resolveAssociations(account.orgId, msg.fromEmail, [...toEmails, ...ccEmails, ...bccEmails]);
+
+      if (msg.threadId) {
+        const participants = Array.from(new Set([msg.fromEmail, ...toEmails, ...ccEmails, ...bccEmails].filter(Boolean)));
+        await db.emailThread.upsert({
+          where: { id: msg.threadId },
+          update: {
+            subject: msg.subject,
+            lastMessageId: msg.messageId,
+            lastMessageAt: msg.sentAt || msg.receivedAt || new Date(),
+            participants,
+            relatedDealId: msg.relatedDealId || assoc.relatedDealId,
+          },
+          create: {
+            id: msg.threadId,
+            orgId: account.orgId,
+            accountId: account.id,
+            subject: msg.subject,
+            firstMessageId: msg.messageId,
+            lastMessageId: msg.messageId,
+            messageCount: 1,
+            participants,
+            lastMessageAt: msg.sentAt || msg.receivedAt || new Date(),
+            relatedDealId: msg.relatedDealId || assoc.relatedDealId,
+          },
+        });
+      }
 
       await db.email.upsert({
         where: { accountId_messageId: { accountId: account.id, messageId: msg.messageId } },
@@ -225,6 +330,33 @@ export class EmailSyncService {
     return { emailsSynced, threadsSynced: touchedThreads.size };
   }
 
+  async getAccountSyncLogs(accountId: string, scope: { orgId: string; userId?: string }, limit = 50) {
+    const db = this.deps.db ?? prisma;
+    const account = await db.emailAccount.findFirst({ where: { id: accountId, orgId: scope.orgId, ...(scope.userId ? { userId: scope.userId } : {}) }, select: { id: true } });
+    if (!account) throw new Error("Email account not found");
+    return db.syncLog.findMany({ where: { orgId: scope.orgId, accountId }, orderBy: { startedAt: "desc" }, take: Math.min(Math.max(limit, 1), 200) });
+  }
+
+  async getSyncStatus(scope: { orgId: string; userId?: string }) {
+    const db = this.deps.db ?? prisma;
+    const whereAccounts: any = { orgId: scope.orgId, ...(scope.userId ? { userId: scope.userId } : {}) };
+    const [totalAccounts, connectedAccounts, syncingAccounts, errorAccounts, latestLogs] = await Promise.all([
+      db.emailAccount.count({ where: whereAccounts }),
+      db.emailAccount.count({ where: { ...whereAccounts, isConnected: true } }),
+      db.emailAccount.count({ where: { ...whereAccounts, syncStatus: "syncing" } }),
+      db.emailAccount.count({ where: { ...whereAccounts, syncStatus: "error" } }),
+      db.syncLog.findMany({ where: { orgId: scope.orgId, account: { is: whereAccounts } }, orderBy: { startedAt: "desc" }, take: 10 }),
+    ]);
+
+    return {
+      totalAccounts,
+      connectedAccounts,
+      syncingAccounts,
+      errorAccounts,
+      recentRuns: latestLogs,
+    };
+  }
+
   private async resolveAssociations(orgId: string, fromEmail?: string, recipients: string[] = []) {
     const db = this.deps.db ?? prisma;
     const candidates = [fromEmail, ...recipients].filter((e): e is string => !!e).map((e) => e.toLowerCase());
@@ -238,8 +370,8 @@ export class EmailSyncService {
         AND: [
           {
             OR: [
-          { fromEmail: { in: candidates } },
-          { toEmails: { hasSome: candidates } },
+              { fromEmail: { in: candidates } },
+              { toEmails: { hasSome: candidates } },
             ],
           },
           {
