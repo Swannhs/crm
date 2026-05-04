@@ -11,10 +11,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@mymanager/node-service-kit": "file:../../common/node-service-kit"
+    "@mymanager/node-service-kit": "file:../../common/node-service-kit",
+    "tsx": "^4.19.0"
   },
   "devDependencies": {
-    "tsx": "^4.19.0",
     "typescript": "^5.0.0",
     "ts-node": "^10.9.0",
     "@types/node": "^20.0.0",

@@ -18,6 +18,8 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
+import { m } from 'framer-motion';
+import { alpha, useTheme } from '@mui/material/styles';
 
 import { builderService } from 'src/services/builder-service';
 import { marketingService } from 'src/services/marketing-service';
@@ -177,8 +179,31 @@ export function BuilderWorkspaceView({
 
   return (
     <Container maxWidth="xl" sx={{ py: 5 }}>
-      <Stack spacing={3}>
-        <Box>
+      <Stack spacing={4}>
+        <Box
+          component={m.div}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+            position: 'relative',
+            overflow: 'hidden',
+            bgcolor: 'background.paper',
+            border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            boxShadow: (theme) => `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+            '&:before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '4px',
+              background: (theme) =>
+                `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.info.main})`,
+            },
+          }}
+        >
           <Typography variant="h4">
             {mode === 'form-list'
               ? 'Form Funnel'
@@ -211,7 +236,18 @@ export function BuilderWorkspaceView({
           </Typography>
         </Box>
 
-        <Card sx={{ p: 3 }}>
+        <Card
+          component={m.div}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          sx={{
+            p: 2,
+            backdropFilter: 'blur(10px)',
+            bgcolor: (theme) => alpha(theme.palette.background.paper, 0.8),
+            border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          }}
+        >
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {relatedLinks.map((link) => (
               <Button key={link.href} component={Link} href={link.href} variant="soft" color="inherit">
@@ -224,23 +260,49 @@ export function BuilderWorkspaceView({
         {mode === 'form-list' && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={4}>
-              <Card sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
+              <Card
+                component={m.div}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                sx={{
+                  p: 3,
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04),
+                  border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
                   Funnels
                 </Typography>
                 <Typography variant="h3">{formsQuery.data?.length || 0}</Typography>
               </Card>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Card sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
+              <Card
+                component={m.div}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                sx={{
+                  p: 3,
+                  bgcolor: (theme) => alpha(theme.palette.info.main, 0.04),
+                  border: (theme) => `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 2, color: 'info.main' }}>
                   Templates
                 </Typography>
                 <Typography variant="h3">{templatesQuery.data?.length || 0}</Typography>
               </Card>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Card sx={{ p: 3 }}>
+              <Card
+                component={m.div}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                sx={{ p: 3 }}
+              >
                 <Typography variant="h6" sx={{ mb: 2 }}>
                   Quick Actions
                 </Typography>

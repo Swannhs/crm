@@ -3,6 +3,8 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 import { useSettingsContext } from 'src/components/settings';
 
@@ -25,7 +27,9 @@ export function ThemeProvider({ children }) {
         modeStorageKey={schemeConfig.modeStorageKey}
       >
         <CssBaseline />
-        <RTL direction={settings.direction}>{children}</RTL>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <RTL direction={settings.direction}>{children}</RTL>
+        </LocalizationProvider>
       </CssVarsProvider>
     </AppRouterCacheProvider>
   );

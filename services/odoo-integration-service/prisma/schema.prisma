@@ -262,3 +262,63 @@ model SupportKnowledgeArticle {
   @@index([orgId, isPublic, publishedAt])
   @@index([orgId, categoryId])
 }
+
+model Website {
+  id          String   @id @default(uuid())
+  orgId       String
+  name        String
+  domain      String?
+  config      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  forms       Form[]
+
+  @@index([orgId])
+}
+
+model Form {
+  id          String   @id @default(uuid())
+  orgId       String
+  websiteId   String?
+  name        String
+  type        String   @default("contact") // contact, registration, custom
+  fields      Json?
+  config      Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  website     Website? @relation(fields: [websiteId], references: [id], onDelete: SetNull)
+  submissions FormSubmission[]
+
+  @@index([orgId, websiteId])
+}
+
+model FormSubmission {
+  id          String   @id @default(uuid())
+  orgId       String
+  formId      String
+  data        Json
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, formId])
+}
+
+model ReputationStats {
+  id               String   @id @default(uuid())
+  orgId            String
+  averageRating    Float    @default(0.0)
+  totalReviews     Int      @default(0)
+  positiveReviews  Int      @default(0)
+  negativeReviews  Int      @default(0)
+  lastSyncAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([orgId])
+}

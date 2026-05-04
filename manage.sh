@@ -187,7 +187,7 @@ case $CMD in
     seed)
         info "Seeding dummy data for $ENV environment..."
         # Try to find the network name dynamically from a running container
-        NETWORK=$(docker inspect ms-keycloak -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null || echo "")
+        NETWORK=$(docker inspect keycloak -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null || echo "")
         
         if [ -z "$NETWORK" ]; then
             error "Could not detect network. Is the environment running? Try: $0 $ENV up"
@@ -199,9 +199,18 @@ case $CMD in
             --network "$NETWORK" \
             -v "$ROOT_DIR:/repo" \
             -w /repo \
-            -e SEED_ORG_HOST=ms-organization-service \
-            -e SEED_EMAIL_SYNC_HOST=ms-email-sync-service \
-            -e KEYCLOAK_URL=http://ms-keycloak:8080 \
+            -e SEED_ORG_HOST=organization-service \
+            -e SEED_PROJECTS_HOST=api-router-service \
+            -e SEED_DEAL_HOST=api-router-service \
+            -e SEED_EMAIL_SYNC_HOST=email-sync-service \
+            -e SEED_CALENDAR_HOST=api-router-service \
+            -e SEED_DOCUMENTS_HOST=api-router-service \
+            -e SEED_EMPLOYEES_HOST=api-router-service \
+            -e SEED_POS_HOST=odoo-integration-service \
+            -e SEED_ODOO_HOST=odoo-integration-service \
+            -e SEED_BOOKING_HOST=booking-service \
+            -e SEED_INTEGRATIONS_HOST=integrations-service \
+            -e KEYCLOAK_URL=http://keycloak:8080 \
             node:24-alpine \
             sh -c "node scripts/seed-keycloak.cjs && node scripts/seed.cjs"
         success "Seeding complete!"

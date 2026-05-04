@@ -14,7 +14,8 @@ export class OdooClientService {
   private readonly isProduction: boolean;
   private readonly allowMockFallback: boolean;
 
-  // Shared in-memory store across requests (static)
+  // Shared in-memory store for UID and mock data
+  private static authCache = new Map<string, number>();
   private static mockStore: Record<string, any[]> = { ...INITIAL_MOCK_DATA };
 
   constructor(private configService: ConfigService) {
@@ -81,16 +82,28 @@ export class OdooClientService {
   }
 
   async authenticate(username?: string, password?: string): Promise<number> {
+    const targetUser =
+      username ||
+      this.configService.get<string>('ODOO_USERNAME') ||
+      'admin';
+    const targetPass = password || this.password;
+
     try {
       const isMockHost = this.url.includes('odoo-demo') || this.url.includes('localhost');
       if (!isMockHost) {
+        // Check cache first
+        const cacheKey = `${this.db}:${targetUser}:${targetPass}`;
+        if (OdooClientService.authCache.has(cacheKey)) {
+          const cachedUid = OdooClientService.authCache.get(cacheKey)!;
+          this.uid = cachedUid;
+          return cachedUid;
+        }
+
         this.logger.log(`Attempting Odoo authentication for database: ${this.db}`);
         const uid = await this.jsonRpcCall('common', 'authenticate', [
           this.db,
-          username ||
-            this.configService.get<string>('ODOO_USERNAME') ||
-            'admin',
-          password || this.password,
+          targetUser,
+          targetPass,
           {},
         ]);
 
@@ -102,6 +115,7 @@ export class OdooClientService {
 
         this.logger.log(`Odoo authenticated successfully, UID: ${uid}`);
         this.uid = uid;
+        OdooClientService.authCache.set(cacheKey, uid);
         return uid;
       }
 

@@ -380,16 +380,19 @@ async function handleApiCompat(req: Request, res: Response) {
   if (!ident) return;
 
   try {
-    if (module === "form-builder" && req.method === "GET" && (rest === "/forms" || rest === "/templates")) {
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "Form builder compatibility endpoint has no upstream implementation." });
+    if (module === "form-builder") {
+      const targetPath = withQuery(req, `/v1/odoo/form-builder${rest}`);
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
     }
 
-    if (module === "webbuilder" && req.method === "GET" && (rest === "" || rest === "/")) {
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "Webbuilder compatibility endpoint has no upstream implementation." });
+    if (module === "webbuilder") {
+      const targetPath = withQuery(req, `/v1/odoo/webbuilder${rest}`);
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
     }
 
-    if (module === "reputation" && req.method === "GET" && rest === "/dashboard-stats") {
-      return notImplemented(res, { module, method: req.method, path: rest, hint: "Reputation dashboard compatibility endpoint has no upstream implementation." });
+    if (module === "reputation") {
+      const targetPath = withQuery(req, `/v1/odoo/reputation${rest}`);
+      return proxyTo(req, res, { baseUrl: API_ROUTER_CONFIG.odooIntegrationBaseUrl, targetPath });
     }
 
     if (deprecatedCommerceModules.has(module)) {

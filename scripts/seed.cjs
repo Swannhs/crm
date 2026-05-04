@@ -1,17 +1,13 @@
 const http = require('http');
 
 const CONFIG = {
+  orgId: 'd6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384',
   services: {
     organization: { host: process.env.SEED_ORG_HOST || 'localhost', port: 7010 },
-    projects: { host: process.env.SEED_PROJECTS_HOST || 'localhost', port: 8040 },
-    deal: { host: process.env.SEED_DEAL_HOST || 'localhost', port: 7150 },
     emailSync: { host: process.env.SEED_EMAIL_SYNC_HOST || 'localhost', port: 7160 },
-    calendar: { host: process.env.SEED_CALENDAR_HOST || 'localhost', port: 8050 },
-    documents: { host: process.env.SEED_DOCUMENTS_HOST || 'localhost', port: 7080 },
-    employees: { host: process.env.SEED_EMPLOYEES_HOST || 'localhost', port: 7070 },
-    pos: { host: process.env.SEED_POS_HOST || 'localhost', port: 7100 },
-    notification: { host: process.env.SEED_NOTIFICATION_HOST || 'localhost', port: 8000 },
-    scoring: { host: process.env.SEED_SCORING_HOST || 'localhost', port: 7180 }
+    odoo: { host: process.env.SEED_ODOO_HOST || 'localhost', port: 7200 },
+    booking: { host: process.env.SEED_BOOKING_HOST || 'localhost', port: 7040 },
+    integrations: { host: process.env.SEED_INTEGRATIONS_HOST || 'localhost', port: 7140 }
   },
   keycloak: {
     url: process.env.KEYCLOAK_URL || 'http://keycloak:8080',
@@ -19,7 +15,6 @@ const CONFIG = {
     adminPass: process.env.KEYCLOAK_PASS || 'admin',
     realm: 'mymanager'
   },
-  orgId: 'd6b9ea2a-7e1e-4b9a-9e1e-5a0a38d7b384',
   users: [
     { username: 'org-owner', role: 'org_owner', email: 'owner@example.com' },
     { username: 'org-admin', role: 'org_admin', email: 'admin@example.com' },
@@ -29,27 +24,47 @@ const CONFIG = {
 };
 
 const DUMMY_DATA = {
-  projects: [
-    { name: 'Enterprise Resource Planning', description: 'Internal ERP modernization.' },
-    { name: 'Customer Portal 2.0', description: 'New React-based customer facing portal.' }
-  ],
-  columns: ['To Do', 'Doing', 'Done'],
-  deals: [
-    { name: 'Cloud Migration Contract', amount: 85000, stage: 'proposal' },
-    { name: 'Security Audit Service', amount: 12000, stage: 'qualification' }
-  ],
-  events: [
-    { title: 'Weekly Sync', description: 'Team update meeting', startTime: new Date().toISOString(), duration: 60 },
-    { title: 'Project Kickoff', description: 'New project start', startTime: new Date(Date.now() + 86400000).toISOString(), duration: 90 }
-  ],
-  employees: [
-    { firstName: 'Sarah', lastName: 'Connor', email: 'sarah@mymanager.com', position: 'Developer', department: 'Engineering' },
-    { firstName: 'Kyle', lastName: 'Reese', email: 'kyle@mymanager.com', position: 'Manager', department: 'Sales' }
-  ],
-  documents: [
-    { name: 'Company Handbook.pdf', type: 'policy', size: 1024567 },
-    { name: 'Q1 Financial Report.xlsx', type: 'report', size: 450000 }
-  ]
+  odoo: {
+    projects: [
+      { name: 'Enterprise Resource Planning', description: 'Internal ERP modernization.' },
+      { name: 'Customer Portal 2.0', description: 'New React-based customer facing portal.' }
+    ],
+    columns: ['To Do', 'Doing', 'Done'],
+    crm: [
+      { name: 'Cloud Migration Contract', planned_revenue: 85000, probability: 30 },
+      { name: 'Security Audit Service', planned_revenue: 12000, probability: 70 }
+    ],
+    employees: [
+      { name: 'Sarah Connor', work_email: 'sarah@mymanager.com', job_title: 'Developer', department_id: false },
+      { name: 'Kyle Reese', work_email: 'kyle@mymanager.com', job_title: 'Manager', department_id: false }
+    ],
+    contacts: [
+      { name: 'John Doe', email: 'john@acme.com', phone: '+123456789', is_company: false },
+      { name: 'Acme Corp', email: 'contact@acme.com', is_company: true, street: '123 Business Ave', city: 'Tech City' }
+    ],
+    products: [
+      { name: 'Industrial Sensor X1', list_price: 299.99, standard_price: 150.00, default_code: 'SNSR-X1' },
+      { name: 'Control Unit v4', list_price: 1200.00, standard_price: 600.00, default_code: 'CTRL-V4' }
+    ],
+    categories: [
+      { name: 'Hardware' },
+      { name: 'Software' }
+    ]
+  },
+  booking: {
+    types: [
+      { name: 'Technical Consultation', duration: 60, price: 150 },
+      { name: 'Product Demo', duration: 30, price: 0 }
+    ],
+    appointments: [
+      { customerName: 'Alice Smith', customerEmail: 'alice@example.com', startTime: new Date(Date.now() + 172800000).toISOString() }
+    ]
+  },
+  emailSync: {
+    sequences: [
+      { name: 'Onboarding Sequence', steps: [{ subject: 'Welcome!', body: 'Glad to have you.', delayDays: 0 }] }
+    ]
+  }
 };
 
 async function getAdminToken() {
@@ -143,63 +158,78 @@ async function request(serviceName, method, path, data, headers = {}) {
 }
 
 async function seed() {
-  console.log('🚀 Starting Comprehensive Multi-Service Seeding...');
+  console.log('🚀 Starting Unified Full-Stack Seeding...');
   
-  console.log('🔑 Authenticating with Keycloak for ID resolution...');
   const token = await getAdminToken();
-  
   for (const user of CONFIG.users) {
     user.id = await getUserIdByEmail(token, user.email);
     console.log(`🆔 Resolved ${user.username} to ${user.id}`);
   }
 
+  const owner = CONFIG.users[0];
+  const staff = CONFIG.users[2];
+
   // 1. ORGANIZATION
-  console.log('\n--- Organization ---');
+  console.log('\n--- Organization Memberships ---');
   for (const user of CONFIG.users) {
     if (user.id) {
        await request('organization', 'POST', '/v1/memberships', { userId: user.id, role: user.role, metadata: { username: user.username } }, { 'X-User-Id': 'system' });
     }
   }
 
-  const owner = CONFIG.users[0];
-  const staff = CONFIG.users[2];
-
-  // 2. PROJECTS
-  console.log('--- Projects ---');
-  for (const proj of DUMMY_DATA.projects) {
-    const res = await request('projects', 'POST', '/v1/projects', proj, { 'X-User-Id': owner.id });
-    const projectId = res.data?.id || res.id;
+  // 2. ODOO INTEGRATION (Unified Odoo Adapter)
+  console.log('\n--- Odoo Integration Entities ---');
+  for (const cat of DUMMY_DATA.odoo.categories) await request('odoo', 'POST', '/v1/odoo/categories', cat, { 'X-User-Id': owner.id });
+  for (const prod of DUMMY_DATA.odoo.products) await request('odoo', 'POST', '/v1/odoo/products', prod, { 'X-User-Id': owner.id });
+  for (const contact of DUMMY_DATA.odoo.contacts) await request('odoo', 'POST', '/v1/odoo/contacts', contact, { 'X-User-Id': owner.id });
+  for (const lead of DUMMY_DATA.odoo.crm) await request('odoo', 'POST', '/v1/odoo/crm', lead, { 'X-User-Id': staff.id });
+  for (const emp of DUMMY_DATA.odoo.employees) await request('odoo', 'POST', '/v1/odoo/employees', emp, { 'X-User-Id': owner.id });
+  
+  for (const proj of DUMMY_DATA.odoo.projects) {
+    const res = await request('odoo', 'POST', '/v1/odoo/projects', proj, { 'X-User-Id': owner.id });
+    const projectId = res.id;
     if (projectId) {
-      const boardRes = await request('projects', 'POST', `/v1/projects/${projectId}/boards`, { name: 'Main' }, { 'X-User-Id': owner.id });
-      const boardId = boardRes.data?.id || boardRes.id;
-      for (const col of DUMMY_DATA.columns) await request('projects', 'POST', `/v1/boards/${boardId}/columns`, { name: col }, { 'X-User-Id': owner.id });
+       // Odoo uses a slightly different structure for stages/columns
+       await request('odoo', 'POST', '/v1/odoo/projects/stages', { name: 'To Do', project_ids: [projectId] }, { 'X-User-Id': owner.id });
     }
   }
 
-  // 3. Deals
-  console.log('--- Deals ---');
-  for (const d of DUMMY_DATA.deals) await request('deal', 'POST', '/api/v1/deals', d, { 'X-User-Id': staff.id });
+  // 3. BOOKING SERVICE
+  console.log('\n--- Booking Service ---');
+  for (const bt of DUMMY_DATA.booking.types) {
+    const res = await request('booking', 'POST', '/v1/booking-types', bt, { 'X-User-Id': owner.id });
+    const btId = res.id;
+    if (btId) {
+       await request('booking', 'POST', '/v1/availability', { bookingTypeId: btId, dayOfWeek: 1, startTime: '09:00', endTime: '17:00' }, { 'X-User-Id': owner.id });
+       await request('booking', 'POST', '/v1/appointments', { ...DUMMY_DATA.booking.appointments[0], bookingTypeId: btId }, { 'X-User-Id': owner.id });
+    }
+  }
 
-  // 4. CALENDAR
-  console.log('--- Calendar ---');
-  for (const e of DUMMY_DATA.events) await request('calendar', 'POST', '/v1/events', e, { 'X-User-Id': staff.id });
+  // 4. EMAIL SYNC SERVICE
+  console.log('\n--- Email Sync Service ---');
+  for (const seq of DUMMY_DATA.emailSync.sequences) {
+    const res = await request('emailSync', 'POST', '/api/v1/email/sequences', seq, { 'X-User-Id': owner.id });
+    const seqId = res.id;
+    if (seqId) {
+      await request('emailSync', 'POST', '/api/v1/email/sequences/enroll', { 
+        sequenceId: seqId, 
+        contactEmail: DUMMY_DATA.odoo.contacts[0].email,
+        firstName: DUMMY_DATA.odoo.contacts[0].name.split(' ')[0]
+      }, { 'X-User-Id': owner.id });
+    }
+  }
 
-  // 5. EMPLOYEES
-  console.log('--- Employees ---');
-  for (const emp of DUMMY_DATA.employees) await request('employees', 'POST', '/v1/employees', emp, { 'X-User-Id': owner.id });
+  // 5. INTEGRATIONS SERVICE
+  console.log('\n--- Integrations Service ---');
+  await request('integrations', 'POST', '/v1/integrations/connect', { 
+    provider: 'odoo', 
+    credentials: { url: 'http://odoo:8069', db: 'odoo', username: 'admin', password: 'password' } 
+  }, { 'X-User-Id': owner.id });
 
-  // 6. DOCUMENTS
-  console.log('--- Documents ---');
-  for (const doc of DUMMY_DATA.documents) await request('documents', 'POST', '/v1/documents', doc, { 'X-User-Id': staff.id });
-
-  // 7. POS
-  console.log('--- POS ---');
-  await request('pos', 'POST', '/v1/transactions', { amount: 150.50, items: [{ name: 'License', price: 150.50 }] }, { 'X-User-Id': staff.id });
-
-  console.log('\n✅ Comprehensive Seeding Completed!');
+  console.log('\n✅ Unified Seeding Completed Successfully!');
 }
 
 seed().then(() => process.exit(0)).catch((err) => {
-  console.error(err);
+  console.error('❌ Seeding failed:', err);
   process.exit(1);
 });

@@ -338,6 +338,7 @@ export function CommerceProductsTable({
     return product.variants?.length ? inventory > 0 && inventory <= threshold : false;
   }).length;
   const [inventoryDrafts, setInventoryDrafts] = useState<Record<string, { qty: string; sourceCode: string }>>({});
+  const [inventoryQuickEditTarget, setInventoryQuickEditTarget] = useState<ICommerceProduct | null>(null);
   const hasActiveFilters = Boolean(search.trim()) || categoryFilter !== 'all' || statusFilter !== 'all';
   const [actionsAnchorEl, setActionsAnchorEl] = useState<null | HTMLElement>(null);
   const [activeActionProduct, setActiveActionProduct] = useState<ICommerceProduct | null>(null);
@@ -618,71 +619,32 @@ export function CommerceProductsTable({
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <Stack spacing={1}>
-                      <Chip
-                        size="small"
-                        label={`${inventoryState.label}${hasTrackedInventory && inventory ? ` (${inventory})` : ''}`}
-                        color={inventoryState.color}
-                        variant="outlined"
-                      />
+                    <Stack spacing={1} alignItems="flex-start">
+                      <Tooltip title="Click to quick edit inventory" arrow>
+                        <Chip
+                          size="small"
+                          label={`${inventoryState.label}${hasTrackedInventory && inventory ? ` (${inventory})` : ''}`}
+                          color={inventoryState.color}
+                          variant="soft"
+                          onClick={() => setInventoryQuickEditTarget(product)}
+                          sx={{
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            '&:hover': {
+                              opacity: 0.72,
+                            }
+                          }}
+                        />
+                      </Tooltip>
                       {hasTrackedInventory && (
-                        <LinearProgress
-                          variant="determinate"
-                          value={inventory > 0 ? Math.min(100, inventory * 5) : 0}
-                        />
+                        <Box sx={{ width: 1, px: 0.5 }}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={inventory > 0 ? Math.min(100, inventory * 5) : 0}
+                            sx={{ height: 4, borderRadius: 2 }}
+                          />
+                        </Box>
                       )}
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                        <TextField
-                          size="small"
-                          label="Qty"
-                          type="number"
-                          value={inventoryDrafts[product.id]?.qty ?? String(inventory)}
-                          onChange={(event) =>
-                            setInventoryDrafts((prev) => ({
-                              ...prev,
-                              [product.id]: {
-                                qty: event.target.value,
-                                sourceCode: prev[product.id]?.sourceCode ?? 'default',
-                              },
-                            }))
-                          }
-                          sx={{ maxWidth: 110 }}
-                        />
-                        <TextField
-                          select
-                          size="small"
-                          label="Source"
-                          value={inventoryDrafts[product.id]?.sourceCode ?? 'default'}
-                          onChange={(event) =>
-                            setInventoryDrafts((prev) => ({
-                              ...prev,
-                              [product.id]: {
-                                qty: prev[product.id]?.qty ?? String(inventory),
-                                sourceCode: event.target.value,
-                              },
-                            }))
-                          }
-                          sx={{ maxWidth: 130 }}
-                        >
-                          <MenuItem value="default">default</MenuItem>
-                          <MenuItem value="warehouse">warehouse</MenuItem>
-                          <MenuItem value="storefront">storefront</MenuItem>
-                        </TextField>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          disabled={isQuickInventorySaving}
-                          onClick={() =>
-                            onQuickInventorySave(
-                              product.sku || product.id,
-                              Number(inventoryDrafts[product.id]?.qty ?? inventory),
-                              inventoryDrafts[product.id]?.sourceCode ?? 'default'
-                            )
-                          }
-                        >
-                          {isQuickInventorySaving ? 'Saving...' : 'Save'}
-                        </Button>
-                      </Stack>
                     </Stack>
                   </TableCell>
                   <TableCell align="right">
@@ -777,6 +739,92 @@ export function CommerceProductsTable({
           </Stack>
         </MenuItem>
       </Menu>
+
+      <Dialog
+        open={Boolean(inventoryQuickEditTarget)}
+        onClose={() => setInventoryQuickEditTarget(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Quick edit inventory</DialogTitle>
+        <DialogContent sx={{ pb: 3 }}>
+          {inventoryQuickEditTarget && (
+            <Stack spacing={3} sx={{ pt: 1 }}>
+              <Box>
+                <Typography variant="subtitle1" noWrap>
+                  {inventoryQuickEditTarget.name}
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  SKU: {inventoryQuickEditTarget.sku || 'N/A'}
+                </Typography>
+              </Box>
+
+              <TextField
+                fullWidth
+                label="Quantity"
+                type="number"
+                value={
+                  inventoryDrafts[inventoryQuickEditTarget.id]?.qty ??
+                  String(getInventoryTotal(inventoryQuickEditTarget))
+                }
+                onChange={(event) =>
+                  setInventoryDrafts((prev) => ({
+                    ...prev,
+                    [inventoryQuickEditTarget.id]: {
+                      qty: event.target.value,
+                      sourceCode: prev[inventoryQuickEditTarget.id]?.sourceCode ?? 'default',
+                    },
+                  }))
+                }
+              />
+
+              <TextField
+                fullWidth
+                select
+                label="Inventory Source"
+                value={inventoryDrafts[inventoryQuickEditTarget.id]?.sourceCode ?? 'default'}
+                onChange={(event) =>
+                  setInventoryDrafts((prev) => ({
+                    ...prev,
+                    [inventoryQuickEditTarget.id]: {
+                      qty:
+                        inventoryDrafts[inventoryQuickEditTarget.id]?.qty ??
+                        String(getInventoryTotal(inventoryQuickEditTarget)),
+                      sourceCode: event.target.value,
+                    },
+                  }))
+                }
+              >
+                <MenuItem value="default">Default</MenuItem>
+                <MenuItem value="warehouse">Warehouse</MenuItem>
+                <MenuItem value="storefront">Storefront</MenuItem>
+              </TextField>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setInventoryQuickEditTarget(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={isQuickInventorySaving || !inventoryQuickEditTarget}
+            onClick={() => {
+              if (!inventoryQuickEditTarget) return;
+              const draft = inventoryDrafts[inventoryQuickEditTarget.id];
+              onQuickInventorySave(
+                inventoryQuickEditTarget.sku || inventoryQuickEditTarget.id,
+                Number(draft?.qty ?? getInventoryTotal(inventoryQuickEditTarget)),
+                draft?.sourceCode ?? 'default'
+              );
+              setInventoryQuickEditTarget(null);
+            }}
+          >
+            {isQuickInventorySaving ? 'Saving...' : 'Save changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }

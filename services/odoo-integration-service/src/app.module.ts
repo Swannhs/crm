@@ -20,6 +20,9 @@ import { CalendarModule } from './modules/calendar/calendar.module.js';
 import { ScoresModule } from './modules/scores/scores.module.js';
 import { SupportModule } from './modules/support/support.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { FormBuilderModule } from './modules/form-builder/form-builder.module.js';
+import { WebbuilderModule } from './modules/webbuilder/webbuilder.module.js';
+import { ReputationModule } from './modules/reputation/reputation.module.js';
 
 @Module({
   imports: [
@@ -42,6 +45,9 @@ import { HealthModule } from './modules/health/health.module.js';
     ScoresModule,
     SupportModule,
     HealthModule,
+    FormBuilderModule,
+    WebbuilderModule,
+    ReputationModule,
     OdooAdapterModule,
     MagentoCompatibilityModule,
   ],
