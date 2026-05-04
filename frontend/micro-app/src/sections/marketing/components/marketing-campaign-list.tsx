@@ -5,7 +5,6 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Skeleton from '@mui/material/Skeleton';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -19,6 +18,7 @@ import { fDate } from 'src/utils/format-time';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
+import { AppLoader } from 'src/components/loading';
 
 import { MarketingCampaign, formatOptionalNumber, formatOptionalPercent } from '../types';
 
@@ -31,9 +31,7 @@ export function MarketingCampaignList({ campaigns, loading }: Props) {
   if (loading) {
     return (
       <Card sx={{ p: 3 }}>
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} variant="rectangular" height={60} sx={{ mb: 2, borderRadius: 1 }} />
-        ))}
+        <AppLoader type="skeleton" rows={5} rowHeight={60} showHeader={false} />
       </Card>
     );
   }

@@ -4,9 +4,9 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
+import { AppLoader } from 'src/components/loading';
 
 import { CampaignAnalytics, formatOptionalNumber } from '../types';
 
@@ -20,8 +20,8 @@ export function MarketingCampaignAnalytics({ analytics, loading }: Props) {
 
   if (loading) {
     return (
-      <Stack alignItems="center" justifyContent="center" sx={{ py: 10 }}>
-        <CircularProgress />
+      <Stack alignItems="center" justifyContent="center" sx={{ py: 4 }}>
+        <AppLoader type="linear" label="Loading campaign analytics..." />
       </Stack>
     );
   }

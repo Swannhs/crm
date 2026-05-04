@@ -3,7 +3,8 @@
 
 import Box from '@mui/material/Box';
 import Portal from '@mui/material/Portal';
-import LinearProgress from '@mui/material/LinearProgress';
+
+import { AppLoader } from 'src/components/loading';
 
 // ----------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ export function LoadingScreen({ portal, sx, ...other }: LoadingScreenProps) {
       }}
       {...other}
     >
-      <LinearProgress color="inherit" sx={{ width: 1, maxWidth: 360 }} />
+      <AppLoader type="linear" sx={{ maxWidth: 360 }} />
     </Box>
   );
 

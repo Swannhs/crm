@@ -8,7 +8,6 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -17,6 +16,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { builderService } from 'src/services/builder-service';
 
 import { Iconify } from 'src/components/iconify';
+import { LoaderBlock } from 'src/components/loading';
 
 // ----------------------------------------------------------------------
 
@@ -34,11 +34,7 @@ export function BuildersOverviewView() {
   });
 
   if (websitesLoading || formsLoading) {
-    return (
-      <Box sx={{ p: 5, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoaderBlock loader={{ type: 'circular', label: 'Loading builder data...' }} minHeight={220} />;
   }
 
   const creativeTools = [

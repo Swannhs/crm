@@ -748,8 +748,13 @@ export class MembershipService {
         metadata: { bootstrapped: true },
       });
     }
-
-    return null;
+    return this.membershipRepo.create({
+      organizationId: orgId,
+      userId,
+      role: 'org_member',
+      permissions: DEFAULT_ROLE_PERMISSIONS.org_member,
+      metadata: { autoProvisioned: true },
+    });
   }
 
   getCatalog() {

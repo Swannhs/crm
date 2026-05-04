@@ -128,6 +128,10 @@ Key endpoints (defaults):
 Smoke tests:
 - `GET http://localhost:8081/health`
 
+## Build and CI Command Reference
+
+- See `docs/build-and-ci-commands.md` for the canonical repo, frontend, service, Prisma, and Docker smoke commands used by CI.
+
 ## Services
 
 Services live under `microservices/services/*`.
